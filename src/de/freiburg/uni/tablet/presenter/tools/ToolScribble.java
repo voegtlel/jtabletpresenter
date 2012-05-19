@@ -9,11 +9,14 @@ import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 
 import de.freiburg.uni.tablet.presenter.geometry.DataPoint;
+import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
+import de.freiburg.uni.tablet.presenter.geometry.Scribble;
 import de.freiburg.uni.tablet.presenter.page.IPen;
+import de.freiburg.uni.tablet.presenter.page.SolidPen;
 
-public class ToolScribble extends DefaultTool {
-
-	IPen _pen;
+public class ToolScribble extends AbstractTool {
+	public IPen _pen = new SolidPen();
+	public Scribble _scribble = null;
 
 	public ToolScribble(final Container container) {
 		super(container);
@@ -21,19 +24,21 @@ public class ToolScribble extends DefaultTool {
 
 	@Override
 	public void Begin(final DataPoint data) {
-
+		_scribble = new Scribble(_pen);
 	}
 
 	@Override
 	public void Draw(final DataPoint data) {
-		// TODO Auto-generated method stub
-
+		if (_scribble != null) {
+			_scribble.addPoint(data);
+		}
 	}
 
 	@Override
-	public void End(final DataPoint data) {
-		// TODO Auto-generated method stub
-
+	public IRenderable End(final DataPoint data) {
+		final IRenderable result = _scribble;
+		_scribble = null;
+		return result;
 	}
 
 	@Override

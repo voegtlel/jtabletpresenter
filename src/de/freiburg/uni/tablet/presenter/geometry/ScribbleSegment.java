@@ -7,7 +7,7 @@ import de.freiburg.uni.tablet.presenter.list.LinkedElementList;
 import de.freiburg.uni.tablet.presenter.page.IPageRenderer;
 import de.freiburg.uni.tablet.presenter.page.IPen;
 
-public class PathSegment {
+public class ScribbleSegment {
 	private Path2D _path;
 
 	private boolean _hasBoundary;
@@ -21,7 +21,7 @@ public class PathSegment {
 	/**
 	 * Creates an empty path segment
 	 */
-	public PathSegment() {
+	public ScribbleSegment() {
 		_points = new LinkedElementList<DataPoint>();
 		_path = new Path2D.Float();
 		_hasBoundary = true;
@@ -31,7 +31,7 @@ public class PathSegment {
 		_maxY = Float.MIN_VALUE;
 	}
 
-	private PathSegment(final LinkedElementList<DataPoint> points) {
+	private ScribbleSegment(final LinkedElementList<DataPoint> points) {
 		_points = points;
 		_hasBoundary = false;
 	}
@@ -89,7 +89,7 @@ public class PathSegment {
 	 *            erase information
 	 * @return splitted path or null, if not splitted
 	 */
-	public PathSegment eraseAt(final EraseInfo eraseInfo) {
+	public ScribbleSegment eraseAt(final EraseInfo eraseInfo) {
 		if (!_hasBoundary || eraseInfo.isInRange(_minX, _minY, _maxX, _maxY)) {
 			_minX = Float.MAX_VALUE;
 			_minY = Float.MAX_VALUE;
@@ -110,7 +110,7 @@ public class PathSegment {
 					} else {
 						_path = null;
 						_hasBoundary = true;
-						return new PathSegment(_points.splitAtRemove(e));
+						return new ScribbleSegment(_points.splitAtRemove(e));
 					}
 				} else {
 					_minX = Math.min(_minX, e.getData().getX());

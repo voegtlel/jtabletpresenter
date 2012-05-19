@@ -9,12 +9,17 @@ public class SolidPen implements IPen {
 	private final BasicStroke _stroke;
 	private final Color _paint;
 
+	public SolidPen() {
+		this(1.0f, Color.BLACK);
+	}
+
 	public SolidPen(final float thickness, final Color color) {
 		_stroke = new BasicStroke(thickness, BasicStroke.CAP_ROUND,
 				BasicStroke.JOIN_ROUND);
 		_paint = color;
 	}
 
+	@Override
 	public float getThickness() {
 		return _stroke.getLineWidth();
 	}

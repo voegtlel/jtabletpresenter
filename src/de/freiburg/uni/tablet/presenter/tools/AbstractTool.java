@@ -5,12 +5,12 @@ import java.awt.Cursor;
 
 import de.freiburg.uni.tablet.presenter.geometry.DataPoint;
 
-public abstract class DefaultTool implements ITool {
+public abstract class AbstractTool implements ITool {
 	private boolean _isActive = false;
 	private Cursor _cursor = null;
 	private final Container _container;
 
-	public DefaultTool(final Container container) {
+	public AbstractTool(final Container container) {
 		_container = container;
 		_cursor = generateCursor();
 	}

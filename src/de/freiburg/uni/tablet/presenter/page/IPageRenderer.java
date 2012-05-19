@@ -29,4 +29,20 @@ public interface IPageRenderer {
 	 */
 	void draw(IPen pen, float x, float y);
 
+	/**
+	 * Adds a listener when the component needs to be repainted.
+	 * 
+	 * @param l
+	 *            listener to add
+	 */
+	void addRedrawListener(RedrawListener l);
+
+	/**
+	 * Removes a listener previously added by addRedrawListener.
+	 * 
+	 * @param l
+	 *            listener to remove
+	 */
+	void removeRedrawListener(RedrawListener l);
+
 }

@@ -1,21 +1,22 @@
 package de.freiburg.uni.tablet.presenter.geometry;
 
-import java.util.Date;
 
 public class DataPoint {
 	private final float _x;
 	private final float _y;
 	private final float _xOrig;
 	private final float _yOrig;
+	private final float _pressure;
 	private final long _timestamp;
 
 	public DataPoint(final float x, final float y, final float xOrig,
-			final float yOrig) {
+			final float yOrig, final float pressure, final long timestamp) {
 		_x = x;
 		_y = y;
 		_xOrig = xOrig;
 		_yOrig = yOrig;
-		_timestamp = new Date().getTime();
+		_pressure = pressure;
+		_timestamp = timestamp;
 	}
 
 	/**
