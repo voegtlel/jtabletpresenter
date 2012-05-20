@@ -2,7 +2,7 @@ package de.freiburg.uni.tablet.presenter.page;
 
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 
-public interface IPage {
+public interface IPage extends IRenderable {
 	/**
 	 * Add a renderable object to the page.
 	 * 
@@ -18,5 +18,4 @@ public interface IPage {
 	 *            object to remove
 	 */
 	void removeRenderable(IRenderable renderable);
-
 }

@@ -36,14 +36,14 @@ public class DataPoint {
 	/**
 	 * @return the xOrig
 	 */
-	public float getxOrig() {
+	public float getXOrig() {
 		return _xOrig;
 	}
 
 	/**
 	 * @return the yOrig
 	 */
-	public float getyOrig() {
+	public float getYOrig() {
 		return _yOrig;
 	}
 

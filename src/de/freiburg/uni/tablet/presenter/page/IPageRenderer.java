@@ -1,5 +1,6 @@
 package de.freiburg.uni.tablet.presenter.page;
 
+import java.awt.Paint;
 import java.awt.geom.Path2D;
 
 public interface IPageRenderer {
@@ -12,7 +13,7 @@ public interface IPageRenderer {
 	void drawGridLine(IPen pen, float x1, float y1, float x2, float y2);
 
 	/**
-	 * Renders a path. Must check, if there is only one element in the path.
+	 * Renders a path.
 	 * 
 	 * @param pen
 	 *            pen
@@ -22,6 +23,7 @@ public interface IPageRenderer {
 	void draw(IPen pen, Path2D path);
 
 	/**
+	 * Renders a dot using the pen.
 	 * 
 	 * @param pen
 	 * @param x
@@ -30,19 +32,9 @@ public interface IPageRenderer {
 	void draw(IPen pen, float x, float y);
 
 	/**
-	 * Adds a listener when the component needs to be repainted.
+	 * Fills everything
 	 * 
-	 * @param l
-	 *            listener to add
+	 * @param paint
 	 */
-	void addRedrawListener(RedrawListener l);
-
-	/**
-	 * Removes a listener previously added by addRedrawListener.
-	 * 
-	 * @param l
-	 *            listener to remove
-	 */
-	void removeRedrawListener(RedrawListener l);
-
+	void fill(Paint paint);
 }

@@ -1,26 +1,28 @@
 package de.freiburg.uni.tablet.presenter.gui;
 
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Paint;
 import java.awt.RenderingHints;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
-import java.awt.image.BufferedImage;
-
-import javax.swing.JComponent;
+import java.awt.image.VolatileImage;
 
 import jpen.owner.multiAwt.AwtPenToolkit;
+import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
+import de.freiburg.uni.tablet.presenter.page.IPage;
 import de.freiburg.uni.tablet.presenter.page.IPageFrontRenderer;
 import de.freiburg.uni.tablet.presenter.page.IPageRenderer;
 import de.freiburg.uni.tablet.presenter.page.IPen;
-import de.freiburg.uni.tablet.presenter.page.PageProperties;
-import de.freiburg.uni.tablet.presenter.page.RedrawEvent;
-import de.freiburg.uni.tablet.presenter.page.RedrawListener;
+import de.freiburg.uni.tablet.presenter.tools.ITool;
+import de.freiburg.uni.tablet.presenter.tools.IToolContainer;
 
-public class JPageRenderer extends JComponent implements IPageRenderer,
-		IPageFrontRenderer {
+public class JPageRenderer extends Component implements IPageRenderer,
+		IPageFrontRenderer, IPageEditor, IToolContainer {
 	/**
 	 * Default serial version
 	 */
@@ -28,27 +30,43 @@ public class JPageRenderer extends JComponent implements IPageRenderer,
 
 	private Graphics2D _backGraphics = null;
 	private Graphics2D _frontGraphics = null;
-	private BufferedImage _backBuffer = null;
+	// private BufferedImage _backBuffer = null;
+	private VolatileImage _backBuffer = null;
 
 	private final Ellipse2D.Float _ellipseRenderer = new Ellipse2D.Float();
 	private final Line2D.Float _lineRenderer = new Line2D.Float();
 
 	private Dimension _lastRenderDimensions = new Dimension();
 
-	private PageProperties _properties = new PageProperties();
+	private final PagePenDispatcher _pagePenListener = new PagePenDispatcher();
+
+	private IPage _page = null;
+
+	private VolatileImage _frontBuffer;
+
+	private int _renderWidth;
+	private int _renderHeight;
 
 	public JPageRenderer() {
-		setDoubleBuffered(false);
+		// setDoubleBuffered(false);
 
-		// TODO: Size changed listener to resize bitmap
+		_pagePenListener.addListener(new IPenListener() {
+			@Override
+			public void begin(final PenEvent e) {
+			}
 
-		AwtPenToolkit.addPenListener(this, new PagePenListener());
+			@Override
+			public void end(final PenEndEvent e) {
+				onAddDrawing(e.getResult());
+			}
+		});
+		AwtPenToolkit.addPenListener(this, _pagePenListener);
 		AwtPenToolkit.getPenManager().pen.levelEmulator
 				.setPressureTriggerForLeftCursorButton(0.5f);
 	}
 
 	@Override
-	protected void paintComponent(final Graphics g) {
+	public void paint(final Graphics g) {
 		if (!_lastRenderDimensions.equals(this.getSize())) {
 			_lastRenderDimensions = this.getSize();
 			if (_backGraphics != null) {
@@ -59,74 +77,42 @@ public class JPageRenderer extends JComponent implements IPageRenderer,
 			}
 			initializeGraphics();
 		}
-		if (_backBuffer != null) {
-			g.drawImage(_backBuffer, 0, 0, null);
-		} else {
-			g.setColor(_properties.getBackgroundColor());
-			g.fillRect(0, 0, this.getWidth(), this.getHeight());
-		}
+		g.drawImage(_frontBuffer, 0, 0, null);
 	}
 
-	@Override
-	public void addRedrawListener(final RedrawListener l) {
-		this.listenerList.add(RedrawListener.class, l);
-	}
-
-	@Override
-	public void removeRedrawListener(final RedrawListener l) {
-		this.listenerList.remove(RedrawListener.class, l);
-	}
-
-	protected void fireRedraw() {
-		RedrawEvent args = null;
-		final Object[] listeners = listenerList.getListenerList();
-		for (int i = listeners.length - 2; i >= 0; i -= 2) {
-			if (listeners[i] == RedrawListener.class) {
-				if (args == null) {
-					args = new RedrawEvent(this, this);
-				}
-				((RedrawListener) listeners[i + 1]).redraw(args);
-			}
-		}
-	}
-
+	/**
+	 * (re)initialized the buffers and drawing destinations
+	 */
 	private void initializeGraphics() {
+		System.out.println("initGraphics");
 		if ((this.getWidth() > 0) && (this.getHeight() > 0) && this.isVisible()) {
-			_backBuffer = new BufferedImage(this.getWidth(), this.getHeight(),
-					BufferedImage.TYPE_INT_BGR);
-
+			_renderWidth = this.getWidth();
+			_renderHeight = this.getHeight();
+			_backBuffer = createVolatileImage(_renderWidth, _renderHeight);
 			_backGraphics = _backBuffer.createGraphics();
-
 			_backGraphics.setRenderingHint(RenderingHints.KEY_RENDERING,
 					RenderingHints.VALUE_RENDER_QUALITY);
 			_backGraphics.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
-					RenderingHints.VALUE_STROKE_PURE);
+					RenderingHints.VALUE_STROKE_NORMALIZE);
 			_backGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 					RenderingHints.VALUE_ANTIALIAS_ON);
 			_backGraphics.setRenderingHint(
 					RenderingHints.KEY_FRACTIONALMETRICS,
 					RenderingHints.VALUE_FRACTIONALMETRICS_ON);
-			_backGraphics.setColor(_properties.getBackgroundColor());
-			_backGraphics.fillRect(0, 0, _backBuffer.getWidth(),
-					_backBuffer.getHeight());
 
-			fireRedraw();
+			_frontBuffer = createVolatileImage(_renderWidth, _renderHeight);
+			_frontGraphics = _frontBuffer.createGraphics();
+			_frontGraphics.setRenderingHint(RenderingHints.KEY_RENDERING,
+					RenderingHints.VALUE_RENDER_SPEED);
+			_frontGraphics.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
+					RenderingHints.VALUE_STROKE_PURE);
+			_frontGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+					RenderingHints.VALUE_ANTIALIAS_OFF);
+			_frontGraphics.setRenderingHint(
+					RenderingHints.KEY_FRACTIONALMETRICS,
+					RenderingHints.VALUE_FRACTIONALMETRICS_ON);
 
-			_frontGraphics = (Graphics2D) this.getGraphics();
-			if (_frontGraphics != null) {
-				_frontGraphics.setRenderingHint(RenderingHints.KEY_RENDERING,
-						RenderingHints.VALUE_RENDER_SPEED);
-				_frontGraphics.setRenderingHint(
-						RenderingHints.KEY_STROKE_CONTROL,
-						RenderingHints.VALUE_STROKE_PURE);
-				_frontGraphics.setRenderingHint(
-						RenderingHints.KEY_ANTIALIASING,
-						RenderingHints.VALUE_ANTIALIAS_OFF);
-				_frontGraphics.setRenderingHint(
-						RenderingHints.KEY_FRACTIONALMETRICS,
-						RenderingHints.VALUE_FRACTIONALMETRICS_ON);
-				clearFront();
-			}
+			redrawBack();
 		}
 	}
 
@@ -139,21 +125,32 @@ public class JPageRenderer extends JComponent implements IPageRenderer,
 		}
 	}
 
-	private void drawPoint(final IPen pen, final float x, final float y,
-			final Graphics2D dest) {
-		_ellipseRenderer.x = x - (pen.getThickness() / 2.0f);
-		_ellipseRenderer.y = y - (pen.getThickness() / 2.0f);
-		_ellipseRenderer.width = pen.getThickness();
-		_ellipseRenderer.height = pen.getThickness();
-		dest.setPaint(pen.getPaint());
-		dest.setStroke(pen.getStroke());
-		dest.fill(_ellipseRenderer);
+	@Override
+	public void fill(final Paint paint) {
+		if (_backGraphics != null) {
+			_backGraphics.setPaint(paint);
+			_backGraphics.fillRect(0, 0, _renderWidth, _renderHeight);
+		}
+	}
+
+	private void repaint(final float x, final float y, final float width,
+			final float height, final IPen pen) {
+		_frontBuffer.flush();
+		final float thickness = pen.getThickness();
+		repaint((int) (x - (thickness / 2.0f)) - 1,
+				(int) (y - (thickness / 2.0f)) - 1,
+				(int) (width + thickness) + 2, (int) (height + thickness) + 2);
 	}
 
 	@Override
 	public void draw(final IPen pen, final float x, final float y) {
 		if (_backGraphics != null) {
-			drawPoint(pen, x, y, _backGraphics);
+			_ellipseRenderer.x = x - (pen.getThickness() / 2.0f);
+			_ellipseRenderer.y = y - (pen.getThickness() / 2.0f);
+			_ellipseRenderer.width = pen.getThickness();
+			_ellipseRenderer.height = pen.getThickness();
+			_backGraphics.setPaint(pen.getPaint());
+			_backGraphics.fill(_ellipseRenderer);
 		}
 	}
 
@@ -161,12 +158,11 @@ public class JPageRenderer extends JComponent implements IPageRenderer,
 	public void drawGridLine(final IPen pen, final float x1, final float y1,
 			final float x2, final float y2) {
 		if (_backGraphics != null) {
-			_backGraphics.setPaint(pen.getPaint());
-			_backGraphics.setStroke(pen.getStroke());
 			_lineRenderer.x1 = x1;
 			_lineRenderer.y1 = y1;
 			_lineRenderer.x2 = x2;
 			_lineRenderer.y2 = y2;
+			_backGraphics.setStroke(pen.getStroke());
 			_backGraphics.draw(_lineRenderer);
 		}
 	}
@@ -175,35 +171,98 @@ public class JPageRenderer extends JComponent implements IPageRenderer,
 	public void drawFront(final IPen pen, final float x1, final float y1,
 			final float x2, final float y2) {
 		if (_frontGraphics != null) {
-			_frontGraphics.setPaint(pen.getPaint());
-			_frontGraphics.setStroke(pen.getStroke());
 			_lineRenderer.x1 = x1;
 			_lineRenderer.y1 = y1;
 			_lineRenderer.x2 = x2;
 			_lineRenderer.y2 = y2;
+			_frontGraphics.setStroke(pen.getStroke());
 			_frontGraphics.draw(_lineRenderer);
+			repaint(Math.min(x1, x2), Math.min(y1, y2),
+					Math.max(x1, x2) - Math.min(x1, x2), Math.max(y1, y2)
+							- Math.min(y1, y2), pen);
 		}
 	}
 
 	@Override
 	public void drawFront(final IPen pen, final float x, final float y) {
 		if (_frontGraphics != null) {
-			drawPoint(pen, x, y, _frontGraphics);
+			_ellipseRenderer.x = x - (pen.getThickness() / 2.0f);
+			_ellipseRenderer.y = y - (pen.getThickness() / 2.0f);
+			_ellipseRenderer.width = pen.getThickness();
+			_ellipseRenderer.height = pen.getThickness();
+			_frontGraphics.setPaint(pen.getPaint());
+			_frontGraphics.fill(_ellipseRenderer);
+			repaint(x, y, 0.0f, 0.0f, pen);
 		}
 	}
 
 	@Override
 	public void clearFront() {
 		if (_frontGraphics != null) {
+			_backBuffer.flush();
 			_frontGraphics.drawImage(_backBuffer, 0, 0, null);
+			repaint();
 		}
 	}
 
-	public PageProperties getProperties() {
-		return _properties;
+	/**
+	 * Redraw back buffer and clear front
+	 */
+	protected void redrawBack() {
+		if (_page == null) {
+			if (_backGraphics != null) {
+				_backGraphics.setColor(Color.WHITE);
+				_backGraphics.fillRect(0, 0, _renderWidth, _renderHeight);
+				System.out.println("clearBack");
+			}
+		} else {
+			_page.render(this);
+			System.out.println("redrawBack");
+		}
+		clearFront();
 	}
 
-	public void setProperties(final PageProperties properties) {
-		_properties = properties;
+	/**
+	 * Event. Called when a renderable should be added.
+	 * 
+	 * @param result
+	 *            new renderable
+	 */
+	protected void onAddDrawing(final IRenderable result) {
+		_page.addRenderable(result);
+		result.render(this);
+		clearFront();
 	}
+
+	@Override
+	public IPage getPage() {
+		return _page;
+	}
+
+	@Override
+	public void setPage(final IPage page) {
+		_page = page;
+		redrawBack();
+	}
+
+	@Override
+	public ITool getNormalTool() {
+		return _pagePenListener.getNormalTool();
+	}
+
+	@Override
+	public void setNormalTool(final ITool normalTool) {
+		_pagePenListener.setNormalTool(normalTool);
+	}
+
+	@Override
+	public ITool getInvertedTool() {
+		return _pagePenListener.getInvertedTool();
+	}
+
+	@Override
+	public void setInvertedTool(final ITool invertedTool) {
+		_pagePenListener.setInvertedTool(invertedTool);
+	}
+
 }

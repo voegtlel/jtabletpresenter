@@ -1,16 +1,13 @@
 package de.freiburg.uni.tablet.presenter.tools;
 
-import java.awt.Container;
 import java.awt.Cursor;
-
-import de.freiburg.uni.tablet.presenter.geometry.DataPoint;
 
 public abstract class AbstractTool implements ITool {
 	private boolean _isActive = false;
 	private Cursor _cursor = null;
-	private final Container _container;
+	private final IToolContainer _container;
 
-	public AbstractTool(final Container container) {
+	public AbstractTool(final IToolContainer container) {
 		_container = container;
 		_cursor = generateCursor();
 	}
@@ -25,13 +22,13 @@ public abstract class AbstractTool implements ITool {
 	}
 
 	@Override
-	public void Over(final DataPoint data) {
+	public void over() {
 		_container.setCursor(_cursor);
 		_isActive = true;
 	}
 
 	@Override
-	public void Out(final DataPoint data) {
+	public void out() {
 		_isActive = false;
 	}
 }

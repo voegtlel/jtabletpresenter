@@ -4,13 +4,13 @@ import de.freiburg.uni.tablet.presenter.geometry.DataPoint;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 
 public interface ITool {
-	void Begin(DataPoint data);
+	void begin();
 
-	void Draw(DataPoint data);
+	void draw(DataPoint data);
 
-	IRenderable End(DataPoint data);
+	IRenderable end();
 
-	void Over(DataPoint data);
+	void over();
 
-	void Out(DataPoint data);
+	void out();
 }
