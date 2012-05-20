@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.LinkedList;
 import java.util.List;
 
+import de.freiburg.uni.tablet.presenter.geometry.DataPoint;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 
 public class DefaultPage implements IPage {
@@ -39,5 +40,12 @@ public class DefaultPage implements IPage {
 		for (final IRenderable renderable : _renderables) {
 			renderable.render(renderer);
 		}
+	}
+
+	@Override
+	public void eraseAt(final DataPoint data, final float radiusX,
+			final float radiusY) {
+		// TODO Auto-generated method stub
+
 	}
 }

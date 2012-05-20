@@ -86,4 +86,9 @@ public class ToolScribble extends AbstractTool {
 								+ extraline), "ScribbleCursor");
 		return newCursor;
 	}
+
+	@Override
+	public boolean requiresRedraw() {
+		return false;
+	}
 }

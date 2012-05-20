@@ -13,4 +13,6 @@ public interface ITool {
 	void over();
 
 	void out();
+
+	boolean requiresRedraw();
 }

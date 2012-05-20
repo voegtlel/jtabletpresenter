@@ -1,5 +1,6 @@
 package de.freiburg.uni.tablet.presenter.page;
 
+import de.freiburg.uni.tablet.presenter.geometry.DataPoint;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 
 public interface IPage extends IRenderable {
@@ -18,4 +19,12 @@ public interface IPage extends IRenderable {
 	 *            object to remove
 	 */
 	void removeRenderable(IRenderable renderable);
+
+	/**
+	 * Erases at the given point
+	 * 
+	 * @param data
+	 * @param radius
+	 */
+	void eraseAt(DataPoint data, float radiusX, float radiusY);
 }

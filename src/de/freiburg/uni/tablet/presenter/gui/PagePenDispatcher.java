@@ -1,5 +1,7 @@
 package de.freiburg.uni.tablet.presenter.gui;
 
+import java.awt.Dimension;
+
 import javax.swing.event.EventListenerList;
 
 import jpen.PButton;
@@ -9,6 +11,7 @@ import jpen.PKindEvent;
 import jpen.PLevel.Type;
 import jpen.PLevelEvent;
 import jpen.PScrollEvent;
+import jpen.Pen;
 import jpen.event.PenListener;
 import de.freiburg.uni.tablet.presenter.geometry.DataPoint;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
@@ -30,13 +33,25 @@ public class PagePenDispatcher implements PenListener {
 
 	private final EventListenerList _listenerList = new EventListenerList();
 
+	private Dimension _drawSize = new Dimension();
+
 	public PagePenDispatcher() {
 	}
 
+	/**
+	 * Add listener for pen event
+	 * 
+	 * @param l
+	 */
 	public void addListener(final IPenListener l) {
 		_listenerList.add(IPenListener.class, l);
 	}
 
+	/**
+	 * Remove listener for pen event
+	 * 
+	 * @param l
+	 */
 	public void removeListener(final IPenListener l) {
 		_listenerList.remove(IPenListener.class, l);
 	}
@@ -67,6 +82,20 @@ public class PagePenDispatcher implements PenListener {
 		}
 	}
 
+	/**
+	 * Reads the data point
+	 * 
+	 * @param pen
+	 * @param timestamp
+	 * @return
+	 */
+	private DataPoint getDataPoint(final Pen pen, final long timestamp) {
+		return new DataPoint(pen.getLevelValue(Type.X) / _drawSize.width,
+				pen.getLevelValue(Type.Y) / _drawSize.height,
+				pen.getLevelValue(Type.X), pen.getLevelValue(Type.Y),
+				pen.getLevelValue(Type.PRESSURE), timestamp);
+	}
+
 	@Override
 	public void penButtonEvent(final PButtonEvent e) {
 		System.out.println("Button: " + e.button.getType().toString() + " -> "
@@ -74,6 +103,7 @@ public class PagePenDispatcher implements PenListener {
 		// override active tool
 		boolean activate = false;
 		boolean inverted = false;
+		// dispatch event
 		switch (_penKind) {
 		case CURSOR:
 			switch (e.button.getType()) {
@@ -129,12 +159,7 @@ public class PagePenDispatcher implements PenListener {
 					// Activate tool
 					_activeTool.begin();
 					fireEventBegin(_activeTool);
-					final DataPoint dp = new DataPoint(
-							e.pen.getLevelValue(Type.X),
-							e.pen.getLevelValue(Type.Y),
-							e.pen.getLevelValue(Type.X),
-							e.pen.getLevelValue(Type.Y),
-							e.pen.getLevelValue(Type.PRESSURE), e.getTime());
+					final DataPoint dp = getDataPoint(e.pen, e.getTime());
 					_lastData = null;
 					_activeTool.draw(dp);
 				}
@@ -157,12 +182,11 @@ public class PagePenDispatcher implements PenListener {
 			return;
 		}
 		if (_activeTool != null) {
-			final DataPoint dp = new DataPoint(e.pen.getLevelValue(Type.X),
-					e.pen.getLevelValue(Type.Y), e.pen.getLevelValue(Type.X),
-					e.pen.getLevelValue(Type.Y),
-					e.pen.getLevelValue(Type.PRESSURE), e.getTime());
+			// if there is an active tool
+			final DataPoint dp = getDataPoint(e.pen, e.getTime());
 			boolean usePoint = true;
 			if (_lastData != null) {
+				// if it is not the first point, check if we have moved enough
 				final float xDiff = dp.getXOrig() - _lastData.getXOrig();
 				final float yDiff = dp.getYOrig() - _lastData.getYOrig();
 				usePoint = (((xDiff * xDiff) + (yDiff * yDiff)) > 3.0f);
@@ -229,5 +253,13 @@ public class PagePenDispatcher implements PenListener {
 
 	public void setInvertedTool(final ITool invertedTool) {
 		_invertedTool = invertedTool;
+	}
+
+	public Dimension getDrawSize() {
+		return _drawSize;
+	}
+
+	public void setDrawSize(final Dimension drawSize) {
+		_drawSize = drawSize;
 	}
 }

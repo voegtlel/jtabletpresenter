@@ -7,6 +7,8 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.RenderingHints;
+import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
@@ -44,8 +46,10 @@ public class JPageRenderer extends Component implements IPageRenderer,
 
 	private VolatileImage _frontBuffer;
 
-	private int _renderWidth;
-	private int _renderHeight;
+	private int _renderWidth = 0;
+	private int _renderHeight = 0;
+	private float _renderFactorX = 1.0f;
+	private float _renderFactorY = 1.0f;
 
 	public JPageRenderer() {
 		// setDoubleBuffered(false);
@@ -57,7 +61,7 @@ public class JPageRenderer extends Component implements IPageRenderer,
 
 			@Override
 			public void end(final PenEndEvent e) {
-				onAddDrawing(e.getResult());
+				onAddDrawing(e.getActiveTool(), e.getResult());
 			}
 		});
 		AwtPenToolkit.addPenListener(this, _pagePenListener);
@@ -112,7 +116,14 @@ public class JPageRenderer extends Component implements IPageRenderer,
 					RenderingHints.KEY_FRACTIONALMETRICS,
 					RenderingHints.VALUE_FRACTIONALMETRICS_ON);
 
+			_renderFactorX = _renderWidth;
+			_renderFactorY = _renderHeight;
+
 			redrawBack();
+
+			// Update pen listener
+			_pagePenListener.setDrawSize(new Dimension(_renderWidth,
+					_renderHeight));
 		}
 	}
 
@@ -121,7 +132,10 @@ public class JPageRenderer extends Component implements IPageRenderer,
 		if (_backGraphics != null) {
 			_backGraphics.setPaint(pen.getPaint());
 			_backGraphics.setStroke(pen.getStroke());
-			_backGraphics.draw(path);
+			final Shape transformedPath = path
+					.createTransformedShape(AffineTransform.getScaleInstance(
+							_renderFactorX, _renderFactorY));
+			_backGraphics.draw(transformedPath);
 		}
 	}
 
@@ -145,8 +159,10 @@ public class JPageRenderer extends Component implements IPageRenderer,
 	@Override
 	public void draw(final IPen pen, final float x, final float y) {
 		if (_backGraphics != null) {
-			_ellipseRenderer.x = x - (pen.getThickness() / 2.0f);
-			_ellipseRenderer.y = y - (pen.getThickness() / 2.0f);
+			_ellipseRenderer.x = (x * _renderFactorX)
+					- (pen.getThickness() / 2.0f);
+			_ellipseRenderer.y = (y * _renderFactorY)
+					- (pen.getThickness() / 2.0f);
 			_ellipseRenderer.width = pen.getThickness();
 			_ellipseRenderer.height = pen.getThickness();
 			_backGraphics.setPaint(pen.getPaint());
@@ -158,11 +174,12 @@ public class JPageRenderer extends Component implements IPageRenderer,
 	public void drawGridLine(final IPen pen, final float x1, final float y1,
 			final float x2, final float y2) {
 		if (_backGraphics != null) {
-			_lineRenderer.x1 = x1;
-			_lineRenderer.y1 = y1;
-			_lineRenderer.x2 = x2;
-			_lineRenderer.y2 = y2;
+			_lineRenderer.x1 = x1 * _renderFactorX;
+			_lineRenderer.y1 = y1 * _renderFactorY;
+			_lineRenderer.x2 = x2 * _renderFactorX;
+			_lineRenderer.y2 = y2 * _renderFactorY;
 			_backGraphics.setStroke(pen.getStroke());
+			_frontGraphics.setPaint(pen.getPaint());
 			_backGraphics.draw(_lineRenderer);
 		}
 	}
@@ -171,23 +188,30 @@ public class JPageRenderer extends Component implements IPageRenderer,
 	public void drawFront(final IPen pen, final float x1, final float y1,
 			final float x2, final float y2) {
 		if (_frontGraphics != null) {
-			_lineRenderer.x1 = x1;
-			_lineRenderer.y1 = y1;
-			_lineRenderer.x2 = x2;
-			_lineRenderer.y2 = y2;
+			_lineRenderer.x1 = x1 * _renderFactorX;
+			_lineRenderer.y1 = y1 * _renderFactorY;
+			_lineRenderer.x2 = x2 * _renderFactorX;
+			_lineRenderer.y2 = y2 * _renderFactorY;
 			_frontGraphics.setStroke(pen.getStroke());
+			_frontGraphics.setPaint(pen.getPaint());
 			_frontGraphics.draw(_lineRenderer);
-			repaint(Math.min(x1, x2), Math.min(y1, y2),
-					Math.max(x1, x2) - Math.min(x1, x2), Math.max(y1, y2)
-							- Math.min(y1, y2), pen);
+			final float x = Math.min(_lineRenderer.x1, _lineRenderer.x2);
+			final float y = Math.min(_lineRenderer.y1, _lineRenderer.y2);
+			final float width = Math.max(_lineRenderer.x1, _lineRenderer.x2)
+					- x;
+			final float height = Math.max(_lineRenderer.y1, _lineRenderer.y2)
+					- y;
+			repaint(x, y, width, height, pen);
 		}
 	}
 
 	@Override
 	public void drawFront(final IPen pen, final float x, final float y) {
 		if (_frontGraphics != null) {
-			_ellipseRenderer.x = x - (pen.getThickness() / 2.0f);
-			_ellipseRenderer.y = y - (pen.getThickness() / 2.0f);
+			_ellipseRenderer.x = (x * _renderFactorX)
+					- (pen.getThickness() / 2.0f);
+			_ellipseRenderer.y = (y * _renderFactorY)
+					- (pen.getThickness() / 2.0f);
 			_ellipseRenderer.width = pen.getThickness();
 			_ellipseRenderer.height = pen.getThickness();
 			_frontGraphics.setPaint(pen.getPaint());
@@ -225,12 +249,19 @@ public class JPageRenderer extends Component implements IPageRenderer,
 	/**
 	 * Event. Called when a renderable should be added.
 	 * 
+	 * @param activeTool
+	 *            active tool
+	 * 
 	 * @param result
 	 *            new renderable
 	 */
-	protected void onAddDrawing(final IRenderable result) {
+	protected void onAddDrawing(final ITool activeTool, final IRenderable result) {
 		_page.addRenderable(result);
-		result.render(this);
+		if (activeTool.requiresRedraw()) {
+			redrawBack();
+		} else {
+			result.render(this);
+		}
 		clearFront();
 	}
 
