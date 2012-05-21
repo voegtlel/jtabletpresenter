@@ -5,10 +5,6 @@ public class LinkedElement<T> {
 	private LinkedElement<T> _next;
 	private T _data;
 
-	public LinkedElement(final T data) {
-		_data = data;
-	}
-
 	public LinkedElement(final LinkedElement<T> previous,
 			final LinkedElement<T> next, final T data) {
 		_previous = previous;
@@ -21,6 +17,8 @@ public class LinkedElement<T> {
 	}
 
 	public void setPrevious(final LinkedElement<T> previous) {
+		System.out.println("setPrevious " + hashCode() + " -> "
+				+ (previous == null ? "null" : previous.hashCode()));
 		_previous = previous;
 	}
 
@@ -29,6 +27,8 @@ public class LinkedElement<T> {
 	}
 
 	public void setNext(final LinkedElement<T> next) {
+		System.out.println("setNext " + hashCode() + " -> "
+				+ (next == null ? "null" : next.hashCode()));
 		_next = next;
 	}
 

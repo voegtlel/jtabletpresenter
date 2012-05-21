@@ -32,13 +32,10 @@ public class LinkedElementList<T> {
 
 	public void addLast(final T data) {
 		if (_last == null) {
-			_first = _last = new LinkedElement<T>(data);
+			_first = _last = new LinkedElement<T>(null, null, data);
 		} else {
 			final LinkedElement<T> newElement = new LinkedElement<T>(_last,
-					_last.getNext(), data);
-			if (_last.getNext() != null) {
-				_last.getNext().setPrevious(newElement);
-			}
+					null, data);
 			_last.setNext(newElement);
 			_last = newElement;
 		}
@@ -46,19 +43,17 @@ public class LinkedElementList<T> {
 
 	public void addFirst(final T data) {
 		if (_first == null) {
-			_first = _last = new LinkedElement<T>(data);
+			_first = _last = new LinkedElement<T>(null, null, data);
 		} else {
-			final LinkedElement<T> newElement = new LinkedElement<T>(
-					_first.getPrevious(), _first, data);
-			if (_first.getPrevious() != null) {
-				_first.getPrevious().setNext(newElement);
-			}
+			final LinkedElement<T> newElement = new LinkedElement<T>(null,
+					_first, data);
 			_first.setPrevious(newElement);
 			_first = newElement;
 		}
 	}
 
 	public void remove(final LinkedElement<T> element) {
+		System.out.println("rm " + element.hashCode());
 		if (element == _first) {
 			removeFirst();
 		} else if (element == _last) {
@@ -75,6 +70,7 @@ public class LinkedElementList<T> {
 		if (_last == _first) {
 			_last = _first = null;
 		} else {
+			System.out.println("rmLast " + _first.hashCode());
 			_last = _last.getPrevious();
 			_last.getNext().setPrevious(null);
 			_last.setNext(null);
@@ -85,6 +81,7 @@ public class LinkedElementList<T> {
 		if (_last == _first) {
 			_last = _first = null;
 		} else {
+			System.out.println("rmFirst " + _first.hashCode());
 			_first = _first.getNext();
 			_first.getPrevious().setNext(null);
 			_first.setPrevious(null);
@@ -123,20 +120,23 @@ public class LinkedElementList<T> {
 		} else if (first == _last) {
 			newList._first = null;
 			newList._last = null;
-			_last = first.getPrevious();
+			_last = _last.getPrevious();
+			_last.getNext().setPrevious(null);
 			_last.setNext(null);
-			first.setPrevious(null);
 		} else if (first == _first) {
-			newList._first = first.getNext();
-			newList._last = _last;
+			newList._first = _first.getNext();
+			newList._first.getPrevious().setNext(null);
 			newList._first.setPrevious(null);
+			newList._last = _last;
 			_first = _last = null;
 		} else {
 			newList._first = first.getNext();
 			newList._last = _last;
 			_last = first.getPrevious();
+			newList._first.setPrevious(null);
 			_last.setNext(null);
-			newList._last.setPrevious(null);
+			first.setNext(null);
+			first.setPrevious(null);
 		}
 		return newList;
 	}
