@@ -17,7 +17,8 @@ import de.freiburg.uni.tablet.presenter.page.IPen;
 import de.freiburg.uni.tablet.presenter.page.SolidPen;
 
 public class ToolEraser extends AbstractTool {
-	private final IPen _pen = new SolidPen(15.0f, new Color(0xffffffc0, true));
+	private final IPen _pen = new SolidPen(15.0f, new Color(0xff, 0xff, 0xff,
+			0xa0));
 	private final IPageFrontRenderer _renderer;
 	private final IPageEditor _editor;
 

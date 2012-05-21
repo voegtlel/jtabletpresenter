@@ -98,8 +98,8 @@ public class PagePenDispatcher implements PenListener {
 
 	@Override
 	public void penButtonEvent(final PButtonEvent e) {
-		System.out.println("Button: " + e.button.getType().toString() + " -> "
-				+ e.button.value);
+		// System.out.println("Button: " + e.button.getType().toString() +
+		// " -> " + e.button.value);
 		// override active tool
 		boolean activate = false;
 		boolean inverted = false;
@@ -201,7 +201,7 @@ public class PagePenDispatcher implements PenListener {
 	@Override
 	public void penKindEvent(final PKindEvent e) {
 		_penKind = e.kind.getType();
-		System.out.println("Kind: " + e.kind.getType().toString());
+		// System.out.println("Kind: " + e.kind.getType().toString());
 		// Only if no tool is active
 		if (_activeTool == null) {
 			// Clear last hover tool
@@ -229,7 +229,7 @@ public class PagePenDispatcher implements PenListener {
 
 	@Override
 	public void penScrollEvent(final PScrollEvent e) {
-		System.out.println("Scroll: " + e.scroll.getType().toString());
+		// System.out.println("Scroll: " + e.scroll.getType().toString());
 	}
 
 	@Override

@@ -88,7 +88,7 @@ public class JPageRenderer extends Component implements IPageRenderer,
 	 * (re)initialized the buffers and drawing destinations
 	 */
 	private void initializeGraphics() {
-		System.out.println("initGraphics");
+		// System.out.println("initGraphics");
 		if ((this.getWidth() > 0) && (this.getHeight() > 0) && this.isVisible()) {
 			_renderWidth = this.getWidth();
 			_renderHeight = this.getHeight();
@@ -237,11 +237,11 @@ public class JPageRenderer extends Component implements IPageRenderer,
 			if (_backGraphics != null) {
 				_backGraphics.setColor(Color.WHITE);
 				_backGraphics.fillRect(0, 0, _renderWidth, _renderHeight);
-				System.out.println("clearBack");
+				// System.out.println("clearBack");
 			}
 		} else {
 			_page.render(this);
-			System.out.println("redrawBack");
+			// System.out.println("redrawBack");
 		}
 		clearFront();
 	}
