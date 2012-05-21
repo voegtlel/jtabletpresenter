@@ -53,7 +53,6 @@ public class LinkedElementList<T> {
 	}
 
 	public void remove(final LinkedElement<T> element) {
-		System.out.println("rm " + element.hashCode());
 		if (element == _first) {
 			removeFirst();
 		} else if (element == _last) {
@@ -70,7 +69,6 @@ public class LinkedElementList<T> {
 		if (_last == _first) {
 			_last = _first = null;
 		} else {
-			System.out.println("rmLast " + _first.hashCode());
 			_last = _last.getPrevious();
 			_last.getNext().setPrevious(null);
 			_last.setNext(null);
@@ -81,7 +79,6 @@ public class LinkedElementList<T> {
 		if (_last == _first) {
 			_last = _first = null;
 		} else {
-			System.out.println("rmFirst " + _first.hashCode());
 			_first = _first.getNext();
 			_first.getPrevious().setNext(null);
 			_first.setPrevious(null);

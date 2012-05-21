@@ -17,8 +17,6 @@ public class LinkedElement<T> {
 	}
 
 	public void setPrevious(final LinkedElement<T> previous) {
-		System.out.println("setPrevious " + hashCode() + " -> "
-				+ (previous == null ? "null" : previous.hashCode()));
 		_previous = previous;
 	}
 
@@ -27,8 +25,6 @@ public class LinkedElement<T> {
 	}
 
 	public void setNext(final LinkedElement<T> next) {
-		System.out.println("setNext " + hashCode() + " -> "
-				+ (next == null ? "null" : next.hashCode()));
 		_next = next;
 	}
 
