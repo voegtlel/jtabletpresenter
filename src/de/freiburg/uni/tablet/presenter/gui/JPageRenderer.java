@@ -5,6 +5,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Paint;
 import java.awt.RenderingHints;
 import java.awt.Shape;
@@ -33,7 +34,7 @@ public class JPageRenderer extends Component implements IPageRenderer,
 	private Graphics2D _backGraphics = null;
 	private Graphics2D _frontGraphics = null;
 	// private BufferedImage _backBuffer = null;
-	private VolatileImage _backBuffer = null;
+	private Image _backBuffer = null;
 
 	private final Ellipse2D.Float _ellipseRenderer = new Ellipse2D.Float();
 	private final Line2D.Float _lineRenderer = new Line2D.Float();
@@ -44,12 +45,14 @@ public class JPageRenderer extends Component implements IPageRenderer,
 
 	private IPage _page = null;
 
-	private VolatileImage _frontBuffer;
+	private Image _frontBuffer;
 
 	private int _renderWidth = 0;
 	private int _renderHeight = 0;
 	private float _renderFactorX = 1.0f;
 	private float _renderFactorY = 1.0f;
+
+	private VolatileImage _surface;
 
 	public JPageRenderer() {
 		// setDoubleBuffered(false);
@@ -92,8 +95,8 @@ public class JPageRenderer extends Component implements IPageRenderer,
 		if ((this.getWidth() > 0) && (this.getHeight() > 0) && this.isVisible()) {
 			_renderWidth = this.getWidth();
 			_renderHeight = this.getHeight();
-			_backBuffer = createVolatileImage(_renderWidth, _renderHeight);
-			_backGraphics = _backBuffer.createGraphics();
+			_backBuffer = createImage(_renderWidth, _renderHeight);
+			_backGraphics = (Graphics2D) _backBuffer.getGraphics();
 			_backGraphics.setRenderingHint(RenderingHints.KEY_RENDERING,
 					RenderingHints.VALUE_RENDER_QUALITY);
 			_backGraphics.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
@@ -104,8 +107,8 @@ public class JPageRenderer extends Component implements IPageRenderer,
 					RenderingHints.KEY_FRACTIONALMETRICS,
 					RenderingHints.VALUE_FRACTIONALMETRICS_ON);
 
-			_frontBuffer = createVolatileImage(_renderWidth, _renderHeight);
-			_frontGraphics = _frontBuffer.createGraphics();
+			_frontBuffer = createImage(_renderWidth, _renderHeight);
+			_frontGraphics = (Graphics2D) _frontBuffer.getGraphics();
 			_frontGraphics.setRenderingHint(RenderingHints.KEY_RENDERING,
 					RenderingHints.VALUE_RENDER_SPEED);
 			_frontGraphics.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,

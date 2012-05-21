@@ -65,8 +65,7 @@ public class ToolEraser extends AbstractTool {
 		}
 
 		final int diameter = (int) Math.max(_pen.getThickness(), 2);
-		final BufferedImage img = new BufferedImage(diameter + 1, diameter + 1,
-				BufferedImage.TYPE_INT_ARGB);
+		final BufferedImage img = createBitmap(diameter + 1, diameter + 1);
 		final Graphics2D g = (Graphics2D) img.getGraphics();
 		g.setColor(Color.WHITE);
 		g.fillOval(0, 0, diameter, diameter);

@@ -66,9 +66,8 @@ public class ToolScribble extends AbstractTool {
 		}
 		final int diameter = (int) Math.max(_pen.getThickness(), 2);
 		final int extraline = 3;
-		final BufferedImage img = new BufferedImage(diameter + (2 * extraline)
-				+ 1, diameter + (2 * extraline) + 1,
-				BufferedImage.TYPE_INT_ARGB);
+		final BufferedImage img = createBitmap(diameter + (2 * extraline) + 1,
+				diameter + (2 * extraline) + 1);
 		final Graphics2D g = (Graphics2D) img.getGraphics();
 		g.setColor(Color.BLACK);
 		g.drawLine(0, (diameter / 2) + extraline, diameter + (extraline * 2),

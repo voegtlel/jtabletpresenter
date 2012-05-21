@@ -1,6 +1,9 @@
 package de.freiburg.uni.tablet.presenter.tools;
 
 import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Toolkit;
+import java.awt.image.BufferedImage;
 
 public abstract class AbstractTool implements ITool {
 	private boolean _isActive = false;
@@ -19,6 +22,13 @@ public abstract class AbstractTool implements ITool {
 		if (_isActive) {
 			_container.setCursor(_cursor);
 		}
+	}
+
+	protected BufferedImage createBitmap(final int width, final int height) {
+		final Dimension cursorSize = Toolkit.getDefaultToolkit()
+				.getBestCursorSize(width, height);
+		return new BufferedImage(cursorSize.width, cursorSize.height,
+				BufferedImage.TYPE_INT_ARGB);
 	}
 
 	@Override
