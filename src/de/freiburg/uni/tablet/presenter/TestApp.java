@@ -7,6 +7,7 @@ import javax.swing.JFrame;
 
 import de.freiburg.uni.tablet.presenter.gui.JPageRenderer;
 import de.freiburg.uni.tablet.presenter.page.DefaultPage;
+import de.freiburg.uni.tablet.presenter.tools.ToolEraser;
 import de.freiburg.uni.tablet.presenter.tools.ToolScribble;
 
 public class TestApp {
@@ -51,5 +52,7 @@ public class TestApp {
 		_pageRenderer.setPage(new DefaultPage());
 		_pageRenderer.setNormalTool(new ToolScribble(_pageRenderer,
 				_pageRenderer));
+		_pageRenderer.setInvertedTool(new ToolEraser(_pageRenderer,
+				_pageRenderer, _pageRenderer));
 	}
 }

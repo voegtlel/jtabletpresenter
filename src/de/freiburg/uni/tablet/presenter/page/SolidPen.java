@@ -8,12 +8,14 @@ import java.awt.Stroke;
 public class SolidPen implements IPen {
 	private final BasicStroke _stroke;
 	private final Color _paint;
+	private final float _thickness;
 
 	public SolidPen() {
 		this(1.0f, Color.BLACK);
 	}
 
 	public SolidPen(final float thickness, final Color color) {
+		_thickness = thickness;
 		_stroke = new BasicStroke(thickness, BasicStroke.CAP_ROUND,
 				BasicStroke.JOIN_ROUND);
 		_paint = color;
@@ -21,7 +23,7 @@ public class SolidPen implements IPen {
 
 	@Override
 	public float getThickness() {
-		return _stroke.getLineWidth();
+		return _thickness;
 	}
 
 	public Color getColor() {

@@ -12,4 +12,11 @@ public interface IRenderable {
 	 */
 	void render(final IPageRenderer renderer);
 
+	/**
+	 * Erase at a point
+	 * 
+	 * @param eraseInfo
+	 */
+	void eraseAt(EraseInfo eraseInfo);
+
 }

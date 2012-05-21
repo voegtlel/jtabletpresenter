@@ -152,6 +152,9 @@ public class ScribbleSegment {
 				renderer.draw(pen, _points.getFirst().getData().getX(), _points
 						.getFirst().getData().getY());
 			} else {
+				if (_path == null) {
+					bake();
+				}
 				renderer.draw(pen, _path);
 			}
 		}

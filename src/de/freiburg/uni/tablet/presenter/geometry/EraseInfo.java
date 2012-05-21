@@ -1,10 +1,18 @@
 package de.freiburg.uni.tablet.presenter.geometry;
 
 public class EraseInfo {
-	private float _radiusX;
-	private float _radiusY;
-	private float _x;
-	private float _y;
+	private final float _x;
+	private final float _y;
+	private final float _radiusX;
+	private final float _radiusY;
+
+	public EraseInfo(final float x, final float y, final float radiusX,
+			final float radiusY) {
+		_x = x;
+		_y = y;
+		_radiusX = radiusX;
+		_radiusY = radiusY;
+	}
 
 	public boolean isInRange(final float minX, final float minY,
 			final float maxX, final float maxY) {

@@ -17,7 +17,7 @@ import de.freiburg.uni.tablet.presenter.page.IPen;
 import de.freiburg.uni.tablet.presenter.page.SolidPen;
 
 public class ToolEraser extends AbstractTool {
-	private final IPen _pen = new SolidPen(15.0f, Color.WHITE);
+	private final IPen _pen = new SolidPen(15.0f, new Color(0xffffffc0, true));
 	private final IPageFrontRenderer _renderer;
 	private final IPageEditor _editor;
 
@@ -67,9 +67,9 @@ public class ToolEraser extends AbstractTool {
 		final BufferedImage img = new BufferedImage(diameter + 1, diameter + 1,
 				BufferedImage.TYPE_INT_ARGB);
 		final Graphics2D g = (Graphics2D) img.getGraphics();
-		g.setColor(Color.BLACK);
-		g.fillOval(0, 0, diameter, diameter);
 		g.setColor(Color.WHITE);
+		g.fillOval(0, 0, diameter, diameter);
+		g.setColor(Color.BLACK);
 		g.drawOval(0, 0, diameter, diameter);
 		img.flush();
 		g.dispose();

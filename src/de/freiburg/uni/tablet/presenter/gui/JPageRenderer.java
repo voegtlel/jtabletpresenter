@@ -216,7 +216,7 @@ public class JPageRenderer extends Component implements IPageRenderer,
 			_ellipseRenderer.height = pen.getThickness();
 			_frontGraphics.setPaint(pen.getPaint());
 			_frontGraphics.fill(_ellipseRenderer);
-			repaint(x, y, 0.0f, 0.0f, pen);
+			repaint(x * _renderFactorX, y * _renderFactorY, 0.0f, 0.0f, pen);
 		}
 	}
 
@@ -256,10 +256,12 @@ public class JPageRenderer extends Component implements IPageRenderer,
 	 *            new renderable
 	 */
 	protected void onAddDrawing(final ITool activeTool, final IRenderable result) {
-		_page.addRenderable(result);
+		if (result != null) {
+			_page.addRenderable(result);
+		}
 		if (activeTool.requiresRedraw()) {
 			redrawBack();
-		} else {
+		} else if (result != null) {
 			result.render(this);
 		}
 		clearFront();
