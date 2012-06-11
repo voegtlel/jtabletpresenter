@@ -1,4 +1,4 @@
-package de.freiburg.uni.tablet.presenter.gui;
+package de.freiburg.uni.tablet.presenter.editor;
 
 import de.freiburg.uni.tablet.presenter.page.IPage;
 import de.freiburg.uni.tablet.presenter.tools.ITool;

@@ -1,13 +1,17 @@
 package de.freiburg.uni.tablet.presenter.geometry;
 
 import java.awt.geom.Path2D;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 
+import de.freiburg.uni.tablet.presenter.IBinarySerializable;
 import de.freiburg.uni.tablet.presenter.list.LinkedElement;
 import de.freiburg.uni.tablet.presenter.list.LinkedElementList;
 import de.freiburg.uni.tablet.presenter.page.IPageRenderer;
 import de.freiburg.uni.tablet.presenter.page.IPen;
 
-public class ScribbleSegment {
+public class ScribbleSegment implements IBinarySerializable {
 	private Path2D _path;
 
 	private boolean _hasBoundary;
@@ -29,6 +33,25 @@ public class ScribbleSegment {
 		_minY = Float.MAX_VALUE;
 		_maxX = Float.MIN_VALUE;
 		_maxY = Float.MIN_VALUE;
+	}
+
+	public ScribbleSegment(final DataInputStream reader) throws IOException {
+		_points = new LinkedElementList<DataPoint>();
+		_minX = Float.MAX_VALUE;
+		_minY = Float.MAX_VALUE;
+		_maxX = Float.MIN_VALUE;
+		_maxY = Float.MIN_VALUE;
+		_hasBoundary = true;
+
+		final int count = reader.readInt();
+		for (int i = 0; i < count; i++) {
+			final DataPoint e = new DataPoint(reader);
+			_points.addLast(e);
+			_minX = Math.min(_minX, e.getX());
+			_minY = Math.min(_minY, e.getY());
+			_maxX = Math.max(_maxX, e.getX());
+			_maxY = Math.max(_maxY, e.getY());
+		}
 	}
 
 	private ScribbleSegment(final LinkedElementList<DataPoint> points) {
@@ -162,5 +185,22 @@ public class ScribbleSegment {
 
 	public boolean isEmpty() {
 		return _points.isEmpty();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * de.freiburg.uni.tablet.presenter.IBinarySerializable#serialize(java.io
+	 * .DataOutputStream)
+	 */
+	@Override
+	public void serialize(final DataOutputStream writer) throws IOException {
+		writer.writeInt(_points.getFirst().getNextCount());
+
+		for (LinkedElement<DataPoint> element = _points.getFirst(); element != null; element = element
+				.getNext()) {
+			element.getData().serialize(writer);
+		}
 	}
 }

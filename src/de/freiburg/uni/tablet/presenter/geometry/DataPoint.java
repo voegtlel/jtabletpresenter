@@ -1,7 +1,12 @@
 package de.freiburg.uni.tablet.presenter.geometry;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 
-public class DataPoint {
+import de.freiburg.uni.tablet.presenter.IBinarySerializable;
+
+public class DataPoint implements IBinarySerializable {
 	private final float _x;
 	private final float _y;
 	private final float _xOrig;
@@ -17,6 +22,15 @@ public class DataPoint {
 		_yOrig = yOrig;
 		_pressure = pressure;
 		_timestamp = timestamp;
+	}
+
+	public DataPoint(final DataInputStream reader) throws IOException {
+		_xOrig = reader.readFloat();
+		_yOrig = reader.readFloat();
+		_x = reader.readFloat();
+		_y = reader.readFloat();
+		_pressure = reader.readFloat();
+		_timestamp = reader.readLong();
 	}
 
 	/**
@@ -52,5 +66,22 @@ public class DataPoint {
 	 */
 	public long getTimestamp() {
 		return _timestamp;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * de.freiburg.uni.tablet.presenter.IBinarySerializable#serialize(java.io
+	 * .DataOutputStream)
+	 */
+	@Override
+	public void serialize(final DataOutputStream writer) throws IOException {
+		writer.writeFloat(_xOrig);
+		writer.writeFloat(_yOrig);
+		writer.writeFloat(_x);
+		writer.writeFloat(_y);
+		writer.writeFloat(_pressure);
+		writer.writeLong(_timestamp);
 	}
 }

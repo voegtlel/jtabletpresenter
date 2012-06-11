@@ -1,4 +1,4 @@
-package de.freiburg.uni.tablet.presenter.gui;
+package de.freiburg.uni.tablet.presenter.editor.gui;
 
 import java.awt.Dimension;
 

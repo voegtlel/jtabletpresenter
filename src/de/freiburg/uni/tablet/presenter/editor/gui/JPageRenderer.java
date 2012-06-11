@@ -1,4 +1,4 @@
-package de.freiburg.uni.tablet.presenter.gui;
+package de.freiburg.uni.tablet.presenter.editor.gui;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -16,6 +16,7 @@ import java.awt.geom.Path2D;
 import java.awt.image.VolatileImage;
 
 import jpen.owner.multiAwt.AwtPenToolkit;
+import de.freiburg.uni.tablet.presenter.editor.IPageEditor;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 import de.freiburg.uni.tablet.presenter.page.IPage;
 import de.freiburg.uni.tablet.presenter.page.IPageFrontRenderer;

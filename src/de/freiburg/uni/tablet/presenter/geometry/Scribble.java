@@ -1,9 +1,14 @@
 package de.freiburg.uni.tablet.presenter.geometry;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+
 import de.freiburg.uni.tablet.presenter.list.LinkedElement;
 import de.freiburg.uni.tablet.presenter.list.LinkedElementList;
 import de.freiburg.uni.tablet.presenter.page.IPageRenderer;
 import de.freiburg.uni.tablet.presenter.page.IPen;
+import de.freiburg.uni.tablet.presenter.page.SolidPen;
 
 public class Scribble implements IRenderable {
 	private final LinkedElementList<ScribbleSegment> _segments = new LinkedElementList<ScribbleSegment>();
@@ -12,6 +17,14 @@ public class Scribble implements IRenderable {
 
 	public Scribble(final IPen pen) {
 		_pen = pen;
+	}
+
+	public Scribble(final DataInputStream reader) throws IOException {
+		_pen = new SolidPen(reader);
+		final int count = reader.readInt();
+		for (int i = 0; i < count; i++) {
+			_segments.addLast(new ScribbleSegment(reader));
+		}
 	}
 
 	public void addPoint(final DataPoint data) {
@@ -28,6 +41,7 @@ public class Scribble implements IRenderable {
 		}
 	}
 
+	@Override
 	public void eraseAt(final EraseInfo eraseInfo) {
 		for (LinkedElement<ScribbleSegment> seg = _segments.getFirst(); seg != null;) {
 			LinkedElement<ScribbleSegment> nextSeg = seg.getNext();
@@ -48,6 +62,23 @@ public class Scribble implements IRenderable {
 		for (LinkedElement<ScribbleSegment> e = _segments.getFirst(); e != null; e = e
 				.getNext()) {
 			e.getData().render(_pen, renderer);
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * de.freiburg.uni.tablet.presenter.IBinarySerializable#serialize(java.io
+	 * .DataOutputStream)
+	 */
+	@Override
+	public void serialize(final DataOutputStream writer) throws IOException {
+		_pen.serialize(writer);
+		writer.writeInt(_segments.getFirst().getNextCount());
+		for (LinkedElement<ScribbleSegment> element = _segments.getFirst(); element != null; element = element
+				.getNext()) {
+			element.getData().serialize(writer);
 		}
 	}
 }

@@ -4,6 +4,9 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Paint;
 import java.awt.Stroke;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 
 public class SolidPen implements IPen {
 	private final BasicStroke _stroke;
@@ -19,6 +22,15 @@ public class SolidPen implements IPen {
 		_stroke = new BasicStroke(thickness, BasicStroke.CAP_ROUND,
 				BasicStroke.JOIN_ROUND);
 		_paint = color;
+	}
+
+	public SolidPen(final DataInputStream reader) throws IOException {
+		_thickness = reader.readFloat();
+		final int color = reader.readInt();
+		_paint = new Color(color & 0xff, (color >> 8) & 0xff,
+				(color >> 16) & 0xff, (color >> 24) & 0xff);
+		_stroke = new BasicStroke(_thickness, BasicStroke.CAP_ROUND,
+				BasicStroke.JOIN_ROUND);
 	}
 
 	@Override
@@ -40,4 +52,16 @@ public class SolidPen implements IPen {
 		return _paint;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * de.freiburg.uni.tablet.presenter.IBinarySerializable#serialize(java.io
+	 * .DataOutputStream)
+	 */
+	@Override
+	public void serialize(final DataOutputStream writer) throws IOException {
+		writer.writeInt((getColor().getAlpha() << 24) | getColor().getRGB());
+		writer.writeFloat(getThickness());
+	}
 }

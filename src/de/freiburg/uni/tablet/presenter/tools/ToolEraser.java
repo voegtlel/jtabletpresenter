@@ -7,10 +7,10 @@ import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 
+import de.freiburg.uni.tablet.presenter.editor.IPageEditor;
 import de.freiburg.uni.tablet.presenter.geometry.DataPoint;
 import de.freiburg.uni.tablet.presenter.geometry.EraseInfo;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
-import de.freiburg.uni.tablet.presenter.gui.IPageEditor;
 import de.freiburg.uni.tablet.presenter.page.IPage;
 import de.freiburg.uni.tablet.presenter.page.IPageFrontRenderer;
 import de.freiburg.uni.tablet.presenter.page.IPen;

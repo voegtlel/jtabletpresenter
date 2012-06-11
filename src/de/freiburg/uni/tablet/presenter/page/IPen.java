@@ -3,7 +3,9 @@ package de.freiburg.uni.tablet.presenter.page;
 import java.awt.Paint;
 import java.awt.Stroke;
 
-public interface IPen {
+import de.freiburg.uni.tablet.presenter.IBinarySerializable;
+
+public interface IPen extends IBinarySerializable {
 	/**
 	 * Get system stroke.
 	 * 

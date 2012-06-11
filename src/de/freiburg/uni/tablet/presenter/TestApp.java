@@ -5,7 +5,7 @@ import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 
-import de.freiburg.uni.tablet.presenter.gui.JPageRenderer;
+import de.freiburg.uni.tablet.presenter.editor.gui.JPageRenderer;
 import de.freiburg.uni.tablet.presenter.page.DefaultPage;
 import de.freiburg.uni.tablet.presenter.tools.ToolEraser;
 import de.freiburg.uni.tablet.presenter.tools.ToolScribble;
