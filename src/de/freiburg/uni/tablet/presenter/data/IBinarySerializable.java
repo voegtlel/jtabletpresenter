@@ -1,6 +1,5 @@
-package de.freiburg.uni.tablet.presenter;
+package de.freiburg.uni.tablet.presenter.data;
 
-import java.io.DataOutputStream;
 import java.io.IOException;
 
 /**
@@ -15,5 +14,5 @@ public interface IBinarySerializable {
 	 * 
 	 * @throws IOException
 	 */
-	void serialize(DataOutputStream writer) throws IOException;
+	void serialize(BinarySerializer writer) throws IOException;
 }

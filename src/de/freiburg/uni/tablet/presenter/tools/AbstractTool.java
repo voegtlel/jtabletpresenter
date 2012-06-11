@@ -12,7 +12,13 @@ public abstract class AbstractTool implements ITool {
 
 	public AbstractTool(final IToolContainer container) {
 		_container = container;
-		_cursor = generateCursor();
+	}
+
+	public void invalidateCursor() {
+		_cursor = null;
+		if (_isActive) {
+			updateCursor();
+		}
 	}
 
 	protected abstract Cursor generateCursor();
@@ -33,6 +39,9 @@ public abstract class AbstractTool implements ITool {
 
 	@Override
 	public void over() {
+		if (_cursor == null) {
+			updateCursor();
+		}
 		_container.setCursor(_cursor);
 		_isActive = true;
 	}

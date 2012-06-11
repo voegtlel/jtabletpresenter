@@ -5,7 +5,7 @@ import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 
-import de.freiburg.uni.tablet.presenter.editor.gui.JPageRenderer;
+import de.freiburg.uni.tablet.presenter.gui.JPageEditor;
 import de.freiburg.uni.tablet.presenter.page.DefaultPage;
 import de.freiburg.uni.tablet.presenter.tools.ToolEraser;
 import de.freiburg.uni.tablet.presenter.tools.ToolScribble;
@@ -13,7 +13,7 @@ import de.freiburg.uni.tablet.presenter.tools.ToolScribble;
 public class TestApp {
 
 	private JFrame frame;
-	private JPageRenderer _pageRenderer;
+	private JPageEditor _pageRenderer;
 
 	/**
 	 * Launch the application.
@@ -47,12 +47,13 @@ public class TestApp {
 		frame.setBounds(100, 100, 450, 300);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		_pageRenderer = new JPageRenderer();
+		_pageRenderer = new JPageEditor();
 		frame.getContentPane().add(_pageRenderer, BorderLayout.CENTER);
-		_pageRenderer.setPage(new DefaultPage());
-		_pageRenderer.setNormalTool(new ToolScribble(_pageRenderer,
-				_pageRenderer));
-		_pageRenderer.setInvertedTool(new ToolEraser(_pageRenderer,
-				_pageRenderer, _pageRenderer));
+		/*
+		 * _pageRenderer.setPage(new DefaultPage());
+		 * _pageRenderer.setNormalTool(new ToolScribble(_pageRenderer,
+		 * _pageRenderer)); _pageRenderer.setInvertedTool(new
+		 * ToolEraser(_pageRenderer, _pageRenderer, _pageRenderer));
+		 */
 	}
 }

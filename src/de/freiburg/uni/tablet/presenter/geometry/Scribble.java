@@ -1,25 +1,27 @@
 package de.freiburg.uni.tablet.presenter.geometry;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 
+import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
+import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.list.LinkedElement;
 import de.freiburg.uni.tablet.presenter.list.LinkedElementList;
 import de.freiburg.uni.tablet.presenter.page.IPageRenderer;
 import de.freiburg.uni.tablet.presenter.page.IPen;
 import de.freiburg.uni.tablet.presenter.page.SolidPen;
 
-public class Scribble implements IRenderable {
+public class Scribble extends IRenderable {
 	private final LinkedElementList<ScribbleSegment> _segments = new LinkedElementList<ScribbleSegment>();
 
 	private final IPen _pen;
 
 	public Scribble(final IPen pen) {
+		super();
 		_pen = pen;
 	}
 
-	public Scribble(final DataInputStream reader) throws IOException {
+	public Scribble(final BinaryDeserializer reader) throws IOException {
+		super(reader);
 		_pen = new SolidPen(reader);
 		final int count = reader.readInt();
 		for (int i = 0; i < count; i++) {
@@ -73,7 +75,8 @@ public class Scribble implements IRenderable {
 	 * .DataOutputStream)
 	 */
 	@Override
-	public void serialize(final DataOutputStream writer) throws IOException {
+	public void serialize(final BinarySerializer writer) throws IOException {
+		super.serialize(writer);
 		_pen.serialize(writer);
 		writer.writeInt(_segments.getFirst().getNextCount());
 		for (LinkedElement<ScribbleSegment> element = _segments.getFirst(); element != null; element = element

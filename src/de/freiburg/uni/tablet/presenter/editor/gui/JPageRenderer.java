@@ -13,7 +13,6 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
-import java.awt.image.VolatileImage;
 
 import jpen.owner.multiAwt.AwtPenToolkit;
 import de.freiburg.uni.tablet.presenter.editor.IPageEditor;
@@ -52,8 +51,6 @@ public class JPageRenderer extends Component implements IPageRenderer,
 	private int _renderHeight = 0;
 	private float _renderFactorX = 1.0f;
 	private float _renderFactorY = 1.0f;
-
-	private VolatileImage _surface;
 
 	public JPageRenderer() {
 		// setDoubleBuffered(false);
@@ -134,7 +131,7 @@ public class JPageRenderer extends Component implements IPageRenderer,
 	@Override
 	public void draw(final IPen pen, final Path2D path) {
 		if (_backGraphics != null) {
-			_backGraphics.setPaint(pen.getPaint());
+			_backGraphics.setPaint(pen.getColor());
 			_backGraphics.setStroke(pen.getStroke());
 			final Shape transformedPath = path
 					.createTransformedShape(AffineTransform.getScaleInstance(
@@ -169,7 +166,7 @@ public class JPageRenderer extends Component implements IPageRenderer,
 					- (pen.getThickness() / 2.0f);
 			_ellipseRenderer.width = pen.getThickness();
 			_ellipseRenderer.height = pen.getThickness();
-			_backGraphics.setPaint(pen.getPaint());
+			_backGraphics.setPaint(pen.getColor());
 			_backGraphics.fill(_ellipseRenderer);
 		}
 	}
@@ -183,7 +180,7 @@ public class JPageRenderer extends Component implements IPageRenderer,
 			_lineRenderer.x2 = x2 * _renderFactorX;
 			_lineRenderer.y2 = y2 * _renderFactorY;
 			_backGraphics.setStroke(pen.getStroke());
-			_frontGraphics.setPaint(pen.getPaint());
+			_frontGraphics.setPaint(pen.getColor());
 			_backGraphics.draw(_lineRenderer);
 		}
 	}
@@ -197,7 +194,7 @@ public class JPageRenderer extends Component implements IPageRenderer,
 			_lineRenderer.x2 = x2 * _renderFactorX;
 			_lineRenderer.y2 = y2 * _renderFactorY;
 			_frontGraphics.setStroke(pen.getStroke());
-			_frontGraphics.setPaint(pen.getPaint());
+			_frontGraphics.setPaint(pen.getColor());
 			_frontGraphics.draw(_lineRenderer);
 			final float x = Math.min(_lineRenderer.x1, _lineRenderer.x2);
 			final float y = Math.min(_lineRenderer.y1, _lineRenderer.y2);
@@ -218,7 +215,7 @@ public class JPageRenderer extends Component implements IPageRenderer,
 					- (pen.getThickness() / 2.0f);
 			_ellipseRenderer.width = pen.getThickness();
 			_ellipseRenderer.height = pen.getThickness();
-			_frontGraphics.setPaint(pen.getPaint());
+			_frontGraphics.setPaint(pen.getColor());
 			_frontGraphics.fill(_ellipseRenderer);
 			repaint(x * _renderFactorX, y * _renderFactorY, 0.0f, 0.0f, pen);
 		}
@@ -302,4 +299,8 @@ public class JPageRenderer extends Component implements IPageRenderer,
 		_pagePenListener.setInvertedTool(invertedTool);
 	}
 
+	@Override
+	public Component getContainer() {
+		return this;
+	}
 }

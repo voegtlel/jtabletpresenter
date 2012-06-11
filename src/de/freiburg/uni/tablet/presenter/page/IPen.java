@@ -1,9 +1,9 @@
 package de.freiburg.uni.tablet.presenter.page;
 
-import java.awt.Paint;
+import java.awt.Color;
 import java.awt.Stroke;
 
-import de.freiburg.uni.tablet.presenter.IBinarySerializable;
+import de.freiburg.uni.tablet.presenter.data.IBinarySerializable;
 
 public interface IPen extends IBinarySerializable {
 	/**
@@ -18,7 +18,7 @@ public interface IPen extends IBinarySerializable {
 	 * 
 	 * @return paint
 	 */
-	Paint getPaint();
+	Color getColor();
 
 	/**
 	 * Gets the thickness.

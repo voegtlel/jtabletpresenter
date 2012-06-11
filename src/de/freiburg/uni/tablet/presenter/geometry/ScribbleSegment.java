@@ -1,11 +1,11 @@
 package de.freiburg.uni.tablet.presenter.geometry;
 
 import java.awt.geom.Path2D;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 
-import de.freiburg.uni.tablet.presenter.IBinarySerializable;
+import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
+import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
+import de.freiburg.uni.tablet.presenter.data.IBinarySerializable;
 import de.freiburg.uni.tablet.presenter.list.LinkedElement;
 import de.freiburg.uni.tablet.presenter.list.LinkedElementList;
 import de.freiburg.uni.tablet.presenter.page.IPageRenderer;
@@ -35,7 +35,7 @@ public class ScribbleSegment implements IBinarySerializable {
 		_maxY = Float.MIN_VALUE;
 	}
 
-	public ScribbleSegment(final DataInputStream reader) throws IOException {
+	public ScribbleSegment(final BinaryDeserializer reader) throws IOException {
 		_points = new LinkedElementList<DataPoint>();
 		_minX = Float.MAX_VALUE;
 		_minY = Float.MAX_VALUE;
@@ -195,7 +195,7 @@ public class ScribbleSegment implements IBinarySerializable {
 	 * .DataOutputStream)
 	 */
 	@Override
-	public void serialize(final DataOutputStream writer) throws IOException {
+	public void serialize(final BinarySerializer writer) throws IOException {
 		writer.writeInt(_points.getFirst().getNextCount());
 
 		for (LinkedElement<DataPoint> element = _points.getFirst(); element != null; element = element

@@ -2,11 +2,11 @@ package de.freiburg.uni.tablet.presenter.page;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Paint;
 import java.awt.Stroke;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
+
+import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
+import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 
 public class SolidPen implements IPen {
 	private final BasicStroke _stroke;
@@ -24,7 +24,7 @@ public class SolidPen implements IPen {
 		_paint = color;
 	}
 
-	public SolidPen(final DataInputStream reader) throws IOException {
+	public SolidPen(final BinaryDeserializer reader) throws IOException {
 		_thickness = reader.readFloat();
 		final int color = reader.readInt();
 		_paint = new Color(color & 0xff, (color >> 8) & 0xff,
@@ -38,29 +38,18 @@ public class SolidPen implements IPen {
 		return _thickness;
 	}
 
-	public Color getColor() {
-		return _paint;
-	}
-
 	@Override
 	public Stroke getStroke() {
 		return _stroke;
 	}
 
 	@Override
-	public Paint getPaint() {
+	public Color getColor() {
 		return _paint;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * de.freiburg.uni.tablet.presenter.IBinarySerializable#serialize(java.io
-	 * .DataOutputStream)
-	 */
 	@Override
-	public void serialize(final DataOutputStream writer) throws IOException {
+	public void serialize(final BinarySerializer writer) throws IOException {
 		writer.writeInt((getColor().getAlpha() << 24) | getColor().getRGB());
 		writer.writeFloat(getThickness());
 	}

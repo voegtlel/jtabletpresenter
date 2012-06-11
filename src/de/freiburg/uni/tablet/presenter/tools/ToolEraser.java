@@ -7,7 +7,7 @@ import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 
-import de.freiburg.uni.tablet.presenter.editor.IPageEditor;
+import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 import de.freiburg.uni.tablet.presenter.geometry.DataPoint;
 import de.freiburg.uni.tablet.presenter.geometry.EraseInfo;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
@@ -17,10 +17,10 @@ import de.freiburg.uni.tablet.presenter.page.IPen;
 import de.freiburg.uni.tablet.presenter.page.SolidPen;
 
 public class ToolEraser extends AbstractTool {
-	private final IPen _pen = new SolidPen(15.0f, new Color(0xff, 0xff, 0xff,
-			0xa0));
+	private final IPen _pen = new SolidPen(15.0f, new Color(0xFF, 0xFF, 0xFF,
+			0xAA));
 	private final IPageFrontRenderer _renderer;
-	private final IPageEditor _editor;
+	private final IToolPageEditor _editor;
 
 	/**
 	 * 
@@ -28,7 +28,7 @@ public class ToolEraser extends AbstractTool {
 	 *            used for cursor changing
 	 */
 	public ToolEraser(final IToolContainer container,
-			final IPageFrontRenderer renderer, final IPageEditor editor) {
+			final IPageFrontRenderer renderer, final IToolPageEditor editor) {
 		super(container);
 		_renderer = renderer;
 		_editor = editor;

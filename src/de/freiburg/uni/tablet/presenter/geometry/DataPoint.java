@@ -1,10 +1,10 @@
 package de.freiburg.uni.tablet.presenter.geometry;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 
-import de.freiburg.uni.tablet.presenter.IBinarySerializable;
+import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
+import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
+import de.freiburg.uni.tablet.presenter.data.IBinarySerializable;
 
 public class DataPoint implements IBinarySerializable {
 	private final float _x;
@@ -24,7 +24,7 @@ public class DataPoint implements IBinarySerializable {
 		_timestamp = timestamp;
 	}
 
-	public DataPoint(final DataInputStream reader) throws IOException {
+	public DataPoint(final BinaryDeserializer reader) throws IOException {
 		_xOrig = reader.readFloat();
 		_yOrig = reader.readFloat();
 		_x = reader.readFloat();
@@ -76,7 +76,7 @@ public class DataPoint implements IBinarySerializable {
 	 * .DataOutputStream)
 	 */
 	@Override
-	public void serialize(final DataOutputStream writer) throws IOException {
+	public void serialize(final BinarySerializer writer) throws IOException {
 		writer.writeFloat(_xOrig);
 		writer.writeFloat(_yOrig);
 		writer.writeFloat(_x);

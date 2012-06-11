@@ -1,5 +1,7 @@
 package de.freiburg.uni.tablet.presenter.editor;
 
+import java.awt.Component;
+
 import de.freiburg.uni.tablet.presenter.page.IPage;
 import de.freiburg.uni.tablet.presenter.tools.ITool;
 
@@ -48,5 +50,12 @@ public interface IPageEditor {
 	 *            inverted tool
 	 */
 	void setInvertedTool(ITool invertedTool);
+
+	/**
+	 * Gets the gui-container.
+	 * 
+	 * @return gui-container
+	 */
+	Component getContainer();
 
 }
