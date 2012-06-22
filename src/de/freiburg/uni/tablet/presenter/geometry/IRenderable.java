@@ -8,14 +8,13 @@ import de.freiburg.uni.tablet.presenter.data.IBinarySerializable;
 import de.freiburg.uni.tablet.presenter.page.IPageRenderer;
 
 public abstract class IRenderable implements IBinarySerializable {
-	private static int __nextId = 0;
 	private final int _id;
 
 	/**
 	 * Creates the renderable
 	 */
-	protected IRenderable() {
-		_id = (__nextId++);
+	protected IRenderable(final int id) {
+		_id = id;
 	}
 
 	/**
@@ -43,6 +42,14 @@ public abstract class IRenderable implements IBinarySerializable {
 	public abstract void eraseAt(EraseInfo eraseInfo);
 
 	/**
+	 * Returns if the info is colliding with this object
+	 * 
+	 * @param collisionInfo
+	 *            collision info
+	 */
+	public abstract boolean isInRange(CollisionInfo collisionInfo);
+
+	/**
 	 * Returns the id of the renderable object.
 	 * 
 	 * @return id
@@ -54,15 +61,5 @@ public abstract class IRenderable implements IBinarySerializable {
 	@Override
 	public void serialize(final BinarySerializer stream) throws IOException {
 		stream.writeInt(_id);
-	}
-
-	public static void serializeStatic(final BinarySerializer stream)
-			throws IOException {
-		stream.writeInt(__nextId);
-	}
-
-	public static void deserializeStatic(final BinaryDeserializer stream)
-			throws IOException {
-		__nextId = stream.readInt();
 	}
 }

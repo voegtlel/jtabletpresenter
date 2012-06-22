@@ -11,13 +11,18 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
+import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
+import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
+import de.freiburg.uni.tablet.presenter.editor.IToolPageEditorListener;
 import de.freiburg.uni.tablet.presenter.editor.gui.JPageRenderer;
 import de.freiburg.uni.tablet.presenter.gui.buttons.ButtonColor;
 import de.freiburg.uni.tablet.presenter.gui.buttons.ButtonEraser;
@@ -33,9 +38,12 @@ import de.freiburg.uni.tablet.presenter.gui.buttons.ButtonSpinnerPage;
 import de.freiburg.uni.tablet.presenter.gui.buttons.ButtonUndo;
 import de.freiburg.uni.tablet.presenter.page.DefaultPage;
 import de.freiburg.uni.tablet.presenter.page.IPage;
+import de.freiburg.uni.tablet.presenter.page.IPageFrontRenderer;
+import de.freiburg.uni.tablet.presenter.page.IPageRenderer;
 import de.freiburg.uni.tablet.presenter.page.IPen;
 import de.freiburg.uni.tablet.presenter.page.SolidPen;
 import de.freiburg.uni.tablet.presenter.tools.ITool;
+import de.freiburg.uni.tablet.presenter.tools.IToolContainer;
 import de.freiburg.uni.tablet.presenter.tools.ToolEraser;
 import de.freiburg.uni.tablet.presenter.tools.ToolScribble;
 
@@ -44,12 +52,20 @@ import de.freiburg.uni.tablet.presenter.tools.ToolScribble;
  * 
  */
 public class JPageEditor extends JPanel implements IToolPageEditor {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	private JPageRenderer _pageRenderer;
 	private JPanel _panelTools;
 
 	private final List<IPage> _pages = new LinkedList<IPage>();
 	private int _currentPage = 0;
 	private IPen _currentPen = new SolidPen();
+	private final List<IToolPageEditorListener> _listeners = new ArrayList<IToolPageEditorListener>();
+
+	private int _nextObjectId = 0;
 
 	/**
 	 * Create the panel.
@@ -65,20 +81,12 @@ public class JPageEditor extends JPanel implements IToolPageEditor {
 		setLayout(new BorderLayout(0, 0));
 		_pageRenderer = new JPageRenderer();
 		this.add(_pageRenderer);
-		_pageRenderer.setPage(new DefaultPage());
+		_pages.add(new DefaultPage());
+		_pageRenderer.setPage(_pages.get(0));
 		_pageRenderer.setNormalTool(new ToolScribble(_pageRenderer,
 				_pageRenderer, this));
 		_pageRenderer.setInvertedTool(new ToolEraser(_pageRenderer,
 				_pageRenderer, this));
-
-		final JPanel panel = new JPanel();
-		add(panel, BorderLayout.EAST);
-		final GridBagLayout gbl_panel = new GridBagLayout();
-		gbl_panel.columnWidths = new int[] { 0 };
-		gbl_panel.rowHeights = new int[] { 0 };
-		gbl_panel.columnWeights = new double[] { Double.MIN_VALUE };
-		gbl_panel.rowWeights = new double[] { Double.MIN_VALUE };
-		panel.setLayout(gbl_panel);
 
 		_panelTools = new JPanel();
 		add(_panelTools, BorderLayout.WEST);
@@ -94,8 +102,11 @@ public class JPageEditor extends JPanel implements IToolPageEditor {
 	public void setToolButtons(final IButtonAction[] buttons) {
 		// Build layout
 		final GridBagLayout gbl_panelTools = new GridBagLayout();
-		gbl_panelTools.columnWidths = new int[] { 0, 0 };
-		gbl_panelTools.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
+		// gbl_panelTools.columnWidths = new int[] { 0, 0 };
+		// gbl_panelTools.columnWeights = new double[] { 1.0, Double.MIN_VALUE
+		// };
+		gbl_panelTools.columnWidths = new int[] { 0 };
+		gbl_panelTools.columnWeights = new double[] { 1.0 };
 		gbl_panelTools.rowHeights = new int[buttons.length + 1];
 		gbl_panelTools.rowWeights = new double[buttons.length + 1];
 
@@ -146,7 +157,10 @@ public class JPageEditor extends JPanel implements IToolPageEditor {
 
 	@Override
 	public void setPage(final IPage page) {
-		_pageRenderer.setPage(page);
+		final int index = _pages.indexOf(page);
+		if (index != -1) {
+			setPageIndex(index);
+		}
 	}
 
 	@Override
@@ -189,13 +203,20 @@ public class JPageEditor extends JPanel implements IToolPageEditor {
 	}
 
 	@Override
-	public int getCurrentPage() {
+	public int getPageIndex() {
 		return _currentPage;
 	}
 
 	@Override
-	public void setCurrentPage(final int index) {
-		_currentPage = index;
+	public void setPageIndex(final int index) {
+		if (_currentPage != index) {
+			_currentPage = index;
+			while (_pages.size() <= _currentPage) {
+				_pages.add(new DefaultPage());
+			}
+			_pageRenderer.setPage(_pages.get(index));
+			firePageNumberChanged();
+		}
 	}
 
 	@Override
@@ -216,5 +237,59 @@ public class JPageEditor extends JPanel implements IToolPageEditor {
 	@Override
 	public Iterable<IPage> getPages() {
 		return _pages;
+	}
+
+	@Override
+	public IPageRenderer getRenderer() {
+		return _pageRenderer;
+	}
+
+	@Override
+	public IPageFrontRenderer getFrontRenderer() {
+		return _pageRenderer;
+	}
+
+	@Override
+	public IToolContainer getToolContainer() {
+		return _pageRenderer;
+	}
+
+	private void firePageNumberChanged() {
+		for (final IToolPageEditorListener listener : _listeners) {
+			listener.pageNumberChanged();
+		}
+	}
+
+	@Override
+	public void addListener(final IToolPageEditorListener listener) {
+		_listeners.add(listener);
+	}
+
+	@Override
+	public void removeListener(final IToolPageEditorListener listener) {
+		_listeners.remove(listener);
+	}
+
+	public void serialize(final BinarySerializer writer) throws IOException {
+		writer.writeInt(_nextObjectId);
+		writer.writeInt(_currentPage);
+		writer.writeInt(_pages.size());
+		for (final IPage page : _pages) {
+			writer.writeSerializableClass(page);
+		}
+	}
+
+	public void deserialize(final BinaryDeserializer reader) throws IOException {
+		_nextObjectId = reader.readInt();
+		_currentPage = reader.readInt();
+		final int pages = reader.readInt();
+		for (int i = 0; i < pages; i++) {
+			_pages.add(reader.<IPage> readSerializableClass());
+		}
+	}
+
+	@Override
+	public int getNextObjectId() {
+		return _nextObjectId++;
 	}
 }

@@ -4,15 +4,14 @@
  */
 package de.freiburg.uni.tablet.presenter.gui.buttons;
 
-import java.awt.Component;
-
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
+import de.freiburg.uni.tablet.presenter.tools.ITool;
 
 /**
  * @author lukas
  * 
  */
-public class ButtonEraser extends AbstractButtonAction {
+public class ButtonEraser extends AbstractButtonSelectTool {
 	/**
 	 * Creates the action with an editor.
 	 */
@@ -21,6 +20,12 @@ public class ButtonEraser extends AbstractButtonAction {
 	}
 
 	@Override
-	public void perform(final Component button) {
+	protected void setSelectedTool(final ITool tool) {
+		_editor.setInvertedTool(tool);
+	}
+
+	@Override
+	protected ITool getSelectedTool() {
+		return _editor.getInvertedTool();
 	}
 }

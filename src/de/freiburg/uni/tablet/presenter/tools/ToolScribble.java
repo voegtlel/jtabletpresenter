@@ -34,7 +34,8 @@ public class ToolScribble extends AbstractTool {
 
 	@Override
 	public void begin() {
-		_scribble = new Scribble(_editor.getCurrentPen());
+		_scribble = new Scribble(_editor.getNextObjectId(),
+				_editor.getCurrentPen());
 	}
 
 	@Override

@@ -14,7 +14,6 @@ import jpen.PScrollEvent;
 import jpen.Pen;
 import jpen.event.PenListener;
 import de.freiburg.uni.tablet.presenter.geometry.DataPoint;
-import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 import de.freiburg.uni.tablet.presenter.tools.ITool;
 
 public class PagePenDispatcher implements PenListener {
@@ -69,13 +68,13 @@ public class PagePenDispatcher implements PenListener {
 		}
 	}
 
-	protected void fireEventEnd(final ITool activeTool, final IRenderable result) {
-		PenEndEvent args = null;
+	protected void fireEventEnd(final ITool activeTool) {
+		PenEvent args = null;
 		final Object[] listeners = _listenerList.getListenerList();
 		for (int i = listeners.length - 2; i >= 0; i -= 2) {
 			if (listeners[i] == IPenListener.class) {
 				if (args == null) {
-					args = new PenEndEvent(this, activeTool, result);
+					args = new PenEvent(this, activeTool);
 				}
 				((IPenListener) listeners[i + 1]).end(args);
 			}
@@ -138,10 +137,10 @@ public class PagePenDispatcher implements PenListener {
 				// At first check for active tool
 				if (_activeTool != null) {
 					// Deactivate tool and store result
-					final IRenderable result = _activeTool.end();
+					_activeTool.end();
 					final ITool activeTool = _activeTool;
 					_activeTool = null;
-					fireEventEnd(activeTool, result);
+					fireEventEnd(activeTool);
 				}
 				// Use the new tool
 				_activePenKind = _penKind;
@@ -167,10 +166,10 @@ public class PagePenDispatcher implements PenListener {
 					&& (_activePenButton == e.button.getType())) {
 				// Deactivate tool and store result
 				if (_activeTool != null) {
-					final IRenderable result = _activeTool.end();
+					_activeTool.end();
 					final ITool activeTool = _activeTool;
 					_activeTool = null;
-					fireEventEnd(activeTool, result);
+					fireEventEnd(activeTool);
 				}
 			}
 		}
@@ -244,6 +243,19 @@ public class PagePenDispatcher implements PenListener {
 	}
 
 	public void setNormalTool(final ITool normalTool) {
+		if (_normalTool != null) {
+			if (_hoverTool == _normalTool) {
+				if (_activeTool == _normalTool) {
+					_activeTool.end();
+					final ITool activeTool = _activeTool;
+					_activeTool = null;
+					fireEventEnd(activeTool);
+				}
+				_normalTool.out();
+				_hoverTool = normalTool;
+				_hoverTool.over();
+			}
+		}
 		_normalTool = normalTool;
 	}
 
@@ -252,6 +264,19 @@ public class PagePenDispatcher implements PenListener {
 	}
 
 	public void setInvertedTool(final ITool invertedTool) {
+		if (_invertedTool != null) {
+			if (_hoverTool == _invertedTool) {
+				if (_activeTool == _invertedTool) {
+					_activeTool.end();
+					final ITool activeTool = _activeTool;
+					_activeTool = null;
+					fireEventEnd(activeTool);
+				}
+				_hoverTool.out();
+				_hoverTool = invertedTool;
+				_hoverTool.over();
+			}
+		}
 		_invertedTool = invertedTool;
 	}
 

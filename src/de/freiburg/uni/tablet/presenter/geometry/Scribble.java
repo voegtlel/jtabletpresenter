@@ -15,8 +15,8 @@ public class Scribble extends IRenderable {
 
 	private final IPen _pen;
 
-	public Scribble(final IPen pen) {
-		super();
+	public Scribble(final int id, final IPen pen) {
+		super(id);
 		_pen = pen;
 	}
 
@@ -60,6 +60,17 @@ public class Scribble extends IRenderable {
 	}
 
 	@Override
+	public boolean isInRange(final CollisionInfo collisionInfo) {
+		for (LinkedElement<ScribbleSegment> seg = _segments.getFirst(); seg != null; seg = seg
+				.getNext()) {
+			if (seg.getData().isInRange(collisionInfo)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
 	public void render(final IPageRenderer renderer) {
 		for (LinkedElement<ScribbleSegment> e = _segments.getFirst(); e != null; e = e
 				.getNext()) {
@@ -67,13 +78,6 @@ public class Scribble extends IRenderable {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * de.freiburg.uni.tablet.presenter.IBinarySerializable#serialize(java.io
-	 * .DataOutputStream)
-	 */
 	@Override
 	public void serialize(final BinarySerializer writer) throws IOException {
 		super.serialize(writer);

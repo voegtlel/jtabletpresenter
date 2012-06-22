@@ -5,7 +5,10 @@
 package de.freiburg.uni.tablet.presenter.editor;
 
 import de.freiburg.uni.tablet.presenter.page.IPage;
+import de.freiburg.uni.tablet.presenter.page.IPageFrontRenderer;
+import de.freiburg.uni.tablet.presenter.page.IPageRenderer;
 import de.freiburg.uni.tablet.presenter.page.IPen;
+import de.freiburg.uni.tablet.presenter.tools.IToolContainer;
 
 /**
  * @author lukas
@@ -47,7 +50,7 @@ public interface IToolPageEditor extends IPageEditor {
 	 * 
 	 * @return index of current page
 	 */
-	int getCurrentPage();
+	int getPageIndex();
 
 	/**
 	 * Sets the current page by index
@@ -55,7 +58,7 @@ public interface IToolPageEditor extends IPageEditor {
 	 * @param index
 	 *            page index
 	 */
-	void setCurrentPage(int index);
+	void setPageIndex(int index);
 
 	/**
 	 * Sets the current pen
@@ -71,4 +74,46 @@ public interface IToolPageEditor extends IPageEditor {
 	 * @return current pen
 	 */
 	IPen getCurrentPen();
+
+	/**
+	 * Gets the renderer
+	 * 
+	 * @return renderer
+	 */
+	IPageRenderer getRenderer();
+
+	/**
+	 * Gets the front renderer
+	 * 
+	 * @return front renderer
+	 */
+	IPageFrontRenderer getFrontRenderer();
+
+	/**
+	 * Gets the tool container
+	 * 
+	 * @return tool container
+	 */
+	IToolContainer getToolContainer();
+
+	/**
+	 * Adds a listener
+	 * 
+	 * @param listener
+	 */
+	void addListener(IToolPageEditorListener listener);
+
+	/**
+	 * Remove a listener
+	 * 
+	 * @param listener
+	 */
+	void removeListener(IToolPageEditorListener listener);
+
+	/**
+	 * Gets the next if for objects and increases the object id counter.
+	 * 
+	 * @return next id for a new object
+	 */
+	int getNextObjectId();
 }

@@ -55,16 +55,6 @@ public class JPageRenderer extends Component implements IPageRenderer,
 	public JPageRenderer() {
 		// setDoubleBuffered(false);
 
-		_pagePenListener.addListener(new IPenListener() {
-			@Override
-			public void begin(final PenEvent e) {
-			}
-
-			@Override
-			public void end(final PenEndEvent e) {
-				onAddDrawing(e.getActiveTool(), e.getResult());
-			}
-		});
 		AwtPenToolkit.addPenListener(this, _pagePenListener);
 		AwtPenToolkit.getPenManager().pen.levelEmulator
 				.setPressureTriggerForLeftCursorButton(0.5f);

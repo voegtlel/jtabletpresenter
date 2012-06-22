@@ -12,14 +12,17 @@ import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 
 public class DefaultPage extends IPage {
 	private Color _backgroundColor;
+	private int _nextObjectId = 0;
 
 	private final List<IRenderable> _renderables = new LinkedList<IRenderable>();
 
 	public DefaultPage() {
+		super();
 		_backgroundColor = Color.WHITE;
 	}
 
 	public DefaultPage(final BinaryDeserializer reader) throws IOException {
+		super(reader);
 		final int count = reader.readInt();
 		for (int i = 0; i < count; i++) {
 			final IRenderable newInstance = reader.readSerializableClass();
@@ -66,5 +69,10 @@ public class DefaultPage extends IPage {
 		for (final IRenderable renderable : _renderables) {
 			writer.writeSerializableClass(renderable);
 		}
+	}
+
+	@Override
+	public int getNextObjectId() {
+		return _nextObjectId++;
 	}
 }

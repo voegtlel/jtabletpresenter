@@ -46,8 +46,11 @@ public class ToolEraser extends AbstractTool {
 			final EraseInfo eraseInfo = new EraseInfo(
 					data.getX(),
 					data.getY(),
+					data.getXOrig(),
+					data.getYOrig(),
 					((data.getX() / data.getXOrig()) * _pen.getThickness()) / 2.0f,
-					((data.getY() / data.getYOrig()) * _pen.getThickness()) / 2.0f);
+					((data.getY() / data.getYOrig()) * _pen.getThickness()) / 2.0f,
+					_pen.getThickness(), _pen.getThickness());
 			page.eraseAt(eraseInfo);
 			_renderer.drawFront(_pen, data.getX(), data.getY());
 		}

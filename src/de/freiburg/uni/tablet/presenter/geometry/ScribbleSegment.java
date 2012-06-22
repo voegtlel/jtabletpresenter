@@ -149,6 +149,27 @@ public class ScribbleSegment implements IBinarySerializable {
 	}
 
 	/**
+	 * Checks if the collision info is in range
+	 * 
+	 * @param collisionInfo
+	 * @return true if in range
+	 */
+	public boolean isInRange(final CollisionInfo collisionInfo) {
+		if (!_hasBoundary
+				|| collisionInfo.isInRange(_minX, _minY, _maxX, _maxY)) {
+			for (LinkedElement<DataPoint> e = _points.getFirst(); e != null;) {
+				final LinkedElement<DataPoint> next = e.getNext();
+				if (collisionInfo.isInRadius(e.getData().getX(), e.getData()
+						.getY())) {
+					return true;
+				}
+				e = next;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Creates the graphics object.
 	 */
 	public void bake() {
@@ -187,13 +208,6 @@ public class ScribbleSegment implements IBinarySerializable {
 		return _points.isEmpty();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * de.freiburg.uni.tablet.presenter.IBinarySerializable#serialize(java.io
-	 * .DataOutputStream)
-	 */
 	@Override
 	public void serialize(final BinarySerializer writer) throws IOException {
 		writer.writeInt(_points.getFirst().getNextCount());

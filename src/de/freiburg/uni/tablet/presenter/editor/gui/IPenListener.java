@@ -18,6 +18,6 @@ public interface IPenListener extends EventListener {
 	 * @param e
 	 *            event arguments
 	 */
-	void end(PenEndEvent e);
+	void end(PenEvent e);
 
 }
