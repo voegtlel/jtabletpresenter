@@ -5,7 +5,6 @@
 package de.freiburg.uni.tablet.presenter.editor;
 
 import de.freiburg.uni.tablet.presenter.page.IPage;
-import de.freiburg.uni.tablet.presenter.page.IPageFrontRenderer;
 import de.freiburg.uni.tablet.presenter.page.IPageRenderer;
 import de.freiburg.uni.tablet.presenter.page.IPen;
 import de.freiburg.uni.tablet.presenter.tools.IToolContainer;
@@ -81,13 +80,6 @@ public interface IToolPageEditor extends IPageEditor {
 	 * @return renderer
 	 */
 	IPageRenderer getRenderer();
-
-	/**
-	 * Gets the front renderer
-	 * 
-	 * @return front renderer
-	 */
-	IPageFrontRenderer getFrontRenderer();
 
 	/**
 	 * Gets the tool container

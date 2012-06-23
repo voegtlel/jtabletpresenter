@@ -36,12 +36,12 @@ public abstract class AbstractButtonSelectTool extends AbstractButtonAction {
 				"Pen",
 				"/buttons/edit-scribble.png",
 				new ToolScribble(_editor.getToolContainer(), _editor
-						.getFrontRenderer(), _editor));
+						.getRenderer(), _editor));
 		_tool.addValue(
 				"Eraser",
 				"/buttons/edit-erase.png",
 				new ToolEraser(_editor.getToolContainer(), _editor
-						.getFrontRenderer(), _editor));
+						.getRenderer(), _editor));
 	}
 
 	@Override

@@ -5,7 +5,7 @@ import java.io.IOException;
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.data.IBinarySerializable;
-import de.freiburg.uni.tablet.presenter.page.IPageRenderer;
+import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
 
 public abstract class IRenderable implements IBinarySerializable {
 	private final int _id;
@@ -32,7 +32,7 @@ public abstract class IRenderable implements IBinarySerializable {
 	 * @param renderer
 	 *            renderer
 	 */
-	public abstract void render(IPageRenderer renderer);
+	public abstract void render(IPageBackRenderer renderer);
 
 	/**
 	 * Erase at a point

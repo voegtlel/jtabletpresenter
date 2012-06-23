@@ -8,7 +8,7 @@ import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.data.IBinarySerializable;
 import de.freiburg.uni.tablet.presenter.list.LinkedElement;
 import de.freiburg.uni.tablet.presenter.list.LinkedElementList;
-import de.freiburg.uni.tablet.presenter.page.IPageRenderer;
+import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
 import de.freiburg.uni.tablet.presenter.page.IPen;
 
 public class ScribbleSegment implements IBinarySerializable {
@@ -190,7 +190,7 @@ public class ScribbleSegment implements IBinarySerializable {
 	 * @param pen
 	 * @param renderer
 	 */
-	public void render(final IPen pen, final IPageRenderer renderer) {
+	public void render(final IPen pen, final IPageBackRenderer renderer) {
 		if (!_points.isEmpty()) {
 			if (_points.hasOne()) {
 				renderer.draw(pen, _points.getFirst().getData().getX(), _points

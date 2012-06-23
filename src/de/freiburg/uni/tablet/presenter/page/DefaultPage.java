@@ -49,7 +49,7 @@ public class DefaultPage extends IPage {
 	}
 
 	@Override
-	public void render(final IPageRenderer renderer) {
+	public void render(final IPageBackRenderer renderer) {
 		renderer.fill(_backgroundColor);
 		for (final IRenderable renderable : _renderables) {
 			renderable.render(renderer);

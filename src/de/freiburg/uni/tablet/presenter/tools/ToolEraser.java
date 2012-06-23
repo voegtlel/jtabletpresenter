@@ -10,16 +10,15 @@ import java.awt.image.BufferedImage;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 import de.freiburg.uni.tablet.presenter.geometry.DataPoint;
 import de.freiburg.uni.tablet.presenter.geometry.EraseInfo;
-import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 import de.freiburg.uni.tablet.presenter.page.IPage;
-import de.freiburg.uni.tablet.presenter.page.IPageFrontRenderer;
+import de.freiburg.uni.tablet.presenter.page.IPageRenderer;
 import de.freiburg.uni.tablet.presenter.page.IPen;
 import de.freiburg.uni.tablet.presenter.page.SolidPen;
 
 public class ToolEraser extends AbstractTool {
 	private final IPen _pen = new SolidPen(15.0f, new Color(0xFF, 0xFF, 0xFF,
 			0xAA));
-	private final IPageFrontRenderer _renderer;
+	private final IPageRenderer _renderer;
 	private final IToolPageEditor _editor;
 
 	/**
@@ -28,7 +27,7 @@ public class ToolEraser extends AbstractTool {
 	 *            used for cursor changing
 	 */
 	public ToolEraser(final IToolContainer container,
-			final IPageFrontRenderer renderer, final IToolPageEditor editor) {
+			final IPageRenderer renderer, final IToolPageEditor editor) {
 		super(container);
 		_renderer = renderer;
 		_editor = editor;
@@ -57,8 +56,9 @@ public class ToolEraser extends AbstractTool {
 	}
 
 	@Override
-	public IRenderable end() {
-		return null;
+	public void end() {
+		_renderer.redrawBack();
+		_renderer.clearFront();
 	}
 
 	@Override
@@ -81,10 +81,5 @@ public class ToolEraser extends AbstractTool {
 						new Point((diameter / 2), (diameter / 2)),
 						"EraserCursor");
 		return newCursor;
-	}
-
-	@Override
-	public boolean requiresRedraw() {
-		return true;
 	}
 }

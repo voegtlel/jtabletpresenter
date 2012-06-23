@@ -1,7 +1,6 @@
 package de.freiburg.uni.tablet.presenter.tools;
 
 import de.freiburg.uni.tablet.presenter.geometry.DataPoint;
-import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 
 /**
  * Interface for a tool
@@ -24,10 +23,8 @@ public interface ITool {
 
 	/**
 	 * Called, when drawing ends
-	 * 
-	 * @return
 	 */
-	IRenderable end();
+	void end();
 
 	/**
 	 * Called, when the mouse is active for this tool
@@ -38,11 +35,4 @@ public interface ITool {
 	 * Called, when the mouse leaves this tool
 	 */
 	void out();
-
-	/**
-	 * Returns, wheather the tool requires a redraw of the entire page.
-	 * 
-	 * @return
-	 */
-	boolean requiresRedraw();
 }

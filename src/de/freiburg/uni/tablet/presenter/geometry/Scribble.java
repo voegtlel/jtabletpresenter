@@ -6,7 +6,7 @@ import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.list.LinkedElement;
 import de.freiburg.uni.tablet.presenter.list.LinkedElementList;
-import de.freiburg.uni.tablet.presenter.page.IPageRenderer;
+import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
 import de.freiburg.uni.tablet.presenter.page.IPen;
 import de.freiburg.uni.tablet.presenter.page.SolidPen;
 
@@ -71,7 +71,7 @@ public class Scribble extends IRenderable {
 	}
 
 	@Override
-	public void render(final IPageRenderer renderer) {
+	public void render(final IPageBackRenderer renderer) {
 		for (LinkedElement<ScribbleSegment> e = _segments.getFirst(); e != null; e = e
 				.getNext()) {
 			e.getData().render(_pen, renderer);

@@ -30,55 +30,9 @@ public class PagePenDispatcher implements PenListener {
 
 	private DataPoint _lastData = null;
 
-	private final EventListenerList _listenerList = new EventListenerList();
-
 	private Dimension _drawSize = new Dimension();
 
 	public PagePenDispatcher() {
-	}
-
-	/**
-	 * Add listener for pen event
-	 * 
-	 * @param l
-	 */
-	public void addListener(final IPenListener l) {
-		_listenerList.add(IPenListener.class, l);
-	}
-
-	/**
-	 * Remove listener for pen event
-	 * 
-	 * @param l
-	 */
-	public void removeListener(final IPenListener l) {
-		_listenerList.remove(IPenListener.class, l);
-	}
-
-	protected void fireEventBegin(final ITool activeTool) {
-		PenEvent args = null;
-		final Object[] listeners = _listenerList.getListenerList();
-		for (int i = listeners.length - 2; i >= 0; i -= 2) {
-			if (listeners[i] == IPenListener.class) {
-				if (args == null) {
-					args = new PenEvent(this, activeTool);
-				}
-				((IPenListener) listeners[i + 1]).begin(args);
-			}
-		}
-	}
-
-	protected void fireEventEnd(final ITool activeTool) {
-		PenEvent args = null;
-		final Object[] listeners = _listenerList.getListenerList();
-		for (int i = listeners.length - 2; i >= 0; i -= 2) {
-			if (listeners[i] == IPenListener.class) {
-				if (args == null) {
-					args = new PenEvent(this, activeTool);
-				}
-				((IPenListener) listeners[i + 1]).end(args);
-			}
-		}
 	}
 
 	/**
@@ -140,7 +94,6 @@ public class PagePenDispatcher implements PenListener {
 					_activeTool.end();
 					final ITool activeTool = _activeTool;
 					_activeTool = null;
-					fireEventEnd(activeTool);
 				}
 				// Use the new tool
 				_activePenKind = _penKind;
@@ -157,7 +110,6 @@ public class PagePenDispatcher implements PenListener {
 					}
 					// Activate tool
 					_activeTool.begin();
-					fireEventBegin(_activeTool);
 					final DataPoint dp = getDataPoint(e.pen, e.getTime());
 					_lastData = null;
 					_activeTool.draw(dp);
@@ -169,7 +121,6 @@ public class PagePenDispatcher implements PenListener {
 					_activeTool.end();
 					final ITool activeTool = _activeTool;
 					_activeTool = null;
-					fireEventEnd(activeTool);
 				}
 			}
 		}
@@ -249,7 +200,6 @@ public class PagePenDispatcher implements PenListener {
 					_activeTool.end();
 					final ITool activeTool = _activeTool;
 					_activeTool = null;
-					fireEventEnd(activeTool);
 				}
 				_normalTool.out();
 				_hoverTool = normalTool;
@@ -270,7 +220,6 @@ public class PagePenDispatcher implements PenListener {
 					_activeTool.end();
 					final ITool activeTool = _activeTool;
 					_activeTool = null;
-					fireEventEnd(activeTool);
 				}
 				_hoverTool.out();
 				_hoverTool = invertedTool;

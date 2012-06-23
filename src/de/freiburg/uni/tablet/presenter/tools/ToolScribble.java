@@ -11,12 +11,12 @@ import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 import de.freiburg.uni.tablet.presenter.geometry.DataPoint;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 import de.freiburg.uni.tablet.presenter.geometry.Scribble;
-import de.freiburg.uni.tablet.presenter.page.IPageFrontRenderer;
+import de.freiburg.uni.tablet.presenter.page.IPageRenderer;
 
 public class ToolScribble extends AbstractTool {
 	private Scribble _scribble = null;
 	private DataPoint _lastData = null;
-	private final IPageFrontRenderer _renderer;
+	private final IPageRenderer _renderer;
 	private final IToolPageEditor _editor;
 
 	/**
@@ -25,7 +25,7 @@ public class ToolScribble extends AbstractTool {
 	 *            used for cursor changing
 	 */
 	public ToolScribble(final IToolContainer container,
-			final IPageFrontRenderer renderer, final IToolPageEditor editor) {
+			final IPageRenderer renderer, final IToolPageEditor editor) {
 		super(container);
 		_renderer = renderer;
 		_editor = editor;
@@ -54,11 +54,13 @@ public class ToolScribble extends AbstractTool {
 	}
 
 	@Override
-	public IRenderable end() {
+	public void end() {
 		final IRenderable result = _scribble;
 		_scribble = null;
 		_lastData = null;
-		return result;
+		_editor.getPage().addRenderable(result);
+		result.render(_renderer);
+		_renderer.clearFront();
 	}
 
 	@Override
@@ -87,10 +89,5 @@ public class ToolScribble extends AbstractTool {
 						new Point((diameter / 2) + extraline, (diameter / 2)
 								+ extraline), "ScribbleCursor");
 		return newCursor;
-	}
-
-	@Override
-	public boolean requiresRedraw() {
-		return false;
 	}
 }
