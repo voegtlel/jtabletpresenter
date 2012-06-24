@@ -6,9 +6,11 @@ package de.freiburg.uni.tablet.presenter.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
+import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -17,6 +19,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
@@ -50,7 +53,7 @@ import de.freiburg.uni.tablet.presenter.tools.ToolScribble;
  * @author lukas
  * 
  */
-public class JPageEditor extends JPanel implements IToolPageEditor {
+public class JPageEditor extends JFrame implements IToolPageEditor {
 	/**
 	 * 
 	 */
@@ -66,6 +69,9 @@ public class JPageEditor extends JPanel implements IToolPageEditor {
 
 	private int _nextObjectId = 0;
 
+	private int _lastExtendedState;
+	private Rectangle _lastBounds;
+	
 	/**
 	 * Create the panel.
 	 */
@@ -77,9 +83,9 @@ public class JPageEditor extends JPanel implements IToolPageEditor {
 	 * Initializes the frame
 	 */
 	private void initialize() {
-		setLayout(new BorderLayout(0, 0));
+		getContentPane().setLayout(new BorderLayout(0, 0));
 		_pageRenderer = new JPageRenderer();
-		this.add(_pageRenderer);
+		getContentPane().add(_pageRenderer, BorderLayout.CENTER);
 		IPage defaultPage = new DefaultPage();
 		_pages.add(defaultPage);
 		_pageRenderer.setPage(defaultPage);
@@ -89,7 +95,7 @@ public class JPageEditor extends JPanel implements IToolPageEditor {
 				_pageRenderer, this));
 
 		_panelTools = new JPanel();
-		add(_panelTools, BorderLayout.WEST);
+		getContentPane().add(_panelTools, BorderLayout.WEST);
 		setToolButtons(new IButtonAction[] { new ButtonOpenFrom(this),
 				new ButtonSaveAs(this), new ButtonPreferences(this), null,
 				new ButtonPen(this), new ButtonEraser(this), null,
@@ -287,5 +293,32 @@ public class JPageEditor extends JPanel implements IToolPageEditor {
 	@Override
 	public int getNextObjectId() {
 		return _nextObjectId++;
+	}
+	
+	@Override
+	public boolean isFullscreen() {
+		return isUndecorated();
+	}
+	
+	@Override
+	public void setFullscreen(boolean fullscreen) {
+		if(fullscreen != isFullscreen()) {
+			if(fullscreen) {
+				_lastExtendedState = this.getExtendedState();
+				_lastBounds = this.getBounds();
+				this.setVisible(false);
+				this.dispose();
+				this.setUndecorated(true);
+				this.setExtendedState(Frame.MAXIMIZED_BOTH);
+				this.setVisible(true);
+			} else {
+				this.setVisible(false);
+				this.dispose();
+				this.setBounds(_lastBounds);
+				this.setExtendedState(_lastExtendedState);
+				this.setUndecorated(false);
+				this.setVisible(true);
+			}
+		}
 	}
 }

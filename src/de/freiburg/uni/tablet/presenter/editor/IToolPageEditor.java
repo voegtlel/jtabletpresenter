@@ -13,6 +13,10 @@ import de.freiburg.uni.tablet.presenter.tools.IToolContainer;
  * @author lukas
  * 
  */
+/**
+ * @author luke
+ *
+ */
 public interface IToolPageEditor extends IPageEditor {
 	/**
 	 * Gets an iterable for all pages
@@ -108,4 +112,16 @@ public interface IToolPageEditor extends IPageEditor {
 	 * @return next id for a new object
 	 */
 	int getNextObjectId();
+
+	/**
+	 * Gets, if the editor is in fullscreen mode
+	 * @return is fullscreen
+	 */
+	boolean isFullscreen();
+
+	/**
+	 * Sets the fullscreen state
+	 * @param fullscreen fullscreen state
+	 */
+	void setFullscreen(boolean fullscreen);
 }
