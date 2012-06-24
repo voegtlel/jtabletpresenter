@@ -1,5 +1,5 @@
 /**
- * Copyright Lukas Vögtle
+ * Copyright Lukas Voegtle
  * Albert Ludwigs University of Freiburg
  */
 package de.freiburg.uni.tablet.presenter.editor;
@@ -12,10 +12,6 @@ import de.freiburg.uni.tablet.presenter.tools.IToolContainer;
 /**
  * @author lukas
  * 
- */
-/**
- * @author luke
- *
  */
 public interface IToolPageEditor extends IPageEditor {
 	/**
@@ -115,13 +111,16 @@ public interface IToolPageEditor extends IPageEditor {
 
 	/**
 	 * Gets, if the editor is in fullscreen mode
+	 * 
 	 * @return is fullscreen
 	 */
 	boolean isFullscreen();
 
 	/**
 	 * Sets the fullscreen state
-	 * @param fullscreen fullscreen state
+	 * 
+	 * @param fullscreen
+	 *            fullscreen state
 	 */
 	void setFullscreen(boolean fullscreen);
 }

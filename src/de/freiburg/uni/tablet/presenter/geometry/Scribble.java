@@ -10,7 +10,7 @@ import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
 import de.freiburg.uni.tablet.presenter.page.IPen;
 import de.freiburg.uni.tablet.presenter.page.SolidPen;
 
-public class Scribble extends IRenderable {
+public class Scribble extends AbstractRenderable {
 	private final LinkedElementList<ScribbleSegment> _segments = new LinkedElementList<ScribbleSegment>();
 
 	private final IPen _pen;

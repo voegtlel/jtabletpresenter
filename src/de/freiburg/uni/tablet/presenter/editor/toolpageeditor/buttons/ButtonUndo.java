@@ -2,7 +2,7 @@
  * Copyright Lukas Vögtle
  * Albert Ludwigs University of Freiburg
  */
-package de.freiburg.uni.tablet.presenter.gui.buttons;
+package de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons;
 
 import java.awt.Component;
 
@@ -12,12 +12,12 @@ import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
  * @author lukas
  * 
  */
-public class ButtonRedo extends AbstractButtonAction {
+public class ButtonUndo extends AbstractButtonAction {
 	/**
 	 * Creates the action with an editor.
 	 */
-	public ButtonRedo(final IToolPageEditor editor) {
-		super(editor, "Redo", "/buttons/edit-redo.png");
+	public ButtonUndo(final IToolPageEditor editor) {
+		super(editor, "Undo", "/buttons/edit-undo.png");
 	}
 
 	@Override

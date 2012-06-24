@@ -2,7 +2,7 @@
  * Copyright Lukas Vögtle
  * Albert Ludwigs University of Freiburg
  */
-package de.freiburg.uni.tablet.presenter.gui.buttons;
+package de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons;
 
 import java.awt.Component;
 
@@ -12,16 +12,16 @@ import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
  * @author lukas
  * 
  */
-public class ButtonFullscreen extends AbstractButtonAction {
+public class ButtonNext extends AbstractButtonAction {
 	/**
 	 * Creates the action with an editor.
 	 */
-	public ButtonFullscreen(final IToolPageEditor editor) {
-		super(editor, "Full", "/buttons/view-fullscreen.png");
+	public ButtonNext(final IToolPageEditor editor) {
+		super(editor, "Next", "/buttons/go-next.png");
 	}
 
 	@Override
 	public void perform(final Component button) {
-		_editor.setFullscreen(!_editor.isFullscreen());
+		_editor.setPageIndex(_editor.getPageIndex() + 1);
 	}
 }

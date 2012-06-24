@@ -2,7 +2,7 @@
  * Copyright Lukas Vögtle
  * Albert Ludwigs University of Freiburg
  */
-package de.freiburg.uni.tablet.presenter.gui;
+package de.freiburg.uni.tablet.presenter.editor.toolpageeditor;
 
 import java.awt.Component;
 

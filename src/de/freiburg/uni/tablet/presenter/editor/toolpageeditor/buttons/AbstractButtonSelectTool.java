@@ -2,13 +2,13 @@
  * Copyright Lukas Vögtle
  * Albert Ludwigs University of Freiburg
  */
-package de.freiburg.uni.tablet.presenter.gui.buttons;
+package de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons;
 
 import java.awt.Component;
 
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
-import de.freiburg.uni.tablet.presenter.gui.JPageToolButton;
-import de.freiburg.uni.tablet.presenter.gui.JPageToolFrame;
+import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.JPageToolButton;
+import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.JPageToolFrame;
 import de.freiburg.uni.tablet.presenter.tools.ITool;
 import de.freiburg.uni.tablet.presenter.tools.ToolEraser;
 import de.freiburg.uni.tablet.presenter.tools.ToolScribble;
@@ -32,16 +32,10 @@ public abstract class AbstractButtonSelectTool extends AbstractButtonAction {
 		_tool = new JPageToolFrame<ITool>();
 		_tool.setSize(JPageToolButton.WIDTH_WIDE * 1,
 				JPageToolButton.HEIGHT_NORMAL * 2);
-		_tool.addValue(
-				"Pen",
-				"/buttons/edit-scribble.png",
-				new ToolScribble(_editor.getToolContainer(), _editor
-						.getRenderer(), _editor));
-		_tool.addValue(
-				"Eraser",
-				"/buttons/edit-erase.png",
-				new ToolEraser(_editor.getToolContainer(), _editor
-						.getRenderer(), _editor));
+		_tool.addValue("Pen", "/buttons/edit-scribble.png", new ToolScribble(
+				_editor.getToolContainer(), _editor.getRenderer(), _editor));
+		_tool.addValue("Eraser", "/buttons/edit-erase.png", new ToolEraser(
+				_editor.getToolContainer(), _editor.getRenderer(), _editor));
 	}
 
 	@Override

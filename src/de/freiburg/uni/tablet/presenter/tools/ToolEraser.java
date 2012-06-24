@@ -42,13 +42,10 @@ public class ToolEraser extends AbstractTool {
 	public void draw(final DataPoint data) {
 		final IPage page = _editor.getPage();
 		if (page != null) {
-			final EraseInfo eraseInfo = new EraseInfo(
-					data.getX(),
-					data.getY(),
-					data.getXOrig(),
-					data.getYOrig(),
-					((data.getX() / data.getXOrig()) * _pen.getThickness()) / 2.0f,
-					((data.getY() / data.getYOrig()) * _pen.getThickness()) / 2.0f,
+			final EraseInfo eraseInfo = new EraseInfo(data.getX(), data.getY(),
+					data.getXOrig(), data.getYOrig(), data.getX()
+							/ data.getXOrig() * _pen.getThickness() / 2.0f,
+					data.getY() / data.getYOrig() * _pen.getThickness() / 2.0f,
 					_pen.getThickness(), _pen.getThickness());
 			page.eraseAt(eraseInfo);
 			_renderer.drawFront(_pen, data.getX(), data.getY());
@@ -57,7 +54,7 @@ public class ToolEraser extends AbstractTool {
 
 	@Override
 	public void end() {
-		_renderer.redrawBack();
+		_editor.getPage().render(_renderer);
 		_renderer.clearFront();
 	}
 
@@ -77,8 +74,7 @@ public class ToolEraser extends AbstractTool {
 		img.flush();
 		g.dispose();
 		final Cursor newCursor = Toolkit.getDefaultToolkit()
-				.createCustomCursor(img,
-						new Point((diameter / 2), (diameter / 2)),
+				.createCustomCursor(img, new Point(diameter / 2, diameter / 2),
 						"EraserCursor");
 		return newCursor;
 	}

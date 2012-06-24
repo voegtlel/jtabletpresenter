@@ -1,5 +1,5 @@
 /**
- * Copyright Lukas Vögtle
+ * Copyright Lukas Voegtle
  * Albert Ludwigs University of Freiburg
  */
 package de.freiburg.uni.tablet.presenter.actions;
@@ -13,28 +13,26 @@ import de.freiburg.uni.tablet.presenter.data.IBinarySerializable;
  * @author lukas
  * 
  */
-public class PrevAction implements IAction, IBinarySerializable {
+public class ChangePageIndexAction implements IAction, IBinarySerializable {
 	/**
 	 * 
 	 */
-	public PrevAction() {
+	public ChangePageIndexAction() {
 
 	}
 
 	@Override
 	public boolean hasUndoAction() {
-		return false;
+		return true;
 	}
 
 	@Override
 	public IAction getUndoAction() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public void perform() {
-		// TODO Auto-generated method stub
 
 	}
 

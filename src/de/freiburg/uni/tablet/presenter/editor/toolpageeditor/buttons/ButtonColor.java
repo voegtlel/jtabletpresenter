@@ -2,14 +2,14 @@
  * Copyright Lukas Vögtle
  * Albert Ludwigs University of Freiburg
  */
-package de.freiburg.uni.tablet.presenter.gui.buttons;
+package de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons;
 
 import java.awt.Color;
 import java.awt.Component;
 
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
-import de.freiburg.uni.tablet.presenter.gui.JPageToolButton;
-import de.freiburg.uni.tablet.presenter.gui.JPageToolFrame;
+import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.JPageToolButton;
+import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.JPageToolFrame;
 import de.freiburg.uni.tablet.presenter.page.SolidPen;
 
 /**

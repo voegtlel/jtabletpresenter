@@ -2,7 +2,7 @@
  * Copyright Lukas Vögtle
  * Albert Ludwigs University of Freiburg
  */
-package de.freiburg.uni.tablet.presenter.gui.buttons;
+package de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons;
 
 import java.awt.Component;
 import java.awt.Dimension;
@@ -14,7 +14,7 @@ import javax.swing.event.ChangeListener;
 
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditorListener;
-import de.freiburg.uni.tablet.presenter.gui.JPageToolButton;
+import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.JPageToolButton;
 
 /**
  * @author lukas

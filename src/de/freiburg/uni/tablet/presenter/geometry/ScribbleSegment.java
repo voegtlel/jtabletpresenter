@@ -193,13 +193,13 @@ public class ScribbleSegment implements IBinarySerializable {
 	public void render(final IPen pen, final IPageBackRenderer renderer) {
 		if (!_points.isEmpty()) {
 			if (_points.hasOne()) {
-				renderer.draw(pen, _points.getFirst().getData().getX(), _points
+				renderer.drawBack(pen, _points.getFirst().getData().getX(), _points
 						.getFirst().getData().getY());
 			} else {
 				if (_path == null) {
 					bake();
 				}
-				renderer.draw(pen, _path);
+				renderer.drawBack(pen, _path);
 			}
 		}
 	}

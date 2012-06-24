@@ -9,7 +9,7 @@ import java.awt.image.BufferedImage;
 
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 import de.freiburg.uni.tablet.presenter.geometry.DataPoint;
-import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
+import de.freiburg.uni.tablet.presenter.geometry.AbstractRenderable;
 import de.freiburg.uni.tablet.presenter.geometry.Scribble;
 import de.freiburg.uni.tablet.presenter.page.IPageRenderer;
 
@@ -55,7 +55,7 @@ public class ToolScribble extends AbstractTool {
 
 	@Override
 	public void end() {
-		final IRenderable result = _scribble;
+		final AbstractRenderable result = _scribble;
 		_scribble = null;
 		_lastData = null;
 		_editor.getPage().addRenderable(result);

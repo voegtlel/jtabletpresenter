@@ -1,4 +1,4 @@
-package de.freiburg.uni.tablet.presenter.editor.gui;
+package de.freiburg.uni.tablet.presenter.editor.pageeditor;
 
 import java.util.EventObject;
 

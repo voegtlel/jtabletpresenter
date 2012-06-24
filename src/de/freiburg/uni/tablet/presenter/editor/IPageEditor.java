@@ -1,26 +1,12 @@
 package de.freiburg.uni.tablet.presenter.editor;
 
 import java.awt.Component;
+import java.awt.Cursor;
 
-import de.freiburg.uni.tablet.presenter.page.IPage;
+import de.freiburg.uni.tablet.presenter.editor.pageeditor.IPageLayerBuffer;
 import de.freiburg.uni.tablet.presenter.tools.ITool;
 
 public interface IPageEditor {
-	/**
-	 * Gets the currently active page.
-	 * 
-	 * @return active page
-	 */
-	IPage getPage();
-
-	/**
-	 * Sets the currently active page
-	 * 
-	 * @param page
-	 *            new active page
-	 */
-	void setPage(IPage page);
-
 	/**
 	 * Gets the normal tool
 	 * 
@@ -52,10 +38,37 @@ public interface IPageEditor {
 	void setInvertedTool(ITool invertedTool);
 
 	/**
+	 * Method to set the currently active cursor
+	 * 
+	 * @param cursor
+	 *            new cursor
+	 */
+	void setCursor(Cursor cursor);
+
+	/**
 	 * Gets the gui-container.
 	 * 
 	 * @return gui-container
 	 */
-	Component getContainer();
+	Component getContainerComponent();
+
+	/**
+	 * Clears the renderer
+	 */
+	void clear();
+
+	/**
+	 * Sets the page layer
+	 * 
+	 * @param pageLayer
+	 */
+	void setPageLayer(IPageLayerBuffer pageLayer);
+
+	/**
+	 * Gets the page layer
+	 * 
+	 * @return
+	 */
+	IPageLayerBuffer getPageLayer();
 
 }

@@ -1,7 +1,8 @@
 package de.freiburg.uni.tablet.presenter.page;
 
-import java.awt.Paint;
 import java.awt.geom.Path2D;
+
+import de.freiburg.uni.tablet.presenter.editor.PageRepaintListener;
 
 public interface IPageBackRenderer {
 	/**
@@ -32,14 +33,14 @@ public interface IPageBackRenderer {
 	void draw(IPen pen, float x, float y);
 
 	/**
-	 * Fills everything
-	 * 
-	 * @param paint
+	 * Clears the buffer
 	 */
-	void fill(Paint paint);
+	void clear();
 
 	/**
-	 * Redraws the entire back buffer
+	 * Sets the repaint listener
+	 * 
+	 * @param repaintListener
 	 */
-	void redrawBack();
+	void setRepaintListener(PageRepaintListener repaintListener);
 }

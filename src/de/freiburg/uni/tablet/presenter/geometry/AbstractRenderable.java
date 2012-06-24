@@ -7,13 +7,13 @@ import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.data.IBinarySerializable;
 import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
 
-public abstract class IRenderable implements IBinarySerializable {
+public abstract class AbstractRenderable implements IBinarySerializable {
 	private final int _id;
 
 	/**
 	 * Creates the renderable
 	 */
-	protected IRenderable(final int id) {
+	protected AbstractRenderable(final int id) {
 		_id = id;
 	}
 
@@ -22,7 +22,7 @@ public abstract class IRenderable implements IBinarySerializable {
 	 * 
 	 * @throws IOException
 	 */
-	protected IRenderable(final BinaryDeserializer reader) throws IOException {
+	protected AbstractRenderable(final BinaryDeserializer reader) throws IOException {
 		_id = reader.readInt();
 	}
 

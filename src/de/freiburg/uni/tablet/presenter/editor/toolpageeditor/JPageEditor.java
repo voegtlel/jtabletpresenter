@@ -2,7 +2,7 @@
  * Copyright Lukas Vögtle
  * Albert Ludwigs University of Freiburg
  */
-package de.freiburg.uni.tablet.presenter.gui;
+package de.freiburg.uni.tablet.presenter.editor.toolpageeditor;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
@@ -24,21 +24,23 @@ import javax.swing.JPanel;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
+import de.freiburg.uni.tablet.presenter.editor.IPageEditor;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditorListener;
-import de.freiburg.uni.tablet.presenter.editor.gui.JPageRenderer;
-import de.freiburg.uni.tablet.presenter.gui.buttons.ButtonColor;
-import de.freiburg.uni.tablet.presenter.gui.buttons.ButtonEraser;
-import de.freiburg.uni.tablet.presenter.gui.buttons.ButtonFullscreen;
-import de.freiburg.uni.tablet.presenter.gui.buttons.ButtonNext;
-import de.freiburg.uni.tablet.presenter.gui.buttons.ButtonOpenFrom;
-import de.freiburg.uni.tablet.presenter.gui.buttons.ButtonPen;
-import de.freiburg.uni.tablet.presenter.gui.buttons.ButtonPreferences;
-import de.freiburg.uni.tablet.presenter.gui.buttons.ButtonPrevious;
-import de.freiburg.uni.tablet.presenter.gui.buttons.ButtonRedo;
-import de.freiburg.uni.tablet.presenter.gui.buttons.ButtonSaveAs;
-import de.freiburg.uni.tablet.presenter.gui.buttons.ButtonSpinnerPage;
-import de.freiburg.uni.tablet.presenter.gui.buttons.ButtonUndo;
+import de.freiburg.uni.tablet.presenter.editor.pageeditor.JPageRenderer;
+import de.freiburg.uni.tablet.presenter.editor.pageeditor.PageLayerBufferComposite;
+import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonColor;
+import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonEraser;
+import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonFullscreen;
+import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonNext;
+import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonOpenFrom;
+import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonPen;
+import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonPreferences;
+import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonPrevious;
+import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonRedo;
+import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonSaveAs;
+import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonSpinnerPage;
+import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonUndo;
 import de.freiburg.uni.tablet.presenter.page.DefaultPage;
 import de.freiburg.uni.tablet.presenter.page.IPage;
 import de.freiburg.uni.tablet.presenter.page.IPageRenderer;
@@ -59,7 +61,7 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	private JPageRenderer _pageRenderer;
+	private IPageEditor _pageRenderer;
 	private JPanel _panelTools;
 
 	private final List<IPage> _pages = new LinkedList<IPage>();
@@ -71,7 +73,12 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 
 	private int _lastExtendedState;
 	private Rectangle _lastBounds;
-	
+
+	private PageLayerBufferComposite _clientOnlyLayer;
+	private PageLayerBufferComposite _serverSyncCommonLayer;
+	private PageLayerBufferComposite _serverSyncOwnLayer;
+	private PageLayerBufferComposite _serverSyncOthersLayer;
+
 	/**
 	 * Create the panel.
 	 */
@@ -84,11 +91,21 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 	 */
 	private void initialize() {
 		getContentPane().setLayout(new BorderLayout(0, 0));
-		_pageRenderer = new JPageRenderer();
-		getContentPane().add(_pageRenderer, BorderLayout.CENTER);
-		IPage defaultPage = new DefaultPage();
+		final JPageRenderer pageRenderer = new JPageRenderer();
+		_pageRenderer = pageRenderer;
+		getContentPane().add(pageRenderer, BorderLayout.CENTER);
+
+		final IPage defaultPage = new DefaultPage();
 		_pages.add(defaultPage);
-		_pageRenderer.setPage(defaultPage);
+
+		final PageLayerBufferComposite pageLayers = new PageLayerBufferComposite(
+				pageRenderer);
+		_clientOnlyLayer = pageLayers.addComposite();
+		_serverSyncCommonLayer = pageLayers.addComposite();
+		_serverSyncOwnLayer = pageLayers.addComposite();
+		_serverSyncOthersLayer = pageLayers.addComposite();
+		_pageRenderer.setPageLayer(pageLayers);
+
 		_pageRenderer.setNormalTool(new ToolScribble(_pageRenderer,
 				_pageRenderer, this));
 		_pageRenderer.setInvertedTool(new ToolEraser(_pageRenderer,
@@ -108,9 +125,6 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 	public void setToolButtons(final IButtonAction[] buttons) {
 		// Build layout
 		final GridBagLayout gbl_panelTools = new GridBagLayout();
-		// gbl_panelTools.columnWidths = new int[] { 0, 0 };
-		// gbl_panelTools.columnWeights = new double[] { 1.0, Double.MIN_VALUE
-		// };
 		gbl_panelTools.columnWidths = new int[] { 0 };
 		gbl_panelTools.columnWeights = new double[] { 1.0 };
 		gbl_panelTools.rowHeights = new int[buttons.length + 1];
@@ -190,7 +204,7 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 	}
 
 	@Override
-	public Container getContainer() {
+	public Container getContainerComponent() {
 		return this;
 	}
 
@@ -221,7 +235,7 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 				_pages.add(new DefaultPage());
 			}
 			_pageRenderer.setPage(_pages.get(index));
-			_pageRenderer.redrawBack();
+			_pageRenderer.getPage().render(_pageRenderer);
 			firePageNumberChanged();
 		}
 	}
@@ -294,16 +308,16 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 	public int getNextObjectId() {
 		return _nextObjectId++;
 	}
-	
+
 	@Override
 	public boolean isFullscreen() {
 		return isUndecorated();
 	}
-	
+
 	@Override
-	public void setFullscreen(boolean fullscreen) {
-		if(fullscreen != isFullscreen()) {
-			if(fullscreen) {
+	public void setFullscreen(final boolean fullscreen) {
+		if (fullscreen != isFullscreen()) {
+			if (fullscreen) {
 				_lastExtendedState = this.getExtendedState();
 				_lastBounds = this.getBounds();
 				this.setVisible(false);

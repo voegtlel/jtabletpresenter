@@ -2,7 +2,7 @@
  * Copyright Lukas Vögtle
  * Albert Ludwigs University of Freiburg
  */
-package de.freiburg.uni.tablet.presenter.gui.buttons;
+package de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons;
 
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 import de.freiburg.uni.tablet.presenter.tools.ITool;
@@ -11,21 +11,21 @@ import de.freiburg.uni.tablet.presenter.tools.ITool;
  * @author lukas
  * 
  */
-public class ButtonEraser extends AbstractButtonSelectTool {
+public class ButtonPen extends AbstractButtonSelectTool {
 	/**
 	 * Creates the action with an editor.
 	 */
-	public ButtonEraser(final IToolPageEditor editor) {
-		super(editor, "Eraser", "/buttons/edit-erase.png");
+	public ButtonPen(final IToolPageEditor editor) {
+		super(editor, "Pen", "/buttons/edit-scribble.png");
 	}
 
 	@Override
 	protected void setSelectedTool(final ITool tool) {
-		_editor.setInvertedTool(tool);
+		_editor.setNormalTool(tool);
 	}
 
 	@Override
 	protected ITool getSelectedTool() {
-		return _editor.getInvertedTool();
+		return _editor.getNormalTool();
 	}
 }
