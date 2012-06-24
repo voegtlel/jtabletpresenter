@@ -1,7 +1,9 @@
 package de.freiburg.uni.tablet.presenter.editor.gui;
 
+import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -9,6 +11,7 @@ import java.awt.Image;
 import java.awt.Paint;
 import java.awt.RenderingHints;
 import java.awt.Shape;
+import java.awt.Toolkit;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
@@ -22,7 +25,8 @@ import de.freiburg.uni.tablet.presenter.page.IPen;
 import de.freiburg.uni.tablet.presenter.tools.ITool;
 import de.freiburg.uni.tablet.presenter.tools.IToolContainer;
 
-public class JPageRenderer extends Component implements IPageRenderer, IPageEditor, IToolContainer {
+public class JPageRenderer extends Component implements IPageRenderer,
+		IPageEditor, IToolContainer {
 	/**
 	 * Default serial version
 	 */
@@ -32,6 +36,7 @@ public class JPageRenderer extends Component implements IPageRenderer, IPageEdit
 	private Graphics2D _frontGraphics = null;
 	// private BufferedImage _backBuffer = null;
 	private Image _backBuffer = null;
+	private Image _frontBuffer;
 
 	private final Ellipse2D.Float _ellipseRenderer = new Ellipse2D.Float();
 	private final Line2D.Float _lineRenderer = new Line2D.Float();
@@ -42,9 +47,7 @@ public class JPageRenderer extends Component implements IPageRenderer, IPageEdit
 
 	private IPage _page = null;
 
-	private Image _frontBuffer;
-	
-	private final Object _paintSynch = new Object();
+	private Object _paintSynch = new Object();
 
 	private int _renderWidth = 0;
 	private int _renderHeight = 0;
@@ -52,7 +55,8 @@ public class JPageRenderer extends Component implements IPageRenderer, IPageEdit
 	private float _renderFactorY = 1.0f;
 
 	public JPageRenderer() {
-		//setDoubleBuffered(false);
+		// setDoubleBuffered(false);
+		setIgnoreRepaint(true);
 
 		AwtPenToolkit.addPenListener(this, _pagePenListener);
 		AwtPenToolkit.getPenManager().pen.levelEmulator
@@ -61,18 +65,20 @@ public class JPageRenderer extends Component implements IPageRenderer, IPageEdit
 
 	@Override
 	public void paint(final Graphics g) {
-		synchronized (_paintSynch) {
-			if (!_lastRenderDimensions.equals(this.getSize())) {
-				_lastRenderDimensions = this.getSize();
-				if (_backGraphics != null) {
-					_backGraphics.dispose();
-				}
-				if (_frontGraphics != null) {
-					_frontGraphics.dispose();
-				}
-				initializeGraphics();
+		if (!_lastRenderDimensions.equals(this.getSize())) {
+			_lastRenderDimensions = this.getSize();
+			if (_backGraphics != null) {
+				_backGraphics.dispose();
 			}
-			g.drawImage(_frontBuffer, 0, 0, null);
+			if (_frontGraphics != null) {
+				_frontGraphics.dispose();
+			}
+			initializeGraphics();
+		}
+		g.drawImage(_frontBuffer, 0, 0, _renderWidth,
+				_renderHeight, null);
+		synchronized (_paintSynch) {
+			_paintSynch.notifyAll();
 		}
 	}
 
@@ -179,52 +185,111 @@ public class JPageRenderer extends Component implements IPageRenderer, IPageEdit
 	@Override
 	public void drawFront(final IPen pen, final float x1, final float y1,
 			final float x2, final float y2) {
-		synchronized (_paintSynch) {
-			if (_frontGraphics != null) {
-				_lineRenderer.x1 = x1 * _renderFactorX;
-				_lineRenderer.y1 = y1 * _renderFactorY;
-				_lineRenderer.x2 = x2 * _renderFactorX;
-				_lineRenderer.y2 = y2 * _renderFactorY;
-				_frontGraphics.setStroke(pen.getStroke());
-				_frontGraphics.setPaint(pen.getColor());
-				_frontGraphics.draw(_lineRenderer);
-				final float x = Math.min(_lineRenderer.x1, _lineRenderer.x2);
-				final float y = Math.min(_lineRenderer.y1, _lineRenderer.y2);
-				final float width = Math.max(_lineRenderer.x1, _lineRenderer.x2)
-						- x;
-				final float height = Math.max(_lineRenderer.y1, _lineRenderer.y2)
-						- y;
-				repaint(x, y, width, height, pen);
+		if (_frontGraphics != null) {
+			Graphics2D g = (Graphics2D) this.getGraphics().create();
+			
+			g.setRenderingHint(RenderingHints.KEY_RENDERING,
+					RenderingHints.VALUE_RENDER_SPEED);
+			g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
+					RenderingHints.VALUE_STROKE_PURE);
+			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+					RenderingHints.VALUE_ANTIALIAS_OFF);
+			g.setRenderingHint(
+					RenderingHints.KEY_FRACTIONALMETRICS,
+					RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+			
+			
+			_lineRenderer.x1 = x1 * _renderFactorX;
+			_lineRenderer.y1 = y1 * _renderFactorY;
+			_lineRenderer.x2 = x2 * _renderFactorX;
+			_lineRenderer.y2 = y2 * _renderFactorY;
+			g.setStroke(pen.getStroke());
+			g.setPaint(pen.getColor());
+			g.draw(_lineRenderer);
+			_frontGraphics.setStroke(pen.getStroke());
+			_frontGraphics.setPaint(pen.getColor());
+			_frontGraphics.draw(_lineRenderer);
+			final float x = Math.min(_lineRenderer.x1, _lineRenderer.x2);
+			final float y = Math.min(_lineRenderer.y1, _lineRenderer.y2);
+			final float width = Math.max(_lineRenderer.x1, _lineRenderer.x2)
+					- x;
+			final float height = Math.max(_lineRenderer.y1, _lineRenderer.y2)
+					- y;
+			g.dispose();
+			//g.finalize();
+			Toolkit.getDefaultToolkit().sync();
+			//repaint(x, y, width, height, pen);
+			synchronized (_paintSynch) {
+				repaint(0, 0, 1, 1);
+				try {
+					_paintSynch.wait(500);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}
 
 	@Override
 	public void drawFront(final IPen pen, final float x, final float y) {
-		synchronized (_paintSynch) {
 		if (_frontGraphics != null) {
+			Graphics2D g = (Graphics2D) this.getGraphics().create();
+			
+			g.setRenderingHint(RenderingHints.KEY_RENDERING,
+					RenderingHints.VALUE_RENDER_SPEED);
+			g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
+					RenderingHints.VALUE_STROKE_PURE);
+			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+					RenderingHints.VALUE_ANTIALIAS_OFF);
+			g.setRenderingHint(
+					RenderingHints.KEY_FRACTIONALMETRICS,
+					RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+			
 			_ellipseRenderer.x = (x * _renderFactorX)
 					- (pen.getThickness() / 2.0f);
 			_ellipseRenderer.y = (y * _renderFactorY)
 					- (pen.getThickness() / 2.0f);
-			_ellipseRenderer.width = pen.getThickness();
-			_ellipseRenderer.height = pen.getThickness();
+			_ellipseRenderer.width = pen.getThickness() * 10;
+			_ellipseRenderer.height = pen.getThickness() * 10;
 			_frontGraphics.setPaint(pen.getColor());
 			_frontGraphics.fill(_ellipseRenderer);
-			repaint(x * _renderFactorX, y * _renderFactorY, 0.0f, 0.0f, pen);
-		}
+			g.setPaint(pen.getColor());
+			g.fill(_ellipseRenderer);
+			g.dispose();
+			Toolkit.getDefaultToolkit().sync();
+			synchronized (_paintSynch) {
+				repaint(0, 0, 1, 1);
+				try {
+					_paintSynch.wait(500);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			//repaint(x * _renderFactorX, y * _renderFactorY, 0.0f, 0.0f, pen);
 		}
 	}
 
 	@Override
 	public void clearFront() {
-		synchronized (_paintSynch) {
 		if (_frontGraphics != null) {
 			_backBuffer.flush();
 			_frontGraphics.drawImage(_backBuffer, 0, 0, null);
+			/*_frontGraphics.drawImage(_backBuffer, 0, 0, null);
 			_frontBuffer.flush();
-			repaint();
-		}
+			repaint();*/
+			
+			Graphics2D g = (Graphics2D) this.getGraphics().create();
+			g.drawImage(_backBuffer, 0, 0, null);
+			g.dispose();
+			Toolkit.getDefaultToolkit().sync();
+			synchronized (_paintSynch) {
+				repaint(0, 0, 1, 1);
+				try {
+					_paintSynch.wait(10);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 	}
 
@@ -232,7 +297,6 @@ public class JPageRenderer extends Component implements IPageRenderer, IPageEdit
 	 * Redraw back buffer and clear front
 	 */
 	public void redrawBack() {
-		synchronized (_paintSynch) {
 		if (_page == null) {
 			if (_backGraphics != null) {
 				_backGraphics.setColor(Color.WHITE);
@@ -244,7 +308,6 @@ public class JPageRenderer extends Component implements IPageRenderer, IPageEdit
 			// System.out.println("redrawBack");
 		}
 		clearFront();
-		}
 	}
 
 	@Override
