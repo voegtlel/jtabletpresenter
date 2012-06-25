@@ -138,6 +138,54 @@ public class LinkedElementList<T> {
 		return newList;
 	}
 
+	/**
+	 * Gets an element of the list by comparing the instance
+	 * 
+	 * @param object
+	 *            object to find
+	 * @return
+	 */
+	public LinkedElement<T> getElementByInstance(final T object) {
+		for (LinkedElement<T> j = _first; j != null; j = j.getNext()) {
+			if (j.getData() == object) {
+				return j;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Finds the object by .equals.
+	 * 
+	 * @param object
+	 * @return
+	 */
+	public LinkedElement<T> getElement(final T object) {
+		for (LinkedElement<T> j = _first; j != null; j = j.getNext()) {
+			if (j.getData().equals(object)) {
+				return j;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Finds the object by .equals.
+	 * 
+	 * @param object
+	 * @return
+	 */
+	public LinkedElement<T> getElementByIndex(final int index) {
+		int i = index;
+		for (LinkedElement<T> j = _first; j != null; j = j.getNext()) {
+			if (i == 0) {
+				return j;
+			}
+			i--;
+		}
+		return null;
+	}
+
 	public boolean isEmpty() {
 		return _first == null;
 	}

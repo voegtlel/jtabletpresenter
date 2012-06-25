@@ -4,6 +4,8 @@
  */
 package de.freiburg.uni.tablet.presenter.actions;
 
+import de.freiburg.uni.tablet.presenter.document.Document;
+
 /**
  * Interface for a general action
  * 
@@ -28,5 +30,5 @@ public interface IAction {
 	/**
 	 * Performs the action
 	 */
-	void perform();
+	void perform(Document document);
 }

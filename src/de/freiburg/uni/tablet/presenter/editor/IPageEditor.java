@@ -62,7 +62,7 @@ public interface IPageEditor {
 	 * 
 	 * @param pageLayer
 	 */
-	void setPageLayer(IPageLayerBuffer pageLayer);
+	void setDisplayedPageLayerBuffer(IPageLayerBuffer pageLayer);
 
 	/**
 	 * Gets the page layer

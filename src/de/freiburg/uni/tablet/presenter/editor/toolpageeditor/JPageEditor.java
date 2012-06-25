@@ -104,7 +104,7 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 		_serverSyncCommonLayer = pageLayers.addComposite();
 		_serverSyncOwnLayer = pageLayers.addComposite();
 		_serverSyncOthersLayer = pageLayers.addComposite();
-		_pageRenderer.setPageLayer(pageLayers);
+		_pageRenderer.setDisplayedPageLayerBuffer(pageLayers);
 
 		_pageRenderer.setNormalTool(new ToolScribble(_pageRenderer,
 				_pageRenderer, this));

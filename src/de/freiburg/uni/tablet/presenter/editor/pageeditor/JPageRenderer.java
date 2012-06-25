@@ -22,7 +22,7 @@ public class JPageRenderer extends Component implements IPageEditor,
 	/**
 	 * The default page buffer
 	 */
-	private IPageLayerBuffer _pageLayer = new PageLayerBufferNull();
+	private IPageLayerBuffer _displayedPageLayerBuffer = new PageLayerBufferNull();
 
 	/**
 	 * Dimensions, when the component was last drawn
@@ -61,7 +61,7 @@ public class JPageRenderer extends Component implements IPageEditor,
 				_lastRenderDimensions = this.getSize();
 				initializeGraphics();
 			}
-			_pageLayer.drawBuffer((Graphics2D) g);
+			_displayedPageLayerBuffer.drawBuffer((Graphics2D) g);
 			System.out.println("Paint");
 		}
 		if (_paintSynch != null) {
@@ -78,7 +78,7 @@ public class JPageRenderer extends Component implements IPageEditor,
 		// System.out.println("initGraphics");
 		if (_lastRenderDimensions.width > 0 && _lastRenderDimensions.height > 0
 				&& this.isVisible()) {
-			_pageLayer.resize(_lastRenderDimensions.width,
+			_displayedPageLayerBuffer.resize(_lastRenderDimensions.width,
 					_lastRenderDimensions.height);
 			// Update pen listener
 			_pagePenDispatcher.setDrawSize(_lastRenderDimensions);
@@ -89,19 +89,19 @@ public class JPageRenderer extends Component implements IPageEditor,
 	public void clear() {
 		if (isVisible()) {
 			final Graphics2D g = createRenderer();
-			_pageLayer.drawBuffer(g);
+			_displayedPageLayerBuffer.drawBuffer(g);
 			updateRenderer(g);
 		}
 	}
 
 	@Override
 	public IPageLayerBuffer getPageLayer() {
-		return _pageLayer;
+		return _displayedPageLayerBuffer;
 	}
 
 	@Override
-	public void setPageLayer(final IPageLayerBuffer pageLayer) {
-		_pageLayer = pageLayer;
+	public void setDisplayedPageLayerBuffer(final IPageLayerBuffer pageLayerBuffer) {
+		_displayedPageLayerBuffer = pageLayerBuffer;
 	}
 
 	@Override
