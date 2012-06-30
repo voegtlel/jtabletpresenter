@@ -16,7 +16,7 @@ public class AbstractEntity implements IEntity {
 	}
 
 	@Override
-	public int getId() {
+	public long getId() {
 		// TODO Auto-generated method stub
 		return _id;
 	}

@@ -28,7 +28,9 @@ import de.freiburg.uni.tablet.presenter.editor.IPageEditor;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditorListener;
 import de.freiburg.uni.tablet.presenter.editor.pageeditor.JPageRenderer;
+import de.freiburg.uni.tablet.presenter.editor.pageeditor.PageLayerBufferBack;
 import de.freiburg.uni.tablet.presenter.editor.pageeditor.PageLayerBufferComposite;
+import de.freiburg.uni.tablet.presenter.editor.pageeditor.PageLayerBufferFront;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonColor;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonEraser;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonFullscreen;
@@ -41,8 +43,6 @@ import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonRedo
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonSaveAs;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonSpinnerPage;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonUndo;
-import de.freiburg.uni.tablet.presenter.page.DefaultPage;
-import de.freiburg.uni.tablet.presenter.page.IPage;
 import de.freiburg.uni.tablet.presenter.page.IPageRenderer;
 import de.freiburg.uni.tablet.presenter.page.IPen;
 import de.freiburg.uni.tablet.presenter.page.SolidPen;
@@ -74,10 +74,10 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 	private int _lastExtendedState;
 	private Rectangle _lastBounds;
 
-	private PageLayerBufferComposite _clientOnlyLayer;
-	private PageLayerBufferComposite _serverSyncCommonLayer;
-	private PageLayerBufferComposite _serverSyncOwnLayer;
-	private PageLayerBufferComposite _serverSyncOthersLayer;
+	private PageLayerBufferBack _clientOnlyBackLayer;
+	private PageLayerBufferBack _serverSyncBackLayer;
+	private PageLayerBufferFront _serverSyncFrontLayer;
+	private PageLayerBufferFront _clientOnlyFrontLayer;
 
 	/**
 	 * Create the panel.
@@ -100,10 +100,10 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 
 		final PageLayerBufferComposite pageLayers = new PageLayerBufferComposite(
 				pageRenderer);
-		_clientOnlyLayer = pageLayers.addComposite();
-		_serverSyncCommonLayer = pageLayers.addComposite();
-		_serverSyncOwnLayer = pageLayers.addComposite();
-		_serverSyncOthersLayer = pageLayers.addComposite();
+		_serverSyncBackLayer = pageLayers.addBackBuffer();
+		_serverSyncFrontLayer = pageLayers.addFrontBuffer();
+		_clientOnlyBackLayer = pageLayers.addBackBuffer();
+		_clientOnlyFrontLayer = pageLayers.addFrontBuffer();
 		_pageRenderer.setDisplayedPageLayerBuffer(pageLayers);
 
 		_pageRenderer.setNormalTool(new ToolScribble(_pageRenderer,
