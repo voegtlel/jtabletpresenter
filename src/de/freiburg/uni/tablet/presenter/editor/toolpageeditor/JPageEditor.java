@@ -15,7 +15,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.JButton;
@@ -28,9 +27,8 @@ import de.freiburg.uni.tablet.presenter.editor.IPageEditor;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditorListener;
 import de.freiburg.uni.tablet.presenter.editor.pageeditor.JPageRenderer;
-import de.freiburg.uni.tablet.presenter.editor.pageeditor.PageLayerBufferBack;
 import de.freiburg.uni.tablet.presenter.editor.pageeditor.PageLayerBufferComposite;
-import de.freiburg.uni.tablet.presenter.editor.pageeditor.PageLayerBufferFront;
+import de.freiburg.uni.tablet.presenter.editor.pageeditor.PageLayerBufferEditor;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonColor;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonEraser;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonFullscreen;
@@ -45,11 +43,8 @@ import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonSpin
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonUndo;
 import de.freiburg.uni.tablet.presenter.page.IPageRenderer;
 import de.freiburg.uni.tablet.presenter.page.IPen;
-import de.freiburg.uni.tablet.presenter.page.SolidPen;
 import de.freiburg.uni.tablet.presenter.tools.ITool;
 import de.freiburg.uni.tablet.presenter.tools.IToolContainer;
-import de.freiburg.uni.tablet.presenter.tools.ToolEraser;
-import de.freiburg.uni.tablet.presenter.tools.ToolScribble;
 
 /**
  * @author lukas
@@ -64,9 +59,6 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 	private IPageEditor _pageRenderer;
 	private JPanel _panelTools;
 
-	private final List<IPage> _pages = new LinkedList<IPage>();
-	private int _currentPageIndex = 0;
-	private IPen _currentPen = new SolidPen();
 	private final List<IToolPageEditorListener> _listeners = new ArrayList<IToolPageEditorListener>();
 
 	private int _nextObjectId = 0;
@@ -74,10 +66,8 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 	private int _lastExtendedState;
 	private Rectangle _lastBounds;
 
-	private PageLayerBufferBack _clientOnlyBackLayer;
-	private PageLayerBufferBack _serverSyncBackLayer;
-	private PageLayerBufferFront _serverSyncFrontLayer;
-	private PageLayerBufferFront _clientOnlyFrontLayer;
+	private PageLayerBufferEditor _clientOnlyLayer;
+	private PageLayerBufferEditor _serverSyncLayer;
 
 	/**
 	 * Create the panel.
@@ -95,21 +85,11 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 		_pageRenderer = pageRenderer;
 		getContentPane().add(pageRenderer, BorderLayout.CENTER);
 
-		final IPage defaultPage = new DefaultPage();
-		_pages.add(defaultPage);
-
 		final PageLayerBufferComposite pageLayers = new PageLayerBufferComposite(
 				pageRenderer);
-		_serverSyncBackLayer = pageLayers.addBackBuffer();
-		_serverSyncFrontLayer = pageLayers.addFrontBuffer();
-		_clientOnlyBackLayer = pageLayers.addBackBuffer();
-		_clientOnlyFrontLayer = pageLayers.addFrontBuffer();
+		_serverSyncLayer = pageLayers.addEditorBuffer();
+		_clientOnlyLayer = pageLayers.addEditorBuffer();
 		_pageRenderer.setDisplayedPageLayerBuffer(pageLayers);
-
-		_pageRenderer.setNormalTool(new ToolScribble(_pageRenderer,
-				_pageRenderer, this));
-		_pageRenderer.setInvertedTool(new ToolEraser(_pageRenderer,
-				_pageRenderer, this));
 
 		_panelTools = new JPanel();
 		getContentPane().add(_panelTools, BorderLayout.WEST);

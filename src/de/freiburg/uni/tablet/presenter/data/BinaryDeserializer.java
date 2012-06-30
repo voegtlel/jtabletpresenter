@@ -65,14 +65,16 @@ public class BinaryDeserializer {
 	}
 
 	public String readStringTable() throws IOException {
-		final boolean isNew = readBoolean();
-		if (isNew) {
+		final int index = readInt();
+		if ((index & 0x80000000) != 0) {
 			final String newString = readString();
+			if (_stringTable.size() != (index & 0x7fffffff)) {
+				throw new IllegalStateException("String table out of synch");
+			}
 			_stringTable.add(newString);
 			return newString;
 		} else {
-			final int index = readInt();
-			return _stringTable.get(index);
+			return _stringTable.get(index & 0x7fffffff);
 		}
 	}
 

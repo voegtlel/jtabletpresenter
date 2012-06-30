@@ -7,8 +7,7 @@ package de.freiburg.uni.tablet.presenter.data;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 
 /**
  * @author lukas
@@ -16,7 +15,7 @@ import java.util.List;
  */
 public class BinarySerializer {
 	private final DataOutputStream _dataOutputStream;
-	private final List<String> _stringTable = new ArrayList<String>();
+	private final HashMap<String, Integer> _stringTable = new HashMap<String, Integer>();
 
 	/**
 	 * 
@@ -56,14 +55,14 @@ public class BinarySerializer {
 	}
 
 	public void writeStringTable(final String value) throws IOException {
-		final int index = _stringTable.indexOf(value);
-		if (index != -1) {
-			writeBoolean(true);
+		final Integer index = _stringTable.get(value);
+		if (index != null) {
 			writeInt(index);
 		} else {
-			writeBoolean(false);
+			final int newIndex = _stringTable.size();
+			_stringTable.put(value, newIndex);
+			writeInt(newIndex | 0x80000000);
 			writeString(value);
-			_stringTable.add(value);
 		}
 	}
 }

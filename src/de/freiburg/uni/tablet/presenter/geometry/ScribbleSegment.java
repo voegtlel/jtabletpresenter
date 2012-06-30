@@ -108,20 +108,20 @@ public class ScribbleSegment implements IBinarySerializable {
 	 * Erases points at the location until the line must be splitted.
 	 * Additionally calculates the boundaries.
 	 * 
-	 * @param eraseInfo
+	 * @param collisionInfo
 	 *            erase information
 	 * @return splitted path or null, if not splitted
 	 */
-	public ScribbleSegment eraseAt(final EraseInfo eraseInfo) {
-		if (!_hasBoundary || eraseInfo.isInRange(_minX, _minY, _maxX, _maxY)) {
+	public ScribbleSegment eraseAt(final CollisionInfo collisionInfo) {
+		if (!_hasBoundary || collisionInfo.collides(_minX, _minY, _maxX, _maxY)) {
 			_minX = Float.MAX_VALUE;
 			_minY = Float.MAX_VALUE;
 			_maxX = Float.MIN_VALUE;
 			_maxY = Float.MIN_VALUE;
 			for (LinkedElement<DataPoint> e = _points.getFirst(); e != null;) {
 				final LinkedElement<DataPoint> next = e.getNext();
-				if (eraseInfo
-						.isInRadius(e.getData().getX(), e.getData().getY())) {
+				if (collisionInfo.collides(e.getData().getX(), e.getData()
+						.getY())) {
 					if (e == _points.getFirst()) {
 						// Simply remove the point.
 						_points.removeFirst();
@@ -154,12 +154,14 @@ public class ScribbleSegment implements IBinarySerializable {
 	 * @param collisionInfo
 	 * @return true if in range
 	 */
-	public boolean isInRange(final CollisionInfo collisionInfo) {
-		if (!_hasBoundary
-				|| collisionInfo.isInRange(_minX, _minY, _maxX, _maxY)) {
+	public boolean collides(final CollisionInfo collisionInfo) {
+		if (!_hasBoundary || collisionInfo.collides(_minX, _minY, _maxX, _maxY)) {
+			if (collisionInfo.isCheckOnlyBoundaries()) {
+				return true;
+			}
 			for (LinkedElement<DataPoint> e = _points.getFirst(); e != null;) {
 				final LinkedElement<DataPoint> next = e.getNext();
-				if (collisionInfo.isInRadius(e.getData().getX(), e.getData()
+				if (collisionInfo.collides(e.getData().getX(), e.getData()
 						.getY())) {
 					return true;
 				}
@@ -204,6 +206,11 @@ public class ScribbleSegment implements IBinarySerializable {
 		}
 	}
 
+	/**
+	 * Returns true, if this segment has no data
+	 * 
+	 * @return
+	 */
 	public boolean isEmpty() {
 		return _points.isEmpty();
 	}
@@ -216,5 +223,27 @@ public class ScribbleSegment implements IBinarySerializable {
 				.getNext()) {
 			element.getData().serialize(writer);
 		}
+	}
+
+	/**
+	 * Clones this object
+	 * 
+	 * @return
+	 */
+	public ScribbleSegment cloneRenderable() {
+		final ScribbleSegment result = new ScribbleSegment();
+		result._hasBoundary = _hasBoundary;
+		result._minX = _minX;
+		result._minY = _minY;
+		result._maxX = _maxX;
+		result._maxY = _maxY;
+		if (_path != null) {
+			result._path = (Path2D) _path.clone();
+		}
+		for (LinkedElement<DataPoint> element = _points.getFirst(); element != null; element = element
+				.getNext()) {
+			result._points.addLast(element.getData());
+		}
+		return result;
 	}
 }

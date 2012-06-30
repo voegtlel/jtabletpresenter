@@ -5,15 +5,15 @@ import java.io.IOException;
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.data.IBinarySerializable;
-import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
 
-public abstract class AbstractRenderable implements IBinarySerializable {
-	private final int _id;
+public abstract class AbstractRenderable implements IBinarySerializable,
+		IRenderable {
+	private final long _id;
 
 	/**
 	 * Creates the renderable
 	 */
-	protected AbstractRenderable(final int id) {
+	protected AbstractRenderable(final long id) {
 		_id = id;
 	}
 
@@ -22,44 +22,23 @@ public abstract class AbstractRenderable implements IBinarySerializable {
 	 * 
 	 * @throws IOException
 	 */
-	protected AbstractRenderable(final BinaryDeserializer reader) throws IOException {
-		_id = reader.readInt();
+	protected AbstractRenderable(final BinaryDeserializer reader)
+			throws IOException {
+		_id = reader.readLong();
 	}
-
-	/**
-	 * Renders the object
-	 * 
-	 * @param renderer
-	 *            renderer
-	 */
-	public abstract void render(IPageBackRenderer renderer);
-
-	/**
-	 * Erase at a point
-	 * 
-	 * @param eraseInfo
-	 */
-	public abstract void eraseAt(EraseInfo eraseInfo);
-
-	/**
-	 * Returns if the info is colliding with this object
-	 * 
-	 * @param collisionInfo
-	 *            collision info
-	 */
-	public abstract boolean isInRange(CollisionInfo collisionInfo);
 
 	/**
 	 * Returns the id of the renderable object.
 	 * 
 	 * @return id
 	 */
-	public int getId() {
+	@Override
+	public long getId() {
 		return _id;
 	}
 
 	@Override
 	public void serialize(final BinarySerializer stream) throws IOException {
-		stream.writeInt(_id);
+		stream.writeLong(_id);
 	}
 }

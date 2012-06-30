@@ -1,12 +1,12 @@
 package de.freiburg.uni.tablet.presenter.editor.pageeditor;
 
 import java.awt.Graphics2D;
-import java.util.ArrayList;
+import java.util.LinkedList;
 
 public class PageLayerBufferComposite implements IPageLayerBuffer {
 	private final IDisplayRenderer _displayRenderer;
 
-	private final ArrayList<IPageLayerBuffer> _pageLayerBuffers = new ArrayList<IPageLayerBuffer>();
+	private final LinkedList<IPageLayerBuffer> _pageLayerBuffers = new LinkedList<IPageLayerBuffer>();
 
 	public PageLayerBufferComposite(final IDisplayRenderer displayRenderer) {
 		_displayRenderer = displayRenderer;
@@ -26,8 +26,22 @@ public class PageLayerBufferComposite implements IPageLayerBuffer {
 		return result;
 	}
 
+	public PageLayerBufferEditor addEditorBuffer() {
+		final PageLayerBufferEditor result = new PageLayerBufferEditor(
+				_displayRenderer);
+		_pageLayerBuffers.add(result);
+		return result;
+	}
+
 	public PageLayerBufferComposite addComposite() {
 		final PageLayerBufferComposite result = new PageLayerBufferComposite(
+				_displayRenderer);
+		_pageLayerBuffers.add(result);
+		return result;
+	}
+
+	public <T> PageLayerBufferHashComposite<T> addHashComposite() {
+		final PageLayerBufferHashComposite<T> result = new PageLayerBufferHashComposite<T>(
 				_displayRenderer);
 		_pageLayerBuffers.add(result);
 		return result;

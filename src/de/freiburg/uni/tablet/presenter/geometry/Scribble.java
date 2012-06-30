@@ -15,7 +15,7 @@ public class Scribble extends AbstractRenderable {
 
 	private final IPen _pen;
 
-	public Scribble(final int id, final IPen pen) {
+	public Scribble(final long id, final IPen pen) {
 		super(id);
 		_pen = pen;
 	}
@@ -29,6 +29,21 @@ public class Scribble extends AbstractRenderable {
 		}
 	}
 
+	@Override
+	public IRenderable cloneRenderable(final long id) {
+		final Scribble result = new Scribble(id, _pen);
+		for (LinkedElement<ScribbleSegment> segment = _segments.getFirst(); segment != null; segment = segment
+				.getNext()) {
+			result._segments.addLast(segment.getData().cloneRenderable());
+		}
+		return result;
+	}
+
+	/**
+	 * Adds an additional point
+	 * 
+	 * @param data
+	 */
 	public void addPoint(final DataPoint data) {
 		if (_segments.isEmpty()) {
 			_segments.addLast(new ScribbleSegment());
@@ -36,8 +51,11 @@ public class Scribble extends AbstractRenderable {
 		_segments.getLast().getData().addPoint(data);
 	}
 
+	/**
+	 * Starts a new segment
+	 */
 	public void addSegment() {
-		if ((_segments.getLast() == null)
+		if (_segments.getLast() == null
 				|| !_segments.getLast().getData().isEmpty()) {
 			_segments.addLast(new ScribbleSegment());
 		}
@@ -45,9 +63,25 @@ public class Scribble extends AbstractRenderable {
 
 	@Override
 	public void eraseAt(final EraseInfo eraseInfo) {
+		Scribble modifiedObjectInstance = (Scribble) eraseInfo
+				.getModifiedObject(this);
+		if (modifiedObjectInstance == null) {
+			if (collides(eraseInfo.getCollisionInfo())) {
+				modifiedObjectInstance = (Scribble) eraseInfo
+						.addModifiedObject(this);
+			}
+		}
+
+		if (modifiedObjectInstance != null) {
+			modifiedObjectInstance.eraseAtDirect(eraseInfo.getCollisionInfo());
+		}
+	}
+
+	@Override
+	public void eraseAtDirect(final CollisionInfo collisionInfo) {
 		for (LinkedElement<ScribbleSegment> seg = _segments.getFirst(); seg != null;) {
 			LinkedElement<ScribbleSegment> nextSeg = seg.getNext();
-			final ScribbleSegment newSeg = seg.getData().eraseAt(eraseInfo);
+			final ScribbleSegment newSeg = seg.getData().eraseAt(collisionInfo);
 			if (newSeg != null) {
 				_segments.insertAfter(seg, newSeg);
 				nextSeg = seg.getNext();
@@ -60,10 +94,10 @@ public class Scribble extends AbstractRenderable {
 	}
 
 	@Override
-	public boolean isInRange(final CollisionInfo collisionInfo) {
+	public boolean collides(final CollisionInfo collisionInfo) {
 		for (LinkedElement<ScribbleSegment> seg = _segments.getFirst(); seg != null; seg = seg
 				.getNext()) {
-			if (seg.getData().isInRange(collisionInfo)) {
+			if (seg.getData().collides(collisionInfo)) {
 				return true;
 			}
 		}
@@ -87,5 +121,14 @@ public class Scribble extends AbstractRenderable {
 				.getNext()) {
 			element.getData().serialize(writer);
 		}
+	}
+
+	/**
+	 * Gets the objects pen
+	 * 
+	 * @return
+	 */
+	public IPen getPen() {
+		return _pen;
 	}
 }

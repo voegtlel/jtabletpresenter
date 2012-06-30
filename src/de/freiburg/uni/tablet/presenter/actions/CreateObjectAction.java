@@ -16,14 +16,12 @@ import de.freiburg.uni.tablet.presenter.document.DocumentPage;
  * @author lukas
  * 
  */
-public class ChangePageIndexAction implements IAction, IBinarySerializable {
-	private final int _pageId;
-	private final int _lastPageId;
+public class CreateObjectAction implements IAction, IBinarySerializable {
 
 	/**
 	 * 
 	 */
-	public ChangePageIndexAction(final int pageId, final int lastPageId) {
+	public CreateObjectAction(final int pageId, final int lastPageId) {
 		_pageId = pageId;
 		_lastPageId = lastPageId;
 	}
@@ -32,7 +30,7 @@ public class ChangePageIndexAction implements IAction, IBinarySerializable {
 	 * @throws IOException
 	 * 
 	 */
-	public ChangePageIndexAction(final BinaryDeserializer reader)
+	public CreateObjectAction(final BinaryDeserializer reader)
 			throws IOException {
 		_pageId = reader.readInt();
 		_lastPageId = reader.readInt();
@@ -45,7 +43,7 @@ public class ChangePageIndexAction implements IAction, IBinarySerializable {
 
 	@Override
 	public IAction getUndoAction() {
-		return new ChangePageIndexAction(_lastPageId, _pageId);
+		return new CreateObjectAction(_lastPageId, _pageId);
 	}
 
 	@Override

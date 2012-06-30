@@ -14,12 +14,14 @@ import de.freiburg.uni.tablet.presenter.list.LinkedElementList;
  * 
  */
 public class Document {
-	private final HashMap<Integer, IEntity> _objects = new HashMap<Integer, IEntity>();
+	private final HashMap<Long, IEntity> _objects = new HashMap<Long, IEntity>();
 
 	private final LinkedElementList<DocumentPage> _pages = new LinkedElementList<DocumentPage>();
 
 	private final int _clientId;
 	private int _uniqueId = 0;
+
+	private DocumentPage _currentPage = null;
 
 	/**
 	 * 
@@ -34,8 +36,38 @@ public class Document {
 	 * @param id
 	 * @return
 	 */
-	public IEntity getObject(final int id) {
+	public IEntity getObject(final long id) {
 		return _objects.get(id);
+	}
+
+	/**
+	 * Called, when an entity was added
+	 * 
+	 * @param entity
+	 */
+	void onObjectAdded(final IEntity entity) {
+		_objects.put(entity.getId(), entity);
+	}
+
+	/**
+	 * Called, when an entity was removed
+	 * 
+	 * @param entity
+	 */
+	void onObjectRemoved(final IEntity entity) {
+		_objects.remove(entity.getId());
+	}
+
+	/**
+	 * Adds a document page
+	 * 
+	 * @return
+	 */
+	public DocumentPage addPage() {
+		final DocumentPage result = new DocumentPage(this);
+		onObjectAdded(result);
+		_pages.addLast(result);
+		return result;
 	}
 
 	/**
@@ -61,6 +93,15 @@ public class Document {
 	}
 
 	/**
+	 * Returns the current page.
+	 * 
+	 * @return
+	 */
+	public DocumentPage getCurrentPage() {
+		return _currentPage;
+	}
+
+	/**
 	 * Set the current page
 	 * 
 	 * @param page
@@ -71,6 +112,7 @@ public class Document {
 		if (element == null) {
 			throw new IllegalArgumentException("afterPage not in document");
 		}
+		_currentPage = element.getData();
 	}
 
 	/**
@@ -78,18 +120,19 @@ public class Document {
 	 * 
 	 * @param page
 	 */
-	public void setCurrentPageIndex(final int index) {
+	public void setCurrentPageByIndex(final int index) {
 		final LinkedElement<DocumentPage> element = _pages
 				.getElementByIndex(index);
 		if (element == null) {
 			throw new IllegalArgumentException("index out of range");
 		}
+		_currentPage = element.getData();
 	}
 
 	/**
 	 * @return
 	 */
 	public long getNextId() {
-		return ((long) _clientId << 32) | (_uniqueId++);
+		return (long) _clientId << 32 | _uniqueId++;
 	}
 }
