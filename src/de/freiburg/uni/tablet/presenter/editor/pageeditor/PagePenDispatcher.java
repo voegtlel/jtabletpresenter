@@ -2,8 +2,6 @@ package de.freiburg.uni.tablet.presenter.editor.pageeditor;
 
 import java.awt.Dimension;
 
-import javax.swing.event.EventListenerList;
-
 import jpen.PButton;
 import jpen.PButtonEvent;
 import jpen.PKind;
@@ -92,13 +90,12 @@ public class PagePenDispatcher implements PenListener {
 				if (_activeTool != null) {
 					// Deactivate tool and store result
 					_activeTool.end();
-					final ITool activeTool = _activeTool;
 					_activeTool = null;
 				}
 				// Use the new tool
 				_activePenKind = _penKind;
 				_activePenButton = e.button.getType();
-				_activeTool = (inverted ? _invertedTool : _normalTool);
+				_activeTool = inverted ? _invertedTool : _normalTool;
 				if (_activeTool != null) {
 					// Update hover
 					if (_hoverTool != _activeTool) {
@@ -114,12 +111,11 @@ public class PagePenDispatcher implements PenListener {
 					_lastData = null;
 					_activeTool.draw(dp);
 				}
-			} else if ((_activePenKind == _penKind)
-					&& (_activePenButton == e.button.getType())) {
+			} else if (_activePenKind == _penKind
+					&& _activePenButton == e.button.getType()) {
 				// Deactivate tool and store result
 				if (_activeTool != null) {
 					_activeTool.end();
-					final ITool activeTool = _activeTool;
 					_activeTool = null;
 				}
 			}
@@ -139,7 +135,7 @@ public class PagePenDispatcher implements PenListener {
 				// if it is not the first point, check if we have moved enough
 				final float xDiff = dp.getXOrig() - _lastData.getXOrig();
 				final float yDiff = dp.getYOrig() - _lastData.getYOrig();
-				usePoint = (((xDiff * xDiff) + (yDiff * yDiff)) > 3.0f);
+				usePoint = xDiff * xDiff + yDiff * yDiff > 3.0f;
 			}
 			if (usePoint) {
 				_activeTool.draw(dp);
@@ -198,7 +194,6 @@ public class PagePenDispatcher implements PenListener {
 			if (_hoverTool == _normalTool) {
 				if (_activeTool == _normalTool) {
 					_activeTool.end();
-					final ITool activeTool = _activeTool;
 					_activeTool = null;
 				}
 				_normalTool.out();
@@ -218,7 +213,6 @@ public class PagePenDispatcher implements PenListener {
 			if (_hoverTool == _invertedTool) {
 				if (_activeTool == _invertedTool) {
 					_activeTool.end();
-					final ITool activeTool = _activeTool;
 					_activeTool = null;
 				}
 				_hoverTool.out();

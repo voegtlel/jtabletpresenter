@@ -19,6 +19,12 @@ public class PageLayerBufferComposite implements IPageLayerBuffer {
 		return result;
 	}
 
+	public PageLayerBufferColor addColorBuffer() {
+		final PageLayerBufferColor result = new PageLayerBufferColor();
+		_pageLayerBuffers.add(result);
+		return result;
+	}
+
 	public PageLayerBufferBack addBackBuffer() {
 		final PageLayerBufferBack result = new PageLayerBufferBack(
 				_displayRenderer);

@@ -22,6 +22,7 @@ public class ButtonNext extends AbstractButtonAction {
 
 	@Override
 	public void perform(final Component button) {
-		_editor.setPageIndex(_editor.getPageIndex() + 1);
+		_editor.getDocumentEditor().setCurrentPageByIndex(
+				_editor.getDocumentEditor().getCurrentPageIndex() + 1, true);
 	}
 }

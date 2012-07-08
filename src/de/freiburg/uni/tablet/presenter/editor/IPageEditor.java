@@ -4,6 +4,7 @@ import java.awt.Component;
 import java.awt.Cursor;
 
 import de.freiburg.uni.tablet.presenter.editor.pageeditor.IPageLayerBuffer;
+import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 import de.freiburg.uni.tablet.presenter.tools.ITool;
 
 public interface IPageEditor {
@@ -53,9 +54,14 @@ public interface IPageEditor {
 	Component getContainerComponent();
 
 	/**
-	 * Clears the renderer
+	 * Clears the renderer (redraw all content)
 	 */
 	void clear();
+
+	/**
+	 * Clears the renderer (redraw all content) within the given rectangle
+	 */
+	void clear(IRenderable renderable);
 
 	/**
 	 * Sets the page layer
@@ -70,5 +76,4 @@ public interface IPageEditor {
 	 * @return
 	 */
 	IPageLayerBuffer getPageLayer();
-
 }

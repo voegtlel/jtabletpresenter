@@ -6,6 +6,7 @@ package de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons;
 
 import java.awt.Component;
 
+import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.IButtonAction;
 
@@ -45,5 +46,9 @@ public abstract class AbstractButtonAction implements IButtonAction {
 
 	@Override
 	public void perform(final Component button) {
+	}
+
+	@Override
+	public void onUpdateEditor(final DocumentEditor lastEditor) {
 	}
 }

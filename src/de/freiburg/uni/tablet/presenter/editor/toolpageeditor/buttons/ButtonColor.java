@@ -35,12 +35,15 @@ public class ButtonColor extends AbstractButtonAction {
 
 	@Override
 	public void perform(final Component button) {
-		_tool.setSelectedValue(_editor.getCurrentPen().getColor());
+		_tool.setSelectedValue(_editor.getDocumentEditor().getCurrentPen()
+				.getColor());
 		_tool.showAt(button, button.getWidth(), 0);
 		final Color selectedColor = _tool.getSelectedValue();
-		if (!selectedColor.equals(_editor.getCurrentPen().getColor())) {
-			_editor.setCurrentPen(new SolidPen(_editor.getCurrentPen()
-					.getThickness(), selectedColor));
+		if (!selectedColor.equals(_editor.getDocumentEditor().getCurrentPen()
+				.getColor())) {
+			_editor.getDocumentEditor().setCurrentPen(
+					new SolidPen(_editor.getDocumentEditor().getCurrentPen()
+							.getThickness(), selectedColor));
 		}
 	}
 }

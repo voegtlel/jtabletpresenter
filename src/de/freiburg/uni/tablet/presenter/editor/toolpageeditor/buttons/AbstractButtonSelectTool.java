@@ -20,6 +20,10 @@ import de.freiburg.uni.tablet.presenter.tools.ToolScribble;
 public abstract class AbstractButtonSelectTool extends AbstractButtonAction {
 	private final JPageToolFrame<ITool> _tool;
 
+	protected ToolScribble _toolScribble;
+
+	protected ToolEraser _toolEraser;
+
 	/**
 	 * Creates the action with an editor.
 	 * 
@@ -32,10 +36,10 @@ public abstract class AbstractButtonSelectTool extends AbstractButtonAction {
 		_tool = new JPageToolFrame<ITool>();
 		_tool.setSize(JPageToolButton.WIDTH_WIDE * 1,
 				JPageToolButton.HEIGHT_NORMAL * 2);
-		_tool.addValue("Pen", "/buttons/edit-scribble.png", new ToolScribble(
-				_editor.getToolContainer(), _editor.getRenderer(), _editor));
-		_tool.addValue("Eraser", "/buttons/edit-erase.png", new ToolEraser(
-				_editor.getToolContainer(), _editor.getRenderer(), _editor));
+		_toolScribble = new ToolScribble(_editor);
+		_toolEraser = new ToolEraser(_editor);
+		_tool.addValue("Pen", "/buttons/edit-scribble.png", _toolScribble);
+		_tool.addValue("Eraser", "/buttons/edit-erase.png", _toolEraser);
 	}
 
 	@Override

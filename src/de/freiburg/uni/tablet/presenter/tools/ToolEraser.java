@@ -7,55 +7,60 @@ import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 
+import de.freiburg.uni.tablet.presenter.document.DocumentPageLayer;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 import de.freiburg.uni.tablet.presenter.geometry.DataPoint;
 import de.freiburg.uni.tablet.presenter.geometry.EraseInfo;
-import de.freiburg.uni.tablet.presenter.page.IPage;
-import de.freiburg.uni.tablet.presenter.page.IPageRenderer;
 import de.freiburg.uni.tablet.presenter.page.IPen;
 import de.freiburg.uni.tablet.presenter.page.SolidPen;
 
 public class ToolEraser extends AbstractTool {
 	private final IPen _pen = new SolidPen(15.0f, new Color(0xFF, 0xFF, 0xFF,
 			0xAA));
-	private final IPageRenderer _renderer;
-	private final IToolPageEditor _editor;
+
+	private EraseInfo _eraseInfo = null;
+
+	private final boolean _checkOnlyBoundaries = false;
 
 	/**
 	 * 
 	 * @param container
 	 *            used for cursor changing
 	 */
-	public ToolEraser(final IToolContainer container,
-			final IPageRenderer renderer, final IToolPageEditor editor) {
-		super(container);
-		_renderer = renderer;
-		_editor = editor;
+	public ToolEraser(final IToolPageEditor editor) {
+		super(editor);
 		updateCursor();
 	}
 
 	@Override
 	public void begin() {
+		_eraseInfo = new EraseInfo(_editor.getDocumentEditor().getDocument(),
+				_editor.getDocumentEditor().getActiveLayer());
 	}
 
 	@Override
 	public void draw(final DataPoint data) {
-		final IPage page = _editor.getPage();
-		if (page != null) {
-			final EraseInfo eraseInfo = new EraseInfo(data.getX(), data.getY(),
-					data.getXOrig(), data.getYOrig(), data.getX()
-							/ data.getXOrig() * _pen.getThickness() / 2.0f,
+		final DocumentPageLayer activeLayer = _editor.getDocumentEditor()
+				.getActiveLayer();
+		if (activeLayer != null) {
+			_eraseInfo.createCollisionInfo(data.getX(), data.getY(),
+					data.getXOrig(), data.getYOrig(),
+					data.getX() / data.getXOrig() * _pen.getThickness() / 2.0f,
 					data.getY() / data.getYOrig() * _pen.getThickness() / 2.0f,
-					_pen.getThickness(), _pen.getThickness());
-			page.eraseAt(eraseInfo);
-			_renderer.drawFront(_pen, data.getX(), data.getY());
+					_pen.getThickness(), _pen.getThickness(),
+					_checkOnlyBoundaries);
+			activeLayer.eraseAt(_eraseInfo);
+			_editor.getFrontRenderer().draw(_pen, data.getX(), data.getY());
 		}
 	}
 
 	@Override
 	public void end() {
-		_editor.getPage().render(_renderer);
-		_renderer.clearFront();
+		_eraseInfo.applyModifications();
+		_eraseInfo = null;
+
+		_editor.getFrontRenderer().clear();
+		_editor.getPageEditor().clear();
 	}
 
 	@Override

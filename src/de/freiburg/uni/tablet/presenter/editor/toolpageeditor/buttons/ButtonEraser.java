@@ -17,15 +17,16 @@ public class ButtonEraser extends AbstractButtonSelectTool {
 	 */
 	public ButtonEraser(final IToolPageEditor editor) {
 		super(editor, "Eraser", "/buttons/edit-erase.png");
+		setSelectedTool(_toolEraser);
 	}
 
 	@Override
 	protected void setSelectedTool(final ITool tool) {
-		_editor.setInvertedTool(tool);
+		_editor.getPageEditor().setInvertedTool(tool);
 	}
 
 	@Override
 	protected ITool getSelectedTool() {
-		return _editor.getInvertedTool();
+		return _editor.getPageEditor().getInvertedTool();
 	}
 }

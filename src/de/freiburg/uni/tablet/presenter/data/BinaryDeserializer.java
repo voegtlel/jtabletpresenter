@@ -64,6 +64,21 @@ public class BinaryDeserializer {
 		}
 	}
 
+	public <T> T readSerializableClass(final Class<?>[] ctorArgTypes,
+			final Object[] ctorArgs) throws IOException {
+		final String className = readStringTable();
+		try {
+			@SuppressWarnings("unchecked")
+			final Class<T> classRef = (Class<T>) Class.forName(className);
+			final Constructor<T> constructor = classRef
+					.getConstructor(ctorArgTypes);
+			final T newInstance = constructor.newInstance(ctorArgs);
+			return newInstance;
+		} catch (final Exception e) {
+			throw new IOException(e);
+		}
+	}
+
 	public String readStringTable() throws IOException {
 		final int index = readInt();
 		if ((index & 0x80000000) != 0) {

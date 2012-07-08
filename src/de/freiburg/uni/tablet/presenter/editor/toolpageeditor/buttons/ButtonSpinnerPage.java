@@ -1,5 +1,5 @@
 /**
- * Copyright Lukas Vögtle
+ * Copyright Lukas Voegtle
  * Albert Ludwigs University of Freiburg
  */
 package de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons;
@@ -12,8 +12,10 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
+import de.freiburg.uni.tablet.presenter.document.DocumentEditorAdapter;
+import de.freiburg.uni.tablet.presenter.document.DocumentPage;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
-import de.freiburg.uni.tablet.presenter.editor.IToolPageEditorListener;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.JPageToolButton;
 
 /**
@@ -22,6 +24,7 @@ import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.JPageToolButton;
  */
 public class ButtonSpinnerPage extends AbstractButtonAction {
 	private final JSpinner _spinner;
+	private final DocumentEditorAdapter _documentEditorListener;
 
 	/**
 	 * Creates the action with an editor.
@@ -41,21 +44,35 @@ public class ButtonSpinnerPage extends AbstractButtonAction {
 				onSpinnnerChanged();
 			}
 		});
-		_editor.addListener(new IToolPageEditorListener() {
+		_documentEditorListener = new DocumentEditorAdapter() {
+
 			@Override
-			public void pageNumberChanged() {
-				if (!_spinner.getValue().equals(_editor.getPageIndex())) {
-					_spinner.setValue(_editor.getPageIndex());
-				}
+			public void currentPageChanged(final DocumentPage lastCurrentPage) {
+				onUpdateSpinner();
 			}
-		});
+		};
+		_editor.getDocumentEditor().addListener(_documentEditorListener);
+	}
+
+	protected void onUpdateSpinner() {
+		final int pageIndex = _editor.getDocumentEditor().getCurrentPageIndex();
+		if (!_spinner.getValue().equals(pageIndex)) {
+			_spinner.setValue(pageIndex);
+		}
 	}
 
 	/**
 	 * Event.
 	 */
 	protected void onSpinnnerChanged() {
-		_editor.setPageIndex((Integer) _spinner.getValue());
+		_editor.getDocumentEditor().setCurrentPageByIndex(
+				(Integer) _spinner.getValue(), true);
+	}
+
+	@Override
+	public void onUpdateEditor(final DocumentEditor lastEditor) {
+		lastEditor.removeListener(_documentEditorListener);
+		_editor.getDocumentEditor().addListener(_documentEditorListener);
 	}
 
 	@Override

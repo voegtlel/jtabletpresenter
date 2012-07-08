@@ -17,15 +17,16 @@ public class ButtonPen extends AbstractButtonSelectTool {
 	 */
 	public ButtonPen(final IToolPageEditor editor) {
 		super(editor, "Pen", "/buttons/edit-scribble.png");
+		setSelectedTool(_toolScribble);
 	}
 
 	@Override
 	protected void setSelectedTool(final ITool tool) {
-		_editor.setNormalTool(tool);
+		_editor.getPageEditor().setNormalTool(tool);
 	}
 
 	@Override
 	protected ITool getSelectedTool() {
-		return _editor.getNormalTool();
+		return _editor.getPageEditor().getNormalTool();
 	}
 }

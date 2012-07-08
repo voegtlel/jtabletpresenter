@@ -22,8 +22,11 @@ public class ButtonPrevious extends AbstractButtonAction {
 
 	@Override
 	public void perform(final Component button) {
-		if (_editor.getPageIndex() > 0) {
-			_editor.setPageIndex(_editor.getPageIndex() - 1);
+		final int currentPageIndex = _editor.getDocumentEditor()
+				.getCurrentPageIndex();
+		if (currentPageIndex > 0) {
+			_editor.getDocumentEditor().setCurrentPageByIndex(
+					currentPageIndex + 1, true);
 		}
 	}
 }

@@ -5,13 +5,15 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 
+import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
+
 public abstract class AbstractTool implements ITool {
 	private boolean _isActive = false;
 	private Cursor _cursor = null;
-	private final IToolContainer _container;
+	protected final IToolPageEditor _editor;
 
-	public AbstractTool(final IToolContainer container) {
-		_container = container;
+	public AbstractTool(final IToolPageEditor editor) {
+		_editor = editor;
 	}
 
 	public void invalidateCursor() {
@@ -26,7 +28,7 @@ public abstract class AbstractTool implements ITool {
 	protected void updateCursor() {
 		_cursor = generateCursor();
 		if (_isActive) {
-			_container.setCursor(_cursor);
+			_editor.getPageEditor().setCursor(_cursor);
 		}
 	}
 
@@ -42,7 +44,7 @@ public abstract class AbstractTool implements ITool {
 		if (_cursor == null) {
 			updateCursor();
 		}
-		_container.setCursor(_cursor);
+		_editor.getPageEditor().setCursor(_cursor);
 		_isActive = true;
 	}
 

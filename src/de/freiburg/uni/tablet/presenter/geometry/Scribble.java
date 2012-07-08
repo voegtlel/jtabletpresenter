@@ -131,4 +131,49 @@ public class Scribble extends AbstractRenderable {
 	public IPen getPen() {
 		return _pen;
 	}
+
+	@Override
+	public float getMinX() {
+		float minX = Float.MAX_VALUE;
+		for (LinkedElement<ScribbleSegment> element = _segments.getFirst(); element != null; element = element
+				.getNext()) {
+			minX = Math.min(minX, element.getData().getMinX());
+		}
+		return minX;
+	}
+
+	@Override
+	public float getMinY() {
+		float minY = Float.MAX_VALUE;
+		for (LinkedElement<ScribbleSegment> element = _segments.getFirst(); element != null; element = element
+				.getNext()) {
+			minY = Math.min(minY, element.getData().getMinY());
+		}
+		return minY;
+	}
+
+	@Override
+	public float getMaxX() {
+		float maxX = Float.MIN_VALUE;
+		for (LinkedElement<ScribbleSegment> element = _segments.getFirst(); element != null; element = element
+				.getNext()) {
+			maxX = Math.max(maxX, element.getData().getMaxX());
+		}
+		return maxX;
+	}
+
+	@Override
+	public float getMaxY() {
+		float maxY = Float.MIN_VALUE;
+		for (LinkedElement<ScribbleSegment> element = _segments.getFirst(); element != null; element = element
+				.getNext()) {
+			maxY = Math.max(maxY, element.getData().getMaxY());
+		}
+		return maxY;
+	}
+
+	@Override
+	public float getRadius() {
+		return _pen.getThickness();
+	}
 }

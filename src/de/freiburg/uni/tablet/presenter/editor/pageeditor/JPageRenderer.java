@@ -10,6 +10,7 @@ import java.awt.Toolkit;
 
 import jpen.owner.multiAwt.AwtPenToolkit;
 import de.freiburg.uni.tablet.presenter.editor.IPageEditor;
+import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 import de.freiburg.uni.tablet.presenter.tools.ITool;
 
 public class JPageRenderer extends Component implements IPageEditor,
@@ -95,12 +96,34 @@ public class JPageRenderer extends Component implements IPageEditor,
 	}
 
 	@Override
+	public void clear(final IRenderable renderable) {
+		if (isVisible()) {
+			final Graphics2D g = createRenderer();
+			final int radius = (int) Math.ceil(renderable.getRadius());
+			final int x = (int) (renderable.getMinX() * _lastRenderDimensions.width)
+					- radius;
+			final int y = (int) (renderable.getMinY() * _lastRenderDimensions.height)
+					- radius;
+			final int w = (int) Math.ceil(renderable.getMaxX()
+					* _lastRenderDimensions.width)
+					+ 1 + x + radius;
+			final int h = (int) Math.ceil(renderable.getMaxY()
+					* _lastRenderDimensions.height)
+					+ 1 + y + radius;
+			g.clipRect(x, y, w, h);
+			_displayedPageLayerBuffer.drawBuffer(g);
+			updateRenderer(g);
+		}
+	}
+
+	@Override
 	public IPageLayerBuffer getPageLayer() {
 		return _displayedPageLayerBuffer;
 	}
 
 	@Override
-	public void setDisplayedPageLayerBuffer(final IPageLayerBuffer pageLayerBuffer) {
+	public void setDisplayedPageLayerBuffer(
+			final IPageLayerBuffer pageLayerBuffer) {
 		_displayedPageLayerBuffer = pageLayerBuffer;
 	}
 

@@ -4,7 +4,8 @@ import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 
-import de.freiburg.uni.tablet.presenter.gui.JPageEditor;
+import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
+import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.JPageEditor;
 
 public class TestApp {
 
@@ -41,6 +42,7 @@ public class TestApp {
 		_pageRenderer = new JPageEditor();
 		_pageRenderer.setBounds(100, 100, 450, 300);
 		_pageRenderer.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		_pageRenderer.setDocumentEditor(new DocumentEditor());
 
 		/*
 		 * _pageRenderer.setPage(new DefaultPage());

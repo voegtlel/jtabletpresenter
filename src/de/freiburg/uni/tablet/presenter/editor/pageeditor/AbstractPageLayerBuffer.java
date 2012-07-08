@@ -53,7 +53,9 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer {
 			_graphics.dispose();
 		}
 
-		_imageBuffer = _displayRenderer.createImageBuffer(width, height,
+		final int imgWidth = Math.max(width, 1);
+		final int imgHeight = Math.max(height, 1);
+		_imageBuffer = _displayRenderer.createImageBuffer(imgWidth, imgHeight,
 				Transparency.TRANSLUCENT);
 		_graphics = (Graphics2D) _imageBuffer.getGraphics();
 		setRenderingHints(_graphics);

@@ -111,7 +111,7 @@ public class LinkedElementList<T> {
 
 	public LinkedElementList<T> splitAtRemove(final LinkedElement<T> first) {
 		final LinkedElementList<T> newList = new LinkedElementList<T>();
-		if ((first == _first) && (_first == _last)) {
+		if (first == _first && _first == _last) {
 			newList._first = _first = null;
 			newList._last = _last = null;
 		} else if (first == _last) {
@@ -184,6 +184,23 @@ public class LinkedElementList<T> {
 			i--;
 		}
 		return null;
+	}
+
+	/**
+	 * Returns the elements index or -1 if not in list
+	 * 
+	 * @param data
+	 * @return
+	 */
+	public int getElementIndex(final T data) {
+		int i = 0;
+		for (LinkedElement<T> j = _first; j != null; j = j.getNext()) {
+			if (j.getData() == data) {
+				return i;
+			}
+			i++;
+		}
+		return -1;
 	}
 
 	public boolean isEmpty() {

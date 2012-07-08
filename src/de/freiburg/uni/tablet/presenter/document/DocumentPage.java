@@ -4,6 +4,11 @@
  */
 package de.freiburg.uni.tablet.presenter.document;
 
+import java.io.IOException;
+
+import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
+import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
+
 /**
  * @author lukas
  * 
@@ -32,12 +37,8 @@ public class DocumentPage implements IEntity {
 		return _id;
 	}
 
-	/**
-	 * Gets the parent document
-	 * 
-	 * @return
-	 */
-	public Document getDocument() {
+	@Override
+	public Document getParent() {
 		return _document;
 	}
 
@@ -57,5 +58,18 @@ public class DocumentPage implements IEntity {
 	 */
 	public DocumentPageLayer getServerSyncLayer() {
 		return _serverSyncLayer;
+	}
+
+	public DocumentPage(final BinaryDeserializer reader, final Document document)
+			throws IOException {
+		_id = reader.readLong();
+		_document = document;
+		_clientOnlyLayer = new DocumentPageLayer(this);
+		_serverSyncLayer = new DocumentPageLayer(this);
+	}
+
+	@Override
+	public void serialize(final BinarySerializer writer) throws IOException {
+		writer.writeLong(_id);
 	}
 }

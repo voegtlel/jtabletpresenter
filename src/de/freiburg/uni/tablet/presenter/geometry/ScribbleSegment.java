@@ -186,6 +186,34 @@ public class ScribbleSegment implements IBinarySerializable {
 		}
 	}
 
+	public float getMinX() {
+		if (!_hasBoundary) {
+			calcBoundary();
+		}
+		return _minX;
+	}
+
+	public float getMinY() {
+		if (!_hasBoundary) {
+			calcBoundary();
+		}
+		return _minY;
+	}
+
+	public float getMaxX() {
+		if (!_hasBoundary) {
+			calcBoundary();
+		}
+		return _maxX;
+	}
+
+	public float getMaxY() {
+		if (!_hasBoundary) {
+			calcBoundary();
+		}
+		return _maxY;
+	}
+
 	/**
 	 * Renders the segment
 	 * 

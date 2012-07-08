@@ -1,5 +1,6 @@
 package de.freiburg.uni.tablet.presenter.geometry;
 
+import de.freiburg.uni.tablet.presenter.document.DocumentPageLayer;
 import de.freiburg.uni.tablet.presenter.document.IEntity;
 import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
 
@@ -23,6 +24,11 @@ public interface IRenderable extends IEntity {
 	void render(IPageBackRenderer renderer);
 
 	/**
+	 * 
+	 */
+	void setParent(DocumentPageLayer pageLayer);
+
+	/**
 	 * Erase at a point and store history
 	 * 
 	 * @param eraseInfo
@@ -43,4 +49,39 @@ public interface IRenderable extends IEntity {
 	 *            collision info
 	 */
 	boolean collides(CollisionInfo collisionInfo);
+
+	/**
+	 * Gets the rectangle
+	 * 
+	 * @return
+	 */
+	float getMinX();
+
+	/**
+	 * Gets the rectangle
+	 * 
+	 * @return
+	 */
+	float getMinY();
+
+	/**
+	 * Gets the rectangle
+	 * 
+	 * @return
+	 */
+	float getMaxX();
+
+	/**
+	 * Gets the rectangle
+	 * 
+	 * @return
+	 */
+	float getMaxY();
+
+	/**
+	 * Gets the additional radius for redrawing in screen coordinates
+	 * 
+	 * @return
+	 */
+	float getRadius();
 }
