@@ -52,7 +52,7 @@ public class Document implements IEntity {
 	 * 
 	 * @param entity
 	 */
-	void onObjectAdded(final IEntity entity) {
+	public void onObjectAdded(final IEntity entity) {
 		_objects.put(entity.getId(), entity);
 	}
 

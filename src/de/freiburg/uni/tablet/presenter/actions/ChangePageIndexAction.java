@@ -9,7 +9,7 @@ import java.io.IOException;
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.data.IBinarySerializable;
-import de.freiburg.uni.tablet.presenter.document.Document;
+import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
 
 /**
@@ -17,13 +17,13 @@ import de.freiburg.uni.tablet.presenter.document.DocumentPage;
  * 
  */
 public class ChangePageIndexAction implements IAction, IBinarySerializable {
-	private final int _pageId;
-	private final int _lastPageId;
+	private final long _pageId;
+	private final long _lastPageId;
 
 	/**
 	 * 
 	 */
-	public ChangePageIndexAction(final int pageId, final int lastPageId) {
+	public ChangePageIndexAction(final long pageId, final long lastPageId) {
 		_pageId = pageId;
 		_lastPageId = lastPageId;
 	}
@@ -34,8 +34,8 @@ public class ChangePageIndexAction implements IAction, IBinarySerializable {
 	 */
 	public ChangePageIndexAction(final BinaryDeserializer reader)
 			throws IOException {
-		_pageId = reader.readInt();
-		_lastPageId = reader.readInt();
+		_pageId = reader.readLong();
+		_lastPageId = reader.readLong();
 	}
 
 	@Override
@@ -49,19 +49,20 @@ public class ChangePageIndexAction implements IAction, IBinarySerializable {
 	}
 
 	@Override
-	public void perform(final Document document) {
-		final DocumentPage page = (DocumentPage) document.getObject(_pageId);
+	public void perform(final DocumentEditor editor) {
+		final DocumentPage page = (DocumentPage) editor.getDocument()
+				.getObject(_pageId);
 		if (page == null) {
 			throw new IllegalStateException("Page with id " + _pageId
 					+ " doesn't exist");
 		}
-		document.setCurrentPage(page);
+		editor.setCurrentPage(page);
 	}
 
 	@Override
 	public void serialize(final BinarySerializer writer) throws IOException {
-		writer.writeInt(_pageId);
-		writer.writeInt(_lastPageId);
+		writer.writeLong(_pageId);
+		writer.writeLong(_lastPageId);
 	}
 
 }

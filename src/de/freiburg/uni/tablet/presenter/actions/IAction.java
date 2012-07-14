@@ -4,7 +4,7 @@
  */
 package de.freiburg.uni.tablet.presenter.actions;
 
-import de.freiburg.uni.tablet.presenter.document.Document;
+import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
 
 /**
  * Interface for a general action
@@ -28,7 +28,7 @@ public interface IAction {
 	IAction getUndoAction();
 
 	/**
-	 * Performs the action
+	 * @param editor
 	 */
-	void perform(Document document);
+	void perform(DocumentEditor editor);
 }

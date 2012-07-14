@@ -203,6 +203,18 @@ public class LinkedElementList<T> {
 		return -1;
 	}
 
+	/**
+	 * Deletes all following elements and sets the next element
+	 * 
+	 * @param element
+	 * @param nextData
+	 * @return
+	 */
+	public void setNext(final LinkedElement<T> element, final T nextData) {
+		_last = new LinkedElement<T>(element, null, nextData);
+		element.setNext(_last);
+	}
+
 	public boolean isEmpty() {
 		return _first == null;
 	}
