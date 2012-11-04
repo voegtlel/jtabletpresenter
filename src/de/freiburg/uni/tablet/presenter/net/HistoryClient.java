@@ -6,64 +6,89 @@ package de.freiburg.uni.tablet.presenter.net;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
 import de.freiburg.uni.tablet.presenter.actions.IAction;
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
-import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
 
 /**
  * @author lukas
  * 
  */
 public class HistoryClient {
-	private final Socket _socket;
-	private final DocumentEditor _editor;
-	private final Thread _thread;
+	private final static int CMD_DOCUMENT = 0;
+	private final static int CMD_INIT = 1;
+
+	private final ClientThread _client;
+	private final Thread _receiveThread;
 
 	private final List<ClientListener> _listeners = new ArrayList<ClientListener>();
+	private final Object _threadSync = new Object();
 
-	/**
-	 * @throws IOException
-	 * @throws UnknownHostException
-	 * 
-	 */
-	public HistoryClient(final String host, final int port, final int timeout,
-			final DocumentEditor editor) throws UnknownHostException,
-			IOException {
-		_editor = editor;
-		_socket = new Socket();
-		final InetAddress remoteAddr = InetAddress.getByName(host);
-		_socket.connect(new InetSocketAddress(remoteAddr, port), timeout);
-		_thread = new Thread() {
+	public HistoryClient(final ClientThread client) {
+		_client = client;
+		_client.addListener(new ClientListener() {
+			@Override
+			public void error(final Throwable t) {
+				onClientError(t);
+			}
+
+			@Override
+			public void disconnected() {
+				onClientDisconnected();
+			}
+
+			@Override
+			public void connected() {
+				onClientConnected();
+			}
+		});
+
+		_receiveThread = new Thread() {
 			@Override
 			public void run() {
-				onReceiveThread();
+				receiveThread();
 			}
 		};
-		_thread.start();
+	}
+
+	public void start() throws IOException {
+		_client.start();
+	}
+
+	protected void onClientConnected() {
+		_receiveThread.start();
+	}
+
+	protected void onClientDisconnected() {
+		synchronized (_threadSync) {
+			_receiveThread.interrupt();
+			try {
+				_receiveThread.join();
+			} catch (final InterruptedException e) {
+			}
+		}
+	}
+
+	protected void onClientError(final Throwable t) {
+		t.printStackTrace();
 	}
 
 	/**
-	 * 
+	 * Thread for receiving data
 	 */
-	protected void onReceiveThread() {
-		try {
-			final InputStream inputStream = _socket.getInputStream();
-
-			while (_socket.isConnected()) {
-				onReceiveData(inputStream);
+	protected void receiveThread() {
+		final ByteBuffer recvBuffer = ByteBuffer.allocateDirect(1024);
+		while (_client.isRunning()) {
+			recvBuffer.position(0);
+			recvBuffer.limit(4);
+			if (!_client.receive(recvBuffer)) {
+				break;
 			}
-		} catch (final IOException e) {
-			e.printStackTrace();
+			final int cmd = recvBuffer.getInt();
 		}
-		System.out.println("Disconnected");
-		fireDisconnected();
 	}
 
 	/**

@@ -1,7 +1,11 @@
 package de.freiburg.uni.tablet.presenter.net;
 
-import java.net.Socket;
-
 public interface AcceptListener {
-	void clientConnected(Socket socket);
+	/**
+	 * Fired, when a client has connected. The given client thread was not
+	 * started.
+	 * 
+	 * @param socket
+	 */
+	void clientConnected(ClientThread socket);
 }

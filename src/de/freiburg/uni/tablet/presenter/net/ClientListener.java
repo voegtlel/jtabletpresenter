@@ -15,4 +15,8 @@ public interface ClientListener {
 	 */
 	void disconnected();
 
+	void connected();
+
+	void error(Throwable t);
+
 }
