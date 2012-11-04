@@ -27,10 +27,16 @@ public class SolidPen implements IPen {
 	public SolidPen(final BinaryDeserializer reader) throws IOException {
 		_thickness = reader.readFloat();
 		final int color = reader.readInt();
-		_paint = new Color(color & 0xff, (color >> 8) & 0xff,
-				(color >> 16) & 0xff, (color >> 24) & 0xff);
+		_paint = new Color(color & 0xff, color >> 8 & 0xff, color >> 16 & 0xff,
+				color >> 24 & 0xff);
 		_stroke = new BasicStroke(_thickness, BasicStroke.CAP_ROUND,
 				BasicStroke.JOIN_ROUND);
+	}
+
+	@Override
+	public void serialize(final BinarySerializer writer) throws IOException {
+		writer.writeFloat(getThickness());
+		writer.writeInt(getColor().getAlpha() << 24 | getColor().getRGB());
 	}
 
 	@Override
@@ -46,11 +52,5 @@ public class SolidPen implements IPen {
 	@Override
 	public Color getColor() {
 		return _paint;
-	}
-
-	@Override
-	public void serialize(final BinarySerializer writer) throws IOException {
-		writer.writeInt((getColor().getAlpha() << 24) | getColor().getRGB());
-		writer.writeFloat(getThickness());
 	}
 }

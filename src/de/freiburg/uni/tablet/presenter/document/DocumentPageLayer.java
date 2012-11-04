@@ -72,15 +72,14 @@ public class DocumentPageLayer implements IEntity {
 		return _id;
 	}
 
-	public DocumentPageLayer(final BinaryDeserializer reader,
-			final Document document) throws IOException {
+	public DocumentPageLayer(final BinaryDeserializer reader)
+			throws IOException {
 		_id = reader.readLong();
-		final long pageId = reader.readLong();
-		_page = (DocumentPage) document.getObject(pageId);
+		reader.putObjectTable(this.getId(), this);
+		_page = reader.readObjectTable();
 		final int count = reader.readInt();
 		for (int i = 0; i < count; i++) {
-			final long id = reader.readLong();
-			final IRenderable renderable = (IRenderable) document.getObject(id);
+			final IRenderable renderable = reader.readObjectTable();
 			_renderablesList.addLast(renderable);
 			_renderablesMap.put(renderable.getId(), renderable);
 		}
@@ -89,11 +88,11 @@ public class DocumentPageLayer implements IEntity {
 	@Override
 	public void serialize(final BinarySerializer writer) throws IOException {
 		writer.writeLong(_id);
-		writer.writeLong(_page.getId());
+		writer.writeObjectTable(_page.getId(), _page);
 		writer.writeInt(_renderablesMap.size());
 		for (LinkedElement<IRenderable> r = _renderablesList.getFirst(); r != null; r = r
 				.getNext()) {
-			writer.writeLong(r.getData().getId());
+			writer.writeObjectTable(r.getData().getId(), r.getData());
 		}
 	}
 }

@@ -83,8 +83,9 @@ public class Document implements IEntity {
 		}
 		DocumentPage page = null;
 		if (createIfNotExisting) {
-			while (i > 0) {
+			while (i >= 0) {
 				page = addPage();
+				i--;
 			}
 		}
 		return page;
@@ -193,17 +194,15 @@ public class Document implements IEntity {
 	public Document(final BinaryDeserializer reader) throws IOException {
 		_uniqueId = reader.readInt();
 		_clientId = reader.readInt();
+		reader.putObjectTable(this.getId(), this);
 		final int count = reader.readInt();
 		for (int i = 0; i < count; i++) {
-			final IEntity entity = reader.readSerializableClass(new Class<?>[] {
-					BinaryDeserializer.class, Document.class }, new Object[] {
-					reader, this });
+			final IEntity entity = reader.readObjectTable();
 			_objects.put(entity.getId(), entity);
 		}
-		final int pageCount = _pages.getFirst().getNextCount();
+		final int pageCount = reader.readInt();
 		for (int i = 0; i < pageCount; i++) {
-			final long pageId = reader.readLong();
-			final DocumentPage page = (DocumentPage) getObject(pageId);
+			final DocumentPage page = reader.readObjectTable();
 			_pages.addLast(page);
 		}
 	}
@@ -214,12 +213,12 @@ public class Document implements IEntity {
 		writer.writeInt(_clientId);
 		writer.writeInt(_objects.size());
 		for (final IEntity entity : _objects.values()) {
-			writer.writeSerializableClass(entity);
+			writer.writeObjectTable(entity.getId(), entity);
 		}
 		writer.writeInt(_pages.getFirst().getNextCount());
 		for (LinkedElement<DocumentPage> dp = _pages.getFirst(); dp != null; dp = dp
 				.getNext()) {
-			writer.writeLong(dp.getData().getId());
+			writer.writeObjectTable(dp.getData().getId(), dp.getData());
 		}
 	}
 }

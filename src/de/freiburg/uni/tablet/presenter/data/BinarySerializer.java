@@ -16,6 +16,7 @@ import java.util.HashMap;
 public class BinarySerializer {
 	private final DataOutputStream _dataOutputStream;
 	private final HashMap<String, Integer> _stringTable = new HashMap<String, Integer>();
+	private final HashMap<Long, IBinarySerializable> _objectTable = new HashMap<Long, IBinarySerializable>();
 
 	/**
 	 * 
@@ -63,6 +64,18 @@ public class BinarySerializer {
 			_stringTable.put(value, newIndex);
 			writeInt(newIndex | 0x80000000);
 			writeString(value);
+		}
+	}
+
+	public void writeObjectTable(final long identifier,
+			final IBinarySerializable obj) throws IOException {
+		final Object data = _objectTable.get(identifier);
+		if (data != null) {
+			writeLong(identifier);
+		} else {
+			_objectTable.put(identifier, obj);
+			writeLong(identifier | 0x8000000000000000l);
+			writeSerializableClass(obj);
 		}
 	}
 }

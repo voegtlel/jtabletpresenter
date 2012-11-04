@@ -35,25 +35,6 @@ public class ScribbleSegment implements IBinarySerializable {
 		_maxY = Float.MIN_VALUE;
 	}
 
-	public ScribbleSegment(final BinaryDeserializer reader) throws IOException {
-		_points = new LinkedElementList<DataPoint>();
-		_minX = Float.MAX_VALUE;
-		_minY = Float.MAX_VALUE;
-		_maxX = Float.MIN_VALUE;
-		_maxY = Float.MIN_VALUE;
-		_hasBoundary = true;
-
-		final int count = reader.readInt();
-		for (int i = 0; i < count; i++) {
-			final DataPoint e = new DataPoint(reader);
-			_points.addLast(e);
-			_minX = Math.min(_minX, e.getX());
-			_minY = Math.min(_minY, e.getY());
-			_maxX = Math.max(_maxX, e.getX());
-			_maxY = Math.max(_maxY, e.getY());
-		}
-	}
-
 	private ScribbleSegment(final LinkedElementList<DataPoint> points) {
 		_points = points;
 		_hasBoundary = false;
@@ -241,6 +222,25 @@ public class ScribbleSegment implements IBinarySerializable {
 	 */
 	public boolean isEmpty() {
 		return _points.isEmpty();
+	}
+
+	public ScribbleSegment(final BinaryDeserializer reader) throws IOException {
+		_points = new LinkedElementList<DataPoint>();
+		_minX = Float.MAX_VALUE;
+		_minY = Float.MAX_VALUE;
+		_maxX = Float.MIN_VALUE;
+		_maxY = Float.MIN_VALUE;
+		_hasBoundary = true;
+
+		final int count = reader.readInt();
+		for (int i = 0; i < count; i++) {
+			final DataPoint e = new DataPoint(reader);
+			_points.addLast(e);
+			_minX = Math.min(_minX, e.getX());
+			_minY = Math.min(_minY, e.getY());
+			_maxX = Math.max(_maxX, e.getX());
+			_maxY = Math.max(_maxY, e.getY());
+		}
 	}
 
 	@Override

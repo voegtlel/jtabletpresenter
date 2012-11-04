@@ -2,6 +2,7 @@ package de.freiburg.uni.tablet.presenter.editor.pageeditor;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -58,12 +59,15 @@ public class JPageRenderer extends Component implements IPageEditor,
 			g.setColor(getBackground());
 			g.fillRect(0, 0, 1, 1);
 		} else {
+			System.out.println("Paint1");
+			System.out.flush();
 			if (!_lastRenderDimensions.equals(this.getSize())) {
 				_lastRenderDimensions = this.getSize();
 				initializeGraphics();
 			}
 			_displayedPageLayerBuffer.drawBuffer((Graphics2D) g);
-			System.out.println("Paint");
+			System.out.println("Paint2");
+			System.out.flush();
 		}
 		if (_paintSynch != null) {
 			synchronized (_paintSynch) {
@@ -134,10 +138,16 @@ public class JPageRenderer extends Component implements IPageEditor,
 		if (_paintSynch != null) {
 			synchronized (_paintSynch) {
 				repaint(0, 0, 1, 1);
-				try {
-					_paintSynch.wait(500);
-				} catch (final InterruptedException e) {
-					e.printStackTrace();
+				if (!EventQueue.isDispatchThread()) {
+					try {
+						System.out.println("Wait1");
+						System.out.flush();
+						_paintSynch.wait(500);
+						System.out.println("Wait2");
+						System.out.flush();
+					} catch (final InterruptedException e) {
+						e.printStackTrace();
+					}
 				}
 			}
 		}

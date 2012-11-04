@@ -24,15 +24,6 @@ public class DataPoint implements IBinarySerializable {
 		_timestamp = timestamp;
 	}
 
-	public DataPoint(final BinaryDeserializer reader) throws IOException {
-		_xOrig = reader.readFloat();
-		_yOrig = reader.readFloat();
-		_x = reader.readFloat();
-		_y = reader.readFloat();
-		_pressure = reader.readFloat();
-		_timestamp = reader.readLong();
-	}
-
 	/**
 	 * @return the x
 	 */
@@ -68,13 +59,15 @@ public class DataPoint implements IBinarySerializable {
 		return _timestamp;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * de.freiburg.uni.tablet.presenter.IBinarySerializable#serialize(java.io
-	 * .DataOutputStream)
-	 */
+	public DataPoint(final BinaryDeserializer reader) throws IOException {
+		_xOrig = reader.readFloat();
+		_yOrig = reader.readFloat();
+		_x = reader.readFloat();
+		_y = reader.readFloat();
+		_pressure = reader.readFloat();
+		_timestamp = reader.readLong();
+	}
+
 	@Override
 	public void serialize(final BinarySerializer writer) throws IOException {
 		writer.writeFloat(_xOrig);

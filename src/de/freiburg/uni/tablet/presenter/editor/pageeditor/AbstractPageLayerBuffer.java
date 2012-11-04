@@ -61,6 +61,7 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer {
 		setRenderingHints(_graphics);
 		_graphics.setBackground(new Color(0, true));
 		_isEmpty = true;
+		System.out.println("Resized: " + width + "x" + height);
 	}
 
 	@Override

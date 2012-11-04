@@ -26,7 +26,7 @@ public class ButtonPrevious extends AbstractButtonAction {
 				.getCurrentPageIndex();
 		if (currentPageIndex > 0) {
 			_editor.getDocumentEditor().setCurrentPageByIndex(
-					currentPageIndex + 1, true);
+					currentPageIndex - 1, true);
 		}
 	}
 }

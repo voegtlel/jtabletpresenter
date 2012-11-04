@@ -151,18 +151,17 @@ public class DocumentEditor implements IBinarySerializable {
 	}
 
 	public DocumentEditor(final BinaryDeserializer reader) throws IOException {
-		_document = new Document(reader);
+		_document = reader.readObjectTable();
 		_currentPen = reader.readSerializableClass();
-		final long pageId = reader.readLong();
-		_currentPage = (DocumentPage) _document.getObject(pageId);
+		_currentPage = reader.readObjectTable();
 		_activeLayerClientOnly = reader.readBoolean();
 	}
 
 	@Override
 	public void serialize(final BinarySerializer writer) throws IOException {
-		_document.serialize(writer);
+		writer.writeObjectTable(_document.getId(), _document);
 		writer.writeSerializableClass(_currentPen);
-		writer.writeLong(_currentPage.getId());
+		writer.writeObjectTable(_currentPage.getId(), _currentPage);
 		writer.writeBoolean(_activeLayerClientOnly);
 	}
 }

@@ -37,7 +37,7 @@ public class ButtonSpinnerPage extends AbstractButtonAction {
 				Integer.MAX_VALUE));
 		_spinner.setPreferredSize(new Dimension(JPageToolButton.WIDTH_NORMAL,
 				_spinner.getPreferredSize().height));
-		_spinner.setModel(new SpinnerNumberModel(0, 0, Integer.MAX_VALUE, 1));
+		_spinner.setModel(new SpinnerNumberModel(1, 1, Integer.MAX_VALUE, 1));
 		_spinner.getModel().addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(final ChangeEvent e) {
@@ -45,7 +45,6 @@ public class ButtonSpinnerPage extends AbstractButtonAction {
 			}
 		});
 		_documentEditorListener = new DocumentEditorAdapter() {
-
 			@Override
 			public void currentPageChanged(final DocumentPage lastCurrentPage) {
 				onUpdateSpinner();
@@ -55,9 +54,10 @@ public class ButtonSpinnerPage extends AbstractButtonAction {
 	}
 
 	protected void onUpdateSpinner() {
-		final int pageIndex = _editor.getDocumentEditor().getCurrentPageIndex();
-		if (!_spinner.getValue().equals(pageIndex)) {
-			_spinner.setValue(pageIndex);
+		final int pageNumber = _editor.getDocumentEditor()
+				.getCurrentPageIndex() + 1;
+		if (!_spinner.getValue().equals(pageNumber)) {
+			_spinner.setValue(pageNumber);
 		}
 	}
 
@@ -66,7 +66,7 @@ public class ButtonSpinnerPage extends AbstractButtonAction {
 	 */
 	protected void onSpinnnerChanged() {
 		_editor.getDocumentEditor().setCurrentPageByIndex(
-				(Integer) _spinner.getValue(), true);
+				(Integer) _spinner.getValue() - 1, true);
 	}
 
 	@Override

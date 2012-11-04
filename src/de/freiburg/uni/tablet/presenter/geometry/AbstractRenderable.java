@@ -20,16 +20,6 @@ public abstract class AbstractRenderable implements IBinarySerializable,
 	}
 
 	/**
-	 * Creates the renderable from an input stream
-	 * 
-	 * @throws IOException
-	 */
-	protected AbstractRenderable(final BinaryDeserializer reader)
-			throws IOException {
-		_id = reader.readLong();
-	}
-
-	/**
 	 * Returns the id of the renderable object.
 	 * 
 	 * @return id
@@ -49,8 +39,18 @@ public abstract class AbstractRenderable implements IBinarySerializable,
 		return _parent;
 	}
 
+	/**
+	 * Creates the renderable from an input stream
+	 * 
+	 * @throws IOException
+	 */
+	protected AbstractRenderable(final BinaryDeserializer reader)
+			throws IOException {
+		_id = reader.readLong();
+	}
+
 	@Override
-	public void serialize(final BinarySerializer stream) throws IOException {
-		stream.writeLong(_id);
+	public void serialize(final BinarySerializer writer) throws IOException {
+		writer.writeLong(_id);
 	}
 }

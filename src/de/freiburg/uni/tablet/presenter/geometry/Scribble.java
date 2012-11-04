@@ -8,7 +8,6 @@ import de.freiburg.uni.tablet.presenter.list.LinkedElement;
 import de.freiburg.uni.tablet.presenter.list.LinkedElementList;
 import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
 import de.freiburg.uni.tablet.presenter.page.IPen;
-import de.freiburg.uni.tablet.presenter.page.SolidPen;
 
 public class Scribble extends AbstractRenderable {
 	private final LinkedElementList<ScribbleSegment> _segments = new LinkedElementList<ScribbleSegment>();
@@ -18,15 +17,6 @@ public class Scribble extends AbstractRenderable {
 	public Scribble(final long id, final IPen pen) {
 		super(id);
 		_pen = pen;
-	}
-
-	public Scribble(final BinaryDeserializer reader) throws IOException {
-		super(reader);
-		_pen = new SolidPen(reader);
-		final int count = reader.readInt();
-		for (int i = 0; i < count; i++) {
-			_segments.addLast(new ScribbleSegment(reader));
-		}
 	}
 
 	@Override
@@ -112,10 +102,19 @@ public class Scribble extends AbstractRenderable {
 		}
 	}
 
+	public Scribble(final BinaryDeserializer reader) throws IOException {
+		super(reader);
+		_pen = reader.readSerializableClass();
+		final int count = reader.readInt();
+		for (int i = 0; i < count; i++) {
+			_segments.addLast(new ScribbleSegment(reader));
+		}
+	}
+
 	@Override
 	public void serialize(final BinarySerializer writer) throws IOException {
 		super.serialize(writer);
-		_pen.serialize(writer);
+		writer.writeSerializableClass(_pen);
 		writer.writeInt(_segments.getFirst().getNextCount());
 		for (LinkedElement<ScribbleSegment> element = _segments.getFirst(); element != null; element = element
 				.getNext()) {

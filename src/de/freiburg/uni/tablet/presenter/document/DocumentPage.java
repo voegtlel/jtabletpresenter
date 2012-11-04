@@ -60,16 +60,41 @@ public class DocumentPage implements IEntity {
 		return _serverSyncLayer;
 	}
 
-	public DocumentPage(final BinaryDeserializer reader, final Document document)
-			throws IOException {
+	public DocumentPage(final BinaryDeserializer reader) throws IOException {
 		_id = reader.readLong();
-		_document = document;
-		_clientOnlyLayer = new DocumentPageLayer(this);
-		_serverSyncLayer = new DocumentPageLayer(this);
+		reader.putObjectTable(this.getId(), this);
+		_document = reader.readObjectTable();
+		_clientOnlyLayer = reader.readObjectTable();
+		_serverSyncLayer = reader.readObjectTable();
 	}
 
 	@Override
 	public void serialize(final BinarySerializer writer) throws IOException {
 		writer.writeLong(_id);
+		writer.writeObjectTable(_document.getId(), _document);
+		writer.writeObjectTable(_clientOnlyLayer.getId(), _clientOnlyLayer);
+		writer.writeObjectTable(_serverSyncLayer.getId(), _serverSyncLayer);
+	}
+
+	public DocumentPage(final BinaryDeserializer reader, final Document document)
+			throws IOException {
+		_id = reader.readLong();
+		_document = document;
+		reader.putObjectTable(this.getId(), this);
+		_clientOnlyLayer = reader.readObjectTable();
+		_serverSyncLayer = reader.readObjectTable();
+	}
+
+	/**
+	 * Serialize this object directly, without its parent
+	 * 
+	 * @param writer
+	 * @throws IOException
+	 */
+	public void serializeDirect(final BinarySerializer writer)
+			throws IOException {
+		writer.writeLong(_id);
+		writer.writeObjectTable(_clientOnlyLayer.getId(), _clientOnlyLayer);
+		writer.writeObjectTable(_serverSyncLayer.getId(), _serverSyncLayer);
 	}
 }

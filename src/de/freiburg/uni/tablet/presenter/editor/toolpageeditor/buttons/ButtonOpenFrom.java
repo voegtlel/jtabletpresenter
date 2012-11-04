@@ -33,37 +33,37 @@ public class ButtonOpenFrom extends AbstractButtonAction {
 
 	@Override
 	public void perform(final Component button) {
-		JFileChooser fileChooser = new JFileChooser();
-		FileFilter presenterDocumentFile = new FileFilter() {
+		final JFileChooser fileChooser = new JFileChooser();
+		final FileFilter presenterDocumentFile = new FileFilter() {
 			@Override
 			public String getDescription() {
 				return "JPresenter Document File (*.jpd)";
 			}
-			
+
 			@Override
-			public boolean accept(File f) {
+			public boolean accept(final File f) {
 				return f.getPath().toLowerCase().endsWith(".jpd");
 			}
 		};
-		FileFilter presenterPageFile = new FileFilter() {
+		final FileFilter presenterPageFile = new FileFilter() {
 			@Override
 			public String getDescription() {
 				return "JPresenter Page File (*.jpp)";
 			}
-			
+
 			@Override
-			public boolean accept(File f) {
+			public boolean accept(final File f) {
 				return f.getPath().toLowerCase().endsWith(".jpp");
 			}
 		};
-		FileFilter pdf = new FileFilter() {
+		final FileFilter pdf = new FileFilter() {
 			@Override
 			public String getDescription() {
 				return "PDF (*.pdf)";
 			}
-			
+
 			@Override
-			public boolean accept(File f) {
+			public boolean accept(final File f) {
 				return f.getPath().toLowerCase().endsWith(".pdf");
 			}
 		};
@@ -72,18 +72,23 @@ public class ButtonOpenFrom extends AbstractButtonAction {
 		fileChooser.addChoosableFileFilter(pdf);
 		fileChooser.setFileFilter(presenterDocumentFile);
 		if (fileChooser.showOpenDialog(button) == JFileChooser.APPROVE_OPTION) {
-			File f = fileChooser.getSelectedFile();
+			final File f = fileChooser.getSelectedFile();
 			try {
-				FileInputStream fileInputStream = new FileInputStream(f);
-				BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
-				BinaryDeserializer binaryDeserializer = new BinaryDeserializer(bufferedInputStream);
-				_editor.getDocumentEditor().setDocument(new Document(binaryDeserializer));
+				final FileInputStream fileInputStream = new FileInputStream(f);
+				final BufferedInputStream bufferedInputStream = new BufferedInputStream(
+						fileInputStream);
+				final BinaryDeserializer binaryDeserializer = new BinaryDeserializer(
+						bufferedInputStream);
+				final Document document = binaryDeserializer.readObjectTable();
+				_editor.getDocumentEditor().setDocument(document);
 				bufferedInputStream.close();
 				fileInputStream.close();
-			} catch (FileNotFoundException e) {
-				JOptionPane.showMessageDialog(button, "Couldn't open file", "Error", JOptionPane.ERROR_MESSAGE);
-			} catch (IOException e) {
-				JOptionPane.showMessageDialog(button, "Couldn't read file: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+			} catch (final FileNotFoundException e) {
+				JOptionPane.showMessageDialog(button, "Couldn't open file",
+						"Error", JOptionPane.ERROR_MESSAGE);
+			} catch (final IOException e) {
+				JOptionPane.showMessageDialog(button, "Couldn't read file: "
+						+ e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 			}
 		}
 	}
