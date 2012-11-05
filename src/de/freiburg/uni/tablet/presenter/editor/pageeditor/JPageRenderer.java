@@ -51,6 +51,11 @@ public class JPageRenderer extends Component implements IPageEditor,
 	}
 
 	@Override
+	public void update(final Graphics g) {
+		paint(g);
+	}
+
+	@Override
 	public void paint(final Graphics g) {
 		final Rectangle clipBounds = g.getClipBounds();
 		if (clipBounds.x == 0 && clipBounds.y == 0 && clipBounds.width == 1
@@ -69,6 +74,7 @@ public class JPageRenderer extends Component implements IPageEditor,
 			System.out.println("Paint2");
 			System.out.flush();
 		}
+		getToolkit().sync();
 		if (_paintSynch != null) {
 			synchronized (_paintSynch) {
 				_paintSynch.notifyAll();

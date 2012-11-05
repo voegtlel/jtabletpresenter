@@ -22,8 +22,8 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer {
 	private int _renderWidth = 1;
 	private int _renderHeight = 1;
 
-	private float _renderFactorX = 1;
-	private float _renderFactorY = 1;
+	protected float _renderFactorX = 1;
+	protected float _renderFactorY = 1;
 	protected final IDisplayRenderer _displayRenderer;
 
 	private final Ellipse2D.Float _ellipseRenderer = new Ellipse2D.Float();
