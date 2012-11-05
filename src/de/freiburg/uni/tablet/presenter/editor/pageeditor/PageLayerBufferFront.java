@@ -29,9 +29,11 @@ public class PageLayerBufferFront extends AbstractPageLayerBuffer implements
 			final float x2, final float y2) {
 		if (_graphics != null) {
 			final Graphics2D g = _displayRenderer.createRenderer();
-			setRenderingHints(g);
+			if (g != null) {
+				setRenderingHints(g);
+				draw(g, pen, x1, y1, x2, y2);
+			}
 			draw(_graphics, pen, x1, y1, x2, y2);
-			draw(g, pen, x1, y1, x2, y2);
 			_displayRenderer.updateRenderer(g);
 		}
 	}
@@ -40,9 +42,11 @@ public class PageLayerBufferFront extends AbstractPageLayerBuffer implements
 	public void draw(final IPen pen, final float x, final float y) {
 		if (_graphics != null) {
 			final Graphics2D g = _displayRenderer.createRenderer();
-			setRenderingHints(g);
+			if (g != null) {
+				setRenderingHints(g);
+				draw(g, pen, x, y);
+			}
 			draw(_graphics, pen, x, y);
-			draw(g, pen, x, y);
 			_displayRenderer.updateRenderer(g);
 		}
 	}

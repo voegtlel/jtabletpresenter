@@ -42,9 +42,6 @@ public class JPageRendererBufferStrategy extends Canvas implements
 	private BufferStrategy _bufferStrategy;
 
 	public JPageRendererBufferStrategy() {
-		// setDoubleBuffered(false);
-		// setIgnoreRepaint(true);
-
 		AwtPenToolkit.addPenListener(this, _pagePenDispatcher);
 		AwtPenToolkit.getPenManager().pen.levelEmulator
 				.setPressureTriggerForLeftCursorButton(0.5f);
@@ -67,29 +64,22 @@ public class JPageRendererBufferStrategy extends Canvas implements
 		this.paint(g);
 	}
 
-	@Override
-	public void setSize(final int width, final int height) {
-		System.out.println("setSize1");
-		super.setSize(width, height);
-	}
-
-	@Override
-	public void setSize(final Dimension d) {
-		System.out.println("setSize2");
-		super.setSize(d);
-	}
-
 	private void initialize() {
-		System.out.println("Init: " + _bufferStrategy);
 		createBufferStrategy(2);
 		_bufferStrategy = getBufferStrategy();
 		System.out.println("Inited: " + _bufferStrategy);
 	}
 
 	@Override
-	public void updateRenderer(final Graphics2D g) {
-		g.dispose();
+	public void updateRenderer(final Graphics2D dummy) {
+		if (!_lastRenderDimensions.equals(this.getSize())) {
+			_lastRenderDimensions = this.getSize();
+			initializeGraphics();
+		}
 		if (_bufferStrategy != null) {
+			final Graphics2D g = (Graphics2D) _bufferStrategy.getDrawGraphics();
+			_displayedPageLayerBuffer.drawBuffer(g, this);
+			g.dispose();
 			_bufferStrategy.show();
 		}
 		getToolkit().sync();
@@ -104,18 +94,7 @@ public class JPageRendererBufferStrategy extends Canvas implements
 
 	@Override
 	public Graphics2D createRenderer() {
-		if (_bufferStrategy == null) {
-			// Fallback
-			return (Graphics2D) this.getGraphics();
-		}
-		if (!_lastRenderDimensions.equals(this.getSize())) {
-			_lastRenderDimensions = this.getSize();
-			initializeGraphics();
-		}
-		final Graphics2D g = (Graphics2D) _bufferStrategy.getDrawGraphics();
-		g.fillRect(0, 0, getWidth(), getHeight());
-		_displayedPageLayerBuffer.drawBuffer(g, this);
-		return g;
+		return null;
 	}
 
 	/**
@@ -136,30 +115,13 @@ public class JPageRendererBufferStrategy extends Canvas implements
 	@Override
 	public void clear() {
 		if (isVisible()) {
-			final Graphics2D g = createRenderer();
-			updateRenderer(g);
+			updateRenderer(null);
 		}
 	}
 
 	@Override
 	public void clear(final IRenderable renderable) {
-		if (isVisible()) {
-			final Graphics2D g = createRenderer();
-			final int radius = (int) Math.ceil(renderable.getRadius());
-			final int x = (int) (renderable.getMinX() * _lastRenderDimensions.width)
-					- radius;
-			final int y = (int) (renderable.getMinY() * _lastRenderDimensions.height)
-					- radius;
-			final int w = (int) Math.ceil(renderable.getMaxX()
-					* _lastRenderDimensions.width)
-					+ 1 + x + radius;
-			final int h = (int) Math.ceil(renderable.getMaxY()
-					* _lastRenderDimensions.height)
-					+ 1 + y + radius;
-			g.clipRect(x, y, w, h);
-			_displayedPageLayerBuffer.drawBuffer(g, this);
-			updateRenderer(g);
-		}
+		clear();
 	}
 
 	@Override
