@@ -28,7 +28,8 @@ import de.freiburg.uni.tablet.presenter.document.DocumentPageLayer;
 import de.freiburg.uni.tablet.presenter.editor.IPageEditor;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 import de.freiburg.uni.tablet.presenter.editor.PageRepaintListener;
-import de.freiburg.uni.tablet.presenter.editor.pageeditor.JPageRenderer;
+import de.freiburg.uni.tablet.presenter.editor.pageeditor.IPageRenderer;
+import de.freiburg.uni.tablet.presenter.editor.pageeditor.JPageRendererBufferStrategy;
 import de.freiburg.uni.tablet.presenter.editor.pageeditor.PageLayerBufferBack;
 import de.freiburg.uni.tablet.presenter.editor.pageeditor.PageLayerBufferColor;
 import de.freiburg.uni.tablet.presenter.editor.pageeditor.PageLayerBufferComposite;
@@ -123,9 +124,10 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 	 */
 	private void initialize() {
 		getContentPane().setLayout(new BorderLayout(0, 0));
-		final JPageRenderer pageRenderer = new JPageRenderer();
+		final IPageRenderer pageRenderer = new JPageRendererBufferStrategy();
 		_pageRenderer = pageRenderer;
-		getContentPane().add(pageRenderer, BorderLayout.CENTER);
+		getContentPane().add(pageRenderer.getContainerComponent(),
+				BorderLayout.CENTER);
 
 		final PageLayerBufferComposite pageLayers = new PageLayerBufferComposite(
 				pageRenderer);

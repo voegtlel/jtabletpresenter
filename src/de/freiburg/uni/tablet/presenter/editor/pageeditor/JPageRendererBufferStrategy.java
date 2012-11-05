@@ -1,21 +1,21 @@
 package de.freiburg.uni.tablet.presenter.editor.pageeditor;
 
+import java.awt.Canvas;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.EventQueue;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.Rectangle;
-import java.awt.Toolkit;
+import java.awt.image.BufferStrategy;
+
+import javax.swing.SwingUtilities;
 
 import jpen.owner.multiAwt.AwtPenToolkit;
-import de.freiburg.uni.tablet.presenter.editor.IPageEditor;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 import de.freiburg.uni.tablet.presenter.tools.ITool;
 
-public class JPageRenderer extends Component implements IPageEditor,
-		IDisplayRenderer {
+public class JPageRendererBufferStrategy extends Canvas implements
+		IPageRenderer {
 	/**
 	 * Default serial version
 	 */
@@ -37,58 +37,95 @@ public class JPageRenderer extends Component implements IPageEditor,
 	private final PagePenDispatcher _pagePenDispatcher = new PagePenDispatcher();
 
 	/**
-	 * Object for locking the paint-Method.
+	 * Buffer strategy
 	 */
-	private final Object _paintSynch = new Object();
+	private BufferStrategy _bufferStrategy;
 
-	public JPageRenderer() {
+	public JPageRendererBufferStrategy() {
 		// setDoubleBuffered(false);
-		setIgnoreRepaint(true);
+		// setIgnoreRepaint(true);
 
 		AwtPenToolkit.addPenListener(this, _pagePenDispatcher);
 		AwtPenToolkit.getPenManager().pen.levelEmulator
 				.setPressureTriggerForLeftCursorButton(0.5f);
-	}
 
-	@Override
-	public void update(final Graphics g) {
-		paint(g);
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				JPageRendererBufferStrategy.this.initialize();
+			}
+		});
 	}
 
 	@Override
 	public void paint(final Graphics g) {
-		final Rectangle clipBounds = g.getClipBounds();
-		if (clipBounds.x == 0 && clipBounds.y == 0 && clipBounds.width == 1
-				&& clipBounds.height == 1) {
-			// Optimize this!
-			g.setColor(getBackground());
-			g.fillRect(0, 0, 1, 1);
-		} else {
-			System.out.println("Paint1");
-			System.out.flush();
-			if (!_lastRenderDimensions.equals(this.getSize())) {
-				_lastRenderDimensions = this.getSize();
-				initializeGraphics();
-			}
-			_displayedPageLayerBuffer.drawBuffer((Graphics2D) g, this);
-			System.out.println("Paint2");
-			System.out.flush();
+		clear();
+	}
+
+	@Override
+	public void update(final Graphics g) {
+		this.paint(g);
+	}
+
+	@Override
+	public void setSize(final int width, final int height) {
+		System.out.println("setSize1");
+		super.setSize(width, height);
+	}
+
+	@Override
+	public void setSize(final Dimension d) {
+		System.out.println("setSize2");
+		super.setSize(d);
+	}
+
+	private void initialize() {
+		System.out.println("Init: " + _bufferStrategy);
+		createBufferStrategy(2);
+		_bufferStrategy = getBufferStrategy();
+		System.out.println("Inited: " + _bufferStrategy);
+	}
+
+	@Override
+	public void updateRenderer(final Graphics2D g) {
+		g.dispose();
+		if (_bufferStrategy != null) {
+			_bufferStrategy.show();
 		}
 		getToolkit().sync();
-		if (_paintSynch != null) {
-			synchronized (_paintSynch) {
-				_paintSynch.notifyAll();
-			}
+	}
+
+	@Override
+	public Image createImageBuffer(final int width, final int height,
+			final int transparency) {
+		return getGraphicsConfiguration().createCompatibleImage(width, height,
+				transparency);
+	}
+
+	@Override
+	public Graphics2D createRenderer() {
+		if (_bufferStrategy == null) {
+			// Fallback
+			return (Graphics2D) this.getGraphics();
 		}
+		if (!_lastRenderDimensions.equals(this.getSize())) {
+			_lastRenderDimensions = this.getSize();
+			initializeGraphics();
+		}
+		final Graphics2D g = (Graphics2D) _bufferStrategy.getDrawGraphics();
+		g.fillRect(0, 0, getWidth(), getHeight());
+		_displayedPageLayerBuffer.drawBuffer(g, this);
+		return g;
 	}
 
 	/**
 	 * (re)initialized the buffers and drawing destinations
 	 */
 	private void initializeGraphics() {
-		// System.out.println("initGraphics");
+		System.out.println("initGraphics");
 		if (_lastRenderDimensions.width > 0 && _lastRenderDimensions.height > 0
 				&& this.isVisible()) {
+
 			_displayedPageLayerBuffer.resize(_lastRenderDimensions.width,
 					_lastRenderDimensions.height);
 			// Update pen listener
@@ -100,7 +137,6 @@ public class JPageRenderer extends Component implements IPageEditor,
 	public void clear() {
 		if (isVisible()) {
 			final Graphics2D g = createRenderer();
-			_displayedPageLayerBuffer.drawBuffer(g, this);
 			updateRenderer(g);
 		}
 	}
@@ -135,36 +171,6 @@ public class JPageRenderer extends Component implements IPageEditor,
 	public void setDisplayedPageLayerBuffer(
 			final IPageLayerBuffer pageLayerBuffer) {
 		_displayedPageLayerBuffer = pageLayerBuffer;
-	}
-
-	@Override
-	public void updateRenderer(final Graphics2D g) {
-		Toolkit.getDefaultToolkit().sync();
-		g.dispose();
-		if (_paintSynch != null) {
-			synchronized (_paintSynch) {
-				repaint(0, 0, 1, 1);
-				if (!EventQueue.isDispatchThread()) {
-					try {
-						_paintSynch.wait(500);
-					} catch (final InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		}
-	}
-
-	@Override
-	public Image createImageBuffer(final int width, final int height,
-			final int transparency) {
-		return getGraphicsConfiguration().createCompatibleImage(width, height,
-				transparency);
-	}
-
-	@Override
-	public Graphics2D createRenderer() {
-		return (Graphics2D) this.getGraphics();
 	}
 
 	@Override

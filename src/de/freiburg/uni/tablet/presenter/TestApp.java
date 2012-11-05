@@ -15,6 +15,7 @@ public class TestApp {
 	 * Launch the application.
 	 */
 	public static void main(final String[] args) {
+		System.setProperty("sun.awt.noerasebackground", "true");
 		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run() {
