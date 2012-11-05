@@ -19,6 +19,11 @@ import java.awt.event.KeyEvent;
 import javax.swing.JDialog;
 
 public class JPageToolFrame<T> extends JDialog {
+	/**
+	 * Default serial version
+	 */
+	private static final long serialVersionUID = 1L;
+
 	private T _selectedValue;
 
 	/**

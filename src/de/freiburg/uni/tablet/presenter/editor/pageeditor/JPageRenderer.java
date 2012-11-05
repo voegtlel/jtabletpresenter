@@ -65,7 +65,7 @@ public class JPageRenderer extends Component implements IPageEditor,
 				_lastRenderDimensions = this.getSize();
 				initializeGraphics();
 			}
-			_displayedPageLayerBuffer.drawBuffer((Graphics2D) g);
+			_displayedPageLayerBuffer.drawBuffer((Graphics2D) g, this);
 			System.out.println("Paint2");
 			System.out.flush();
 		}
@@ -94,7 +94,7 @@ public class JPageRenderer extends Component implements IPageEditor,
 	public void clear() {
 		if (isVisible()) {
 			final Graphics2D g = createRenderer();
-			_displayedPageLayerBuffer.drawBuffer(g);
+			_displayedPageLayerBuffer.drawBuffer(g, this);
 			updateRenderer(g);
 		}
 	}
@@ -115,7 +115,7 @@ public class JPageRenderer extends Component implements IPageEditor,
 					* _lastRenderDimensions.height)
 					+ 1 + y + radius;
 			g.clipRect(x, y, w, h);
-			_displayedPageLayerBuffer.drawBuffer(g);
+			_displayedPageLayerBuffer.drawBuffer(g, this);
 			updateRenderer(g);
 		}
 	}
@@ -140,11 +140,7 @@ public class JPageRenderer extends Component implements IPageEditor,
 				repaint(0, 0, 1, 1);
 				if (!EventQueue.isDispatchThread()) {
 					try {
-						System.out.println("Wait1");
-						System.out.flush();
 						_paintSynch.wait(500);
-						System.out.println("Wait2");
-						System.out.flush();
 					} catch (final InterruptedException e) {
 						e.printStackTrace();
 					}

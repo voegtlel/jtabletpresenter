@@ -9,6 +9,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
+import java.awt.image.ImageObserver;
 
 import de.freiburg.uni.tablet.presenter.page.IPen;
 
@@ -65,9 +66,9 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer {
 	}
 
 	@Override
-	public void drawBuffer(final Graphics2D g) {
+	public void drawBuffer(final Graphics2D g, final ImageObserver obs) {
 		if (!_isEmpty) {
-			g.drawImage(_imageBuffer, 0, 0, null);
+			g.drawImage(_imageBuffer, 0, 0, obs);
 		}
 	}
 

@@ -2,6 +2,7 @@ package de.freiburg.uni.tablet.presenter.editor.pageeditor;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.image.ImageObserver;
 
 public class PageLayerBufferColor implements IPageLayerBuffer {
 	private int _width = 0;
@@ -19,7 +20,7 @@ public class PageLayerBufferColor implements IPageLayerBuffer {
 	}
 
 	@Override
-	public void drawBuffer(final Graphics2D g) {
+	public void drawBuffer(final Graphics2D g, final ImageObserver obs) {
 		g.setBackground(_color);
 		g.clearRect(0, 0, _width, _height);
 	}

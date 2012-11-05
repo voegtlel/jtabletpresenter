@@ -1,6 +1,7 @@
 package de.freiburg.uni.tablet.presenter.editor.pageeditor;
 
 import java.awt.Graphics2D;
+import java.awt.image.ImageObserver;
 import java.util.LinkedList;
 
 public class PageLayerBufferComposite implements IPageLayerBuffer {
@@ -65,9 +66,9 @@ public class PageLayerBufferComposite implements IPageLayerBuffer {
 	}
 
 	@Override
-	public void drawBuffer(final Graphics2D g) {
+	public void drawBuffer(final Graphics2D g, final ImageObserver obs) {
 		for (final IPageLayerBuffer pageLayerBuffer : _pageLayerBuffers) {
-			pageLayerBuffer.drawBuffer(g);
+			pageLayerBuffer.drawBuffer(g, obs);
 		}
 	}
 
