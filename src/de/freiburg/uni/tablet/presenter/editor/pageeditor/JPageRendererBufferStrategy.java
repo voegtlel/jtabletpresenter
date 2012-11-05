@@ -36,6 +36,8 @@ public class JPageRendererBufferStrategy extends Canvas implements
 	 */
 	private final PagePenDispatcher _pagePenDispatcher = new PagePenDispatcher();
 
+	private long _lastFrameTime = 0;
+
 	/**
 	 * Buffer strategy
 	 */
@@ -72,17 +74,26 @@ public class JPageRendererBufferStrategy extends Canvas implements
 
 	@Override
 	public void updateRenderer(final Graphics2D dummy) {
+		boolean dimensionsUpdated = false;
 		if (!_lastRenderDimensions.equals(this.getSize())) {
 			_lastRenderDimensions = this.getSize();
 			initializeGraphics();
+			dimensionsUpdated = true;
 		}
-		if (_bufferStrategy != null) {
-			final Graphics2D g = (Graphics2D) _bufferStrategy.getDrawGraphics();
-			_displayedPageLayerBuffer.drawBuffer(g, this);
-			g.dispose();
-			_bufferStrategy.show();
+		final long time = System.nanoTime();
+		if (dimensionsUpdated
+				|| _lastFrameTime < time
+						+ _pagePenDispatcher.getFrameReduction()) {
+			_lastFrameTime = time;
+			if (_bufferStrategy != null) {
+				final Graphics2D g = (Graphics2D) _bufferStrategy
+						.getDrawGraphics();
+				_displayedPageLayerBuffer.drawBuffer(g, this);
+				g.dispose();
+				_bufferStrategy.show();
+			}
+			getToolkit().sync();
 		}
-		getToolkit().sync();
 	}
 
 	@Override

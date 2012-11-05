@@ -30,6 +30,8 @@ public class PagePenDispatcher implements PenListener {
 
 	private Dimension _drawSize = new Dimension();
 
+	private int _frameReduction = 0;
+
 	public PagePenDispatcher() {
 	}
 
@@ -181,7 +183,11 @@ public class PagePenDispatcher implements PenListener {
 	@Override
 	public void penTock(final long availableMillis) {
 		if (availableMillis <= 0) {
-			System.err.println("Warning: Too slow");
+			System.err.println("Warning: Too slow, reduce to "
+					+ _frameReduction);
+			_frameReduction += 2;
+		} else if (_frameReduction > 0) {
+			_frameReduction--;
 		}
 	}
 
@@ -229,5 +235,9 @@ public class PagePenDispatcher implements PenListener {
 
 	public void setDrawSize(final Dimension drawSize) {
 		_drawSize = drawSize;
+	}
+
+	public int getFrameReduction() {
+		return _frameReduction;
 	}
 }
