@@ -36,7 +36,7 @@ public class JPageRendererBufferStrategy extends Canvas implements
 	 */
 	private final PagePenDispatcher _pagePenDispatcher = new PagePenDispatcher();
 
-	private long _lastFrameTime = 0;
+	private long _nextFrameTime = 0;
 
 	/**
 	 * Buffer strategy
@@ -72,19 +72,16 @@ public class JPageRendererBufferStrategy extends Canvas implements
 		System.out.println("Inited: " + _bufferStrategy);
 	}
 
-	@Override
-	public void updateRenderer(final Graphics2D dummy) {
+	private void render(final boolean force) {
 		boolean dimensionsUpdated = false;
 		if (!_lastRenderDimensions.equals(this.getSize())) {
 			_lastRenderDimensions = this.getSize();
 			initializeGraphics();
 			dimensionsUpdated = true;
 		}
-		final long time = System.nanoTime();
-		if (dimensionsUpdated
-				|| _lastFrameTime < time
-						+ _pagePenDispatcher.getFrameReduction()) {
-			_lastFrameTime = time;
+		final long time = System.nanoTime() / (1000 * 1000);
+		if (force || dimensionsUpdated || _nextFrameTime < time) {
+			_nextFrameTime = time + _pagePenDispatcher.getFrameReduction();
 			if (_bufferStrategy != null) {
 				final Graphics2D g = (Graphics2D) _bufferStrategy
 						.getDrawGraphics();
@@ -94,6 +91,11 @@ public class JPageRendererBufferStrategy extends Canvas implements
 			}
 			getToolkit().sync();
 		}
+	}
+
+	@Override
+	public void updateRenderer(final Graphics2D dummy) {
+		render(false);
 	}
 
 	@Override
@@ -126,13 +128,15 @@ public class JPageRendererBufferStrategy extends Canvas implements
 	@Override
 	public void clear() {
 		if (isVisible()) {
-			updateRenderer(null);
+			render(true);
 		}
 	}
 
 	@Override
 	public void clear(final IRenderable renderable) {
-		clear();
+		if (isVisible()) {
+			render(true);
+		}
 	}
 
 	@Override
