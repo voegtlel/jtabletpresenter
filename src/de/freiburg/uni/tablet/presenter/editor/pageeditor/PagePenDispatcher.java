@@ -182,17 +182,19 @@ public class PagePenDispatcher implements PenListener {
 
 	@Override
 	public void penTock(final long availableMillis) {
-		if (availableMillis <= 0) {
-			_frameReduction = (_frameReduction - availableMillis) * 2;
-			System.err.println("Warning: Too slow, reduce to "
-					+ _frameReduction + " (" + availableMillis + ")");
-		} else if (_frameReduction > 0) {
-			_frameReduction -= availableMillis / 2 + 1;
-			if (_frameReduction < 0) {
-				_frameReduction = 0;
+		if (_activeTool != null) {
+			if (availableMillis <= 0) {
+				_frameReduction = (_frameReduction + 1) * 3 / 2;
+				System.err.println("Warning: Too slow, reduce to "
+						+ _frameReduction + " (" + availableMillis + ")");
+			} else if (_frameReduction > 0) {
+				_frameReduction = (_frameReduction - 1) * 2 / 3;
+				if (_frameReduction < 0) {
+					_frameReduction = 0;
+				}
+				System.out.println("Increase FPS to " + _frameReduction + " ("
+						+ availableMillis + ")");
 			}
-			System.out.println("Increase FPS to " + _frameReduction + " ("
-					+ availableMillis + ")");
 		}
 	}
 
