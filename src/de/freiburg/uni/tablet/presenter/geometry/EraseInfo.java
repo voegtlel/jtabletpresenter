@@ -77,8 +77,7 @@ public class EraseInfo {
 	 */
 	public void applyModifications() {
 		for (final Entry<Long, IRenderable> entry : _modifiedObjects.entrySet()) {
-			final IRenderable renderable = (IRenderable) _document
-					.getObject(entry.getKey());
+			final IRenderable renderable = _layer.getRenderable(entry.getKey());
 			_layer.removeRenderable(renderable);
 			_layer.addRenderable(entry.getValue());
 		}

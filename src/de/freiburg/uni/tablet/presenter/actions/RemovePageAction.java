@@ -57,5 +57,4 @@ public class RemovePageAction implements IAction, IBinarySerializable {
 		writer.writeObjectTable(_prevPage.getId(), _prevPage);
 		writer.writeObjectTable(_page.getId(), _page);
 	}
-
 }

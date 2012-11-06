@@ -13,7 +13,8 @@ import de.freiburg.uni.tablet.presenter.page.SolidPen;
 public class DocumentEditor implements IBinarySerializable {
 	private IPen _currentPen = new SolidPen();
 
-	private Document _document = new Document(0);
+	private Document _document = new Document(1);
+	private final DocumentHistory _history;
 	private DocumentPage _currentPage;
 	private boolean _activeLayerClientOnly = true;
 
@@ -21,6 +22,7 @@ public class DocumentEditor implements IBinarySerializable {
 
 	public DocumentEditor() {
 		_currentPage = _document.getPageByIndex(0, true);
+		_history = new DocumentHistory(this);
 	}
 
 	public void addListener(final DocumentEditorListener listener) {
@@ -150,11 +152,16 @@ public class DocumentEditor implements IBinarySerializable {
 		setCurrentPage(document.getPageByIndex(0, true));
 	}
 
+	public DocumentHistory getHistory() {
+		return _history;
+	}
+
 	public DocumentEditor(final BinaryDeserializer reader) throws IOException {
 		_document = reader.readObjectTable();
 		_currentPen = reader.readSerializableClass();
 		_currentPage = reader.readObjectTable();
 		_activeLayerClientOnly = reader.readBoolean();
+		_history = new DocumentHistory(this);
 	}
 
 	@Override

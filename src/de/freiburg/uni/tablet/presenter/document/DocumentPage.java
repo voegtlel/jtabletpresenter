@@ -28,8 +28,6 @@ public class DocumentPage implements IEntity {
 		_id = _document.getNextId();
 		_clientOnlyLayer = new DocumentPageLayer(this);
 		_serverSyncLayer = new DocumentPageLayer(this);
-		_document.onObjectAdded(getClientOnlyLayer());
-		_document.onObjectAdded(getServerSyncLayer());
 	}
 
 	/**
@@ -40,8 +38,6 @@ public class DocumentPage implements IEntity {
 		_id = newId;
 		_clientOnlyLayer = new DocumentPageLayer(this);
 		_serverSyncLayer = new DocumentPageLayer(this);
-		_document.onObjectAdded(getClientOnlyLayer());
-		_document.onObjectAdded(getServerSyncLayer());
 	}
 
 	@Override

@@ -5,7 +5,6 @@
 package de.freiburg.uni.tablet.presenter.document;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -20,8 +19,6 @@ import de.freiburg.uni.tablet.presenter.list.LinkedElementList;
  * 
  */
 public class Document implements IEntity {
-	private final HashMap<Long, IEntity> _objects = new HashMap<Long, IEntity>();
-
 	private final LinkedElementList<DocumentPage> _pages = new LinkedElementList<DocumentPage>();
 
 	private final int _clientId;
@@ -35,34 +32,6 @@ public class Document implements IEntity {
 	public Document(final int clientId) {
 		_clientId = clientId;
 		addPage();
-	}
-
-	/**
-	 * Gets an object in the document
-	 * 
-	 * @param id
-	 * @return
-	 */
-	public IEntity getObject(final long id) {
-		return _objects.get(id);
-	}
-
-	/**
-	 * Called, when an entity was added
-	 * 
-	 * @param entity
-	 */
-	public void onObjectAdded(final IEntity entity) {
-		_objects.put(entity.getId(), entity);
-	}
-
-	/**
-	 * Called, when an entity was removed
-	 * 
-	 * @param entity
-	 */
-	public void onObjectRemoved(final IEntity entity) {
-		_objects.remove(entity.getId());
 	}
 
 	/**
@@ -110,7 +79,6 @@ public class Document implements IEntity {
 		final DocumentPage result = new DocumentPage(this);
 		final DocumentPage prevData = _pages.getLast() != null ? _pages
 				.getLast().getData() : null;
-		onObjectAdded(result);
 		_pages.addLast(result);
 		firePageInserted(prevData, result);
 		return result;
@@ -242,11 +210,6 @@ public class Document implements IEntity {
 		_uniqueId = reader.readInt();
 		_clientId = reader.readInt();
 		reader.putObjectTable(this.getId(), this);
-		final int count = reader.readInt();
-		for (int i = 0; i < count; i++) {
-			final IEntity entity = reader.readObjectTable();
-			_objects.put(entity.getId(), entity);
-		}
 		final int pageCount = reader.readInt();
 		for (int i = 0; i < pageCount; i++) {
 			final DocumentPage page = reader.readObjectTable();
@@ -258,10 +221,6 @@ public class Document implements IEntity {
 	public void serialize(final BinarySerializer writer) throws IOException {
 		writer.writeInt(_uniqueId);
 		writer.writeInt(_clientId);
-		writer.writeInt(_objects.size());
-		for (final IEntity entity : _objects.values()) {
-			writer.writeObjectTable(entity.getId(), entity);
-		}
 		writer.writeInt(_pages.getFirst().getNextCount());
 		for (LinkedElement<DocumentPage> dp = _pages.getFirst(); dp != null; dp = dp
 				.getNext()) {

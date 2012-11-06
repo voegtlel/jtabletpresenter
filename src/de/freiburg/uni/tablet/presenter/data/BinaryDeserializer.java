@@ -106,7 +106,9 @@ public class BinaryDeserializer {
 			final Class<?>[] ctorArgTypes, final Object[] ctorArgs)
 			throws IOException {
 		final long identifier = readLong();
-		if ((identifier & 0x8000000000000000l) != 0) {
+		if (identifier == 0) {
+			return null;
+		} else if ((identifier & 0x8000000000000000l) != 0) {
 			final T newObj = readSerializableClass(ctorArgTypes, ctorArgs);
 			_objectTable.put(identifier & 0x7fffffffffffffffl, newObj);
 			return newObj;
@@ -124,17 +126,5 @@ public class BinaryDeserializer {
 	public <T extends IBinarySerializable> T readObjectTable()
 			throws IOException {
 		return readObjectTable(_defaultCtorArgTypes, _defaultCtorArgs);
-	}
-
-	public <T> T readObjectTable(final List<T> table) throws IOException {
-		final boolean isNew = readBoolean();
-		if (isNew) {
-			final T objectRef = this.<T> readSerializableClass();
-			table.add(objectRef);
-			return objectRef;
-		} else {
-			final int index = readInt();
-			return table.get(index);
-		}
 	}
 }

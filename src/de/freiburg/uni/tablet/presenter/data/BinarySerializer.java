@@ -69,6 +69,9 @@ public class BinarySerializer {
 
 	public void writeObjectTable(final long identifier,
 			final IBinarySerializable obj) throws IOException {
+		if (obj == null) {
+			writeLong(0);
+		}
 		final Object data = _objectTable.get(identifier);
 		if (data != null) {
 			writeLong(identifier);

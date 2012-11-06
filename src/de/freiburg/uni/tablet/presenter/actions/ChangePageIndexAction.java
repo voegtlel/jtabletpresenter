@@ -17,15 +17,16 @@ import de.freiburg.uni.tablet.presenter.document.DocumentPage;
  * 
  */
 public class ChangePageIndexAction implements IAction, IBinarySerializable {
-	private final long _pageId;
-	private final long _lastPageId;
+	private final DocumentPage _page;
+	private final DocumentPage _lastPage;
 
 	/**
 	 * 
 	 */
-	public ChangePageIndexAction(final long pageId, final long lastPageId) {
-		_pageId = pageId;
-		_lastPageId = lastPageId;
+	public ChangePageIndexAction(final DocumentPage page,
+			final DocumentPage lastPage) {
+		_page = page;
+		_lastPage = lastPage;
 	}
 
 	/**
@@ -34,35 +35,29 @@ public class ChangePageIndexAction implements IAction, IBinarySerializable {
 	 */
 	public ChangePageIndexAction(final BinaryDeserializer reader)
 			throws IOException {
-		_pageId = reader.readLong();
-		_lastPageId = reader.readLong();
+		_page = reader.readObjectTable();
+		_lastPage = reader.readObjectTable();
 	}
 
 	@Override
 	public boolean hasUndoAction() {
-		return _lastPageId != -1;
+		return _lastPage != null;
 	}
 
 	@Override
 	public IAction getUndoAction() {
-		return new ChangePageIndexAction(_lastPageId, _pageId);
+		return new ChangePageIndexAction(_lastPage, _page);
 	}
 
 	@Override
 	public void perform(final DocumentEditor editor) {
-		final DocumentPage page = (DocumentPage) editor.getDocument()
-				.getObject(_pageId);
-		if (page == null) {
-			throw new IllegalStateException("Page with id " + _pageId
-					+ " doesn't exist");
-		}
-		editor.setCurrentPage(page);
+		editor.setCurrentPage(_page);
 	}
 
 	@Override
 	public void serialize(final BinarySerializer writer) throws IOException {
-		writer.writeLong(_pageId);
-		writer.writeLong(_lastPageId);
+		writer.writeObjectTable(_page.getId(), _page);
+		writer.writeObjectTable(_page.getId(), _page);
 	}
 
 }
