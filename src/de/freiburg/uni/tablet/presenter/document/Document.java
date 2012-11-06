@@ -61,7 +61,7 @@ public class Document implements IEntity {
 	 * 
 	 * @param entity
 	 */
-	void onObjectRemoved(final IEntity entity) {
+	public void onObjectRemoved(final IEntity entity) {
 		_objects.remove(entity.getId());
 	}
 
@@ -138,6 +138,53 @@ public class Document implements IEntity {
 			firePageInserted(null, result);
 		}
 		return result;
+	}
+
+	/**
+	 * Inserts a page after the given page.
+	 * 
+	 * @param afterPage
+	 *            the previous page to the inserted page (null for first)
+	 * @return
+	 */
+	public DocumentPage insertPage(final DocumentPage afterPage,
+			final DocumentPage page) {
+		if (page.getParent() != this) {
+			throw new IllegalStateException("Page has invalid parent");
+		}
+		if (afterPage != null) {
+			final LinkedElement<DocumentPage> element = _pages
+					.getElementByInstance(afterPage);
+			if (element == null) {
+				throw new IllegalArgumentException("afterPage not in document");
+			}
+			_pages.insertAfter(element, page);
+			firePageInserted(element.getData(), page);
+		} else {
+			_pages.addFirst(page);
+			firePageInserted(null, page);
+		}
+		return page;
+	}
+
+	/**
+	 * Removes a page.
+	 * 
+	 * @param page
+	 *            the page to remove
+	 */
+	public void removePage(final DocumentPage page) {
+		if (page.getParent() != this) {
+			throw new IllegalStateException("Page has invalid parent");
+		}
+		final LinkedElement<DocumentPage> element = _pages
+				.getElementByInstance(page);
+		if (element == null) {
+			throw new IllegalArgumentException("afterPage not in document");
+		}
+		final LinkedElement<DocumentPage> prevPage = element.getPrevious();
+		_pages.remove(element);
+		firePageRemoved(prevPage.getData(), element.getData());
 	}
 
 	/**

@@ -10,47 +10,52 @@ import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.data.IBinarySerializable;
 import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
-import de.freiburg.uni.tablet.presenter.document.IEntity;
+import de.freiburg.uni.tablet.presenter.document.DocumentPage;
 
 /**
  * @author lukas
  * 
  */
-public class AddObjectAction implements IAction, IBinarySerializable {
-	private final IEntity _entity;
+public class AddPageAction implements IAction, IBinarySerializable {
+	private final DocumentPage _prevPage;
+	private final DocumentPage _page;
 
 	/**
 	 * 
 	 */
-	public AddObjectAction(final IEntity entity) {
-		_entity = entity;
+	public AddPageAction(final DocumentPage prevPage, final DocumentPage page) {
+		_prevPage = prevPage;
+		_page = page;
 	}
 
 	/**
 	 * @throws IOException
 	 * 
 	 */
-	public AddObjectAction(final BinaryDeserializer reader) throws IOException {
-		_entity = reader.readSerializableClass();
+	public AddPageAction(final BinaryDeserializer reader) throws IOException {
+		_prevPage = reader.readObjectTable();
+		_page = reader.readObjectTable();
 	}
 
 	@Override
 	public boolean hasUndoAction() {
-		return false;
+		return true;
 	}
 
 	@Override
 	public IAction getUndoAction() {
-		return null;
+		return new RemovePageAction(_prevPage, _page);
 	}
 
 	@Override
 	public void perform(final DocumentEditor editor) {
-		editor.getDocument().onObjectAdded(_entity);
+		editor.getDocument().insertPage(_prevPage, _page);
 	}
 
 	@Override
 	public void serialize(final BinarySerializer writer) throws IOException {
-		writer.writeSerializableClass(_entity);
+		writer.writeObjectTable(_prevPage.getId(), _prevPage);
+		writer.writeObjectTable(_page.getId(), _page);
 	}
+
 }

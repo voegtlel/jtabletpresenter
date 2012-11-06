@@ -18,15 +18,16 @@ import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
  * 
  */
 public class AddRenderableAction implements IAction, IBinarySerializable {
-	private final long _layerId;
-	private final long _renderableId;
+	private final DocumentPageLayer _layer;
+	private final IRenderable _renderable;
 
 	/**
 	 * 
 	 */
-	public AddRenderableAction(final long layerId, final long renderableId) {
-		_layerId = layerId;
-		_renderableId = renderableId;
+	public AddRenderableAction(final DocumentPageLayer layer,
+			final IRenderable renderable) {
+		_layer = layer;
+		_renderable = renderable;
 	}
 
 	/**
@@ -35,8 +36,8 @@ public class AddRenderableAction implements IAction, IBinarySerializable {
 	 */
 	public AddRenderableAction(final BinaryDeserializer reader)
 			throws IOException {
-		_layerId = reader.readLong();
-		_renderableId = reader.readLong();
+		_layer = reader.readObjectTable();
+		_renderable = reader.readObjectTable();
 	}
 
 	@Override
@@ -46,26 +47,18 @@ public class AddRenderableAction implements IAction, IBinarySerializable {
 
 	@Override
 	public IAction getUndoAction() {
-		return new DeleteRenderableAction(_layerId, _renderableId);
+		return new RemoveRenderableAction(_layer, _renderable);
 	}
 
 	@Override
 	public void perform(final DocumentEditor editor) {
-		final DocumentPageLayer layer = (DocumentPageLayer) editor
-				.getDocument().getObject(_layerId);
-		if (layer == null) {
-			throw new IllegalStateException("Layer with id " + _layerId
-					+ " doesn't exist");
-		}
-		final IRenderable renderable = (IRenderable) editor.getDocument()
-				.getObject(_renderableId);
-		layer.addRenderable(renderable);
+		_layer.addRenderable(_renderable);
 	}
 
 	@Override
 	public void serialize(final BinarySerializer writer) throws IOException {
-		writer.writeLong(_layerId);
-		writer.writeLong(_renderableId);
+		writer.writeObjectTable(_layer.getId(), _layer);
+		writer.writeObjectTable(_renderable.getId(), _renderable);
 	}
 
 }

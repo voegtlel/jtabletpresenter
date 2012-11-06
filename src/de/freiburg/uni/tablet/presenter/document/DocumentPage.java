@@ -32,6 +32,18 @@ public class DocumentPage implements IEntity {
 		_document.onObjectAdded(getServerSyncLayer());
 	}
 
+	/**
+	 * 
+	 */
+	public DocumentPage(final long newId, final Document document) {
+		_document = document;
+		_id = newId;
+		_clientOnlyLayer = new DocumentPageLayer(this);
+		_serverSyncLayer = new DocumentPageLayer(this);
+		_document.onObjectAdded(getClientOnlyLayer());
+		_document.onObjectAdded(getServerSyncLayer());
+	}
+
 	@Override
 	public long getId() {
 		return _id;

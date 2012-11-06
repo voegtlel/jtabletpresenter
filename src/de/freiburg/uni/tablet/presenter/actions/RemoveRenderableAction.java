@@ -17,26 +17,27 @@ import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
  * @author lukas
  * 
  */
-public class DeleteRenderableAction implements IAction, IBinarySerializable {
-	private final long _layerId;
-	private final long _renderableId;
+public class RemoveRenderableAction implements IAction, IBinarySerializable {
+	private final DocumentPageLayer _layer;
+	private final IRenderable _renderable;
 
 	/**
 	 * 
 	 */
-	public DeleteRenderableAction(final long layerId, final long renderableId) {
-		_layerId = layerId;
-		_renderableId = renderableId;
+	public RemoveRenderableAction(final DocumentPageLayer layer,
+			final IRenderable renderable) {
+		_layer = layer;
+		_renderable = renderable;
 	}
 
 	/**
 	 * @throws IOException
 	 * 
 	 */
-	public DeleteRenderableAction(final BinaryDeserializer reader)
+	public RemoveRenderableAction(final BinaryDeserializer reader)
 			throws IOException {
-		_layerId = reader.readLong();
-		_renderableId = reader.readLong();
+		_layer = reader.readObjectTable();
+		_renderable = reader.readObjectTable();
 	}
 
 	@Override
@@ -46,26 +47,18 @@ public class DeleteRenderableAction implements IAction, IBinarySerializable {
 
 	@Override
 	public IAction getUndoAction() {
-		return new AddRenderableAction(_layerId, _renderableId);
+		return new AddRenderableAction(_layer, _renderable);
 	}
 
 	@Override
 	public void perform(final DocumentEditor editor) {
-		final DocumentPageLayer layer = (DocumentPageLayer) editor
-				.getDocument().getObject(_layerId);
-		if (layer == null) {
-			throw new IllegalStateException("Layer with id " + _layerId
-					+ " doesn't exist");
-		}
-		final IRenderable renderable = (IRenderable) editor.getDocument()
-				.getObject(_renderableId);
-		layer.addRenderable(renderable);
+		_layer.removeRenderable(_renderable);
 	}
 
 	@Override
 	public void serialize(final BinarySerializer writer) throws IOException {
-		writer.writeLong(_layerId);
-		writer.writeLong(_renderableId);
+		writer.writeObjectTable(_layer.getId(), _layer);
+		writer.writeObjectTable(_renderable.getId(), _renderable);
 	}
 
 }
