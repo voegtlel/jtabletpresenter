@@ -115,6 +115,7 @@ public class Scribble extends AbstractRenderable {
 	public void serialize(final BinarySerializer writer) throws IOException {
 		super.serialize(writer);
 		writer.writeSerializableClass(_pen);
+		// Always has first
 		writer.writeInt(_segments.getFirst().getNextCount());
 		for (LinkedElement<ScribbleSegment> element = _segments.getFirst(); element != null; element = element
 				.getNext()) {

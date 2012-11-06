@@ -4,6 +4,7 @@
  */
 package de.freiburg.uni.tablet.presenter.actions;
 
+import de.freiburg.uni.tablet.presenter.data.IBinarySerializable;
 import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
 
 /**
@@ -12,7 +13,7 @@ import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
  * @author lukas
  * 
  */
-public interface IAction {
+public interface IAction extends IBinarySerializable {
 	/**
 	 * Returns, if this action has an undo action.
 	 * 

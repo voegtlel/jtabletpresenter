@@ -4,6 +4,7 @@
  */
 package de.freiburg.uni.tablet.presenter.document;
 
+import de.freiburg.uni.tablet.presenter.actions.ActionGroup;
 import de.freiburg.uni.tablet.presenter.actions.AddPageAction;
 import de.freiburg.uni.tablet.presenter.actions.AddRenderableAction;
 import de.freiburg.uni.tablet.presenter.actions.ChangePageIndexAction;
@@ -23,6 +24,7 @@ public class DocumentHistory {
 	private LinkedElement<IAction> _top;
 	private final DocumentEditor _documentEditor;
 	private final DocumentListener _documentListener;
+	private ActionGroup _currentActionGroup;
 
 	private boolean _isPerforming = false;
 
@@ -81,13 +83,31 @@ public class DocumentHistory {
 		_documentEditor.getDocument().addListener(_documentListener);
 	}
 
-	public void addAction(final IAction action) {
-		if (_top == null) {
-			_history.addLast(action);
-		} else {
-			_history.setNext(_top, action);
+	public void beginActionGroup() {
+		if (_currentActionGroup == null) {
+			ActionGroup res = new ActionGroup();
+			addAction(res);
+			_currentActionGroup = res;
 		}
-		_top = _history.getLast();
+	}
+
+	public void endActionGroup() {
+		if (_currentActionGroup != null) {
+			_currentActionGroup = null;
+		}
+	}
+
+	public void addAction(final IAction action) {
+		if (_currentActionGroup != null) {
+			_currentActionGroup.addAction(action);
+		} else {
+			if (_top == null) {
+				_history.addLast(action);
+			} else {
+				_history.setNext(_top, action);
+			}
+			_top = _history.getLast();
+		}
 	}
 
 	public boolean hasUndoAction() {
@@ -101,6 +121,7 @@ public class DocumentHistory {
 	public void undo() {
 		if (_top != null && !_isPerforming) {
 			_isPerforming = true;
+			_currentActionGroup = null;
 			final IAction undoAction = _top.getData().getUndoAction();
 			_top = _top.getPrevious();
 			undoAction.perform(_documentEditor);
@@ -111,6 +132,7 @@ public class DocumentHistory {
 	public void redo() {
 		if (_top.getNext() != null && !_isPerforming) {
 			_isPerforming = true;
+			_currentActionGroup = null;
 			_top = _top.getNext();
 			_top.getData().perform(_documentEditor);
 			_isPerforming = false;

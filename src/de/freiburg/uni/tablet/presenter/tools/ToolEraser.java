@@ -56,7 +56,9 @@ public class ToolEraser extends AbstractTool {
 
 	@Override
 	public void end() {
+		_editor.getDocumentEditor().getHistory().beginActionGroup();
 		_eraseInfo.applyModifications();
+		_editor.getDocumentEditor().getHistory().endActionGroup();
 		_eraseInfo = null;
 
 		_editor.getFrontRenderer().clear();

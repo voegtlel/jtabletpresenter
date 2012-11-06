@@ -221,6 +221,7 @@ public class Document implements IEntity {
 	public void serialize(final BinarySerializer writer) throws IOException {
 		writer.writeInt(_uniqueId);
 		writer.writeInt(_clientId);
+		// Always has first
 		writer.writeInt(_pages.getFirst().getNextCount());
 		for (LinkedElement<DocumentPage> dp = _pages.getFirst(); dp != null; dp = dp
 				.getNext()) {
