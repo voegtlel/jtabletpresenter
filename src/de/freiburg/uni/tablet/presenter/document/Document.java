@@ -154,6 +154,10 @@ public class Document implements IEntity {
 		_pages.remove(element);
 		firePageRemoved(prevPage.getData(), element.getData());
 	}
+	
+	public LinkedElement<DocumentPage> getPages() {
+		return _pages.getFirst();
+	}
 
 	/**
 	 * @return
