@@ -67,6 +67,14 @@ public class DocumentPage implements IEntity {
 	public DocumentPageLayer getServerSyncLayer() {
 		return _serverSyncLayer;
 	}
+	
+	/**
+	 * Gets if the page is empty
+	 * @return
+	 */
+	public boolean isEmpty() {
+		return _clientOnlyLayer.isEmpty() && _serverSyncLayer.isEmpty();
+	}
 
 	public DocumentPage(final BinaryDeserializer reader) throws IOException {
 		_id = reader.readLong();

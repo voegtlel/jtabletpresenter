@@ -94,8 +94,10 @@ public class ButtonSaveAs extends AbstractButtonAction {
 					PdfRenderer pdfRenderer = new PdfRenderer(bufferedOutputStream);
 					LinkedElement<DocumentPage> pages = _editor.getDocumentEditor().getDocument().getPages();
 					for(; pages != null; pages = pages.getNext()) {
-						pdfRenderer.nextPage();
-						pages.getData().getClientOnlyLayer().render(pdfRenderer);
+						if (!pages.getData().isEmpty()) {
+							pdfRenderer.nextPage();
+							pages.getData().getClientOnlyLayer().render(pdfRenderer);
+						}
 					}
 					pdfRenderer.close();
 				}

@@ -5,30 +5,32 @@
 package de.freiburg.uni.tablet.presenter.net;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
 
 import de.freiburg.uni.tablet.presenter.actions.IAction;
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
+import de.freiburg.uni.tablet.presenter.data.IBinarySerializable;
+import de.freiburg.uni.tablet.presenter.data.PackageInputStream;
+import de.freiburg.uni.tablet.presenter.data.PackageInputStream.PackageReader;
+import de.freiburg.uni.tablet.presenter.data.PackageOutputStream.PackageWriter;
+import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
 
 /**
  * @author lukas
  * 
  */
-public class HistoryClient {
-	private final static int CMD_DOCUMENT = 0;
-	private final static int CMD_INIT = 1;
-
+public class HistoryClient implements PackageReader, PackageWriter {
 	private final ClientThread _client;
 	private final Thread _receiveThread;
 
-	private final List<ClientListener> _listeners = new ArrayList<ClientListener>();
 	private final Object _threadSync = new Object();
 
-	public HistoryClient(final ClientThread client) {
+	private ByteBuffer _recvBuffer;
+	private DocumentEditor _documentEditor;
+
+	public HistoryClient(final ClientThread client, DocumentEditor documentEditor) {
 		_client = client;
+		_documentEditor = documentEditor;
 		_client.addListener(new ClientListener() {
 			@Override
 			public void error(final Throwable t) {
@@ -52,6 +54,8 @@ public class HistoryClient {
 				receiveThread();
 			}
 		};
+
+		_recvBuffer = ByteBuffer.allocateDirect(1024);
 	}
 
 	public void start() throws IOException {
@@ -80,63 +84,57 @@ public class HistoryClient {
 	 * Thread for receiving data
 	 */
 	protected void receiveThread() {
-		final ByteBuffer recvBuffer = ByteBuffer.allocateDirect(1024);
+		PackageInputStream packageInputStream = new PackageInputStream(this);
+		BinaryDeserializer reader = new BinaryDeserializer(packageInputStream);
 		while (_client.isRunning()) {
-			recvBuffer.position(0);
-			recvBuffer.limit(4);
-			if (!_client.receive(recvBuffer)) {
-				break;
-			}
-			final int cmd = recvBuffer.getInt();
-		}
-	}
-
-	/**
-	 * 
-	 */
-	private void fireDisconnected() {
-		for (final ClientListener listener : _listeners) {
-			listener.disconnected();
-		}
-	}
-
-	private void onReceiveData(final InputStream inputStream)
-			throws IOException {
-		final BinaryDeserializer reader = new BinaryDeserializer(inputStream);
-		final IAction action = reader.readSerializableClass();
-		action.perform(_editor);
-	}
-
-	public void send(final byte[] data) {
-		try {
-			_outputStream.write(data);
-		} catch (final IOException e) {
-			e.printStackTrace();
 			try {
-				_socket.close();
-			} catch (final IOException e1) {
-				e1.printStackTrace();
+				IBinarySerializable readObject = reader.readObjectTable();
+				if (readObject instanceof IAction) {
+					IAction action = (IAction) readObject;
+					action.perform(_documentEditor);
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	public void close() {
 		try {
-			_socket.shutdownInput();
-			_socket.shutdownOutput();
-			_outputStream.close();
-			_socket.close();
-		} catch (final IOException e) {
-			e.printStackTrace();
-		}
-
-		try {
-			_thread.join(500);
+			_receiveThread.join(500);
 		} catch (final InterruptedException e) {
 			e.printStackTrace();
 		}
-		if (_thread.isAlive()) {
-			_thread.stop();
+		if (_receiveThread.isAlive()) {
+			_receiveThread.stop();
 		}
+	}
+
+	@Override
+	public void writePackage(byte[] data, int size) {
+		_client.send(data, 0, size);
+	}
+
+	@Override
+	public int peekPackageSize() {
+		_recvBuffer.position(0);
+		_recvBuffer.limit(4);
+		_client.receive(_recvBuffer);
+		return _recvBuffer.getInt();
+	}
+
+	@Override
+	public boolean readPackage(byte[] data, int count) {
+		if (_recvBuffer.capacity() < data.length) {
+			_recvBuffer = ByteBuffer.allocateDirect(data.length);
+		}
+		_recvBuffer.position(0);
+		_recvBuffer.limit(count);
+		if (!_client.receive(_recvBuffer)) {
+			return false;
+		}
+		_recvBuffer.get(data, 0, count);
+		return true;
 	}
 }
