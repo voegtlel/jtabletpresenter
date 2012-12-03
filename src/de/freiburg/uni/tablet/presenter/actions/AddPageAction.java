@@ -16,14 +16,15 @@ import de.freiburg.uni.tablet.presenter.document.DocumentPage;
  * @author lukas
  * 
  */
-public class AddPageAction implements IAction, IBinarySerializable {
+public class AddPageAction extends AbstractAction implements IAction, IBinarySerializable {
 	private final DocumentPage _prevPage;
 	private final DocumentPage _page;
 
 	/**
 	 * 
 	 */
-	public AddPageAction(final DocumentPage prevPage, final DocumentPage page) {
+	public AddPageAction(int clientId, final DocumentPage prevPage, final DocumentPage page) {
+		super(clientId);
 		_prevPage = prevPage;
 		_page = page;
 	}
@@ -33,6 +34,7 @@ public class AddPageAction implements IAction, IBinarySerializable {
 	 * 
 	 */
 	public AddPageAction(final BinaryDeserializer reader) throws IOException {
+		super(reader);
 		_prevPage = reader.readObjectTable();
 		_page = reader.readObjectTable();
 	}
@@ -43,8 +45,8 @@ public class AddPageAction implements IAction, IBinarySerializable {
 	}
 
 	@Override
-	public IAction getUndoAction() {
-		return new RemovePageAction(_prevPage, _page);
+	public IAction getUndoAction(int clientId) {
+		return new RemovePageAction(clientId, _prevPage, _page);
 	}
 
 	@Override
@@ -54,8 +56,8 @@ public class AddPageAction implements IAction, IBinarySerializable {
 
 	@Override
 	public void serialize(final BinarySerializer writer) throws IOException {
+		super.serialize(writer);
 		writer.writeObjectTable(_prevPage.getId(), _prevPage);
 		writer.writeObjectTable(_page.getId(), _page);
 	}
-
 }

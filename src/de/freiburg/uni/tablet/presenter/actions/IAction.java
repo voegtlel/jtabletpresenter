@@ -23,13 +23,20 @@ public interface IAction extends IBinarySerializable {
 
 	/**
 	 * Gets the inverse action for this action.
+	 * @param clientId TODO
 	 * 
 	 * @return the undo action or null, if not existing.
 	 */
-	IAction getUndoAction();
+	IAction getUndoAction(int clientId);
 
 	/**
 	 * @param editor
 	 */
 	void perform(DocumentEditor editor);
+	
+	/**
+	 * Gets the client id of the message source
+	 * @return
+	 */
+	int getClientId();
 }

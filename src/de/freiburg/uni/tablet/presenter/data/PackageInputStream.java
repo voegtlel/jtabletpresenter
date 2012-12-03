@@ -54,7 +54,7 @@ public class PackageInputStream extends InputStream {
 	 * Gets the next package from the source
 	 */
 	public boolean nextPackage() {
-		int packageSize = _packageReader.peekPackageSize();
+		int packageSize = _packageReader.readPackageSize();
 		if (_buffer.length < packageSize) {
 			int n = packageSize - 1;
 			n = n | (n >> 1);
@@ -82,7 +82,7 @@ public class PackageInputStream extends InputStream {
 		 * Gets the size of the next package
 		 * @return size of next package
 		 */
-		int peekPackageSize();
+		int readPackageSize();
 		
 		/**
 		 * Reads the next package

@@ -35,7 +35,7 @@ public class DocumentHistory {
 			public void renderableRemoved(final IRenderable renderable,
 					final DocumentPageLayer layer) {
 				if (!_isPerforming) {
-					addAction(new RemoveRenderableAction(layer, renderable));
+					addAction(new RemoveRenderableAction(_documentEditor.getDocument().getClientId(), layer, renderable));
 				}
 			}
 
@@ -43,7 +43,7 @@ public class DocumentHistory {
 			public void renderableAdded(final IRenderable renderable,
 					final DocumentPageLayer layer) {
 				if (!_isPerforming) {
-					addAction(new AddRenderableAction(layer, renderable));
+					addAction(new AddRenderableAction(_documentEditor.getDocument().getClientId(), layer, renderable));
 				}
 			}
 
@@ -51,7 +51,7 @@ public class DocumentHistory {
 			public void pageRemoved(final DocumentPage prevPage,
 					final DocumentPage page) {
 				if (!_isPerforming) {
-					addAction(new RemovePageAction(prevPage, page));
+					addAction(new RemovePageAction(_documentEditor.getDocument().getClientId(), prevPage, page));
 				}
 			}
 
@@ -59,7 +59,7 @@ public class DocumentHistory {
 			public void pageInserted(final DocumentPage prevPage,
 					final DocumentPage page) {
 				if (!_isPerforming) {
-					addAction(new AddPageAction(prevPage, page));
+					addAction(new AddPageAction(_documentEditor.getDocument().getClientId(), prevPage, page));
 				}
 			}
 		};
@@ -75,7 +75,7 @@ public class DocumentHistory {
 			@Override
 			public void currentPageChanged(final DocumentPage lastCurrentPage) {
 				if (!_isPerforming) {
-					addAction(new ChangePageIndexAction(_documentEditor
+					addAction(new ChangePageIndexAction(_documentEditor.getDocument().getClientId(), _documentEditor
 							.getCurrentPage(), lastCurrentPage));
 				}
 			}
@@ -85,7 +85,7 @@ public class DocumentHistory {
 
 	public void beginActionGroup() {
 		if (_currentActionGroup == null) {
-			ActionGroup res = new ActionGroup();
+			ActionGroup res = new ActionGroup(_documentEditor.getDocument().getClientId());
 			addAction(res);
 			_currentActionGroup = res;
 		}
@@ -122,7 +122,7 @@ public class DocumentHistory {
 		if (_top != null && !_isPerforming) {
 			_isPerforming = true;
 			_currentActionGroup = null;
-			final IAction undoAction = _top.getData().getUndoAction();
+			final IAction undoAction = _top.getData().getUndoAction(_documentEditor.getDocument().getClientId());
 			_top = _top.getPrevious();
 			undoAction.perform(_documentEditor);
 			_isPerforming = false;

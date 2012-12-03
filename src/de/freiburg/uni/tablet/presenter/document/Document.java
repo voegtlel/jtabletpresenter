@@ -170,6 +170,10 @@ public class Document implements IEntity {
 	public long getId() {
 		return _clientId << 32;
 	}
+	
+	public int getClientId() {
+		return _clientId;
+	}
 
 	@Override
 	public IEntity getParent() {

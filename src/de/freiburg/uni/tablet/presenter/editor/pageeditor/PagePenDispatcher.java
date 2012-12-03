@@ -67,6 +67,7 @@ public class PagePenDispatcher implements PenListener {
 				activate = true;
 				inverted = true;
 				break;
+			default:
 			}
 			break;
 		case STYLUS:
@@ -74,6 +75,7 @@ public class PagePenDispatcher implements PenListener {
 			case ON_PRESSURE:
 				activate = true;
 				break;
+			default:
 			}
 			break;
 		case ERASER:
@@ -82,8 +84,10 @@ public class PagePenDispatcher implements PenListener {
 				activate = true;
 				inverted = true;
 				break;
+			default:
 			}
 			break;
+		default:
 		}
 		if (activate) {
 			if (e.button.value) {
@@ -118,6 +122,12 @@ public class PagePenDispatcher implements PenListener {
 				// Deactivate tool and store result
 				if (_activeTool != null) {
 					_activeTool.end();
+					if ((_penKind == PKind.Type.CURSOR) && (_activeTool == _invertedTool)) {
+						_invertedTool.out();
+						_activePenButton = PButton.Type.LEFT;
+						_hoverTool = _normalTool;
+						_normalTool.over();
+					}
 					_activeTool = null;
 				}
 			}
@@ -167,6 +177,8 @@ public class PagePenDispatcher implements PenListener {
 			case ERASER:
 				_hoverTool = _invertedTool;
 				break;
+			default:
+				_hoverTool = null;
 			}
 			// Update new hover tool
 			if (_hoverTool != null) {

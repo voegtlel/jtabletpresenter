@@ -16,9 +16,13 @@ public class AcceptThread {
 
 	private boolean _running = true;
 
-	public AcceptThread(final int port) throws IOException {
+	public AcceptThread(final int port) {
 		_port = port;
-		_socket = ServerSocketChannel.open();
+		try {
+			_socket = ServerSocketChannel.open();
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
+		}
 		_thread = new Thread() {
 			@Override
 			public void run() {

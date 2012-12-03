@@ -17,15 +17,16 @@ import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
  * @author lukas
  * 
  */
-public class AddRenderableAction implements IAction, IBinarySerializable {
+public class AddRenderableAction extends AbstractAction implements IAction, IBinarySerializable {
 	private final DocumentPageLayer _layer;
 	private final IRenderable _renderable;
 
 	/**
 	 * 
 	 */
-	public AddRenderableAction(final DocumentPageLayer layer,
+	public AddRenderableAction(int clientId, final DocumentPageLayer layer,
 			final IRenderable renderable) {
+		super(clientId);
 		_layer = layer;
 		_renderable = renderable;
 	}
@@ -36,6 +37,7 @@ public class AddRenderableAction implements IAction, IBinarySerializable {
 	 */
 	public AddRenderableAction(final BinaryDeserializer reader)
 			throws IOException {
+		super(reader);
 		_layer = reader.readObjectTable();
 		_renderable = reader.readObjectTable();
 	}
@@ -46,8 +48,8 @@ public class AddRenderableAction implements IAction, IBinarySerializable {
 	}
 
 	@Override
-	public IAction getUndoAction() {
-		return new RemoveRenderableAction(_layer, _renderable);
+	public IAction getUndoAction(int clientId) {
+		return new RemoveRenderableAction(clientId, _layer, _renderable);
 	}
 
 	@Override
@@ -57,6 +59,7 @@ public class AddRenderableAction implements IAction, IBinarySerializable {
 
 	@Override
 	public void serialize(final BinarySerializer writer) throws IOException {
+		super.serialize(writer);
 		writer.writeObjectTable(_layer.getId(), _layer);
 		writer.writeObjectTable(_renderable.getId(), _renderable);
 	}

@@ -88,6 +88,7 @@ public class HistoryClient implements PackageReader, PackageWriter {
 		BinaryDeserializer reader = new BinaryDeserializer(packageInputStream);
 		while (_client.isRunning()) {
 			try {
+				packageInputStream.nextPackage();
 				IBinarySerializable readObject = reader.readObjectTable();
 				if (readObject instanceof IAction) {
 					IAction action = (IAction) readObject;
@@ -117,7 +118,7 @@ public class HistoryClient implements PackageReader, PackageWriter {
 	}
 
 	@Override
-	public int peekPackageSize() {
+	public int readPackageSize() {
 		_recvBuffer.position(0);
 		_recvBuffer.limit(4);
 		_client.receive(_recvBuffer);
