@@ -75,13 +75,23 @@ public class ButtonSaveAs extends AbstractButtonAction {
 				return f.getPath().toLowerCase().endsWith(".pdf");
 			}
 		};
+		fileChooser.addChoosableFileFilter(pdf);
 		fileChooser.addChoosableFileFilter(presenterDocumentFile);
 		fileChooser.addChoosableFileFilter(presenterPageFile);
-		fileChooser.addChoosableFileFilter(pdf);
 		fileChooser.setFileFilter(pdf);
 		if (fileChooser.showSaveDialog(button) == JFileChooser.APPROVE_OPTION) {
-			final File f = fileChooser.getSelectedFile();
+			File f = fileChooser.getSelectedFile();
 			try {
+				if ((fileChooser.getFileFilter() == pdf)
+						&& !fileChooser.getSelectedFile().getPath().toLowerCase().endsWith(".pdf")) {
+					f = new File(f.getPath() + ".pdf");
+				} else if ((fileChooser.getFileFilter() == presenterDocumentFile)
+						&& !fileChooser.getSelectedFile().getPath().toLowerCase().endsWith(".jpd")) {
+					f = new File(f.getPath() + ".jpd");
+				} else if ((fileChooser.getFileFilter() == presenterPageFile)
+						&& !fileChooser.getSelectedFile().getPath().toLowerCase().endsWith(".jpp")) {
+					f = new File(f.getPath() + ".jpp");
+				}
 				final FileOutputStream fileOutputStream = new FileOutputStream(
 						f);
 				final BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(
@@ -102,6 +112,8 @@ public class ButtonSaveAs extends AbstractButtonAction {
 						}
 					}
 					pdfRenderer.close();
+				} else {
+					JOptionPane.showMessageDialog(button, "Can't save. Unrecognized file type.");
 				}
 				bufferedOutputStream.close();
 				fileOutputStream.close();
