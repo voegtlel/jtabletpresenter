@@ -151,9 +151,7 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 
 		_panelTools = new JPanel();
 		getContentPane().add(_panelTools, BorderLayout.WEST);
-		setToolButtons(new IButtonAction[] { new ButtonOpenFrom(this),
-				new ButtonSaveAs(this), new ButtonPreferences(this), null,
-				new ButtonPen(this), new ButtonEraser(this), null,
+		setToolButtons(new IButtonAction[] { new ButtonPreferences(this), null,
 				new ButtonNext(this), new ButtonPrevious(this),
 				new ButtonSpinnerPage(this), null, new ButtonUndo(this),
 				new ButtonRedo(this), null, new ButtonColor(this), null,

@@ -14,6 +14,11 @@ import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
  */
 public class ButtonUndo extends AbstractButtonAction {
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * Creates the action with an editor.
 	 */
 	public ButtonUndo(final IToolPageEditor editor) {

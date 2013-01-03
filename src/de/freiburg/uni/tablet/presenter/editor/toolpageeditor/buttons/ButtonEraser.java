@@ -13,6 +13,12 @@ import de.freiburg.uni.tablet.presenter.tools.ITool;
  */
 public class ButtonEraser extends AbstractButtonSelectTool {
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
+
+	/**
 	 * Creates the action with an editor.
 	 */
 	public ButtonEraser(final IToolPageEditor editor) {

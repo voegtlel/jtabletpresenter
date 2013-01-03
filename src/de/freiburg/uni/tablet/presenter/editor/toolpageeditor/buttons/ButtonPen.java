@@ -13,6 +13,11 @@ import de.freiburg.uni.tablet.presenter.tools.ITool;
  */
 public class ButtonPen extends AbstractButtonSelectTool {
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * Creates the action with an editor.
 	 */
 	public ButtonPen(final IToolPageEditor editor) {

@@ -16,20 +16,21 @@ import java.awt.event.FocusEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
+import javax.swing.JButton;
 import javax.swing.JDialog;
 
-public class JPageToolFrame<T> extends JDialog {
+import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.AbstractButtonAction;
+
+public class JPageToolMenuFrame<T> extends JDialog {
 	/**
 	 * Default serial version
 	 */
 	private static final long serialVersionUID = 1L;
-
-	private T _selectedValue;
-
+	
 	/**
 	 * Create the frame.
 	 */
-	public JPageToolFrame() {
+	public JPageToolMenuFrame() {
 		super((Dialog) null, ModalityType.DOCUMENT_MODAL);
 		setUndecorated(true);
 		setResizable(false);
@@ -41,7 +42,9 @@ public class JPageToolFrame<T> extends JDialog {
 		addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusLost(final FocusEvent e) {
-				JPageToolFrame.this.setVisible(false);
+				if(!e.isTemporary()) {
+					JPageToolMenuFrame.this.setVisible(false);
+				}
 			}
 		});
 
@@ -49,54 +52,33 @@ public class JPageToolFrame<T> extends JDialog {
 			@Override
 			public void keyReleased(final KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-					JPageToolFrame.this.setVisible(false);
+					JPageToolMenuFrame.this.setVisible(false);
 				}
 			}
 		});
 	}
-
+	
 	/**
-	 * Adds a tool to the selection list buttons
-	 * 
-	 * @param name
-	 *            display name of the tool
-	 * @param resourceImage
-	 *            image resource location
-	 * @param value
-	 *            value
+	 * Adds a subitem
+	 * @param buttonAction
 	 */
-	public void addValue(final String name, final String resourceImage,
-			final T value) {
-		final JPageToolButton button = new JPageToolButton(name, resourceImage,
-				true);
-		getContentPane().add(button);
-		button.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(final ActionEvent e) {
-				_selectedValue = value;
-				JPageToolFrame.this.setVisible(false);
-			}
-		});
-	}
-
-	/**
-	 * Adds a tool to the selection list buttons
-	 * 
-	 * @param resourceImage
-	 *            image resource location
-	 * @param value
-	 *            value
-	 */
-	public void addValue(final String resourceImage, final T value) {
-		final JPageToolButton button = new JPageToolButton(resourceImage, false);
-		getContentPane().add(button);
-		button.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(final ActionEvent e) {
-				_selectedValue = value;
-				JPageToolFrame.this.setVisible(false);
-			}
-		});
+	public void addItem(AbstractButtonAction buttonAction) {
+		if (buttonAction.getControl() != null) {
+			getContentPane().add(buttonAction.getControl());
+		} else {
+			final IButtonAction action = buttonAction;
+			final JButton button = new JPageToolButton(
+					buttonAction.getText(),
+					buttonAction.getImageResource(), true);
+			button.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(final ActionEvent e) {
+					action.perform(JPageToolMenuFrame.this);
+					JPageToolMenuFrame.this.setVisible(false);
+				}
+			});
+			getContentPane().add(button);
+		}
 	}
 
 	/**
@@ -105,35 +87,16 @@ public class JPageToolFrame<T> extends JDialog {
 	 * @param container
 	 *            container for the dialog
 	 */
-	public static <T> JPageToolFrame<T> createIconBox(
+	public static <T> JPageToolMenuFrame<T> createIconBox(
 			final Component container, final int buttonWidth,
 			final int buttonHeight, final int componentsX, final int componentsY) {
-		final JPageToolFrame<T> frame = new JPageToolFrame<T>();
+		final JPageToolMenuFrame<T> frame = new JPageToolMenuFrame<T>();
 		final Rectangle rect = new Rectangle(container.getLocationOnScreen());
 		rect.x += container.getWidth();
 		rect.width = buttonWidth * componentsX;
 		rect.height = buttonHeight * componentsY;
 		frame.setBounds(rect);
 		return frame;
-	}
-
-	/**
-	 * Gets the selected tool
-	 * 
-	 * @return selected tool
-	 */
-	public T getSelectedValue() {
-		return _selectedValue;
-	}
-
-	/**
-	 * Sets the selected value
-	 * 
-	 * @param selectedValue
-	 *            new selected value
-	 */
-	public void setSelectedValue(final T selectedValue) {
-		_selectedValue = selectedValue;
 	}
 
 	/**

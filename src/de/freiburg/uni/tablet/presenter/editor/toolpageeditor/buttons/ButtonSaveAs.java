@@ -4,10 +4,7 @@
  */
 package de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons;
 
-import gnu.jpdf.PDFJob;
-
 import java.awt.Component;
-import java.awt.Graphics;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -30,6 +27,11 @@ import de.freiburg.uni.tablet.presenter.list.LinkedElement;
  * 
  */
 public class ButtonSaveAs extends AbstractButtonAction {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Creates the action with an editor.
 	 */
@@ -76,7 +78,7 @@ public class ButtonSaveAs extends AbstractButtonAction {
 		fileChooser.addChoosableFileFilter(presenterDocumentFile);
 		fileChooser.addChoosableFileFilter(presenterPageFile);
 		fileChooser.addChoosableFileFilter(pdf);
-		fileChooser.setFileFilter(presenterDocumentFile);
+		fileChooser.setFileFilter(pdf);
 		if (fileChooser.showSaveDialog(button) == JFileChooser.APPROVE_OPTION) {
 			final File f = fileChooser.getSelectedFile();
 			try {

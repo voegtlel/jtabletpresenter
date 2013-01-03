@@ -8,7 +8,7 @@ import java.awt.Component;
 
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.JPageToolButton;
-import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.JPageToolFrame;
+import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.JPageToolMenuSelectFrame;
 import de.freiburg.uni.tablet.presenter.tools.ITool;
 import de.freiburg.uni.tablet.presenter.tools.ToolEraser;
 import de.freiburg.uni.tablet.presenter.tools.ToolScribble;
@@ -18,7 +18,12 @@ import de.freiburg.uni.tablet.presenter.tools.ToolScribble;
  * 
  */
 public abstract class AbstractButtonSelectTool extends AbstractButtonAction {
-	private final JPageToolFrame<ITool> _tool;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	private final JPageToolMenuSelectFrame<ITool> _tool;
 
 	protected ToolScribble _toolScribble;
 
@@ -33,7 +38,7 @@ public abstract class AbstractButtonSelectTool extends AbstractButtonAction {
 	public AbstractButtonSelectTool(final IToolPageEditor editor,
 			final String text, final String imageResource) {
 		super(editor, text, imageResource);
-		_tool = new JPageToolFrame<ITool>();
+		_tool = new JPageToolMenuSelectFrame<ITool>();
 		_tool.setSize(JPageToolButton.WIDTH_WIDE * 1,
 				JPageToolButton.HEIGHT_NORMAL * 2);
 		_toolScribble = new ToolScribble(_editor);

@@ -9,7 +9,7 @@ import java.awt.Component;
 
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.JPageToolButton;
-import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.JPageToolFrame;
+import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.JPageToolMenuSelectFrame;
 import de.freiburg.uni.tablet.presenter.page.SolidPen;
 
 /**
@@ -17,14 +17,19 @@ import de.freiburg.uni.tablet.presenter.page.SolidPen;
  * 
  */
 public class ButtonColor extends AbstractButtonAction {
-	private final JPageToolFrame<Color> _tool;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
+	private final JPageToolMenuSelectFrame<Color> _tool;
 
 	/**
 	 * Creates the action with an editor.
 	 */
 	public ButtonColor(final IToolPageEditor editor) {
 		super(editor, "Color", "/buttons/color-select.png");
-		_tool = new JPageToolFrame<Color>();
+		_tool = new JPageToolMenuSelectFrame<Color>();
 		_tool.setSize(JPageToolButton.WIDTH_NORMAL * 2,
 				JPageToolButton.HEIGHT_NORMAL * 2);
 		_tool.addValue("/buttons/color-red.png", Color.RED);

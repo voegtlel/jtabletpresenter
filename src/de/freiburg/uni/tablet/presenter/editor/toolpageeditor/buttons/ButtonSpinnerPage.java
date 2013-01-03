@@ -23,6 +23,11 @@ import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.JPageToolButton;
  * 
  */
 public class ButtonSpinnerPage extends AbstractButtonAction {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
 	private final JSpinner _spinner;
 	private final DocumentEditorAdapter _documentEditorListener;
 
