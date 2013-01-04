@@ -10,6 +10,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -103,15 +105,21 @@ public class ButtonSaveAs extends AbstractButtonAction {
 							.getDocument();
 					binarySerializer.writeObjectTable(document.getId(), document);
 				} else if (f.getPath().toLowerCase().endsWith(".pdf")) {
-					PdfRenderer pdfRenderer = new PdfRenderer(bufferedOutputStream);
-					LinkedElement<DocumentPage> pages = _editor.getDocumentEditor().getDocument().getPages();
-					for(; pages != null; pages = pages.getNext()) {
-						if (!pages.getData().isEmpty()) {
-							pdfRenderer.nextPage();
-							pages.getData().getClientOnlyLayer().render(pdfRenderer);
+					Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Render as PDF " + f.getPath());
+					try {
+						PdfRenderer pdfRenderer = new PdfRenderer(bufferedOutputStream);
+						LinkedElement<DocumentPage> pages = _editor.getDocumentEditor().getDocument().getPages();
+						for(; pages != null; pages = pages.getNext()) {
+							if (!pages.getData().isEmpty()) {
+								pdfRenderer.nextPage();
+								pages.getData().getClientOnlyLayer().render(pdfRenderer);
+							}
 						}
+						pdfRenderer.close();
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
-					pdfRenderer.close();
 				} else {
 					JOptionPane.showMessageDialog(button, "Can't save. Unrecognized file type.");
 				}

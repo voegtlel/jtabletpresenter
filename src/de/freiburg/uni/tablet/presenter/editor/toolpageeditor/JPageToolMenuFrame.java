@@ -28,6 +28,11 @@ public class JPageToolMenuFrame<T> extends JDialog {
 	private static final long serialVersionUID = 1L;
 	
 	/**
+	 * The currently active component
+	 */
+	private Component _activeComponent = null;
+	
+	/**
 	 * Create the frame.
 	 */
 	public JPageToolMenuFrame() {
@@ -42,7 +47,7 @@ public class JPageToolMenuFrame<T> extends JDialog {
 		addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusLost(final FocusEvent e) {
-				if(!e.isTemporary()) {
+				if (JPageToolMenuFrame.this._activeComponent == null) {
 					JPageToolMenuFrame.this.setVisible(false);
 				}
 			}
@@ -73,11 +78,27 @@ public class JPageToolMenuFrame<T> extends JDialog {
 			button.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(final ActionEvent e) {
-					action.perform(JPageToolMenuFrame.this);
-					JPageToolMenuFrame.this.setVisible(false);
+					JPageToolMenuFrame.this.onActionPerformed(button, action);
 				}
 			});
 			getContentPane().add(button);
+		}
+	}
+	
+	private void onActionPerformed(JButton button, IButtonAction action) {
+		if (_activeComponent == null) {
+			_activeComponent = button;
+			for (Component c : getContentPane().getComponents()) {
+				if (c != button) {
+					c.setEnabled(false);
+				}
+			}
+			JPageToolMenuFrame.this.setEnabled(false);
+			action.perform(JPageToolMenuFrame.this);
+			JPageToolMenuFrame.this.setVisible(false);
+			_activeComponent = null;
+		} else {
+			this.toFront();
 		}
 	}
 
@@ -111,6 +132,11 @@ public class JPageToolMenuFrame<T> extends JDialog {
 	 */
 	public void showAt(final Component relativeComponent, final int xOffset,
 			final int yOffset) {
+		_activeComponent = null;
+		JPageToolMenuFrame.this.setEnabled(true);
+		for (Component c : getContentPane().getComponents()) {
+			c.setEnabled(true);
+		}
 		final Point loc = relativeComponent.getLocationOnScreen();
 		setLocation(loc.x + xOffset, loc.y + yOffset);
 		setVisible(true);

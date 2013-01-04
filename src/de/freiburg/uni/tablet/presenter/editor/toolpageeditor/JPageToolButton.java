@@ -17,6 +17,11 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 
 public class JPageToolButton extends JButton {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
 	public static final int WIDTH_NORMAL = 50;
 	public static final int WIDTH_WIDE = 75;
 	public static final int HEIGHT_NORMAL = 50;
@@ -56,5 +61,17 @@ public class JPageToolButton extends JButton {
 		this((wideMode ? WIDTH_WIDE : WIDTH_NORMAL), HEIGHT_NORMAL);
 
 		setIcon(new ImageIcon(JPageEditor.class.getResource(imageResource)));
+	}
+	
+	@Override
+	public void setEnabled(boolean enabled) {
+		super.setEnabled(enabled);
+		if (enabled) {
+			setBackground(Color.WHITE);
+			setForeground(Color.BLACK);
+		} else {
+			setBackground(Color.LIGHT_GRAY);
+			setForeground(Color.DARK_GRAY);
+		}
 	}
 }

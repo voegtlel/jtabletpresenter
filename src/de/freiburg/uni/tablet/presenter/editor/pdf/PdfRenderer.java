@@ -1,15 +1,20 @@
 package de.freiburg.uni.tablet.presenter.editor.pdf;
 
-import gnu.jpdf.PDFJob;
-
-import java.awt.Graphics2D;
-import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
-import java.awt.print.PageFormat;
+import java.awt.geom.PathIterator;
+import java.io.IOException;
 import java.io.OutputStream;
+
+import com.pdfjet.Cap;
+import com.pdfjet.CoreFont;
+import com.pdfjet.Font;
+import com.pdfjet.Join;
+import com.pdfjet.Letter;
+import com.pdfjet.PDF;
+import com.pdfjet.Page;
 
 import de.freiburg.uni.tablet.presenter.editor.PageRepaintListener;
 import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
@@ -22,28 +27,35 @@ public class PdfRenderer implements IPageBackRenderer {
 	private final Ellipse2D.Float _ellipseRenderer = new Ellipse2D.Float();
 	private final Line2D.Float _lineRenderer = new Line2D.Float();
 
-	private PDFJob _job;
-	private Graphics2D _graphics;
+	private PDF _pdf;
+	private Page _page;
+	private Font _font;
 	
-	public PdfRenderer(OutputStream stream) {
-		_job = new PDFJob(stream);
+	private int _pageIndex = 0;
+	
+	public PdfRenderer(OutputStream stream) throws Exception {
+		_pdf = new PDF(stream);
+		_font = new Font(_pdf, CoreFont.HELVETICA);
 	}
 	
 	public void close() {
-		if (_graphics != null) {
-			_graphics.dispose();
-			_graphics = null;
+		try {
+			_pdf.close();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		_job.end();
 	}
 	
-	public void nextPage() {
-		if (_graphics != null) {
-			_graphics.dispose();
-		}
-		_graphics = (Graphics2D) _job.getGraphics(PageFormat.LANDSCAPE);
-		_renderFactorX = (float) _job.getCurrentPage().getDimension().getWidth();
-		_renderFactorY = (float) _job.getCurrentPage().getDimension().getHeight();
+	public void nextPage() throws Exception {
+		_page = new Page(_pdf, Letter.LANDSCAPE);
+		_renderFactorX = _page.getWidth();
+		_renderFactorY = _page.getHeight();
+		
+		// Draw page number
+		_pageIndex++;
+		String s = Integer.valueOf(_pageIndex).toString();
+		float sWidth = _font.stringWidth(s);
+		_page.drawString(_font, s, _page.getWidth() - sWidth - _font.getHeight() / 2, _page.getHeight() - _font.getDescent() - _font.getHeight() / 2);
 	}
 	
 	@Override
@@ -53,9 +65,15 @@ public class PdfRenderer implements IPageBackRenderer {
 		_lineRenderer.y1 = y1 * _renderFactorY;
 		_lineRenderer.x2 = x2 * _renderFactorX;
 		_lineRenderer.y2 = y2 * _renderFactorY;
-		_graphics.setStroke(pen.getStroke());
-		_graphics.setPaint(pen.getColor());
-		_graphics.draw(_lineRenderer);
+		try {
+			_page.setPenColor(pen.getColor().getRGB());
+			_page.setPenWidth(pen.getThickness());
+			_page.setLineCapStyle(Cap.ROUND);
+			_page.setLineJoinStyle(Join.ROUND);
+			_page.drawLine(_lineRenderer.x1, _lineRenderer.y1, _lineRenderer.x2, _lineRenderer.y2);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -65,18 +83,41 @@ public class PdfRenderer implements IPageBackRenderer {
 		_ellipseRenderer.y = y * _renderFactorY - pen.getThickness() / 2.0f;
 		_ellipseRenderer.width = pen.getThickness();
 		_ellipseRenderer.height = pen.getThickness();
-		_graphics.setPaint(pen.getColor());
-		_graphics.fill(_ellipseRenderer);
+		try {
+			_page.setBrushColor(pen.getColor().getRGB());
+			_page.fillEllipse(_ellipseRenderer.x + _ellipseRenderer.width / 2, _ellipseRenderer.y + _ellipseRenderer.height / 2, _ellipseRenderer.width / 2, _ellipseRenderer.height / 2);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
 	public void draw(final IPen pen, final Path2D path) {
-		_graphics.setPaint(pen.getColor());
-		_graphics.setStroke(pen.getStroke());
-		final Shape transformedPath = path
-				.createTransformedShape(AffineTransform.getScaleInstance(
-						_renderFactorX, _renderFactorY));
-		_graphics.draw(transformedPath);
+		try {
+			_page.setPenColor(pen.getColor().getRGB());
+			_page.setPenWidth(pen.getThickness());
+			_page.setLineCapStyle(Cap.ROUND);
+			_page.setLineJoinStyle(Join.ROUND);
+			PathIterator pathIterator = path.getPathIterator(AffineTransform.getScaleInstance(
+					_renderFactorX, _renderFactorY));
+			double[] coords = new double[6];
+			while (!pathIterator.isDone()) {
+				int type = pathIterator.currentSegment(coords);
+				if (type == PathIterator.SEG_MOVETO) {
+					_page.moveTo(coords[0], coords[1]);
+				} else if (type == PathIterator.SEG_LINETO) {
+					_page.lineTo(coords[0], coords[1]);
+				} else if (type == PathIterator.SEG_QUADTO) {
+					_page.lineTo(coords[0], coords[1]);
+				} else if (type == PathIterator.SEG_CUBICTO) {
+					_page.lineTo(coords[0], coords[1]);
+				}
+				pathIterator.next();
+			}
+			_page.strokePath();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
