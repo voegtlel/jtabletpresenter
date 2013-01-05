@@ -2,6 +2,7 @@ package de.freiburg.uni.tablet.presenter.editor.pageeditor;
 
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.image.ImageObserver;
 
 public interface IDisplayRenderer {
 	/**
@@ -10,6 +11,13 @@ public interface IDisplayRenderer {
 	 * @return graphics object for rendering
 	 */
 	public Graphics2D createRenderer();
+	
+	/**
+	 * Gets an image observer
+	 * 
+	 * @return an image observer
+	 */
+	public ImageObserver getObserver();
 
 	/**
 	 * Updates the renderer

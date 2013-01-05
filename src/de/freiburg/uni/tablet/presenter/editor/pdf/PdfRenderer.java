@@ -1,11 +1,13 @@
 package de.freiburg.uni.tablet.presenter.editor.pdf;
 
+import java.awt.Graphics;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.nio.charset.Charset;
 
@@ -14,18 +16,16 @@ import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
 import de.freiburg.uni.tablet.presenter.page.IPen;
 import de.intarsys.pdf.cds.CDSRectangle;
 import de.intarsys.pdf.content.CSContent;
-import de.intarsys.pdf.content.CSOperator;
-import de.intarsys.pdf.content.CSOperators;
 import de.intarsys.pdf.content.common.CSCreator;
-import de.intarsys.pdf.cos.COSObject;
 import de.intarsys.pdf.encoding.WinAnsiEncoding;
 import de.intarsys.pdf.font.PDFont;
 import de.intarsys.pdf.font.PDFontTools;
 import de.intarsys.pdf.font.PDFontType1;
 import de.intarsys.pdf.pd.PDDocument;
 import de.intarsys.pdf.pd.PDForm;
+import de.intarsys.pdf.pd.PDImage;
 import de.intarsys.pdf.pd.PDPage;
-import de.intarsys.pdf.pd.PDResources;
+import de.intarsys.pdf.platform.cwt.image.awt.ImageConverterAwt2Pdf;
 import de.intarsys.tools.locator.FileLocator;
 
 public class PdfRenderer implements IPageBackRenderer {
@@ -214,6 +214,26 @@ public class PdfRenderer implements IPageBackRenderer {
 				pathIterator.next();
 			}
 			_creator.pathStroke();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		_wasEmptyPage = false;
+	}
+	
+	@Override
+	public void draw(BufferedImage image, float x, float y, float width, float height) {
+		try {
+			BufferedImage rgbImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
+			Graphics g = rgbImage.getGraphics();
+			g.drawImage(image, 0, 0, image.getWidth(), image.getHeight(), 0, 0, image.getWidth(), image.getHeight(), null);
+			g.dispose();
+			ImageConverterAwt2Pdf converter = new ImageConverterAwt2Pdf(rgbImage);
+			converter.setPreferJpeg(true);
+			PDImage pdImage = converter.getPDImage();
+			_creator.saveState();
+			_creator.transform(width * _renderFactorX, 0, 0, height * _renderFactorY, x * _renderFactorX, (1f - y - height) * _renderFactorY );
+			_creator.doXObject(null, pdImage);
+			_creator.restoreState();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

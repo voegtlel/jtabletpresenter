@@ -1,6 +1,7 @@
 package de.freiburg.uni.tablet.presenter.page;
 
 import java.awt.geom.Path2D;
+import java.awt.image.BufferedImage;
 
 import de.freiburg.uni.tablet.presenter.editor.PageRepaintListener;
 
@@ -31,6 +32,17 @@ public interface IPageBackRenderer {
 	 * @param y
 	 */
 	void draw(IPen pen, float x, float y);
+	
+	/**
+	 * Renders an image.
+	 * 
+	 * @param image
+	 * @param x
+	 * @param y
+	 * @param width
+	 * @param height
+	 */
+	void draw(BufferedImage image, float x, float y, float width, float height);
 
 	/**
 	 * Clears the buffer

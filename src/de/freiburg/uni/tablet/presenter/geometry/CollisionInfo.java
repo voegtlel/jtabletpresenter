@@ -46,6 +46,22 @@ public class CollisionInfo {
 		return xDiff * xDiff / (_radiusX * _radiusX) + yDiff * yDiff
 				/ (_radiusY * _radiusY) <= 1;
 	}
+	
+	public float getCenterX() {
+		return _x;
+	}
+	
+	public float getCenterY() {
+		return _y;
+	}
+	
+	public float getRadiusX() {
+		return _radiusX;
+	}
+	
+	public float getRadiusY() {
+		return _radiusY;
+	}
 
 	public boolean isCheckOnlyBoundaries() {
 		return _checkOnlyBoundaries;

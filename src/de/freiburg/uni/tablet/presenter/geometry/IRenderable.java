@@ -34,13 +34,14 @@ public interface IRenderable extends IEntity {
 	 * @param eraseInfo
 	 */
 	void eraseAt(EraseInfo eraseInfo);
-
+	
 	/**
-	 * Erases at the given info directly to this object.
+	 * Ends the erase process
+	 * @param eraseInfo 
 	 * 
-	 * @param collisionInfo
+	 * @return if false, the object is now empty an thus can be removed
 	 */
-	void eraseAtDirect(CollisionInfo collisionInfo);
+	boolean eraseEnd(EraseInfo eraseInfo);
 
 	/**
 	 * Returns if the info is colliding with this object

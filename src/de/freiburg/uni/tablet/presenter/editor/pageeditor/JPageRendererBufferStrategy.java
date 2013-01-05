@@ -7,6 +7,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferStrategy;
+import java.awt.image.ImageObserver;
 
 import javax.swing.SwingUtilities;
 
@@ -107,6 +108,11 @@ public class JPageRendererBufferStrategy extends Canvas implements
 
 	@Override
 	public Graphics2D createRenderer() {
+		return null;
+	}
+	
+	@Override
+	public ImageObserver getObserver() {
 		return null;
 	}
 

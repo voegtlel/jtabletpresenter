@@ -9,6 +9,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
+import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 
 import de.freiburg.uni.tablet.presenter.page.IPen;
@@ -130,6 +131,24 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer {
 				.createTransformedShape(AffineTransform.getScaleInstance(
 						_renderFactorX, _renderFactorY));
 		g.draw(transformedPath);
+		_isEmpty = false;
+	}
+	
+	/**
+	 * Draws an image
+	 * @param g
+	 * @param image
+	 * @param x
+	 * @param y
+	 * @param width
+	 * @param height
+	 * @param obs (optional)
+	 */
+	protected void draw(final Graphics2D g, final BufferedImage image, final float x, final float y, final float width, final float height, ImageObserver obs) {
+		AffineTransform t = AffineTransform.getScaleInstance(_renderFactorX, _renderFactorY);
+		t.translate(x, y);
+		t.scale(width/(float)image.getWidth(obs), height/(float)image.getHeight(obs));
+		g.drawImage(image, t, obs);
 		_isEmpty = false;
 	}
 

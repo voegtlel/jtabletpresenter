@@ -55,6 +55,21 @@ public class BinaryDeserializer {
 	public long readLong() throws IOException {
 		return _dataInputStream.readLong();
 	}
+	
+	public byte[] readByteArray() throws IOException {
+		int size = _dataInputStream.readInt();
+		byte[] result = new byte[size];
+		int readTotal = 0;
+		while (size > 0) {
+			int read = _dataInputStream.read(result, readTotal, size);
+			if (read < 0) {
+				throw new IOException("Unexpected end of stream");
+			}
+			readTotal += read;
+			size -= read;
+		}
+		return result;
+	}
 
 	public <T> T readSerializableClass() throws IOException {
 		return readSerializableClass(_defaultCtorArgTypes, _defaultCtorArgs);

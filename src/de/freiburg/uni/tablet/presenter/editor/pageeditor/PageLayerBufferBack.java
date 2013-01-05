@@ -3,6 +3,7 @@ package de.freiburg.uni.tablet.presenter.editor.pageeditor;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.geom.Path2D;
+import java.awt.image.BufferedImage;
 
 import de.freiburg.uni.tablet.presenter.editor.PageRepaintListener;
 import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
@@ -55,6 +56,13 @@ public class PageLayerBufferBack extends AbstractPageLayerBuffer implements
 			final float x2, final float y2) {
 		if (_graphics != null) {
 			draw(_graphics, pen, x1, y1, x2, y2);
+		}
+	}
+	
+	@Override
+	public void draw(BufferedImage image, float x, float y, float width, float height) {
+		if (_graphics != null) {
+			draw(_graphics, image,  x, y, width, height, _displayRenderer.getObserver());
 		}
 	}
 

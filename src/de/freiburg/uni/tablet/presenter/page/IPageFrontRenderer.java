@@ -1,5 +1,7 @@
 package de.freiburg.uni.tablet.presenter.page;
 
+import java.awt.image.BufferedImage;
+
 public interface IPageFrontRenderer {
 	/**
 	 * Draws a line to the front surface. This is cleared on refresh.
@@ -18,6 +20,17 @@ public interface IPageFrontRenderer {
 	 *            location
 	 */
 	void draw(IPen pen, float x, float y);
+	
+	/**
+	 * Draws an image to the front surface. This is cleared on refresh.
+	 * 
+	 * @param image
+	 * @param x
+	 * @param y
+	 * @param width
+	 * @param height
+	 */
+	void draw(BufferedImage image, float x, float y, float width, float height);
 
 	/**
 	 * Clears the front buffer

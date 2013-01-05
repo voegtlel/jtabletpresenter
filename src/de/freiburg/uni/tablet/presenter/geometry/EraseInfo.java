@@ -8,6 +8,7 @@ import de.freiburg.uni.tablet.presenter.document.DocumentPageLayer;
 
 public class EraseInfo {
 	private final HashMap<Long, IRenderable> _modifiedObjects = new HashMap<Long, IRenderable>();
+	private final HashMap<Long, HashMap<Integer, Object>> _objectsData = new HashMap<Long, HashMap<Integer, Object>>();
 	private final Document _document;
 	private CollisionInfo _collisionInfo;
 	private final DocumentPageLayer _layer;
@@ -46,6 +47,36 @@ public class EraseInfo {
 	public CollisionInfo getCollisionInfo() {
 		return _collisionInfo;
 	}
+	
+	/**
+	 * Add a property for a renderable
+	 * @param object the renderable
+	 * @param dataId the id for the property
+	 * @param data the actual data
+	 */
+	public <T> void addObjectData(final IRenderable object, final int dataId, T data) {
+		HashMap<Integer, Object> objectData = _objectsData.get(object.getId());
+		if (objectData == null) {
+			objectData = new HashMap<Integer, Object>();
+			_objectsData.put(object.getId(), objectData);
+		}
+		objectData.put(dataId, data);
+	}
+	
+	/**
+	 * Get a objects property
+	 * @param object
+	 * @param dataId
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> T getObjectData(final IRenderable object, final int dataId) {
+		HashMap<Integer, Object> objectData = _objectsData.get(object.getId());
+		if (objectData == null) {
+			return null;
+		}
+		return (T)objectData.get(dataId);
+	}
 
 	/**
 	 * Adds a to be modified object to the list
@@ -79,7 +110,10 @@ public class EraseInfo {
 		for (final Entry<Long, IRenderable> entry : _modifiedObjects.entrySet()) {
 			final IRenderable renderable = _layer.getRenderable(entry.getKey());
 			_layer.removeRenderable(renderable);
-			_layer.addRenderable(entry.getValue());
+			IRenderable replacement = entry.getValue();
+			if (renderable.eraseEnd(this)) {
+				_layer.addRenderable(replacement);
+			}
 		}
 	}
 }

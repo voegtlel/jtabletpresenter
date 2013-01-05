@@ -48,6 +48,11 @@ public class BinarySerializer {
 	public void writeLong(final long value) throws IOException {
 		_dataOutputStream.writeLong(value);
 	}
+	
+	public void writeByteArray(byte[] data) throws IOException {
+		_dataOutputStream.writeInt(data.length);
+		_dataOutputStream.write(data);
+	}
 
 	public void writeSerializableClass(final IBinarySerializable serializable)
 			throws IOException {

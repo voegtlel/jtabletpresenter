@@ -50,79 +50,7 @@ public class Scribble extends AbstractRenderable {
 			_segments.addLast(new ScribbleSegment());
 		}
 	}
-
-	@Override
-	public void eraseAt(final EraseInfo eraseInfo) {
-		Scribble modifiedObjectInstance = (Scribble) eraseInfo
-				.getModifiedObject(this);
-		if (modifiedObjectInstance == null) {
-			if (collides(eraseInfo.getCollisionInfo())) {
-				modifiedObjectInstance = (Scribble) eraseInfo
-						.addModifiedObject(this);
-			}
-		}
-
-		if (modifiedObjectInstance != null) {
-			modifiedObjectInstance.eraseAtDirect(eraseInfo.getCollisionInfo());
-		}
-	}
-
-	@Override
-	public void eraseAtDirect(final CollisionInfo collisionInfo) {
-		for (LinkedElement<ScribbleSegment> seg = _segments.getFirst(); seg != null;) {
-			LinkedElement<ScribbleSegment> nextSeg = seg.getNext();
-			final ScribbleSegment newSeg = seg.getData().eraseAt(collisionInfo);
-			if (newSeg != null) {
-				_segments.insertAfter(seg, newSeg);
-				nextSeg = seg.getNext();
-			}
-			if (seg.getData().isEmpty()) {
-				_segments.remove(seg);
-			}
-			seg = nextSeg;
-		}
-	}
-
-	@Override
-	public boolean collides(final CollisionInfo collisionInfo) {
-		for (LinkedElement<ScribbleSegment> seg = _segments.getFirst(); seg != null; seg = seg
-				.getNext()) {
-			if (seg.getData().collides(collisionInfo)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	@Override
-	public void render(final IPageBackRenderer renderer) {
-		for (LinkedElement<ScribbleSegment> e = _segments.getFirst(); e != null; e = e
-				.getNext()) {
-			e.getData().render(_pen, renderer);
-		}
-	}
-
-	public Scribble(final BinaryDeserializer reader) throws IOException {
-		super(reader);
-		_pen = reader.readSerializableClass();
-		final int count = reader.readInt();
-		for (int i = 0; i < count; i++) {
-			_segments.addLast(new ScribbleSegment(reader));
-		}
-	}
-
-	@Override
-	public void serialize(final BinarySerializer writer) throws IOException {
-		super.serialize(writer);
-		writer.writeSerializableClass(_pen);
-		// Always has first
-		writer.writeInt(_segments.getFirst().getNextCount());
-		for (LinkedElement<ScribbleSegment> element = _segments.getFirst(); element != null; element = element
-				.getNext()) {
-			element.getData().serialize(writer);
-		}
-	}
-
+	
 	/**
 	 * Gets the objects pen
 	 * 
@@ -175,5 +103,95 @@ public class Scribble extends AbstractRenderable {
 	@Override
 	public float getRadius() {
 		return _pen.getThickness();
+	}
+
+	@Override
+	public void eraseAt(final EraseInfo eraseInfo) {
+		Scribble modifiedObjectInstance = (Scribble) eraseInfo
+				.getModifiedObject(this);
+		if (modifiedObjectInstance == null) {
+			if (collides(eraseInfo.getCollisionInfo())) {
+				modifiedObjectInstance = (Scribble) eraseInfo
+						.addModifiedObject(this);
+			}
+		}
+
+		if (modifiedObjectInstance != null) {
+			modifiedObjectInstance.eraseAtDirect(eraseInfo.getCollisionInfo());
+		}
+	}
+
+	/**
+	 * Performs the erase
+	 * @param collisionInfo
+	 */
+	private void eraseAtDirect(final CollisionInfo collisionInfo) {
+		for (LinkedElement<ScribbleSegment> seg = _segments.getFirst(); seg != null;) {
+			LinkedElement<ScribbleSegment> nextSeg = seg.getNext();
+			final ScribbleSegment newSeg = seg.getData().eraseAt(collisionInfo);
+			if (newSeg != null) {
+				if (collisionInfo.isCheckOnlyBoundaries()) {
+					_segments.remove(seg);
+				} else {
+					_segments.insertAfter(seg, newSeg);
+					nextSeg = seg.getNext();
+				}
+			}
+			if (seg.getData().isEmpty()) {
+				_segments.remove(seg);
+			}
+			seg = nextSeg;
+		}
+	}
+	
+	
+	@Override
+	public boolean eraseEnd(final EraseInfo eraseInfo) {
+		Scribble modifiedObjectInstance = (Scribble) eraseInfo
+				.getModifiedObject(this);
+		if (modifiedObjectInstance != null) {
+			return !modifiedObjectInstance._segments.isEmpty();
+		}
+		return false;
+	}
+
+	@Override
+	public boolean collides(final CollisionInfo collisionInfo) {
+		for (LinkedElement<ScribbleSegment> seg = _segments.getFirst(); seg != null; seg = seg
+				.getNext()) {
+			if (seg.getData().collides(collisionInfo)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public void render(final IPageBackRenderer renderer) {
+		for (LinkedElement<ScribbleSegment> e = _segments.getFirst(); e != null; e = e
+				.getNext()) {
+			e.getData().render(_pen, renderer);
+		}
+	}
+	
+	public Scribble(final BinaryDeserializer reader) throws IOException {
+		super(reader);
+		_pen = reader.readSerializableClass();
+		final int count = reader.readInt();
+		for (int i = 0; i < count; i++) {
+			_segments.addLast(new ScribbleSegment(reader));
+		}
+	}
+
+	@Override
+	public void serialize(final BinarySerializer writer) throws IOException {
+		super.serialize(writer);
+		writer.writeSerializableClass(_pen);
+		// Always has first
+		writer.writeInt(_segments.getFirst().getNextCount());
+		for (LinkedElement<ScribbleSegment> element = _segments.getFirst(); element != null; element = element
+				.getNext()) {
+			element.getData().serialize(writer);
+		}
 	}
 }

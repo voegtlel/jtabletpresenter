@@ -2,6 +2,7 @@ package de.freiburg.uni.tablet.presenter.editor.pageeditor;
 
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.image.BufferedImage;
 
 import de.freiburg.uni.tablet.presenter.page.IPageFrontRenderer;
 import de.freiburg.uni.tablet.presenter.page.IPen;
@@ -47,6 +48,19 @@ public class PageLayerBufferFront extends AbstractPageLayerBuffer implements
 				draw(g, pen, x, y);
 			}
 			draw(_graphics, pen, x, y);
+			_displayRenderer.updateRenderer(g);
+		}
+	}
+	
+	@Override
+	public void draw(final BufferedImage image, final float x, final float y, final float width, final float height) {
+		if (_graphics != null) {
+			final Graphics2D g = _displayRenderer.createRenderer();
+			if (g != null) {
+				setRenderingHints(g);
+				draw(g, image, x, y, width, height, _displayRenderer.getObserver());
+			}
+			draw(_graphics, image, x, y, width, height, _displayRenderer.getObserver());
 			_displayRenderer.updateRenderer(g);
 		}
 	}

@@ -7,6 +7,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Rectangle;
+import java.awt.image.ImageObserver;
 
 import jpen.owner.multiAwt.AwtPenToolkit;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
@@ -160,6 +161,11 @@ public class JPageRendererDirect extends Component implements IPageRenderer {
 	@Override
 	public Graphics2D createRenderer() {
 		return (Graphics2D) this.getGraphics();
+	}
+	
+	@Override
+	public ImageObserver getObserver() {
+		return this;
 	}
 
 	@Override

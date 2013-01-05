@@ -20,15 +20,15 @@ public class ToolEraser extends AbstractTool {
 
 	private EraseInfo _eraseInfo = null;
 
-	private final boolean _checkOnlyBoundaries = false;
+	private boolean _checkOnlyBoundaries = false;
 
 	/**
-	 * 
-	 * @param container
-	 *            used for cursor changing
+	 * @param editor
+	 * @param checkOnlyBoundaries
 	 */
-	public ToolEraser(final IToolPageEditor editor) {
+	public ToolEraser(final IToolPageEditor editor, boolean checkOnlyBoundaries) {
 		super(editor);
+		_checkOnlyBoundaries = checkOnlyBoundaries;
 		updateCursor();
 	}
 

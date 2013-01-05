@@ -1,5 +1,6 @@
 package de.freiburg.uni.tablet.presenter.document;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
@@ -7,11 +8,14 @@ import java.util.List;
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.data.IBinarySerializable;
+import de.freiburg.uni.tablet.presenter.geometry.BitmapImage;
 import de.freiburg.uni.tablet.presenter.page.IPen;
 import de.freiburg.uni.tablet.presenter.page.SolidPen;
 
 public class DocumentEditor implements IBinarySerializable {
 	private IPen _currentPen = new SolidPen();
+	private File _currentImageFile = null;
+	private BitmapImage _currentImage = null;
 
 	private Document _document = new Document(1);
 	private final DocumentHistory _history;
@@ -140,11 +144,39 @@ public class DocumentEditor implements IBinarySerializable {
 	public void setCurrentPen(final IPen currentPen) {
 		_currentPen = currentPen;
 	}
+	
+	/**
+	 * @return
+	 */
+	public File getCurrentImageFile() {
+		return _currentImageFile;
+	}
+	
+	/**
+	 * @return
+	 */
+	public BitmapImage getCurrentImage() {
+		return _currentImage;
+	}
+	
+	/**
+	 * @param imageFile
+	 */
+	public void setCurrentImageFile(File imageFile) {
+		_currentImageFile = imageFile;
+		_currentImage = new BitmapImage(0, imageFile, 0, 0, 0, 0);
+	}
 
+	/**
+	 * @return
+	 */
 	public Document getDocument() {
 		return _document;
 	}
 
+	/**
+	 * @param document
+	 */
 	public void setDocument(final Document document) {
 		final Document lastDocument = _document;
 		_document = document;
@@ -152,6 +184,9 @@ public class DocumentEditor implements IBinarySerializable {
 		setCurrentPage(document.getPageByIndex(0, true));
 	}
 
+	/**
+	 * @return
+	 */
 	public DocumentHistory getHistory() {
 		return _history;
 	}

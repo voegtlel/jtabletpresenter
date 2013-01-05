@@ -103,6 +103,12 @@ public class ScribbleSegment implements IBinarySerializable {
 				final LinkedElement<DataPoint> next = e.getNext();
 				if (collisionInfo.collides(e.getData().getX(), e.getData()
 						.getY())) {
+					if (collisionInfo.isCheckOnlyBoundaries()) {
+						while (!_points.isEmpty()) {
+							_points.removeFirst();
+						}
+						break;
+					}
 					if (e == _points.getFirst()) {
 						// Simply remove the point.
 						_points.removeFirst();
