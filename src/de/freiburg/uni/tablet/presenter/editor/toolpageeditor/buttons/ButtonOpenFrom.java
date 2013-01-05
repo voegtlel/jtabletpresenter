@@ -17,6 +17,7 @@ import javax.swing.filechooser.FileFilter;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.document.Document;
+import de.freiburg.uni.tablet.presenter.document.DocumentPage;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 
 /**
@@ -34,6 +35,44 @@ public class ButtonOpenFrom extends AbstractButtonAction {
 	 */
 	public ButtonOpenFrom(final IToolPageEditor editor) {
 		super("open", editor, "Open", "/buttons/document-open.png");
+	}
+	
+	/**
+	 * Opens a document file
+	 * 
+	 * @param file
+	 * @return
+	 * @throws IOException
+	 */
+	public static Document openDocument(File file) throws IOException {
+		final FileInputStream fileInputStream = new FileInputStream(file);
+		final BufferedInputStream bufferedInputStream = new BufferedInputStream(
+				fileInputStream);
+		final BinaryDeserializer binaryDeserializer = new BinaryDeserializer(
+				bufferedInputStream);
+		final Document document = binaryDeserializer.readObjectTable();
+		bufferedInputStream.close();
+		fileInputStream.close();
+		return document;
+	}
+	
+	/**
+	 * Opens a document file
+	 * 
+	 * @param file
+	 * @return
+	 * @throws IOException
+	 */
+	public static DocumentPage openPage(File file) throws IOException {
+		final FileInputStream fileInputStream = new FileInputStream(file);
+		final BufferedInputStream bufferedInputStream = new BufferedInputStream(
+				fileInputStream);
+		final BinaryDeserializer binaryDeserializer = new BinaryDeserializer(
+				bufferedInputStream);
+		final DocumentPage page = new DocumentPage(binaryDeserializer, null);
+		bufferedInputStream.close();
+		fileInputStream.close();
+		return page;
 	}
 
 	@Override
@@ -77,33 +116,26 @@ public class ButtonOpenFrom extends AbstractButtonAction {
 		fileChooser.addChoosableFileFilter(pdf);
 		fileChooser.setFileFilter(presenterDocumentFile);
 		if (fileChooser.showOpenDialog(button) == JFileChooser.APPROVE_OPTION) {
-			final File f = fileChooser.getSelectedFile();
-			if (f.getPath().toLowerCase().endsWith(".jpd")) {
-				try {
-					final FileInputStream fileInputStream = new FileInputStream(f);
-					final BufferedInputStream bufferedInputStream = new BufferedInputStream(
-							fileInputStream);
-					final BinaryDeserializer binaryDeserializer = new BinaryDeserializer(
-							bufferedInputStream);
-					final Document document = binaryDeserializer.readObjectTable();
-					_editor.getDocumentEditor().setDocument(document);
-					bufferedInputStream.close();
-					fileInputStream.close();
-				} catch (final FileNotFoundException e) {
-					JOptionPane.showMessageDialog(button, "Couldn't open file",
-							"Error", JOptionPane.ERROR_MESSAGE);
-				} catch (final IOException e) {
-					JOptionPane.showMessageDialog(button, "Couldn't read file: "
-							+ e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-				}
-			} else if (f.getPath().toLowerCase().endsWith(".pdf")) {
-				try {
+			try {
+				final File f = fileChooser.getSelectedFile();
+				if (f.getPath().toLowerCase().endsWith(".jpd")) {
+					_editor.getDocumentEditor().setDocument(openDocument(f));
+				} else if (f.getPath().toLowerCase().endsWith(".jpp")) {
+					DocumentPage page = openPage(f).clone(_editor.getDocumentEditor().getDocument());
+					_editor.getDocumentEditor().getDocument().insertPage(
+							_editor.getDocumentEditor().getCurrentPage(), page);
+					_editor.getDocumentEditor().setCurrentPage(page);
+				} else if (f.getPath().toLowerCase().endsWith(".pdf")) {
 					_editor.getDocumentEditor().getDocument().setPdf(f);
-				} catch (IOException e) {
-					JOptionPane.showMessageDialog(button, "Couldn't read file: "
-							+ e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 				}
+			} catch (final FileNotFoundException e) {
+				JOptionPane.showMessageDialog(button, "Couldn't open file",
+						"Error", JOptionPane.ERROR_MESSAGE);
+			} catch (final IOException e) {
+				JOptionPane.showMessageDialog(button, "Couldn't read file: "
+						+ e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 			}
+			
 		}
 	}
 }

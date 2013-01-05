@@ -112,7 +112,22 @@ public class Document implements IEntity {
 	public int getPageIndex(final DocumentPage page) {
 		return _pages.getElementIndex(page);
 	}
-
+	
+	/**
+	 * Adds a document page
+	 * 
+	 * @return
+	 * @throws IOException 
+	 */
+	public DocumentPage addPage(BinaryDeserializer reader) throws IOException {
+		final DocumentPage result = new DocumentPage(reader, this);
+		final DocumentPage prevData = _pages.getLast() != null ? _pages
+				.getLast().getData() : null;
+		_pages.addLast(result);
+		firePageInserted(prevData, result);
+		return result;
+	}
+	
 	/**
 	 * Adds a document page
 	 * 

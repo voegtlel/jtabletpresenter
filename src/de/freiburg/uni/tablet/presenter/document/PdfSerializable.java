@@ -70,11 +70,11 @@ public class PdfSerializable implements IEntity {
 			writer.writeInt(0);
 		} else {
 			writer.writeInt(1);
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			ILocator loc = new StreamLocator(bos, "virtual", "pdf");
+			_document.save(loc);
+			writer.writeByteArray(bos.toByteArray());
 		}
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		ILocator loc = new StreamLocator(bos, "virtual", "pdf");
-		_document.save(loc);
-		writer.writeByteArray(bos.toByteArray());
 	}
 
 	@Override

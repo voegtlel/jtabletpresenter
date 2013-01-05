@@ -271,9 +271,10 @@ public class ScribbleSegment implements IBinarySerializable {
 		result._minY = _minY;
 		result._maxX = _maxX;
 		result._maxY = _maxY;
-		if (_path != null) {
+		result._path = null;
+		/*if (_path != null) {
 			result._path = (Path2D) _path.clone();
-		}
+		}*/
 		for (LinkedElement<DataPoint> element = _points.getFirst(); element != null; element = element
 				.getNext()) {
 			result._points.addLast(element.getData());

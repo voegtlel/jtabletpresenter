@@ -71,6 +71,11 @@ public class BinarySerializer {
 			writeString(value);
 		}
 	}
+	
+	public void putObjectTable(final long identifier,
+			final IBinarySerializable obj) throws IOException {
+		_objectTable.put(identifier, obj);
+	}
 
 	public void writeObjectTable(final long identifier,
 			final IBinarySerializable obj) throws IOException {

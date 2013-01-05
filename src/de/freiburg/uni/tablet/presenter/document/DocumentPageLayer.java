@@ -33,6 +33,20 @@ public class DocumentPageLayer implements IEntity {
 		_page = page;
 		_id = _page.getParent().getNextId();
 	}
+	
+	/**
+	 * Ctor for cloning
+	 */
+	private DocumentPageLayer(final DocumentPage page, final LinkedElementList<IRenderable> renderablesList) {
+		_page = page;
+		_id = _page.getParent().getNextId();
+		for (LinkedElement<IRenderable> r = renderablesList.getFirst(); r != null; r = r
+				.getNext()) {
+			final IRenderable newRenderable = r.getData().cloneRenderable(_page.getParent().getNextId());
+			_renderablesList.addLast(newRenderable);
+			_renderablesMap.put(newRenderable.getId(), newRenderable);
+		}
+	}
 
 	@Override
 	public DocumentPage getParent() {
@@ -100,5 +114,9 @@ public class DocumentPageLayer implements IEntity {
 				.getNext()) {
 			writer.writeObjectTable(r.getData().getId(), r.getData());
 		}
+	}
+	
+	public DocumentPageLayer clone(DocumentPage dstPage) {
+		return new DocumentPageLayer(dstPage, _renderablesList);
 	}
 }

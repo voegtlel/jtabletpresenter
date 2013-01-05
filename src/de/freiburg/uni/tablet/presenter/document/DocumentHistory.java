@@ -24,6 +24,7 @@ import de.intarsys.pdf.pd.PDDocument;
 public class DocumentHistory {
 	private final LinkedElementList<IAction> _history = new LinkedElementList<IAction>();
 	private LinkedElement<IAction> _top;
+	private LinkedElement<IAction> _topNext;
 	private final DocumentEditor _documentEditor;
 	private final DocumentListener _documentListener;
 	private ActionGroup _currentActionGroup;
@@ -116,6 +117,7 @@ public class DocumentHistory {
 				_history.setNext(_top, action);
 			}
 			_top = _history.getLast();
+			_topNext = null;
 		}
 	}
 
@@ -124,7 +126,7 @@ public class DocumentHistory {
 	}
 
 	public boolean hasRedoAction() {
-		return _top.getNext() != null;
+		return _topNext != null;
 	}
 
 	public void undo() {
@@ -132,6 +134,7 @@ public class DocumentHistory {
 			_isPerforming = true;
 			_currentActionGroup = null;
 			final IAction undoAction = _top.getData().getUndoAction(_documentEditor.getDocument().getClientId());
+			_topNext = _top;
 			_top = _top.getPrevious();
 			undoAction.perform(_documentEditor);
 			_isPerforming = false;
@@ -139,10 +142,11 @@ public class DocumentHistory {
 	}
 
 	public void redo() {
-		if (_top.getNext() != null && !_isPerforming) {
+		if (_topNext != null && !_isPerforming) {
 			_isPerforming = true;
 			_currentActionGroup = null;
-			_top = _top.getNext();
+			_top = _topNext;
+			_topNext = _top.getNext();
 			_top.getData().perform(_documentEditor);
 			_isPerforming = false;
 		}

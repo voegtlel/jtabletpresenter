@@ -39,6 +39,16 @@ public class DocumentPage implements IEntity {
 		_clientOnlyLayer = new DocumentPageLayer(this);
 		_serverSyncLayer = new DocumentPageLayer(this);
 	}
+	
+	/**
+	 * Ctor for cloning
+	 */
+	private DocumentPage(final Document document, final DocumentPageLayer clientOnlyLayer, final DocumentPageLayer serverSyncLayer) {
+		_document = document;
+		_id = document.getNextId();
+		_clientOnlyLayer = clientOnlyLayer.clone(this);
+		_serverSyncLayer = serverSyncLayer.clone(this);
+	}
 
 	@Override
 	public long getId() {
@@ -92,11 +102,17 @@ public class DocumentPage implements IEntity {
 		writer.writeObjectTable(_serverSyncLayer.getId(), _serverSyncLayer);
 	}
 
-	public DocumentPage(final BinaryDeserializer reader, final Document document)
+	/**
+	 * Deserialize only this page
+	 * @param reader
+	 * @param dummy null
+	 * @throws IOException
+	 */
+	public DocumentPage(final BinaryDeserializer reader, final Document dummy)
 			throws IOException {
 		_id = reader.readLong();
-		_document = document;
-		reader.putObjectTable(this.getId(), this);
+		_document = null;
+		reader.putObjectTable(_id, this);
 		_clientOnlyLayer = reader.readObjectTable();
 		_serverSyncLayer = reader.readObjectTable();
 	}
@@ -109,8 +125,18 @@ public class DocumentPage implements IEntity {
 	 */
 	public void serializeDirect(final BinarySerializer writer)
 			throws IOException {
+		writer.putObjectTable(_id, this);
 		writer.writeLong(_id);
 		writer.writeObjectTable(_clientOnlyLayer.getId(), _clientOnlyLayer);
 		writer.writeObjectTable(_serverSyncLayer.getId(), _serverSyncLayer);
+	}
+	
+	/**
+	 * Clone this object to the dstDocument
+	 * @param dstDocument
+	 * @return
+	 */
+	public DocumentPage clone(Document dstDocument) {
+		return new DocumentPage(dstDocument, _clientOnlyLayer, _serverSyncLayer);
 	}
 }
