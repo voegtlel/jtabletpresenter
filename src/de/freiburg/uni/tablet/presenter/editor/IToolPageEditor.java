@@ -59,17 +59,4 @@ public interface IToolPageEditor {
 	 * @return
 	 */
 	DocumentConfig getConfig();
-
-	/**
-	 * Sets the pdf document as background
-	 * @param pdfFile
-	 * @throws IOException
-	 */
-	void setPdfDocument(File pdfFile) throws IOException;
-
-	/**
-	 * Gets the active pdf document
-	 * @return
-	 */
-	PDDocument getPdfDocument();
 }

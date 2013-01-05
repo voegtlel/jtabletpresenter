@@ -6,6 +6,7 @@ package de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons;
 
 import java.awt.Component;
 
+import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 
 /**

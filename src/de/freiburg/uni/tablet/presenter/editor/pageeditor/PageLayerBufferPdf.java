@@ -8,20 +8,22 @@ import java.awt.Image;
 import java.awt.Transparency;
 import java.awt.geom.AffineTransform;
 import java.awt.image.ImageObserver;
-import java.io.File;
-import java.io.IOException;
 
+import de.freiburg.uni.tablet.presenter.document.Document;
+import de.freiburg.uni.tablet.presenter.document.DocumentAdapter;
+import de.freiburg.uni.tablet.presenter.document.DocumentListener;
+import de.freiburg.uni.tablet.presenter.document.PdfSerializable;
+import de.freiburg.uni.tablet.presenter.editor.IRepaintListener;
 import de.intarsys.cwt.awt.environment.CwtAwtGraphicsContext;
 import de.intarsys.cwt.environment.IGraphicsContext;
 import de.intarsys.pdf.content.CSContent;
-import de.intarsys.pdf.parser.COSLoadException;
-import de.intarsys.pdf.pd.PDDocument;
 import de.intarsys.pdf.pd.PDPage;
 import de.intarsys.pdf.pd.PDPageTree;
 import de.intarsys.pdf.platform.cwt.rendering.CSPlatformRenderer;
-import de.intarsys.tools.locator.FileLocator;
 
 public class PageLayerBufferPdf implements IPageLayerBuffer {
+	private IRepaintListener _repaintListener = null;
+	
 	protected Image _imageBuffer = null;
 
 	protected int _sizeX = 1;
@@ -34,11 +36,13 @@ public class PageLayerBufferPdf implements IPageLayerBuffer {
 	private PDPage _page;
 	private IDisplayRenderer _displayRenderer;
 
-	private PDDocument _doc;
-
 	private PDPageTree _pageTree;
 
 	private Graphics2D _graphics;
+
+	private Document _document;
+	
+	private DocumentListener _listener;
 	
 	/**
 	 * Create an empty pdf renderer
@@ -49,6 +53,12 @@ public class PageLayerBufferPdf implements IPageLayerBuffer {
 		if (_displayRenderer.isWorking()) {
 			resize(_displayRenderer.getWidth(), _displayRenderer.getHeight());
 		}
+		_listener = new DocumentAdapter() {
+			@Override
+			public void pdfChanged(final PdfSerializable lastPdf) {
+				PageLayerBufferPdf.this.onPdfChanged();
+			}
+		};
 	}
 	
 	@Override
@@ -100,43 +110,38 @@ public class PageLayerBufferPdf implements IPageLayerBuffer {
 	}
 	
 	/**
-	 * Sets the document by file
-	 * @param file
-	 * @throws IOException
+	 * Sets the document
+	 * @param document
 	 */
-	public void setDocument(final File file) throws IOException {
-		try {
-			setDocument(PDDocument.createFromLocator(new FileLocator(file)));
-		} catch (COSLoadException e) {
-			throw new IOException(e);
+	public void setDocument(final Document document) {
+		if (_document != null) {
+			_document.removeListener(_listener);
 		}
+		_document = document;
+		if (_document != null) {
+			System.out.println("Document changed to " + _document.getId());
+			_document.addListener(_listener);
+		}
+		onPdfChanged();
 	}
 
 	/**
-	 * Sets the visible document
-	 * @param doc
+	 * Event
+	 * @param lastPdf
 	 */
-	public void setDocument(final PDDocument doc) {
-		_doc = doc;
-		if (doc == null) {
+	protected void onPdfChanged() {
+		if ((_document == null) || (_document.getPdf().getDocument() == null)) {
+			System.out.println("PDF changed to null");
 			destroyBuffer();
-			_page = null;
 		} else {
-			_pageTree = doc.getPageTree();
+			System.out.println("PDF changed to " + _document.getPdf().getId());
+			_pageTree = _document.getPdf().getDocument().getPageTree();
 			_page = _pageTree.getPageAt(_currentPageIndex);
 			if (_imageBuffer == null) {
 				createImage();
 			}
 			renderPdf();
 		}
-	}
-	
-	/**
-	 * Gets the active document
-	 * @return
-	 */
-	public PDDocument getDocument() {
-		return _doc;
 	}
 	
 	/**
@@ -183,9 +188,16 @@ public class PageLayerBufferPdf implements IPageLayerBuffer {
 				System.out.println("Don't Render Pdf");
 			}
 		}
+		if (_repaintListener != null) {
+			_repaintListener.render();
+		}
 	}
 
 	@Override
 	public void clear() {
+	}
+
+	public void setRepaintListener(final IRepaintListener repaintListener) {
+		_repaintListener = repaintListener;
 	}
 }

@@ -8,12 +8,14 @@ import de.freiburg.uni.tablet.presenter.actions.ActionGroup;
 import de.freiburg.uni.tablet.presenter.actions.AddPageAction;
 import de.freiburg.uni.tablet.presenter.actions.AddRenderableAction;
 import de.freiburg.uni.tablet.presenter.actions.ChangePageIndexAction;
+import de.freiburg.uni.tablet.presenter.actions.ChangePdfAction;
 import de.freiburg.uni.tablet.presenter.actions.IAction;
 import de.freiburg.uni.tablet.presenter.actions.RemovePageAction;
 import de.freiburg.uni.tablet.presenter.actions.RemoveRenderableAction;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 import de.freiburg.uni.tablet.presenter.list.LinkedElement;
 import de.freiburg.uni.tablet.presenter.list.LinkedElementList;
+import de.intarsys.pdf.pd.PDDocument;
 
 /**
  * @author lukas
@@ -60,6 +62,13 @@ public class DocumentHistory {
 					final DocumentPage page) {
 				if (!_isPerforming) {
 					addAction(new AddPageAction(_documentEditor.getDocument().getClientId(), prevPage, page));
+				}
+			}
+			
+			@Override
+			public void pdfChanged(final PdfSerializable lastPdf) {
+				if (!_isPerforming) {
+					addAction(new ChangePdfAction(_documentEditor.getDocument().getClientId(), lastPdf, _documentEditor.getDocument().getPdf()));
 				}
 			}
 		};

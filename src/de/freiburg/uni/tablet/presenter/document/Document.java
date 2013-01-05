@@ -4,6 +4,7 @@
  */
 package de.freiburg.uni.tablet.presenter.document;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,6 +14,7 @@ import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 import de.freiburg.uni.tablet.presenter.list.LinkedElement;
 import de.freiburg.uni.tablet.presenter.list.LinkedElementList;
+import de.intarsys.pdf.pd.PDDocument;
 
 /**
  * @author lukas
@@ -25,13 +27,54 @@ public class Document implements IEntity {
 	private int _uniqueId = 1;
 
 	private final List<DocumentListener> _listeners = new LinkedList<DocumentListener>();
+	
+	private PdfSerializable _pdfDocument;
 
 	/**
 	 * 
 	 */
 	public Document(final int clientId) {
 		_clientId = clientId;
+		_pdfDocument = new PdfSerializable(getNextId(), this);
 		addPage();
+	}
+	
+	/**
+	 * Sets the background pdf
+	 * @param document
+	 */
+	public void setPdf(final File file) throws IOException {
+		PdfSerializable lastPdf = _pdfDocument;
+		_pdfDocument = new PdfSerializable(getNextId(), this, file);
+		firePdfChangedRemoved(lastPdf);
+	}
+	
+	/**
+	 * Sets the background pdf
+	 * @param document
+	 */
+	public void setPdf(final PDDocument document) {
+		PdfSerializable lastPdf = _pdfDocument;
+		_pdfDocument = new PdfSerializable(getNextId(), this, document);
+		firePdfChangedRemoved(lastPdf);
+	}
+	
+	/**
+	 * Sets the background pdf
+	 * @param document
+	 */
+	public void setPdf(final PdfSerializable document) {
+		PdfSerializable lastPdf = _pdfDocument;
+		_pdfDocument = document;
+		firePdfChangedRemoved(lastPdf);
+	}
+	
+	/**
+	 * Gets the background pdf
+	 * @return
+	 */
+	public PdfSerializable getPdf() {
+		return _pdfDocument;
 	}
 
 	/**
@@ -205,6 +248,12 @@ public class Document implements IEntity {
 			listener.renderableRemoved(renderable, layer);
 		}
 	}
+	
+	void firePdfChangedRemoved(final PdfSerializable lastPdf) {
+		for (final DocumentListener listener : _listeners) {
+			listener.pdfChanged(lastPdf);
+		}
+	}
 
 	public void addListener(final DocumentListener listener) {
 		_listeners.add(listener);
@@ -217,6 +266,7 @@ public class Document implements IEntity {
 	public Document(final BinaryDeserializer reader) throws IOException {
 		_uniqueId = reader.readInt();
 		_clientId = reader.readInt();
+		_pdfDocument = reader.readObjectTable();
 		reader.putObjectTable(this.getId(), this);
 		final int pageCount = reader.readInt();
 		for (int i = 0; i < pageCount; i++) {
@@ -229,6 +279,7 @@ public class Document implements IEntity {
 	public void serialize(final BinarySerializer writer) throws IOException {
 		writer.writeInt(_uniqueId);
 		writer.writeInt(_clientId);
+		writer.writeObjectTable(_pdfDocument.getId(), _pdfDocument);
 		// Always has first
 		writer.writeInt(_pages.getFirst().getNextCount());
 		for (LinkedElement<DocumentPage> dp = _pages.getFirst(); dp != null; dp = dp

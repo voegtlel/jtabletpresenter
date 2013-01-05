@@ -259,4 +259,21 @@ public class PagePenDispatcher implements PenListener {
 	public long getFrameReduction() {
 		return _frameReduction;
 	}
+	
+	/**
+	 * Stop the currently active tool
+	 */
+	public void stopTool() {
+		// Deactivate tool and store result
+		if (_activeTool != null) {
+			_activeTool.end();
+			if ((_penKind == PKind.Type.CURSOR) && (_activeTool == _invertedTool)) {
+				_invertedTool.out();
+				_activePenButton = PButton.Type.LEFT;
+				_hoverTool = _normalTool;
+				_normalTool.over();
+			}
+			_activeTool = null;
+		}
+	}
 }

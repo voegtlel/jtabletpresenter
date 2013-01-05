@@ -36,6 +36,12 @@ public class DocumentEditor implements IBinarySerializable {
 	public void removeListener(final DocumentEditorListener listener) {
 		_listeners.remove(listener);
 	}
+	
+	void fireChanging() {
+		for (final DocumentEditorListener listener : _listeners) {
+			listener.changing();
+		}
+	}
 
 	void fireCurrentPageChanged(final DocumentPage lastCurrentPage) {
 		for (final DocumentEditorListener listener : _listeners) {
@@ -70,6 +76,7 @@ public class DocumentEditor implements IBinarySerializable {
 	 * @param page
 	 */
 	public void setCurrentPage(final DocumentPage page) {
+		fireChanging();
 		final DocumentPage lastPage = _currentPage;
 		_currentPage = page;
 		fireCurrentPageChanged(lastPage);
@@ -126,6 +133,7 @@ public class DocumentEditor implements IBinarySerializable {
 	 * @return
 	 */
 	public void setActiveLayerClientOnly(final boolean activeLayerClientOnly) {
+		fireChanging();
 		final boolean lastActiveLayerClientOnly = _activeLayerClientOnly;
 		_activeLayerClientOnly = activeLayerClientOnly;
 		fireActiveLayerChanged(lastActiveLayerClientOnly);
@@ -178,6 +186,7 @@ public class DocumentEditor implements IBinarySerializable {
 	 * @param document
 	 */
 	public void setDocument(final Document document) {
+		fireChanging();
 		final Document lastDocument = _document;
 		_document = document;
 		fireDocumentChanged(lastDocument);

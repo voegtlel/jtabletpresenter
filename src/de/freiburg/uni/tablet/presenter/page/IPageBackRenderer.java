@@ -3,7 +3,7 @@ package de.freiburg.uni.tablet.presenter.page;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 
-import de.freiburg.uni.tablet.presenter.editor.PageRepaintListener;
+import de.freiburg.uni.tablet.presenter.editor.IPageRepaintListener;
 
 public interface IPageBackRenderer {
 	/**
@@ -54,5 +54,5 @@ public interface IPageBackRenderer {
 	 * 
 	 * @param repaintListener
 	 */
-	void setRepaintListener(PageRepaintListener repaintListener);
+	void setRepaintListener(IPageRepaintListener repaintListener);
 }

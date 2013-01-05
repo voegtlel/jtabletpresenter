@@ -1,13 +1,12 @@
 package de.freiburg.uni.tablet.presenter.editor;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 import de.freiburg.uni.tablet.presenter.document.Document;
 import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
-import de.freiburg.uni.tablet.presenter.document.DocumentEditorListener;
-import de.freiburg.uni.tablet.presenter.document.DocumentPage;
+import de.freiburg.uni.tablet.presenter.document.DocumentEditorAdapter;
 import de.freiburg.uni.tablet.presenter.net.AcceptListener;
 import de.freiburg.uni.tablet.presenter.net.AcceptThread;
 import de.freiburg.uni.tablet.presenter.net.ClientThread;
@@ -24,18 +23,10 @@ public class NetworkPageEditor {
 
 	public NetworkPageEditor(DocumentEditor documentEditor) {
 		_documentEditor = documentEditor;
-		_documentEditor.addListener(new DocumentEditorListener() {
+		_documentEditor.addListener(new DocumentEditorAdapter() {
 			@Override
 			public void documentChanged(Document lastDocument) {
 				onDocumentChanged(lastDocument);
-			}
-
-			@Override
-			public void currentPageChanged(DocumentPage lastCurrentPage) {
-			}
-
-			@Override
-			public void activeLayerChanged(boolean lastActiveLayerClientOnly) {
 			}
 		});
 	}

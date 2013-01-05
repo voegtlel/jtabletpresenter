@@ -13,8 +13,6 @@ import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 import javax.swing.AbstractAction;
@@ -36,8 +34,9 @@ import de.freiburg.uni.tablet.presenter.document.DocumentListener;
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
 import de.freiburg.uni.tablet.presenter.document.DocumentPageLayer;
 import de.freiburg.uni.tablet.presenter.editor.IPageEditor;
+import de.freiburg.uni.tablet.presenter.editor.IPageRepaintListener;
+import de.freiburg.uni.tablet.presenter.editor.IRepaintListener;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
-import de.freiburg.uni.tablet.presenter.editor.PageRepaintListener;
 import de.freiburg.uni.tablet.presenter.editor.pageeditor.IPageRenderer;
 import de.freiburg.uni.tablet.presenter.editor.pageeditor.JPageRendererBufferStrategy;
 import de.freiburg.uni.tablet.presenter.editor.pageeditor.PageLayerBufferBack;
@@ -56,7 +55,6 @@ import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonUndo
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
 import de.freiburg.uni.tablet.presenter.page.IPageFrontRenderer;
-import de.intarsys.pdf.pd.PDDocument;
 
 /**
  * @author lukas
@@ -114,6 +112,11 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 
 		_documentEditorListener = new DocumentEditorAdapter() {
 			@Override
+			public void changing() {
+				onDocumentChanging();
+			}
+			
+			@Override
 			public void currentPageChanged(final DocumentPage lastCurrentPage) {
 				onCurrentPageChanged();
 			}
@@ -146,15 +149,22 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 		_backgroundLayer = pageLayers.addColorBuffer();
 		_backgroundLayer.setColor(_config.getColor("document.background.color", Color.white));
 		_pdfLayer = pageLayers.addPdfBuffer();
+		_pdfLayer.setRepaintListener(new IRepaintListener() {
+			@Override
+			public void render() {
+				onRenderPdfLayer();
+			}
+		});
+		_pdfLayer.setDocument(_documentEditor.getDocument());
 		_serverSyncLayer = pageLayers.addBackBuffer();
-		_serverSyncLayer.setRepaintListener(new PageRepaintListener() {
+		_serverSyncLayer.setRepaintListener(new IPageRepaintListener() {
 			@Override
 			public void render(final IPageBackRenderer renderer) {
 				onRenderServerSync();
 			}
 		});
 		_clientOnlyLayer = pageLayers.addBackBuffer();
-		_clientOnlyLayer.setRepaintListener(new PageRepaintListener() {
+		_clientOnlyLayer.setRepaintListener(new IPageRepaintListener() {
 			@Override
 			public void render(final IPageBackRenderer renderer) {
 				onRenderClientOnly();
@@ -259,17 +269,6 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 			}
 		}
 	}
-	
-	@Override
-	public void setPdfDocument(File pdfFile) throws IOException {
-		_pdfLayer.setDocument(pdfFile);
-		_pageRenderer.clear();
-	}
-	
-	@Override
-	public PDDocument getPdfDocument() {
-		return _pdfLayer.getDocument();
-	}
 
 	@Override
 	public boolean isFullscreen() {
@@ -310,6 +309,7 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 			layer.render(_serverSyncLayer);
 		}
 		// Else the object was not on a visible layer
+		// _pageRenderer.clear();?
 	}
 
 	protected void onRenderableAdded(final IRenderable renderable,
@@ -322,15 +322,14 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 			renderable.render(_serverSyncLayer);
 		}
 		// Else the object is not on a visible layer
+		// _pageRenderer.clear();?
 	}
-
-	private void resetEditing() {
-
+	
+	protected void onDocumentChanging() {
+		_pageRenderer.stopTool();
 	}
 
 	protected void onCurrentPageChanged() {
-		// Restart editing
-		resetEditing();
 		// Update layers
 		final DocumentPage currentPage = _documentEditor.getCurrentPage();
 		_clientOnlyLayer.clear();
@@ -345,13 +344,16 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 	}
 
 	protected void onActiveLayerChanged() {
-		// Restart editing
-		resetEditing();
 	}
 
 	protected void onDocumentChanged(final Document lastDocument) {
 		lastDocument.removeListener(_documentListener);
 		_documentEditor.getDocument().addListener(_documentListener);
+		_pdfLayer.setDocument(_documentEditor.getDocument());
+	}
+	
+	protected void onRenderPdfLayer() {
+		_pageRenderer.clear();
 	}
 
 	protected void onRenderClientOnly() {
@@ -394,6 +396,9 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 			if (_documentEditor != null) {
 				_documentEditor.addListener(_documentEditorListener);
 				_documentEditor.getDocument().addListener(_documentListener);
+				if (_pdfLayer != null) {
+					_pdfLayer.setDocument(_documentEditor.getDocument());
+				}
 			}
 			for (final IButtonAction button : _buttonActions) {
 				if (button != null) {

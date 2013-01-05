@@ -13,4 +13,8 @@ public abstract class DocumentEditorAdapter implements DocumentEditorListener {
 	@Override
 	public void documentChanged(final Document lastDocument) {
 	}
+	
+	@Override
+	public void changing() {
+	}
 }

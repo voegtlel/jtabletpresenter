@@ -11,7 +11,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.nio.charset.Charset;
 
-import de.freiburg.uni.tablet.presenter.editor.PageRepaintListener;
+import de.freiburg.uni.tablet.presenter.editor.IPageRepaintListener;
 import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
 import de.freiburg.uni.tablet.presenter.page.IPen;
 import de.intarsys.pdf.cds.CDSRectangle;
@@ -246,7 +246,7 @@ public class PdfRenderer implements IPageBackRenderer {
 	}
 
 	@Override
-	public void setRepaintListener(PageRepaintListener repaintListener) {
+	public void setRepaintListener(IPageRepaintListener repaintListener) {
 		// Ignore
 	}
 }

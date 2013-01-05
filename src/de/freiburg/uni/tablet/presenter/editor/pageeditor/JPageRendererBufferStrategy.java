@@ -185,4 +185,9 @@ public class JPageRendererBufferStrategy extends Canvas implements
 	public Component getContainerComponent() {
 		return this;
 	}
+	
+	@Override
+	public void stopTool() {
+		_pagePenDispatcher.stopTool();
+	}
 }

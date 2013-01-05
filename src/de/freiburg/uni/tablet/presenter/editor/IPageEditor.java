@@ -76,4 +76,9 @@ public interface IPageEditor {
 	 * @return
 	 */
 	IPageLayerBuffer getPageLayer();
+
+	/**
+	 * Stops the active tool
+	 */
+	void stopTool();
 }

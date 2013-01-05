@@ -5,13 +5,13 @@ import java.awt.RenderingHints;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 
-import de.freiburg.uni.tablet.presenter.editor.PageRepaintListener;
+import de.freiburg.uni.tablet.presenter.editor.IPageRepaintListener;
 import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
 import de.freiburg.uni.tablet.presenter.page.IPen;
 
 public class PageLayerBufferBack extends AbstractPageLayerBuffer implements
 		IPageBackRenderer {
-	private PageRepaintListener _repaintListener = null;
+	private IPageRepaintListener _repaintListener = null;
 
 	public PageLayerBufferBack(final IDisplayRenderer displayRenderer) {
 		super(displayRenderer);
@@ -67,7 +67,7 @@ public class PageLayerBufferBack extends AbstractPageLayerBuffer implements
 	}
 
 	@Override
-	public void setRepaintListener(final PageRepaintListener repaintListener) {
+	public void setRepaintListener(final IPageRepaintListener repaintListener) {
 		_repaintListener = repaintListener;
 	}
 }

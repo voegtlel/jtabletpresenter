@@ -98,7 +98,7 @@ public class ButtonOpenFrom extends AbstractButtonAction {
 				}
 			} else if (f.getPath().toLowerCase().endsWith(".pdf")) {
 				try {
-					_editor.setPdfDocument(f);
+					_editor.getDocumentEditor().getDocument().setPdf(f);
 				} catch (IOException e) {
 					JOptionPane.showMessageDialog(button, "Couldn't read file: "
 							+ e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);

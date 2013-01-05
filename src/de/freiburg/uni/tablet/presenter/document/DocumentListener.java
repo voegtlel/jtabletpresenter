@@ -1,6 +1,7 @@
 package de.freiburg.uni.tablet.presenter.document;
 
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
+import de.intarsys.pdf.pd.PDDocument;
 
 public interface DocumentListener {
 	/**
@@ -34,4 +35,11 @@ public interface DocumentListener {
 	 * @param layer
 	 */
 	void renderableRemoved(IRenderable renderable, DocumentPageLayer layer);
+	
+	/**
+	 * Called, when the pdf was changed
+	 * 
+	 * @param lastPdf
+	 */
+	void pdfChanged(PdfSerializable lastPdf);
 }

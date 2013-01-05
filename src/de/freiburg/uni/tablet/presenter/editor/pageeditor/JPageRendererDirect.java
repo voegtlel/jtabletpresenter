@@ -197,4 +197,9 @@ public class JPageRendererDirect extends Component implements IPageRenderer {
 	public Component getContainerComponent() {
 		return this;
 	}
+	
+	@Override
+	public void stopTool() {
+		_pagePenDispatcher.stopTool();
+	}
 }

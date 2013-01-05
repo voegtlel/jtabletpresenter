@@ -23,4 +23,9 @@ public interface DocumentEditorListener {
 	 */
 	void documentChanged(Document lastDocument);
 
+	/**
+	 * Fired when something is about to change
+	 */
+	void changing();
+
 }

@@ -40,6 +40,45 @@ public class ButtonSaveAs extends AbstractButtonAction {
 	public ButtonSaveAs(final IToolPageEditor editor) {
 		super("save", editor, "Save", "/buttons/document-save-as.png");
 	}
+	
+	public static void saveDocument(Document document, File file) throws IOException {
+		final FileOutputStream fileOutputStream = new FileOutputStream(file);
+		
+		final BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(
+				fileOutputStream);
+		final BinarySerializer binarySerializer = new BinarySerializer(
+				bufferedOutputStream);
+		binarySerializer.writeObjectTable(document.getId(), document);
+		bufferedOutputStream.close();
+		fileOutputStream.close();
+	}
+	
+	public static void saveDocumentPage(DocumentPage page, File file) throws IOException {
+		final FileOutputStream fileOutputStream = new FileOutputStream(file);
+		
+		final BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(
+				fileOutputStream);
+		final BinarySerializer binarySerializer = new BinarySerializer(
+				bufferedOutputStream);
+		page.serializeDirect(binarySerializer);
+		bufferedOutputStream.close();
+		fileOutputStream.close();
+	}
+	
+	public static void savePdf(Document document, File file) throws IOException {
+		Logger.getLogger(ButtonSaveAs.class.getName()).log(Level.INFO, "Render as PDF " + file.getPath());
+		try {
+			PdfRenderer pdfRenderer = new PdfRenderer(file, 1024, 768, document.getPdf().getDocument(), true, 0.2f);
+			LinkedElement<DocumentPage> pages = document.getPages();
+			for(; pages != null; pages = pages.getNext()) {
+				pdfRenderer.nextPage();
+				pages.getData().getClientOnlyLayer().render(pdfRenderer);
+			}
+			pdfRenderer.close();
+		} catch (Exception e) {
+			throw new IOException(e);
+		}
+	}
 
 	@Override
 	public void perform(final Component button) {
@@ -95,37 +134,14 @@ public class ButtonSaveAs extends AbstractButtonAction {
 					f = new File(f.getPath() + ".jpp");
 				}
 				if (f.getPath().toLowerCase().endsWith(".jpd")) {
-					final FileOutputStream fileOutputStream = new FileOutputStream(
-							f);
-					
-					final BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(
-							fileOutputStream);
-					final BinarySerializer binarySerializer = new BinarySerializer(
-							bufferedOutputStream);
-					final Document document = _editor.getDocumentEditor()
-							.getDocument();
-					binarySerializer.writeObjectTable(document.getId(), document);
-					bufferedOutputStream.close();
-					fileOutputStream.close();
+					saveDocument(_editor.getDocumentEditor().getDocument(), f);
+				} else if (f.getPath().toLowerCase().endsWith(".jpp")) {
+					saveDocumentPage(_editor.getDocumentEditor().getCurrentPage(), f);
 				} else if (f.getPath().toLowerCase().endsWith(".pdf")) {
-					Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Render as PDF " + f.getPath());
-					try {
-						PdfRenderer pdfRenderer = new PdfRenderer(f, 1024, 768, _editor.getPdfDocument(), true, 0.2f);
-						LinkedElement<DocumentPage> pages = _editor.getDocumentEditor().getDocument().getPages();
-						for(; pages != null; pages = pages.getNext()) {
-							pdfRenderer.nextPage();
-							pages.getData().getClientOnlyLayer().render(pdfRenderer);
-						}
-						pdfRenderer.close();
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					savePdf(_editor.getDocumentEditor().getDocument(), f);
 				} else {
 					JOptionPane.showMessageDialog(button, "Can't save. Unrecognized file type.");
 				}
-				/*bufferedOutputStream.close();
-				fileOutputStream.close();*/
 			} catch (final FileNotFoundException e) {
 				JOptionPane.showMessageDialog(button, "Couldn't open file",
 						"Error", JOptionPane.ERROR_MESSAGE);
