@@ -28,7 +28,7 @@ public class ButtonColor extends AbstractButtonAction {
 	 * Creates the action with an editor.
 	 */
 	public ButtonColor(final IToolPageEditor editor) {
-		super(editor, "Color", "/buttons/color-select.png");
+		super("color", editor, "Color", "/buttons/color-select.png");
 		_tool = new JPageToolMenuSelectFrame<Color>();
 		_tool.setSize(JPageToolButton.WIDTH_NORMAL * 2,
 				JPageToolButton.HEIGHT_NORMAL * 2);

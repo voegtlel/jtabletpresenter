@@ -22,7 +22,7 @@ public class ButtonRedo extends AbstractButtonAction {
 	 * Creates the action with an editor.
 	 */
 	public ButtonRedo(final IToolPageEditor editor) {
-		super(editor, "Redo", "/buttons/edit-redo.png");
+		super("redo", editor, "Redo", "/buttons/edit-redo.png");
 	}
 
 	@Override

@@ -5,6 +5,7 @@
 package de.freiburg.uni.tablet.presenter.editor.toolpageeditor;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -14,13 +15,20 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.KeyStroke;
 
 import de.freiburg.uni.tablet.presenter.document.Document;
 import de.freiburg.uni.tablet.presenter.document.DocumentAdapter;
+import de.freiburg.uni.tablet.presenter.document.DocumentConfig;
+import de.freiburg.uni.tablet.presenter.document.DocumentConfig.KeyValue;
 import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
 import de.freiburg.uni.tablet.presenter.document.DocumentEditorAdapter;
 import de.freiburg.uni.tablet.presenter.document.DocumentEditorListener;
@@ -40,10 +48,10 @@ import de.freiburg.uni.tablet.presenter.editor.pageeditor.PageLayerBufferPdf;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonColor;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonFullscreen;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonNext;
-import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonPreferences;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonPrevious;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonRedo;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonSpinnerPage;
+import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonTools;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonUndo;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
@@ -81,10 +89,13 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 	private PageLayerBufferColor _backgroundLayer;
 	private PageLayerBufferPdf _pdfLayer;
 
+	private DocumentConfig _config;
+
 	/**
 	 * Create the panel.
 	 */
 	public JPageEditor() {
+		_config = new DocumentConfig();
 		setDocumentEditor(new DocumentEditor());
 		initialize();
 		_documentListener = new DocumentAdapter() {
@@ -133,6 +144,7 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 		final PageLayerBufferComposite pageLayers = new PageLayerBufferComposite(
 				pageRenderer);
 		_backgroundLayer = pageLayers.addColorBuffer();
+		_backgroundLayer.setColor(_config.getColor("document.background.color", Color.white));
 		_pdfLayer = pageLayers.addPdfBuffer();
 		_serverSyncLayer = pageLayers.addBackBuffer();
 		_serverSyncLayer.setRepaintListener(new PageRepaintListener() {
@@ -153,11 +165,13 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 
 		_panelTools = new JPanel();
 		getContentPane().add(_panelTools, BorderLayout.WEST);
-		setToolButtons(new IButtonAction[] { new ButtonPreferences(this), null,
+		setToolButtons(new IButtonAction[] { new ButtonTools(this), null,
 				new ButtonNext(this), new ButtonPrevious(this),
 				new ButtonSpinnerPage(this), null, new ButtonUndo(this),
 				new ButtonRedo(this), null, new ButtonColor(this), null,
 				new ButtonFullscreen(this) });
+		registerShortcuts();
+		_config.write();
 	}
 
 	public void setToolButtons(final IButtonAction[] buttons) {
@@ -207,6 +221,43 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 			}
 		}
 		_buttonActions = buttons;
+	}
+	
+	private void registerShortcuts() {
+		List<KeyValue> shortcuts = _config.getAll("shortcut.");
+		for (KeyValue item : shortcuts) {
+			final String actionName = item.key.substring(9);
+			int lastIndex = actionName.lastIndexOf('.');
+			final String destination = actionName.substring(0, lastIndex);
+			final String actionKeys = item.value.toString();
+			IButtonAction button = null;
+			for (IButtonAction b : _buttonActions) {
+				if (b != null) {
+					button = b.getButton(destination);
+					if (button != null) {
+						break;
+					}
+				}
+			}
+			if (button != null) {
+				final IButtonAction refButton = button;
+				final KeyStroke ks = KeyStroke.getKeyStroke(actionKeys);
+				final Action action = new AbstractAction(actionName) {
+					private static final long serialVersionUID = 1L;
+
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						System.out.println("Shortcut " + ks + " activated for " + actionName);
+						refButton.perform(_panelTools);
+					}
+				}; 
+				this.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(ks, actionName);
+				this.getRootPane().getActionMap().put(actionName, action);
+				System.out.println("Shortcut " + ks + " registered for " + actionName);
+			} else {
+				System.out.println("Unknown Button " + destination);
+			}
+		}
 	}
 	
 	@Override
@@ -326,6 +377,10 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 	@Override
 	public IPageEditor getPageEditor() {
 		return _pageRenderer;
+	}
+	
+	public DocumentConfig getConfig() {
+		return _config;
 	}
 
 	public void setDocumentEditor(final DocumentEditor documentEditor) {

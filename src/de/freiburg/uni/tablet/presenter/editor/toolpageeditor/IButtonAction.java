@@ -17,7 +17,7 @@ public interface IButtonAction {
 	 * Performs the action
 	 */
 	void perform(Component button);
-
+	
 	/**
 	 * Text for the button.
 	 * 
@@ -45,4 +45,11 @@ public interface IButtonAction {
 	 * Called, when the editor object was changed
 	 */
 	void onUpdateEditor(DocumentEditor lastEditor);
+	
+	/**
+	 * Gets the button with the given name
+	 * @param name
+	 * @return
+	 */
+	IButtonAction getButton(String name);
 }

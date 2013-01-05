@@ -35,7 +35,7 @@ public class ButtonSpinnerPage extends AbstractButtonAction {
 	 * Creates the action with an editor.
 	 */
 	public ButtonSpinnerPage(final IToolPageEditor editor) {
-		super(editor, null, null);
+		super("pageNumber", editor, null, null);
 		_spinner = new JSpinner();
 		_spinner.setMinimumSize(new Dimension(JPageToolButton.WIDTH_NORMAL, 0));
 		_spinner.setMaximumSize(new Dimension(JPageToolButton.WIDTH_NORMAL,

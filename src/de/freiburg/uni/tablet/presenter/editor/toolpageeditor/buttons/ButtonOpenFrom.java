@@ -33,7 +33,7 @@ public class ButtonOpenFrom extends AbstractButtonAction {
 	 * Creates the action with an editor.
 	 */
 	public ButtonOpenFrom(final IToolPageEditor editor) {
-		super(editor, "Open", "/buttons/document-open.png");
+		super("open", editor, "Open", "/buttons/document-open.png");
 	}
 
 	@Override

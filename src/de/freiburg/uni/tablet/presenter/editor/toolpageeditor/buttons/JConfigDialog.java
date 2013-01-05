@@ -176,6 +176,5 @@ public class JConfigDialog extends JDialog {
 	}
 
 	public void initFields() {
-		_editor.
 	}
 }

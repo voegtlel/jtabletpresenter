@@ -21,7 +21,7 @@ public class DocumentEditor implements IBinarySerializable {
 	private final DocumentHistory _history;
 	private DocumentPage _currentPage;
 	private boolean _activeLayerClientOnly = true;
-
+	
 	private final List<DocumentEditorListener> _listeners = new LinkedList<DocumentEditorListener>();
 
 	public DocumentEditor() {

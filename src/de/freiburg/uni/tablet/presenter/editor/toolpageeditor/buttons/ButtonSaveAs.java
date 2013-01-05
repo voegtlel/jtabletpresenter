@@ -38,7 +38,7 @@ public class ButtonSaveAs extends AbstractButtonAction {
 	 * Creates the action with an editor.
 	 */
 	public ButtonSaveAs(final IToolPageEditor editor) {
-		super(editor, "Save", "/buttons/document-save-as.png");
+		super("save", editor, "Save", "/buttons/document-save-as.png");
 	}
 
 	@Override

@@ -7,6 +7,7 @@ package de.freiburg.uni.tablet.presenter.editor;
 import java.io.File;
 import java.io.IOException;
 
+import de.freiburg.uni.tablet.presenter.document.DocumentConfig;
 import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
 import de.freiburg.uni.tablet.presenter.page.IPageFrontRenderer;
 import de.intarsys.pdf.pd.PDDocument;
@@ -51,6 +52,13 @@ public interface IToolPageEditor {
 	 * @return
 	 */
 	IPageEditor getPageEditor();
+	
+	/**
+	 * Gets the document config
+	 * 
+	 * @return
+	 */
+	DocumentConfig getConfig();
 
 	/**
 	 * Sets the pdf document as background

@@ -30,6 +30,7 @@ public class PageLayerBufferPdf implements IPageLayerBuffer {
 	protected float _renderFactorX = 1;
 	protected float _renderFactorY = 1;
 
+	private int _currentPageIndex = 0;
 	private PDPage _page;
 	private IDisplayRenderer _displayRenderer;
 
@@ -39,6 +40,10 @@ public class PageLayerBufferPdf implements IPageLayerBuffer {
 
 	private Graphics2D _graphics;
 	
+	/**
+	 * Create an empty pdf renderer
+	 * @param displayRenderer
+	 */
 	public PageLayerBufferPdf(final IDisplayRenderer displayRenderer) {
 		_displayRenderer = displayRenderer;
 		if (_displayRenderer.isWorking()) {
@@ -59,13 +64,32 @@ public class PageLayerBufferPdf implements IPageLayerBuffer {
 		}
 	}
 	
+	/**
+	 * Create the backbuffer
+	 */
 	private void createImage() {
+		if (_graphics != null) {
+			_graphics.dispose();
+		}
 		final int imgWidth = Math.max(_sizeX, 1);
 		final int imgHeight = Math.max(_sizeY, 1);
 		_imageBuffer = _displayRenderer.createImageBuffer(imgWidth, imgHeight,
 				Transparency.TRANSLUCENT);
 		_graphics = (Graphics2D) _imageBuffer.getGraphics();
 		System.out.println("Create Pdf Image: " + _sizeX + "x" + _sizeY);
+	}
+	
+	/**
+	 * Destroy the back-buffer
+	 */
+	private void destroyBuffer() {
+		if (_imageBuffer != null) {
+			if (_graphics != null) {
+				_graphics.dispose();
+				_graphics = null;
+			}
+			_imageBuffer = null;
+		}
 	}
 
 	@Override
@@ -75,6 +99,11 @@ public class PageLayerBufferPdf implements IPageLayerBuffer {
 		}
 	}
 	
+	/**
+	 * Sets the document by file
+	 * @param file
+	 * @throws IOException
+	 */
 	public void setDocument(final File file) throws IOException {
 		try {
 			setDocument(PDDocument.createFromLocator(new FileLocator(file)));
@@ -83,27 +112,48 @@ public class PageLayerBufferPdf implements IPageLayerBuffer {
 		}
 	}
 
+	/**
+	 * Sets the visible document
+	 * @param doc
+	 */
 	public void setDocument(final PDDocument doc) {
 		_doc = doc;
-		_pageTree = doc.getPageTree();
-		_page = _pageTree.getFirstPage();
-		if (_imageBuffer == null) {
-			createImage();
+		if (doc == null) {
+			destroyBuffer();
+			_page = null;
+		} else {
+			_pageTree = doc.getPageTree();
+			_page = _pageTree.getPageAt(_currentPageIndex);
+			if (_imageBuffer == null) {
+				createImage();
+			}
+			renderPdf();
 		}
-		renderPdf();
 	}
 	
+	/**
+	 * Gets the active document
+	 * @return
+	 */
 	public PDDocument getDocument() {
 		return _doc;
 	}
 	
+	/**
+	 * Sets the page index
+	 * @param index
+	 */
 	public void setPageIndex(int index) {
+		_currentPageIndex = index;
 		if (_pageTree != null) {
 			_page = _pageTree.getPageAt(index);
 			renderPdf();
 		}
 	}
 	
+	/**
+	 * Renders the active pdf page
+	 */
 	private void renderPdf() {
 		if (_graphics != null) {
 			Composite defaultComp = _graphics.getComposite();

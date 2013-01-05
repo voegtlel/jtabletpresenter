@@ -36,16 +36,16 @@ public abstract class AbstractButtonSelectTool extends AbstractButtonAction {
 	protected ToolEraser _toolDeleter;
 	
 	protected ToolImage _toolImage;
-
+	
 	/**
 	 * Creates the action with an editor.
 	 * 
 	 * @param text
 	 * @param imageResource
 	 */
-	public AbstractButtonSelectTool(final IToolPageEditor editor,
+	public AbstractButtonSelectTool(final String name, final IToolPageEditor editor,
 			final String text, final String imageResource) {
-		super(editor, text, imageResource);
+		super(name, editor, text, imageResource);
 		_tool = new JPageToolMenuSelectFrame<ITool>();
 		_tool.setSize(JPageToolButton.WIDTH_WIDE * 1,
 				JPageToolButton.HEIGHT_NORMAL * 4);
@@ -99,8 +99,21 @@ public abstract class AbstractButtonSelectTool extends AbstractButtonAction {
 			setSelectedTool(selectedTool);
 		}
 	}
+	
+	public ITool getTool(String name) {
+		if (name.equals("scribble")) {
+			return _toolScribble;
+		} else if (name.equals("eraser")) {
+			return _toolEraser;
+		} else if (name.equals("deleter")) {
+			return _toolDeleter;
+		} else if (name.equals("image")) {
+			return _toolImage;
+		}
+		return null;
+	}
 
-	protected abstract void setSelectedTool(ITool tool);
+	public abstract void setSelectedTool(ITool tool);
 
-	protected abstract ITool getSelectedTool();
+	public abstract ITool getSelectedTool();
 }

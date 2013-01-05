@@ -22,7 +22,7 @@ public class ButtonNext extends AbstractButtonAction {
 	 * Creates the action with an editor.
 	 */
 	public ButtonNext(final IToolPageEditor editor) {
-		super(editor, "Next", "/buttons/go-next.png");
+		super("next", editor, "Next", "/buttons/go-next.png");
 	}
 
 	@Override

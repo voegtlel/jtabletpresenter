@@ -15,6 +15,9 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -31,6 +34,8 @@ public class JPageToolMenuFrame<T> extends JDialog {
 	 * The currently active component
 	 */
 	private Component _activeComponent = null;
+	
+	private List<AbstractButtonAction> _actions = new ArrayList<AbstractButtonAction>();
 	
 	/**
 	 * Create the frame.
@@ -83,6 +88,7 @@ public class JPageToolMenuFrame<T> extends JDialog {
 			});
 			getContentPane().add(button);
 		}
+		_actions.add(buttonAction);
 	}
 	
 	private void onActionPerformed(JButton button, IButtonAction action) {
@@ -100,6 +106,14 @@ public class JPageToolMenuFrame<T> extends JDialog {
 		} else {
 			this.toFront();
 		}
+	}
+	
+	/**
+	 * Gets all actions
+	 * @return
+	 */
+	public List<AbstractButtonAction> getActions() {
+		return Collections.unmodifiableList(_actions);
 	}
 
 	/**

@@ -23,6 +23,8 @@ public abstract class AbstractButtonAction extends AbstractAction implements IBu
 	 */
 	private static final long serialVersionUID = 1L;
 	
+	private final String _name;
+	
 	protected final IToolPageEditor _editor;
 	private final String _text;
 	private final String _imageResource;
@@ -30,11 +32,16 @@ public abstract class AbstractButtonAction extends AbstractAction implements IBu
 	/**
 	 * Creates the action with an editor.
 	 */
-	public AbstractButtonAction(final IToolPageEditor editor,
+	public AbstractButtonAction(final String name, final IToolPageEditor editor,
 			final String text, final String imageResource) {
+		_name = name;
 		_editor = editor;
 		_text = text;
 		_imageResource = imageResource;
+	}
+	
+	public String getName() {
+		return _name;
 	}
 
 	@Override
@@ -63,5 +70,13 @@ public abstract class AbstractButtonAction extends AbstractAction implements IBu
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		perform((Component)e.getSource());
+	}
+	
+	@Override
+	public IButtonAction getButton(String name) {
+		if (name.equals(this._name)) {
+			return this;
+		}
+		return null;
 	}
 }
