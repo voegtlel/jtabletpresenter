@@ -78,22 +78,31 @@ public class ButtonOpenFrom extends AbstractButtonAction {
 		fileChooser.setFileFilter(presenterDocumentFile);
 		if (fileChooser.showOpenDialog(button) == JFileChooser.APPROVE_OPTION) {
 			final File f = fileChooser.getSelectedFile();
-			try {
-				final FileInputStream fileInputStream = new FileInputStream(f);
-				final BufferedInputStream bufferedInputStream = new BufferedInputStream(
-						fileInputStream);
-				final BinaryDeserializer binaryDeserializer = new BinaryDeserializer(
-						bufferedInputStream);
-				final Document document = binaryDeserializer.readObjectTable();
-				_editor.getDocumentEditor().setDocument(document);
-				bufferedInputStream.close();
-				fileInputStream.close();
-			} catch (final FileNotFoundException e) {
-				JOptionPane.showMessageDialog(button, "Couldn't open file",
-						"Error", JOptionPane.ERROR_MESSAGE);
-			} catch (final IOException e) {
-				JOptionPane.showMessageDialog(button, "Couldn't read file: "
-						+ e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+			if (f.getPath().toLowerCase().endsWith(".jpd")) {
+				try {
+					final FileInputStream fileInputStream = new FileInputStream(f);
+					final BufferedInputStream bufferedInputStream = new BufferedInputStream(
+							fileInputStream);
+					final BinaryDeserializer binaryDeserializer = new BinaryDeserializer(
+							bufferedInputStream);
+					final Document document = binaryDeserializer.readObjectTable();
+					_editor.getDocumentEditor().setDocument(document);
+					bufferedInputStream.close();
+					fileInputStream.close();
+				} catch (final FileNotFoundException e) {
+					JOptionPane.showMessageDialog(button, "Couldn't open file",
+							"Error", JOptionPane.ERROR_MESSAGE);
+				} catch (final IOException e) {
+					JOptionPane.showMessageDialog(button, "Couldn't read file: "
+							+ e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+				}
+			} else if (f.getPath().toLowerCase().endsWith(".pdf")) {
+				try {
+					_editor.setPdfDocument(f);
+				} catch (IOException e) {
+					JOptionPane.showMessageDialog(button, "Couldn't read file: "
+							+ e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+				}
 			}
 		}
 	}

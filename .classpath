@@ -9,6 +9,25 @@
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="JTabletPresenter/lib"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/gnujpdf.jar"/>
+	<classpathentry kind="lib" path="lib/iscwt.jar"/>
+	<classpathentry kind="lib" path="lib/isfreetype.jar"/>
+	<classpathentry kind="lib" path="lib/isnativec.jar"/>
+	<classpathentry kind="lib" path="lib/isrt.jar"/>
+	<classpathentry kind="lib" path="lib/jai_codec.jar"/>
+	<classpathentry kind="lib" path="lib/jai_core.jar"/>
+	<classpathentry kind="lib" path="lib/jai_imageio.jar"/>
+	<classpathentry kind="lib" path="lib/jbig2.jar"/>
+	<classpathentry kind="lib" path="lib/jna.jar"/>
+	<classpathentry kind="lib" path="lib/jPod.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/C:/Users/Luke/workspace-lejos/JTabletPresenter/javadoc/jPod/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/jPodFonts.jar"/>
+	<classpathentry kind="lib" path="lib/jPodRenderer.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/C:/Users/Luke/workspace-lejos/JTabletPresenter/javadoc/jPodRenderer/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

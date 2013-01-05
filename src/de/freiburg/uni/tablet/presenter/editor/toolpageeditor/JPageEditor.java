@@ -12,6 +12,8 @@ import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -34,21 +36,19 @@ import de.freiburg.uni.tablet.presenter.editor.pageeditor.PageLayerBufferBack;
 import de.freiburg.uni.tablet.presenter.editor.pageeditor.PageLayerBufferColor;
 import de.freiburg.uni.tablet.presenter.editor.pageeditor.PageLayerBufferComposite;
 import de.freiburg.uni.tablet.presenter.editor.pageeditor.PageLayerBufferFront;
+import de.freiburg.uni.tablet.presenter.editor.pageeditor.PageLayerBufferPdf;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonColor;
-import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonEraser;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonFullscreen;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonNext;
-import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonOpenFrom;
-import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonPen;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonPreferences;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonPrevious;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonRedo;
-import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonSaveAs;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonSpinnerPage;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonUndo;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
 import de.freiburg.uni.tablet.presenter.page.IPageFrontRenderer;
+import de.intarsys.pdf.pd.PDDocument;
 
 /**
  * @author lukas
@@ -79,6 +79,7 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 	private IButtonAction[] _buttonActions = new IButtonAction[] {};
 
 	private PageLayerBufferColor _backgroundLayer;
+	private PageLayerBufferPdf _pdfLayer;
 
 	/**
 	 * Create the panel.
@@ -132,6 +133,7 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 		final PageLayerBufferComposite pageLayers = new PageLayerBufferComposite(
 				pageRenderer);
 		_backgroundLayer = pageLayers.addColorBuffer();
+		_pdfLayer = pageLayers.addPdfBuffer();
 		_serverSyncLayer = pageLayers.addBackBuffer();
 		_serverSyncLayer.setRepaintListener(new PageRepaintListener() {
 			@Override
@@ -206,6 +208,17 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 		}
 		_buttonActions = buttons;
 	}
+	
+	@Override
+	public void setPdfDocument(File pdfFile) throws IOException {
+		_pdfLayer.setDocument(pdfFile);
+		_pageRenderer.clear();
+	}
+	
+	@Override
+	public PDDocument getPdfDocument() {
+		return _pdfLayer.getDocument();
+	}
 
 	@Override
 	public boolean isFullscreen() {
@@ -273,6 +286,10 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 		currentPage.getClientOnlyLayer().render(_clientOnlyLayer);
 		_serverSyncLayer.clear();
 		currentPage.getServerSyncLayer().render(_serverSyncLayer);
+		// Next PDF Page
+		_pdfLayer.clear();
+		_pdfLayer.setPageIndex(_documentEditor.getCurrentPageIndex());
+		// Render all
 		_pageRenderer.clear();
 	}
 

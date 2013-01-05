@@ -94,26 +94,27 @@ public class ButtonSaveAs extends AbstractButtonAction {
 						&& !fileChooser.getSelectedFile().getPath().toLowerCase().endsWith(".jpp")) {
 					f = new File(f.getPath() + ".jpp");
 				}
-				final FileOutputStream fileOutputStream = new FileOutputStream(
-						f);
-				final BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(
-						fileOutputStream);
 				if (f.getPath().toLowerCase().endsWith(".jpd")) {
+					final FileOutputStream fileOutputStream = new FileOutputStream(
+							f);
+					
+					final BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(
+							fileOutputStream);
 					final BinarySerializer binarySerializer = new BinarySerializer(
 							bufferedOutputStream);
 					final Document document = _editor.getDocumentEditor()
 							.getDocument();
 					binarySerializer.writeObjectTable(document.getId(), document);
+					bufferedOutputStream.close();
+					fileOutputStream.close();
 				} else if (f.getPath().toLowerCase().endsWith(".pdf")) {
 					Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Render as PDF " + f.getPath());
 					try {
-						PdfRenderer pdfRenderer = new PdfRenderer(bufferedOutputStream);
+						PdfRenderer pdfRenderer = new PdfRenderer(f, 1024, 768, _editor.getPdfDocument(), true, 0.2f);
 						LinkedElement<DocumentPage> pages = _editor.getDocumentEditor().getDocument().getPages();
 						for(; pages != null; pages = pages.getNext()) {
-							if (!pages.getData().isEmpty()) {
-								pdfRenderer.nextPage();
-								pages.getData().getClientOnlyLayer().render(pdfRenderer);
-							}
+							pdfRenderer.nextPage();
+							pages.getData().getClientOnlyLayer().render(pdfRenderer);
 						}
 						pdfRenderer.close();
 					} catch (Exception e) {
@@ -123,8 +124,8 @@ public class ButtonSaveAs extends AbstractButtonAction {
 				} else {
 					JOptionPane.showMessageDialog(button, "Can't save. Unrecognized file type.");
 				}
-				bufferedOutputStream.close();
-				fileOutputStream.close();
+				/*bufferedOutputStream.close();
+				fileOutputStream.close();*/
 			} catch (final FileNotFoundException e) {
 				JOptionPane.showMessageDialog(button, "Couldn't open file",
 						"Error", JOptionPane.ERROR_MESSAGE);
