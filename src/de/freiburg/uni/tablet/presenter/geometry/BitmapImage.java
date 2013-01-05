@@ -232,7 +232,7 @@ public class BitmapImage extends AbstractRenderable {
 		writer.writeFloat(_y);
 		writer.writeFloat(_width);
 		writer.writeFloat(_height);
-		writer.writeByteArray(_fileData);
+		writer.writeByteArray(_fileData, 0, _fileData.length);
 	}
 
 	@Override

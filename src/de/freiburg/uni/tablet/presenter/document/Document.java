@@ -281,8 +281,8 @@ public class Document implements IEntity {
 	public Document(final BinaryDeserializer reader) throws IOException {
 		_uniqueId = reader.readInt();
 		_clientId = reader.readInt();
-		_pdfDocument = reader.readObjectTable();
 		reader.putObjectTable(this.getId(), this);
+		_pdfDocument = reader.readObjectTable();
 		final int pageCount = reader.readInt();
 		for (int i = 0; i < pageCount; i++) {
 			final DocumentPage page = reader.readObjectTable();

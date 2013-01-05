@@ -59,13 +59,11 @@ public class BinaryDeserializer {
 	public byte[] readByteArray() throws IOException {
 		int size = _dataInputStream.readInt();
 		byte[] result = new byte[size];
-		int readTotal = 0;
 		while (size > 0) {
-			int read = _dataInputStream.read(result, readTotal, size);
+			int read = _dataInputStream.read(result, result.length - size, size);
 			if (read < 0) {
 				throw new IOException("Unexpected end of stream");
 			}
-			readTotal += read;
 			size -= read;
 		}
 		return result;

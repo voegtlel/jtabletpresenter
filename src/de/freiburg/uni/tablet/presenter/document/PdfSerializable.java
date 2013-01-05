@@ -9,6 +9,7 @@ import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.intarsys.pdf.parser.COSLoadException;
 import de.intarsys.pdf.pd.PDDocument;
+import de.intarsys.tools.locator.ByteArrayLocator;
 import de.intarsys.tools.locator.FileLocator;
 import de.intarsys.tools.locator.ILocator;
 import de.intarsys.tools.locator.StreamLocator;
@@ -51,13 +52,16 @@ public class PdfSerializable implements IEntity {
 		if (pdfNullCheck == 0) {
 			_document = null;
 		} else {
-			ByteArrayInputStream bis = new ByteArrayInputStream(reader.readByteArray());
-			ILocator loc = new StreamLocator(bis, "virtual", "pdf");
+			byte[] data = reader.readByteArray();
+			ByteArrayLocator loc = new ByteArrayLocator(data, "virtual", "pdf");
+			//ByteArrayInputStream bis = new ByteArrayInputStream(reader.readByteArray());
+			//ILocator loc = new StreamLocator(bis, "virtual", "pdf");
 			try {
 				_document = PDDocument.createFromLocator(loc);
 			} catch (COSLoadException e) {
 				throw new IOException(e);
 			}
+			loc.delete();
 		}
 	}
 
@@ -70,10 +74,13 @@ public class PdfSerializable implements IEntity {
 			writer.writeInt(0);
 		} else {
 			writer.writeInt(1);
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			ILocator loc = new StreamLocator(bos, "virtual", "pdf");
+			//ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			//ILocator loc = new StreamLocator(bos, "virtual", "pdf");
+			ByteArrayLocator loc = new ByteArrayLocator(null, "virtual", "pdf");
 			_document.save(loc);
-			writer.writeByteArray(bos.toByteArray());
+			writer.writeByteArray(loc.getContent(), 0, (int)loc.getLength());
+			loc.delete();
+			//writer.writeByteArray(bos.toByteArray());
 		}
 	}
 

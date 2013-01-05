@@ -45,16 +45,19 @@ public class PdfRenderer implements IPageBackRenderer {
 	
 	private File _file;
 	private CDSRectangle _pageSize;
-	private boolean _showPageNumber = true;
+	private boolean _showPageNumber;
 	
 	private PDDocument _baseDocument;
 	
 	private boolean _wasEmptyPage = true;
 	private boolean _ignoreEmptyPage;
 	private float _thicknessFactor;
+	private boolean _ignoreEmptyPageNumber;
 	
-	public PdfRenderer(File file, float screenSizeX, float screenSizeY, PDDocument baseDocument, boolean ignoreEmptyPage, float thicknessFactor) throws Exception {
+	public PdfRenderer(File file, float screenSizeX, float screenSizeY, PDDocument baseDocument, boolean ignoreEmptyPage, boolean ignoreEmptyPageNumber, boolean showPageNumber, float thicknessFactor) throws Exception {
 		_ignoreEmptyPage = ignoreEmptyPage;
+		_ignoreEmptyPageNumber = ignoreEmptyPageNumber;
+		_showPageNumber = showPageNumber;
 		_thicknessFactor = thicknessFactor;
 		if (baseDocument != null) {
 			_baseDocument = baseDocument;
@@ -85,6 +88,23 @@ public class PdfRenderer implements IPageBackRenderer {
 	
 	private void endPage() {
 		if (_creator != null) {
+			// Finally add page number
+			if (_showPageNumber && (!_wasEmptyPage || !_ignoreEmptyPageNumber)) {
+				// Draw page number
+				float fontSize = 20;
+				_creator.textSetFont(null, _font, fontSize);
+				_pageIndex++;
+				String s = Integer.valueOf(_pageIndex).toString();
+				
+				byte[] data = s.getBytes(Charset.forName("windows-1252"));
+				float sWidth = PDFontTools.getGlyphWidthEncoded(_font, data, 0, data.length) * fontSize / 1000f;
+				_creator.textMoveTo(_renderFactorX - sWidth - 10, 12);
+				_creator.textShow(s);
+				
+				_wasEmptyPage = false;
+			} else if (_showPageNumber && (_form != null)) {
+				_pageIndex++;
+			}
 			System.out.println("creator close");
 			_creator.close();
 			if ((_form != null) && !_wasEmptyPage) {
@@ -106,12 +126,12 @@ public class PdfRenderer implements IPageBackRenderer {
 				creator.close();
 				_page.cosAddContents(content.createStream());
 			}
-			_wasEmptyPage = true;
+			_wasEmptyPage = _ignoreEmptyPage;
 		}
 	}
 	
 	public void nextPage() throws Exception {
-		if (_creator != null && _wasEmptyPage && _ignoreEmptyPage && _form != null) {
+		if (_creator != null && _wasEmptyPage && _ignoreEmptyPage && _form == null) {
 			return;
 		}
 		endPage();
@@ -127,6 +147,7 @@ public class PdfRenderer implements IPageBackRenderer {
 		if (_page == null) {
 			System.out.println("new page");
 			_form = null;
+			_pageSize = _pageSize.copy();
 			_page = (PDPage) PDPage.META.createNew();
 			_page.setCropBox(_pageSize);
 			_page.setMediaBox(_pageSize);
@@ -144,21 +165,6 @@ public class PdfRenderer implements IPageBackRenderer {
 		_creator.setLineJoin(1);
 		_renderFactorX = _pageSize.getWidth();
 		_renderFactorY = _pageSize.getHeight();
-		
-		if (_showPageNumber) {
-			// Draw page number
-			float fontSize = 20;
-			_creator.textSetFont(null, _font, fontSize);
-			_pageIndex++;
-			String s = Integer.valueOf(_pageIndex).toString();
-			
-			byte[] data = s.getBytes(Charset.forName("windows-1252"));
-			float sWidth = PDFontTools.getGlyphWidthEncoded(_font, data, 0, data.length) * fontSize / 1000f;
-			_creator.textMoveTo(_renderFactorX - sWidth - 10, 12);
-			_creator.textShow(s);
-			
-			_wasEmptyPage = false;
-		}
 	}
 	
 	@Override

@@ -137,6 +137,17 @@ public class DocumentConfig {
 		throw new IllegalStateException("Invalid config type for (float)" + key + ": " + keyValue.value.getClass().getName());
 	}
 	
+	public boolean getBoolean(String key, boolean defaultValue) {
+		KeyValue keyValue = getDefault(key, defaultValue);
+		if (keyValue.value instanceof String) {
+			keyValue.value = Boolean.parseBoolean(keyValue.value.toString());
+		}
+		if (keyValue.value instanceof Boolean) {
+			return (Boolean)keyValue.value;
+		}
+		throw new IllegalStateException("Invalid config type for (boolean)" + key + ": " + keyValue.value.getClass().getName());
+	}
+	
 	public Color getColor(String key, Color defaultValue) {
 		
 		KeyValue keyValue = getDefault(key, defaultValue);

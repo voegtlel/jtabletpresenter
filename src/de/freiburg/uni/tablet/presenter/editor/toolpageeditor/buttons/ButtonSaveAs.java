@@ -19,6 +19,7 @@ import javax.swing.filechooser.FileFilter;
 
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.document.Document;
+import de.freiburg.uni.tablet.presenter.document.DocumentConfig;
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 import de.freiburg.uni.tablet.presenter.editor.pdf.PdfRenderer;
@@ -65,10 +66,19 @@ public class ButtonSaveAs extends AbstractButtonAction {
 		fileOutputStream.close();
 	}
 	
-	public static void savePdf(Document document, File file) throws IOException {
+	public static void savePdf(Document document, DocumentConfig config, File file) throws IOException {
 		Logger.getLogger(ButtonSaveAs.class.getName()).log(Level.INFO, "Render as PDF " + file.getPath());
 		try {
-			PdfRenderer pdfRenderer = new PdfRenderer(file, 1024, 768, document.getPdf().getDocument(), true, 0.2f);
+			int pdfDefaultWidth = config.getInt("pdf.defaultWidth", 1024);
+			int pdfDefaultHeight = config.getInt("pdf.defaultHeight", 768);
+			boolean pdfIgnoreEmptyPages = config.getBoolean("pdf.ignoreEmptyPages", false);
+			boolean pdfShowPageNumber = config.getBoolean("pdf.showPageNumber", true);
+			boolean pdfIgnoreEmptyPageNumber = config.getBoolean("pdf.ignoreEmptyPageNumber", true);
+			float pdfThicknessFactor = config.getFloat("pdf.thicknessFactor", 0.2f);
+			PdfRenderer pdfRenderer = new PdfRenderer(file,
+					pdfDefaultWidth, pdfDefaultHeight,
+					document.getPdf().getDocument(),
+					pdfIgnoreEmptyPages, pdfIgnoreEmptyPageNumber, pdfShowPageNumber, pdfThicknessFactor);
 			LinkedElement<DocumentPage> pages = document.getPages();
 			for(; pages != null; pages = pages.getNext()) {
 				pdfRenderer.nextPage();
@@ -138,7 +148,7 @@ public class ButtonSaveAs extends AbstractButtonAction {
 				} else if (f.getPath().toLowerCase().endsWith(".jpp")) {
 					saveDocumentPage(_editor.getDocumentEditor().getCurrentPage(), f);
 				} else if (f.getPath().toLowerCase().endsWith(".pdf")) {
-					savePdf(_editor.getDocumentEditor().getDocument(), f);
+					savePdf(_editor.getDocumentEditor().getDocument(), _editor.getConfig(), f);
 				} else {
 					JOptionPane.showMessageDialog(button, "Can't save. Unrecognized file type.");
 				}
