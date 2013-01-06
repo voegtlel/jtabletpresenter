@@ -41,6 +41,7 @@ public class TestApp {
 	 */
 	private void initialize() {
 		_pageRenderer = new JPageEditor();
+		_pageRenderer.setTitle("JTabletPresenter v1.01");
 		_pageRenderer.setBounds(100, 100, 640, 480);
 		_pageRenderer.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		_pageRenderer.setDocumentEditor(new DocumentEditor());
