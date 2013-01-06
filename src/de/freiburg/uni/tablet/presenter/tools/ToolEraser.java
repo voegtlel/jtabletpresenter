@@ -15,8 +15,7 @@ import de.freiburg.uni.tablet.presenter.page.IPen;
 import de.freiburg.uni.tablet.presenter.page.SolidPen;
 
 public class ToolEraser extends AbstractTool {
-	private final IPen _pen = new SolidPen(15.0f, new Color(0xFF, 0xFF, 0xFF,
-			0xAA));
+	private final IPen _pen;
 
 	private EraseInfo _eraseInfo = null;
 
@@ -28,6 +27,8 @@ public class ToolEraser extends AbstractTool {
 	 */
 	public ToolEraser(final IToolPageEditor editor, boolean checkOnlyBoundaries) {
 		super(editor);
+		_pen = new SolidPen(editor.getConfig().getFloat("editor.eraser.thickness", 15f), new Color(0xFF, 0xFF, 0xFF,
+				0xAA));
 		_checkOnlyBoundaries = checkOnlyBoundaries;
 		updateCursor();
 	}

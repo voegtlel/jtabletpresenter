@@ -85,8 +85,9 @@ public class DocumentPageLayer implements IEntity {
 	
 	public void clear() {
 		while (!_renderablesList.isEmpty()) {
+			final IRenderable removeElement = _renderablesList.getFirst().getData();
 			_renderablesList.removeFirst();
-			_page.getParent().fireRenderableRemoved(_renderablesList.getFirst().getData(), this);
+			_page.getParent().fireRenderableRemoved(removeElement, this);
 		}
 		_renderablesMap.clear();
 	}

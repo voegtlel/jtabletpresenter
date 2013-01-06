@@ -1,9 +1,18 @@
 package de.freiburg.uni.tablet.presenter;
 
 import java.awt.EventQueue;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 import javax.swing.JFrame;
 
+import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
+import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.JPageEditor;
 
@@ -44,7 +53,41 @@ public class TestApp {
 		_pageRenderer.setTitle("JTabletPresenter v1.01");
 		_pageRenderer.setBounds(100, 100, 640, 480);
 		_pageRenderer.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		_pageRenderer.setDocumentEditor(new DocumentEditor());
+		DocumentEditor doc = null;
+		if (_pageRenderer.getConfig().getBoolean("startup.autoload", false)) {
+			final File savedSession = new File("session.dat");
+			if (savedSession.exists())  {
+				try {
+					FileInputStream is = new FileInputStream(savedSession);
+					BinaryDeserializer bd = new BinaryDeserializer(is);
+					doc = bd.readSerializableClass();
+					is.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		} else {
+			doc = new DocumentEditor(_pageRenderer.getConfig());
+		}
+		_pageRenderer.setDocumentEditor(doc);
+		
+		_pageRenderer.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				final File savedSession = new File("session.dat");
+				try {
+					FileOutputStream os = new FileOutputStream(savedSession);
+					BufferedOutputStream bos = new BufferedOutputStream(os);
+					BinarySerializer bs = new BinarySerializer(bos);
+					bs.writeSerializableClass(_pageRenderer.getDocumentEditor());
+					bs.close();
+					bos.close();
+					os.close();
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+			}
+		});
 
 		/*
 		 * _pageRenderer.setPage(new DefaultPage());

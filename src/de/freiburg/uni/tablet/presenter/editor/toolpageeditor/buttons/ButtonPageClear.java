@@ -30,6 +30,7 @@ public class ButtonPageClear extends AbstractButtonAction {
 	public void perform(final Component button) {
 		DocumentPage page = _editor.getDocumentEditor().getCurrentPage();
 		page.getClientOnlyLayer().clear();
+		_editor.getPageEditor().clear();
 		// TODO: Clear server layer?
 		//page.getServerSyncLayer().clear();
 	}

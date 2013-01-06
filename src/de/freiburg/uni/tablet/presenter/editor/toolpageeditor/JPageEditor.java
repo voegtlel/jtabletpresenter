@@ -94,7 +94,7 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 	 */
 	public JPageEditor() {
 		_config = new DocumentConfig();
-		setDocumentEditor(new DocumentEditor());
+		setDocumentEditor(new DocumentEditor(_config));
 		initialize();
 		_documentListener = new DocumentAdapter() {
 			@Override

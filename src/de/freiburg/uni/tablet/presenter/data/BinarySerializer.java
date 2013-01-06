@@ -91,4 +91,8 @@ public class BinarySerializer {
 			writeSerializableClass(obj);
 		}
 	}
+	
+	public void close() throws IOException {
+		_dataOutputStream.close();
+	}
 }

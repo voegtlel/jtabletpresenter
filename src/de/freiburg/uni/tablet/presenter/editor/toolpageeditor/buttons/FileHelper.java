@@ -87,6 +87,7 @@ public class FileHelper {
 		final BinarySerializer binarySerializer = new BinarySerializer(
 				bufferedOutputStream);
 		binarySerializer.writeObjectTable(document.getId(), document);
+		binarySerializer.close();
 		bufferedOutputStream.close();
 		fileOutputStream.close();
 	}
@@ -99,6 +100,7 @@ public class FileHelper {
 		final BinarySerializer binarySerializer = new BinarySerializer(
 				bufferedOutputStream);
 		page.serializeDirect(binarySerializer);
+		binarySerializer.close();
 		bufferedOutputStream.close();
 		fileOutputStream.close();
 	}

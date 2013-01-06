@@ -1,5 +1,6 @@
 package de.freiburg.uni.tablet.presenter.document;
 
+import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
@@ -24,9 +25,10 @@ public class DocumentEditor implements IBinarySerializable {
 	
 	private final List<DocumentEditorListener> _listeners = new LinkedList<DocumentEditorListener>();
 
-	public DocumentEditor() {
+	public DocumentEditor(DocumentConfig config) {
 		_currentPage = _document.getPageByIndex(0, true);
 		_history = new DocumentHistory(this);
+		_currentPen = new SolidPen(config.getFloat("editor.defaultPen.thickness", 1f), config.getColor("editor.defaultPen.color", Color.black));
 	}
 
 	public void addListener(final DocumentEditorListener listener) {
