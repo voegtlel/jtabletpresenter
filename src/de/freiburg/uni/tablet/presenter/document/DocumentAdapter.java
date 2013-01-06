@@ -1,7 +1,6 @@
 package de.freiburg.uni.tablet.presenter.document;
 
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
-import de.intarsys.pdf.pd.PDDocument;
 
 public abstract class DocumentAdapter implements DocumentListener {
 

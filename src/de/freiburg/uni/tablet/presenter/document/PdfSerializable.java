@@ -1,7 +1,5 @@
 package de.freiburg.uni.tablet.presenter.document;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 
@@ -11,8 +9,6 @@ import de.intarsys.pdf.parser.COSLoadException;
 import de.intarsys.pdf.pd.PDDocument;
 import de.intarsys.tools.locator.ByteArrayLocator;
 import de.intarsys.tools.locator.FileLocator;
-import de.intarsys.tools.locator.ILocator;
-import de.intarsys.tools.locator.StreamLocator;
 
 public class PdfSerializable implements IEntity {
 	private final long _id;

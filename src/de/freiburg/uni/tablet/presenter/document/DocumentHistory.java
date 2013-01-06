@@ -15,7 +15,6 @@ import de.freiburg.uni.tablet.presenter.actions.RemoveRenderableAction;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 import de.freiburg.uni.tablet.presenter.list.LinkedElement;
 import de.freiburg.uni.tablet.presenter.list.LinkedElementList;
-import de.intarsys.pdf.pd.PDDocument;
 
 /**
  * @author lukas

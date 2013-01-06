@@ -19,7 +19,6 @@ import de.freiburg.uni.tablet.presenter.page.IPen;
 import de.intarsys.pdf.cds.CDSRectangle;
 import de.intarsys.pdf.content.CSContent;
 import de.intarsys.pdf.content.common.CSCreator;
-import de.intarsys.pdf.cos.COSObject;
 import de.intarsys.pdf.encoding.WinAnsiEncoding;
 import de.intarsys.pdf.font.PDFont;
 import de.intarsys.pdf.font.PDFontTools;
@@ -28,7 +27,6 @@ import de.intarsys.pdf.pd.PDDocument;
 import de.intarsys.pdf.pd.PDForm;
 import de.intarsys.pdf.pd.PDImage;
 import de.intarsys.pdf.pd.PDPage;
-import de.intarsys.pdf.pd.PDResources;
 import de.intarsys.pdf.platform.cwt.image.awt.ImageConverterAwt2Pdf;
 import de.intarsys.tools.locator.FileLocator;
 
@@ -39,7 +37,7 @@ public class PdfRenderer implements IPageBackRenderer {
 	private final Ellipse2D.Float _ellipseRenderer = new Ellipse2D.Float();
 	private final Line2D.Float _lineRenderer = new Line2D.Float();
 
-	private Map _baseCopiedMap = new HashMap();
+	private Map<Object, Object> _baseCopiedMap = new HashMap<Object, Object>();
 	private PDDocument _baseDocument;
 	private PDDocument _pdf;
 	private PDPage _page;
@@ -115,7 +113,7 @@ public class PdfRenderer implements IPageBackRenderer {
 			if ((_form != null) && !_wasEmptyPage) {
 				_form.setBoundingBox(_pageSize);
 				System.out.println("overlay form");
-				AffineTransform transform = PdfPageRedrawer.calculateTransform2(_page);
+				AffineTransform transform = PdfPageHelper.calculateTransform(_page);
 				try {
 					transform.invert();
 				} catch (NoninvertibleTransformException e) {
