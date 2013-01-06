@@ -30,12 +30,18 @@ public class ButtonPrevious extends AbstractButtonAction {
 
 	@Override
 	public void perform(final Component button) {
-		try {
-			int index = _editor.getDocumentEditor().getCurrentPageIndex();
-			DocumentPage page = _editor.getDocumentEditor().getCurrentPage();
-			ButtonSaveAs.saveDocumentPage(page, new File("page_" + index + "-" + String.format("%X", page.getId()) + ".jpp"));
-		} catch (IOException e) {
-			e.printStackTrace();
+		if (_editor.getConfig().getBoolean("autosave.previous", true)) {
+			try {
+				int index = _editor.getDocumentEditor().getCurrentPageIndex();
+				DocumentPage page = _editor.getDocumentEditor().getCurrentPage();
+				File autosaveDir = new File("autosave");
+				if (!autosaveDir.exists()) {
+					autosaveDir.mkdirs();
+				}
+				ButtonSaveAs.saveDocumentPage(page, new File("autosave/page_" + index + "-" + String.format("%X", page.getId()) + ".jpp"));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 		final int currentPageIndex = _editor.getDocumentEditor()
 				.getCurrentPageIndex();

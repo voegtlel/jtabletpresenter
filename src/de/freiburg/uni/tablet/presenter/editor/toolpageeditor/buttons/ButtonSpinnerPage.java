@@ -6,6 +6,8 @@ package de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.io.File;
+import java.io.IOException;
 
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
@@ -70,8 +72,23 @@ public class ButtonSpinnerPage extends AbstractButtonAction {
 	 * Event.
 	 */
 	protected void onSpinnnerChanged() {
-		_editor.getDocumentEditor().setCurrentPageByIndex(
-				(Integer) _spinner.getValue() - 1, true);
+		int newPageIndex = (Integer) _spinner.getValue() - 1;
+		if (_editor.getConfig().getBoolean("autosave.spinner", true)) {
+			File autosaveDir = new File("autosave");
+			if (!autosaveDir.exists()) {
+				autosaveDir.mkdirs();
+			}
+			DocumentPage currentPage = _editor.getDocumentEditor().getCurrentPage();
+			int currentPageIndex = _editor.getDocumentEditor().getCurrentPageIndex();
+			if (newPageIndex != currentPageIndex) {
+				try {
+					ButtonSaveAs.saveDocumentPage(currentPage, new File("autosave/page_" + currentPageIndex + "-" + String.format("%X", currentPage.getId()) + ".jpp"));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		_editor.getDocumentEditor().setCurrentPageByIndex(newPageIndex, true);
 	}
 
 	@Override
