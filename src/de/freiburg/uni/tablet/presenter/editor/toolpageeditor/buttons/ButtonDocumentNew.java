@@ -32,7 +32,7 @@ public class ButtonDocumentNew extends AbstractButtonAction {
 	public void perform(final Component button) {
 		int result = JOptionPane.showConfirmDialog(button, "Save current document before creating a new document?", "New Document...", JOptionPane.YES_NO_CANCEL_OPTION);
 		if (result == JOptionPane.YES_OPTION) {
-			if (!ButtonSaveAs.showSaveDialog(button, _editor, ButtonSaveAs.FILTER_presenterDocumentFile)) {
+			if (!FileHelper.showSaveDialog(button, _editor, FileHelper.FILTER_presenterDocumentFile)) {
 				return;
 			}
 		} else if (result == JOptionPane.CANCEL_OPTION) {

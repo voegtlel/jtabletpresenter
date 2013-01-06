@@ -27,6 +27,6 @@ public class ButtonDocumentOpenPdf extends AbstractButtonAction {
 
 	@Override
 	public void perform(final Component button) {
-		ButtonOpenFrom.showOpenDialog(button, _editor, ButtonSaveAs.FILTER_pdf);
+		FileHelper.showOpenDialog(button, _editor, FileHelper.FILTER_pdf);
 	}
 }
