@@ -19,6 +19,8 @@ public class DocumentPage implements IEntity {
 
 	private final DocumentPageLayer _clientOnlyLayer;
 	private final DocumentPageLayer _serverSyncLayer;
+	
+	private int _pdfPageIndex = -1;
 
 	/**
 	 * 
@@ -85,10 +87,27 @@ public class DocumentPage implements IEntity {
 	public boolean isEmpty() {
 		return _clientOnlyLayer.isEmpty() && _serverSyncLayer.isEmpty();
 	}
+	
+	/**
+	 * Sets the index for a referenced pdf page
+	 * @param pdfPageIndex
+	 */
+	public void setPdfPageIndex(int pdfPageIndex) {
+		_pdfPageIndex = pdfPageIndex;
+	}
+	
+	/**
+	 * Gets the index for a referenced pdf page
+	 * @return
+	 */
+	public int getPdfPageIndex() {
+		return _pdfPageIndex;
+	}
 
 	public DocumentPage(final BinaryDeserializer reader) throws IOException {
 		_id = reader.readLong();
 		reader.putObjectTable(this.getId(), this);
+		_pdfPageIndex = reader.readInt();
 		_document = reader.readObjectTable();
 		_clientOnlyLayer = reader.readObjectTable();
 		_serverSyncLayer = reader.readObjectTable();
@@ -97,6 +116,7 @@ public class DocumentPage implements IEntity {
 	@Override
 	public void serialize(final BinarySerializer writer) throws IOException {
 		writer.writeLong(_id);
+		writer.writeInt(_pdfPageIndex);
 		writer.writeObjectTable(_document.getId(), _document);
 		writer.writeObjectTable(_clientOnlyLayer.getId(), _clientOnlyLayer);
 		writer.writeObjectTable(_serverSyncLayer.getId(), _serverSyncLayer);
@@ -113,6 +133,7 @@ public class DocumentPage implements IEntity {
 		_id = reader.readLong();
 		_document = null;
 		reader.putObjectTable(_id, this);
+		_pdfPageIndex = reader.readInt();
 		_clientOnlyLayer = reader.readObjectTable();
 		_serverSyncLayer = reader.readObjectTable();
 	}
@@ -127,6 +148,7 @@ public class DocumentPage implements IEntity {
 			throws IOException {
 		writer.putObjectTable(_id, this);
 		writer.writeLong(_id);
+		writer.writeInt(_pdfPageIndex);
 		writer.writeObjectTable(_clientOnlyLayer.getId(), _clientOnlyLayer);
 		writer.writeObjectTable(_serverSyncLayer.getId(), _serverSyncLayer);
 	}

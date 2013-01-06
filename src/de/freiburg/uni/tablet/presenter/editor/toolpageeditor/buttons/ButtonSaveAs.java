@@ -34,6 +34,40 @@ public class ButtonSaveAs extends AbstractButtonAction {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	
+	public static final FileFilter FILTER_presenterDocumentFile = new FileFilter() {
+		@Override
+		public String getDescription() {
+			return "JPresenter Document File (*.jpd)";
+		}
+
+		@Override
+		public boolean accept(final File f) {
+			return f.getPath().toLowerCase().endsWith(".jpd");
+		}
+	};
+	public static final FileFilter FILTER_presenterPageFile = new FileFilter() {
+		@Override
+		public String getDescription() {
+			return "JPresenter Page File (*.jpp)";
+		}
+
+		@Override
+		public boolean accept(final File f) {
+			return f.getPath().toLowerCase().endsWith(".jpp");
+		}
+	};
+	public static final FileFilter FILTER_pdf = new FileFilter() {
+		@Override
+		public String getDescription() {
+			return "PDF (*.pdf)";
+		}
+
+		@Override
+		public boolean accept(final File f) {
+			return f.getPath().toLowerCase().endsWith(".pdf");
+		}
+	};
 
 	/**
 	 * Creates the action with an editor.
@@ -81,7 +115,7 @@ public class ButtonSaveAs extends AbstractButtonAction {
 					pdfIgnoreEmptyPages, pdfIgnoreEmptyPageNumber, pdfShowPageNumber, pdfThicknessFactor);
 			LinkedElement<DocumentPage> pages = document.getPages();
 			for(; pages != null; pages = pages.getNext()) {
-				pdfRenderer.nextPage();
+				pdfRenderer.nextPage(pages.getData().getPdfPageIndex());
 				pages.getData().getClientOnlyLayer().render(pdfRenderer);
 			}
 			pdfRenderer.close();
@@ -89,76 +123,53 @@ public class ButtonSaveAs extends AbstractButtonAction {
 			throw new IOException(e);
 		}
 	}
-
-	@Override
-	public void perform(final Component button) {
+	
+	public static boolean showSaveDialog(final Component component, final IToolPageEditor editor, final FileFilter defaultType) {
 		final JFileChooser fileChooser = new JFileChooser();
-		final FileFilter presenterDocumentFile = new FileFilter() {
-			@Override
-			public String getDescription() {
-				return "JPresenter Document File (*.jpd)";
-			}
-
-			@Override
-			public boolean accept(final File f) {
-				return f.getPath().toLowerCase().endsWith(".jpd");
-			}
-		};
-		final FileFilter presenterPageFile = new FileFilter() {
-			@Override
-			public String getDescription() {
-				return "JPresenter Page File (*.jpp)";
-			}
-
-			@Override
-			public boolean accept(final File f) {
-				return f.getPath().toLowerCase().endsWith(".jpp");
-			}
-		};
-		final FileFilter pdf = new FileFilter() {
-			@Override
-			public String getDescription() {
-				return "PDF (*.pdf)";
-			}
-
-			@Override
-			public boolean accept(final File f) {
-				return f.getPath().toLowerCase().endsWith(".pdf");
-			}
-		};
-		fileChooser.addChoosableFileFilter(pdf);
-		fileChooser.addChoosableFileFilter(presenterDocumentFile);
-		fileChooser.addChoosableFileFilter(presenterPageFile);
-		fileChooser.setFileFilter(pdf);
-		if (fileChooser.showSaveDialog(button) == JFileChooser.APPROVE_OPTION) {
+		fileChooser.addChoosableFileFilter(FILTER_pdf);
+		fileChooser.addChoosableFileFilter(FILTER_presenterDocumentFile);
+		fileChooser.addChoosableFileFilter(FILTER_presenterPageFile);
+		fileChooser.setFileFilter(defaultType);
+		if (fileChooser.showSaveDialog(component) == JFileChooser.APPROVE_OPTION) {
 			File f = fileChooser.getSelectedFile();
 			try {
-				if ((fileChooser.getFileFilter() == pdf)
+				if ((fileChooser.getFileFilter() == FILTER_pdf)
 						&& !fileChooser.getSelectedFile().getPath().toLowerCase().endsWith(".pdf")) {
 					f = new File(f.getPath() + ".pdf");
-				} else if ((fileChooser.getFileFilter() == presenterDocumentFile)
+				} else if ((fileChooser.getFileFilter() == FILTER_presenterDocumentFile)
 						&& !fileChooser.getSelectedFile().getPath().toLowerCase().endsWith(".jpd")) {
 					f = new File(f.getPath() + ".jpd");
-				} else if ((fileChooser.getFileFilter() == presenterPageFile)
+				} else if ((fileChooser.getFileFilter() == FILTER_presenterPageFile)
 						&& !fileChooser.getSelectedFile().getPath().toLowerCase().endsWith(".jpp")) {
 					f = new File(f.getPath() + ".jpp");
 				}
 				if (f.getPath().toLowerCase().endsWith(".jpd")) {
-					saveDocument(_editor.getDocumentEditor().getDocument(), f);
+					saveDocument(editor.getDocumentEditor().getDocument(), f);
+					return true;
 				} else if (f.getPath().toLowerCase().endsWith(".jpp")) {
-					saveDocumentPage(_editor.getDocumentEditor().getCurrentPage(), f);
+					saveDocumentPage(editor.getDocumentEditor().getCurrentPage(), f);
+					return true;
 				} else if (f.getPath().toLowerCase().endsWith(".pdf")) {
-					savePdf(_editor.getDocumentEditor().getDocument(), _editor.getConfig(), f);
+					savePdf(editor.getDocumentEditor().getDocument(), editor.getConfig(), f);
+					return true;
 				} else {
-					JOptionPane.showMessageDialog(button, "Can't save. Unrecognized file type.");
+					JOptionPane.showMessageDialog(component, "Can't save. Unrecognized file type.");
 				}
 			} catch (final FileNotFoundException e) {
-				JOptionPane.showMessageDialog(button, "Couldn't open file",
+				e.printStackTrace();
+				JOptionPane.showMessageDialog(component, "Couldn't open file",
 						"Error", JOptionPane.ERROR_MESSAGE);
 			} catch (final IOException e) {
-				JOptionPane.showMessageDialog(button, "Couldn't write file: "
+				e.printStackTrace();
+				JOptionPane.showMessageDialog(component, "Couldn't write file: "
 						+ e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 			}
 		}
+		return false;
+	}
+
+	@Override
+	public void perform(final Component button) {
+		showSaveDialog(button, _editor, FILTER_pdf);
 	}
 }

@@ -338,7 +338,7 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 		currentPage.getServerSyncLayer().render(_serverSyncLayer);
 		// Next PDF Page
 		_pdfLayer.clear();
-		_pdfLayer.setPageIndex(_documentEditor.getCurrentPageIndex());
+		_pdfLayer.setPageIndex(_documentEditor.getCurrentPage().getPdfPageIndex());
 		// Render all
 		_pageRenderer.clear();
 	}

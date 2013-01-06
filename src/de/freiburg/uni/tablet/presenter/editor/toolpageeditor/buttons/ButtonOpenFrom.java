@@ -29,6 +29,25 @@ public class ButtonOpenFrom extends AbstractButtonAction {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	
+	private static class PdfModeOption {
+		private final int _key;
+		private final String _text;
+
+		public PdfModeOption(int key, String text) {
+			_key = key;
+			_text = text;
+		}
+		
+		public int getKey() {
+			return _key;
+		}
+		
+		@Override
+		public String toString() {
+			return _text;
+		}
+	}
 
 	/**
 	 * Creates the action with an editor.
@@ -74,68 +93,51 @@ public class ButtonOpenFrom extends AbstractButtonAction {
 		fileInputStream.close();
 		return page;
 	}
-
-	@Override
-	public void perform(final Component button) {
+	
+	public static boolean showOpenDialog(final Component component, IToolPageEditor editor, FileFilter defaultFilter) {
 		final JFileChooser fileChooser = new JFileChooser();
-		final FileFilter presenterDocumentFile = new FileFilter() {
-			@Override
-			public String getDescription() {
-				return "JPresenter Document File (*.jpd)";
-			}
-
-			@Override
-			public boolean accept(final File f) {
-				return f.getPath().toLowerCase().endsWith(".jpd");
-			}
-		};
-		final FileFilter presenterPageFile = new FileFilter() {
-			@Override
-			public String getDescription() {
-				return "JPresenter Page File (*.jpp)";
-			}
-
-			@Override
-			public boolean accept(final File f) {
-				return f.getPath().toLowerCase().endsWith(".jpp");
-			}
-		};
-		final FileFilter pdf = new FileFilter() {
-			@Override
-			public String getDescription() {
-				return "PDF (*.pdf)";
-			}
-
-			@Override
-			public boolean accept(final File f) {
-				return f.getPath().toLowerCase().endsWith(".pdf");
-			}
-		};
-		fileChooser.addChoosableFileFilter(presenterDocumentFile);
-		fileChooser.addChoosableFileFilter(presenterPageFile);
-		fileChooser.addChoosableFileFilter(pdf);
-		fileChooser.setFileFilter(presenterDocumentFile);
-		if (fileChooser.showOpenDialog(button) == JFileChooser.APPROVE_OPTION) {
+		fileChooser.addChoosableFileFilter(ButtonSaveAs.FILTER_presenterDocumentFile);
+		fileChooser.addChoosableFileFilter(ButtonSaveAs.FILTER_presenterPageFile);
+		fileChooser.addChoosableFileFilter(ButtonSaveAs.FILTER_pdf);
+		fileChooser.setFileFilter(defaultFilter);
+		if (fileChooser.showOpenDialog(component) == JFileChooser.APPROVE_OPTION) {
 			try {
 				final File f = fileChooser.getSelectedFile();
 				if (f.getPath().toLowerCase().endsWith(".jpd")) {
-					_editor.getDocumentEditor().setDocument(openDocument(f));
+					editor.getDocumentEditor().setDocument(openDocument(f));
+					return true;
 				} else if (f.getPath().toLowerCase().endsWith(".jpp")) {
-					DocumentPage page = openPage(f).clone(_editor.getDocumentEditor().getDocument());
-					_editor.getDocumentEditor().getDocument().insertPage(
-							_editor.getDocumentEditor().getCurrentPage(), page);
-					_editor.getDocumentEditor().setCurrentPage(page);
+					final DocumentPage page = openPage(f).clone(editor.getDocumentEditor().getDocument());
+					editor.getDocumentEditor().getDocument().insertPage(
+							editor.getDocumentEditor().getCurrentPage(), page);
+					editor.getDocumentEditor().setCurrentPage(page);
+					return true;
 				} else if (f.getPath().toLowerCase().endsWith(".pdf")) {
-					_editor.getDocumentEditor().getDocument().setPdf(f);
+					final PdfModeOption defOpt = new PdfModeOption(Document.PDF_MODE_REINDEX, "Reindex Pages");
+					final Object dialogResult = JOptionPane.showInputDialog(component, "Select PDF Mode", "PDF Loading...", JOptionPane.QUESTION_MESSAGE, null, new Object[] {
+							defOpt,
+						new PdfModeOption(Document.PDF_MODE_KEEP_INDEX, "Keep Page Indices"),
+						new PdfModeOption(Document.PDF_MODE_APPEND, "Append Pdf Pages")
+					}, defOpt);
+					if (dialogResult != null) {
+						final PdfModeOption res = (PdfModeOption)dialogResult;
+						editor.getDocumentEditor().getDocument().setPdf(f, res.getKey());
+						return true;
+					}
 				}
 			} catch (final FileNotFoundException e) {
-				JOptionPane.showMessageDialog(button, "Couldn't open file",
+				JOptionPane.showMessageDialog(component, "Couldn't open file",
 						"Error", JOptionPane.ERROR_MESSAGE);
 			} catch (final IOException e) {
-				JOptionPane.showMessageDialog(button, "Couldn't read file: "
+				JOptionPane.showMessageDialog(component, "Couldn't read file: "
 						+ e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 			}
-			
 		}
+		return false;
+	}
+
+	@Override
+	public void perform(final Component button) {
+		showOpenDialog(button, _editor, ButtonSaveAs.FILTER_presenterDocumentFile);
 	}
 }

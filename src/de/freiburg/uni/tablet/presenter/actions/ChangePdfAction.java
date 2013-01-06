@@ -55,7 +55,8 @@ public class ChangePdfAction extends AbstractAction implements IAction, IBinaryS
 
 	@Override
 	public void perform(final DocumentEditor editor) {
-		editor.getDocument().setPdf(_oldPdf);
+		// Todo: Store each pages pdf index.
+		//editor.getDocument().setPdf(_oldPdf);
 	}
 
 	@Override

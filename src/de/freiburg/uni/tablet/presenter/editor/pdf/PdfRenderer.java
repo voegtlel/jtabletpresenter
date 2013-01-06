@@ -10,6 +10,8 @@ import java.awt.geom.PathIterator;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Map;
 
 import de.freiburg.uni.tablet.presenter.editor.IPageRepaintListener;
 import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
@@ -17,6 +19,7 @@ import de.freiburg.uni.tablet.presenter.page.IPen;
 import de.intarsys.pdf.cds.CDSRectangle;
 import de.intarsys.pdf.content.CSContent;
 import de.intarsys.pdf.content.common.CSCreator;
+import de.intarsys.pdf.cos.COSObject;
 import de.intarsys.pdf.encoding.WinAnsiEncoding;
 import de.intarsys.pdf.font.PDFont;
 import de.intarsys.pdf.font.PDFontTools;
@@ -25,6 +28,7 @@ import de.intarsys.pdf.pd.PDDocument;
 import de.intarsys.pdf.pd.PDForm;
 import de.intarsys.pdf.pd.PDImage;
 import de.intarsys.pdf.pd.PDPage;
+import de.intarsys.pdf.pd.PDResources;
 import de.intarsys.pdf.platform.cwt.image.awt.ImageConverterAwt2Pdf;
 import de.intarsys.tools.locator.FileLocator;
 
@@ -35,6 +39,8 @@ public class PdfRenderer implements IPageBackRenderer {
 	private final Ellipse2D.Float _ellipseRenderer = new Ellipse2D.Float();
 	private final Line2D.Float _lineRenderer = new Line2D.Float();
 
+	private Map _baseCopiedMap = new HashMap();
+	private PDDocument _baseDocument;
 	private PDDocument _pdf;
 	private PDPage _page;
 	private PDForm _form;
@@ -47,7 +53,6 @@ public class PdfRenderer implements IPageBackRenderer {
 	private CDSRectangle _pageSize;
 	private boolean _showPageNumber;
 	
-	private PDDocument _baseDocument;
 	
 	private boolean _wasEmptyPage = true;
 	private boolean _ignoreEmptyPage;
@@ -62,7 +67,7 @@ public class PdfRenderer implements IPageBackRenderer {
 		if (baseDocument != null) {
 			_baseDocument = baseDocument;
 			System.out.println("copy pdf");
-			_pdf = baseDocument.copyDeep();
+			_pdf = PDDocument.createNew();
 		} else {
 			System.out.println("create pdf");
 			_pdf = PDDocument.createNew();
@@ -130,17 +135,16 @@ public class PdfRenderer implements IPageBackRenderer {
 		}
 	}
 	
-	public void nextPage() throws Exception {
+	public void nextPage(final int sourcePageIndex) throws Exception {
 		if (_creator != null && _wasEmptyPage && _ignoreEmptyPage && _form == null) {
 			return;
 		}
 		endPage();
-		if ((_creator == null) && (_baseDocument != null)) {
-			_page = _pdf.getPageTree().getFirstPage();
-			System.out.println("first page");
-		} else if (_baseDocument != null) {
-			_page = _page.getNextPage();
-			System.out.println("next page");
+		if (sourcePageIndex >= 0 && sourcePageIndex < _baseDocument.getPageTree().getCount()) {
+			PDPage sourcePage = _baseDocument.getPageTree().getPageAt(sourcePageIndex);
+			System.out.println("copy page " + sourcePageIndex);
+			_page = (PDPage) PDPage.META.createFromCos(sourcePage.cosGetObject().copyDeep(_baseCopiedMap));
+			_pdf.addPageNode(_page);
 		} else {
 			_page = null;
 		}

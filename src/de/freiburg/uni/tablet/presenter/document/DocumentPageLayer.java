@@ -83,6 +83,14 @@ public class DocumentPageLayer implements IEntity {
 		_page.getParent().fireRenderableRemoved(renderable, this);
 	}
 	
+	public void clear() {
+		while (!_renderablesList.isEmpty()) {
+			_renderablesList.removeFirst();
+			_page.getParent().fireRenderableRemoved(_renderablesList.getFirst().getData(), this);
+		}
+		_renderablesMap.clear();
+	}
+	
 	public boolean isEmpty() {
 		return _renderablesList.isEmpty();
 	}

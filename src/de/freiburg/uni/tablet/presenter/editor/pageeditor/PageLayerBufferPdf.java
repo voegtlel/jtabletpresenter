@@ -150,8 +150,12 @@ public class PageLayerBufferPdf implements IPageLayerBuffer {
 	 */
 	public void setPageIndex(int index) {
 		_currentPageIndex = index;
-		if (_pageTree != null) {
+		System.out.println("Pdf page index " + index);
+		if ((_pageTree != null) && (index >= 0) && (index < _pageTree.getCount())) {
 			_page = _pageTree.getPageAt(index);
+			renderPdf();
+		} else {
+			_page = null;
 			renderPdf();
 		}
 	}

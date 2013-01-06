@@ -15,12 +15,27 @@ import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 import de.freiburg.uni.tablet.presenter.list.LinkedElement;
 import de.freiburg.uni.tablet.presenter.list.LinkedElementList;
 import de.intarsys.pdf.pd.PDDocument;
+import de.intarsys.pdf.pd.PDPage;
+import de.intarsys.pdf.pd.PDPageTree;
 
 /**
  * @author lukas
  * 
  */
 public class Document implements IEntity {
+	/**
+	 * Reset indices and use first page as first pdf page
+	 */
+	public static final int PDF_MODE_REINDEX = 0;
+	/**
+	 * Keep current indices and append if needed
+	 */
+	public static final int PDF_MODE_KEEP_INDEX = 1;
+	/**
+	 * Append the loaded pdf to the end of the document
+	 */
+	public static final int PDF_MODE_APPEND = 2;
+	
 	private final LinkedElementList<DocumentPage> _pages = new LinkedElementList<DocumentPage>();
 
 	private final int _clientId;
@@ -43,30 +58,77 @@ public class Document implements IEntity {
 	 * Sets the background pdf
 	 * @param document
 	 */
-	public void setPdf(final File file) throws IOException {
-		PdfSerializable lastPdf = _pdfDocument;
-		_pdfDocument = new PdfSerializable(getNextId(), this, file);
-		firePdfChangedRemoved(lastPdf);
+	public void setPdf(final File file, int pdfMode) throws IOException {
+		setPdf(new PdfSerializable(getNextId(), this, file), pdfMode);
 	}
 	
 	/**
 	 * Sets the background pdf
 	 * @param document
 	 */
-	public void setPdf(final PDDocument document) {
-		PdfSerializable lastPdf = _pdfDocument;
-		_pdfDocument = new PdfSerializable(getNextId(), this, document);
-		firePdfChangedRemoved(lastPdf);
+	public void setPdf(final PDDocument document, int pdfMode) {
+		setPdf(new PdfSerializable(getNextId(), this, document), pdfMode);
 	}
 	
 	/**
 	 * Sets the background pdf
 	 * @param document
 	 */
-	public void setPdf(final PdfSerializable document) {
+	public void setPdf(final PdfSerializable document, int pdfMode) {
 		PdfSerializable lastPdf = _pdfDocument;
 		_pdfDocument = document;
-		firePdfChangedRemoved(lastPdf);
+		if (pdfMode == PDF_MODE_REINDEX) {
+			PDPageTree pageTree = document.getDocument().getPageTree();
+			// Ensure the pages exist (enough space)
+			getPageByIndex(pageTree.getCount() - 1, true);
+			// Iterate through pdf pages
+			PDPage pdfPage = pageTree.getFirstPage();
+			LinkedElement<DocumentPage> docPage = _pages.getFirst();
+			while (pdfPage != null) {
+				// Set indices
+				docPage.getData().setPdfPageIndex(pdfPage.getNodeIndex());
+				pdfPage = pdfPage.getNextPage();
+				docPage = docPage.getNext();
+			}
+			while (docPage != null) {
+				docPage.getData().setPdfPageIndex(-1);
+				docPage = docPage.getNext();
+			}
+		} else if (pdfMode == PDF_MODE_KEEP_INDEX) {
+			PDPageTree pageTree = document.getDocument().getPageTree();
+			// Iterate through doc pages and find highest
+			LinkedElement<DocumentPage> docPage = _pages.getFirst();
+			int lastPdfIndex = 0;
+			while (docPage.getNext() != null) {
+				if (docPage.getData().getPdfPageIndex() > lastPdfIndex) {
+					lastPdfIndex = docPage.getData().getPdfPageIndex();
+				}
+				docPage = docPage.getNext();
+			}
+			if (lastPdfIndex < pageTree.getCount() - 1) {
+				PDPage pdfPage = pageTree.getPageAt(lastPdfIndex);
+				while (pdfPage != null) {
+					DocumentPage newPage = this.addPage();
+					newPage.setPdfPageIndex(pdfPage.getNodeIndex());
+					pdfPage = pdfPage.getNextPage();
+				}
+			}
+		} else if (pdfMode == PDF_MODE_APPEND) {
+			PDPageTree pageTree = document.getDocument().getPageTree();
+			// Iterate through doc pages and find highest
+			LinkedElement<DocumentPage> docPage = _pages.getFirst();
+			while (docPage != null) {
+				docPage.getData().setPdfPageIndex(-1);
+				docPage = docPage.getNext();
+			}
+			PDPage pdfPage = pageTree.getFirstPage();
+			while (pdfPage != null) {
+				DocumentPage newPage = this.addPage();
+				newPage.setPdfPageIndex(pdfPage.getNodeIndex());
+				pdfPage = pdfPage.getNextPage();
+			}
+		}
+		firePdfChanged(lastPdf);
 	}
 	
 	/**
@@ -264,7 +326,7 @@ public class Document implements IEntity {
 		}
 	}
 	
-	void firePdfChangedRemoved(final PdfSerializable lastPdf) {
+	void firePdfChanged(final PdfSerializable lastPdf) {
 		for (final DocumentListener listener : _listeners) {
 			listener.pdfChanged(lastPdf);
 		}
