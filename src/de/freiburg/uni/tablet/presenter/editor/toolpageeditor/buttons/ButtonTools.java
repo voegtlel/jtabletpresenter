@@ -20,10 +20,11 @@ public class ButtonTools extends AbstractButtonMenuTool {
 	 * Creates the action with an editor.
 	 */
 	public ButtonTools(final IToolPageEditor editor) {
-		super("tools", editor, "Tools", "/buttons/document-properties.png", 7);
+		super("tools", editor, "Tools", "/buttons/document-properties.png", 8);
 		this._frame.addItem(new ButtonDocumentNew(editor));
 		this._frame.addItem(new ButtonOpenFrom(editor));
 		this._frame.addItem(new ButtonSaveAs(editor));
+		this._frame.addItem(new ButtonToggleShowToolbar(editor));
 		//this._frame.addItem(new ButtonPreferences(editor));
 		this._frame.addItem(new ButtonPrimary(editor));
 		this._frame.addItem(new ButtonSecondary(editor));

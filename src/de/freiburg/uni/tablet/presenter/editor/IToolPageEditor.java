@@ -55,4 +55,16 @@ public interface IToolPageEditor {
 	 * @return
 	 */
 	DocumentConfig getConfig();
+
+	/**
+	 * Sets if the toolbar should be visible
+	 * @param visible
+	 */
+	void setToolbarVisible(boolean visible);
+	
+	/**
+	 * Gets if the toolbar is visible
+	 * @return
+	 */
+	boolean isToolbarVisible();
 }

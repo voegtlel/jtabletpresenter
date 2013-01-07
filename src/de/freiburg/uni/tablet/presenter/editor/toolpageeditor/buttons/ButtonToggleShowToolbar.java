@@ -12,7 +12,7 @@ import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
  * @author lukas
  * 
  */
-public class ButtonFullscreen extends AbstractButtonAction {
+public class ButtonToggleShowToolbar extends AbstractButtonAction {
 	/**
 	 * 
 	 */
@@ -21,12 +21,12 @@ public class ButtonFullscreen extends AbstractButtonAction {
 	/**
 	 * Creates the action with an editor.
 	 */
-	public ButtonFullscreen(final IToolPageEditor editor) {
-		super("fullscreen", editor, "Full", "/buttons/view-fullscreen.png");
+	public ButtonToggleShowToolbar(final IToolPageEditor editor) {
+		super("toggleToolbar", editor, "Toolbar", "/buttons/toggle-toolbar.png");
 	}
 
 	@Override
 	public void performLater(final Component component) {
-		_editor.setFullscreen(!_editor.isFullscreen());
+		_editor.setToolbarVisible(!_editor.isToolbarVisible());
 	}
 }

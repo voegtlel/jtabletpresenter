@@ -45,7 +45,7 @@ import de.freiburg.uni.tablet.presenter.editor.pageeditor.PageLayerBufferComposi
 import de.freiburg.uni.tablet.presenter.editor.pageeditor.PageLayerBufferFront;
 import de.freiburg.uni.tablet.presenter.editor.pageeditor.PageLayerBufferPdf;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonColor;
-import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonFullscreen;
+import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonToggleFullscreen;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonNext;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonPrevious;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonRedo;
@@ -179,7 +179,7 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 				new ButtonNext(this), new ButtonPrevious(this),
 				new ButtonSpinnerPage(this), null, new ButtonUndo(this),
 				new ButtonRedo(this), null, new ButtonColor(this), null,
-				new ButtonFullscreen(this) });
+				new ButtonToggleFullscreen(this) });
 		registerShortcuts();
 		_config.write();
 	}
@@ -268,6 +268,16 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 				System.out.println("Unknown Button " + destination);
 			}
 		}
+	}
+	
+	@Override
+	public void setToolbarVisible(boolean visible) {
+		_panelTools.setVisible(visible);
+	}
+	
+	@Override
+	public boolean isToolbarVisible() {
+		return _panelTools.isVisible();
 	}
 
 	@Override
