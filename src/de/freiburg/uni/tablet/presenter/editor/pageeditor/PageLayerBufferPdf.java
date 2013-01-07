@@ -178,16 +178,21 @@ public class PageLayerBufferPdf implements IPageLayerBuffer {
 				transform.scale(_renderFactorX/_page.getMediaBox().getWidth(), -_renderFactorY/_page.getMediaBox().getHeight());
 				_graphics.setTransform(transform);
 				System.out.println("Init Render Pdf");
-				IGraphicsContext graphics = new CwtAwtGraphicsContext(_graphics);
-				CSContent content = _page.getContentStream();
-				if (content != null) {
-					System.out.println("Render Pdf...");
-					CSPlatformRenderer renderer = new CSPlatformRenderer(null, graphics);
-					renderer.process(content, _page.getResources());
-					System.out.println("translate after: " + graphics.getTransform().getTranslateX() + ", " + graphics.getTransform().getTranslateY());
-					System.out.println("scale after: " + graphics.getTransform().getScaleX() + ", " + graphics.getTransform().getScaleY());
+				try {
+					IGraphicsContext graphics = new CwtAwtGraphicsContext(_graphics);
+					CSContent content = _page.getContentStream();
+					if (content != null) {
+						System.out.println("Render Pdf...");
+						CSPlatformRenderer renderer = new CSPlatformRenderer(null, graphics);
+						renderer.process(content, _page.getResources());
+						System.out.println("translate after: " + graphics.getTransform().getTranslateX() + ", " + graphics.getTransform().getTranslateY());
+						System.out.println("scale after: " + graphics.getTransform().getScaleX() + ", " + graphics.getTransform().getScaleY());
+					}
+					System.out.println("Rendered Pdf");
+				} catch (Exception e) {
+					e.printStackTrace();
+					System.out.println("Can't render Pdf");
 				}
-				System.out.println("Rendered Pdf");
 			} else {
 				System.out.println("Don't Render Pdf");
 			}

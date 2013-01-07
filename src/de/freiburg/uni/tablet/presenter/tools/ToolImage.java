@@ -10,7 +10,6 @@ import java.awt.image.BufferedImage;
 import javax.swing.JOptionPane;
 
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
-import de.freiburg.uni.tablet.presenter.geometry.AbstractRenderable;
 import de.freiburg.uni.tablet.presenter.geometry.BitmapImage;
 import de.freiburg.uni.tablet.presenter.geometry.DataPoint;
 
