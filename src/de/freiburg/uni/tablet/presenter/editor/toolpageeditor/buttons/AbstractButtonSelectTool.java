@@ -65,6 +65,15 @@ public abstract class AbstractButtonSelectTool extends AbstractButtonAction {
 		_tool.setSelectedValue(currentSelectedTool);
 		_tool.showAt(button, button.getWidth(), 0);
 		final ITool selectedTool = _tool.getSelectedValue();
+		if (!selectedTool.equals(currentSelectedTool)) {
+			setSelectedTool(selectedTool);
+		}
+		super.perform(button);
+	}
+	
+	@Override
+	public void performLater(Component component) {
+		final ITool selectedTool = _tool.getSelectedValue();
 		if (selectedTool == _toolImage) {
 			// Select image to insert
 			JFileChooser fileChooser = new JFileChooser();
@@ -91,12 +100,9 @@ public abstract class AbstractButtonSelectTool extends AbstractButtonAction {
 			};
 			fileChooser.addChoosableFileFilter(imageFilter);
 			fileChooser.setFileFilter(imageFilter);
-			if (fileChooser.showOpenDialog(button) == JFileChooser.APPROVE_OPTION) {
+			if (fileChooser.showOpenDialog(component) == JFileChooser.APPROVE_OPTION) {
 				_editor.getDocumentEditor().setCurrentImageFile(fileChooser.getSelectedFile());
 			}
-		}
-		if (!selectedTool.equals(currentSelectedTool)) {
-			setSelectedTool(selectedTool);
 		}
 	}
 	

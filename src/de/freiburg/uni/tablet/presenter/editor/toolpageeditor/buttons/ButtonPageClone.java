@@ -29,8 +29,8 @@ public class ButtonPageClone extends AbstractButtonAction {
 	}
 
 	@Override
-	public void perform(final Component button) {
-		Object result = JOptionPane.showInputDialog(button, "Page number to insert", "Clone to", JOptionPane.QUESTION_MESSAGE, null, null, Integer.valueOf(_editor.getDocumentEditor().getCurrentPageIndex() + 1).toString());
+	public void performLater(final Component component) {
+		Object result = JOptionPane.showInputDialog(component, "Page number to insert", "Clone to", JOptionPane.QUESTION_MESSAGE, null, null, Integer.valueOf(_editor.getDocumentEditor().getCurrentPageIndex() + 1).toString());
 		if ((result != null) && !result.toString().isEmpty()) {
 			int insertIndex = Integer.parseInt(result.toString()) - 1;
 			DocumentPage page = _editor.getDocumentEditor().getCurrentPage();

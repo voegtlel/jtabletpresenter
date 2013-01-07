@@ -29,7 +29,7 @@ public class ButtonSaveAs extends AbstractButtonAction {
 	
 
 	@Override
-	public void perform(final Component button) {
-		FileHelper.showSaveDialog(button, _editor, FileHelper.FILTER_pdf);
+	public void performLater(final Component component) {
+		FileHelper.showSaveDialog(component, _editor, FileHelper.FILTER_pdf);
 	}
 }

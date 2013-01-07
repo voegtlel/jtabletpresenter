@@ -27,7 +27,7 @@ public class ButtonDocumentClearPdf extends AbstractButtonAction {
 	}
 
 	@Override
-	public void perform(final Component button) {
+	public void performLater(final Component component) {
 		_editor.getDocumentEditor().getDocument().setPdf((PDDocument)null, -1);
 	}
 }

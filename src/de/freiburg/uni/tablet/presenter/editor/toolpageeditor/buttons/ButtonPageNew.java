@@ -27,7 +27,7 @@ public class ButtonPageNew extends AbstractButtonAction {
 	}
 
 	@Override
-	public void perform(final Component button) {
+	public void performLater(final Component component) {
 		DocumentPage page = _editor.getDocumentEditor().getCurrentPage();
 		DocumentPage newPage = _editor.getDocumentEditor().getDocument().insertPage(page);
 		_editor.getDocumentEditor().setCurrentPage(newPage);

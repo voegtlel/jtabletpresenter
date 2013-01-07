@@ -28,7 +28,7 @@ public class ButtonOpenFrom extends AbstractButtonAction {
 	}
 
 	@Override
-	public void perform(final Component button) {
-		FileHelper.showOpenDialog(button, _editor, FileHelper.FILTER_presenterDocumentFile);
+	public void performLater(final Component component) {
+		FileHelper.showOpenDialog(component, _editor, FileHelper.FILTER_presenterDocumentFile);
 	}
 }

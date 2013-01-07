@@ -27,7 +27,7 @@ public class ButtonPageClear extends AbstractButtonAction {
 	}
 
 	@Override
-	public void perform(final Component button) {
+	public void performLater(final Component component) {
 		_editor.getDocumentEditor().getHistory().beginActionGroup();
 		DocumentPage page = _editor.getDocumentEditor().getCurrentPage();
 		page.getClientOnlyLayer().clear();

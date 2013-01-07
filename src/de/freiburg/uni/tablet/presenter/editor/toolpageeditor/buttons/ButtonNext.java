@@ -26,7 +26,7 @@ public class ButtonNext extends AbstractButtonAction {
 	}
 
 	@Override
-	public void perform(final Component button) {
+	public void performLater(final Component component) {
 		if (_editor.getConfig().getBoolean("autosave.next", true)) {
 			FileHelper.autosave(_editor.getDocumentEditor());
 		}

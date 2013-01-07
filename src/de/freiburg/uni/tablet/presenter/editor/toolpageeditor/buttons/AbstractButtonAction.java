@@ -8,6 +8,7 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
+import javax.swing.SwingUtilities;
 
 import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
@@ -61,6 +62,15 @@ public abstract class AbstractButtonAction extends AbstractAction implements IBu
 
 	@Override
 	public void perform(final Component button) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				performLater(_editor.getPageEditor().getContainerComponent());
+			}
+		});
+	}
+	
+	public void performLater(final Component component) {
 	}
 
 	@Override

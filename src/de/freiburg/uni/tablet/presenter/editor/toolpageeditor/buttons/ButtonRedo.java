@@ -26,7 +26,7 @@ public class ButtonRedo extends AbstractButtonAction {
 	}
 
 	@Override
-	public void perform(final Component button) {
+	public void performLater(final Component component) {
 		if (_editor.getDocumentEditor().getHistory().hasRedoAction()) {
 			_editor.getDocumentEditor().getHistory().redo();
 			_editor.getPageEditor().clear();

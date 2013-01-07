@@ -26,7 +26,7 @@ public class ButtonFullscreen extends AbstractButtonAction {
 	}
 
 	@Override
-	public void perform(final Component button) {
+	public void performLater(final Component component) {
 		_editor.setFullscreen(!_editor.isFullscreen());
 	}
 }
