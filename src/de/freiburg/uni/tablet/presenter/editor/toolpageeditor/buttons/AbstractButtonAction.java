@@ -5,6 +5,7 @@
 package de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons;
 
 import java.awt.Component;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
@@ -61,7 +62,7 @@ public abstract class AbstractButtonAction extends AbstractAction implements IBu
 	}
 
 	@Override
-	public void perform(final Component button) {
+	public void perform(final Point desiredLocation) {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
@@ -79,7 +80,10 @@ public abstract class AbstractButtonAction extends AbstractAction implements IBu
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		perform((Component)e.getSource());
+		Component c = (Component)e.getSource();
+		Point loc = c.getLocation();
+		loc.x += c.getWidth();
+		perform(loc);
 	}
 	
 	@Override

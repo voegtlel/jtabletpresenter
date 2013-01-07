@@ -10,6 +10,8 @@ import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.MouseInfo;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -45,11 +47,11 @@ import de.freiburg.uni.tablet.presenter.editor.pageeditor.PageLayerBufferComposi
 import de.freiburg.uni.tablet.presenter.editor.pageeditor.PageLayerBufferFront;
 import de.freiburg.uni.tablet.presenter.editor.pageeditor.PageLayerBufferPdf;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonColor;
-import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonToggleFullscreen;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonNext;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonPrevious;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonRedo;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonSpinnerPage;
+import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonToggleFullscreen;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonTools;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonUndo;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
@@ -223,7 +225,9 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 					button.addActionListener(new ActionListener() {
 						@Override
 						public void actionPerformed(final ActionEvent e) {
-							action.perform(button);
+							final Point loc = button.getLocationOnScreen();
+							loc.x += button.getWidth();
+							action.perform(loc);
 						}
 					});
 					_panelTools.add(button, gbc_control);
@@ -258,7 +262,8 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						System.out.println("Shortcut " + ks + " activated for " + actionName);
-						refButton.perform(_panelTools);
+						final Point loc = MouseInfo.getPointerInfo().getLocation();
+						refButton.perform(loc);
 					}
 				}; 
 				this.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(ks, actionName);
@@ -401,7 +406,7 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 				_documentEditor.getDocument().removeListener(_documentListener);
 				_documentEditor.removeListener(_documentEditorListener);
 			}
-			final DocumentEditor lastEditor = documentEditor;
+			final DocumentEditor lastEditor = _documentEditor;
 			_documentEditor = documentEditor;
 			if (_documentEditor != null) {
 				_documentEditor.addListener(_documentEditorListener);

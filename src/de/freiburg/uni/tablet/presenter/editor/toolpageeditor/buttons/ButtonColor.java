@@ -5,7 +5,7 @@
 package de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons;
 
 import java.awt.Color;
-import java.awt.Component;
+import java.awt.Point;
 
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.JPageToolButton;
@@ -39,10 +39,10 @@ public class ButtonColor extends AbstractButtonAction {
 	}
 
 	@Override
-	public void perform(final Component button) {
+	public void perform(final Point desiredLocation) {
 		_tool.setSelectedValue(_editor.getDocumentEditor().getCurrentPen()
 				.getColor());
-		_tool.showAt(button, button.getWidth(), 0);
+		_tool.showAt(desiredLocation);
 		final Color selectedColor = _tool.getSelectedValue();
 		if (!selectedColor.equals(_editor.getDocumentEditor().getCurrentPen()
 				.getColor())) {

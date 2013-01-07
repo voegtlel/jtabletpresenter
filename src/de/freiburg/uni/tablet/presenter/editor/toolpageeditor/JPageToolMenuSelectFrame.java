@@ -139,17 +139,10 @@ public class JPageToolMenuSelectFrame<T> extends JDialog {
 	/**
 	 * moves the component to the relative position and makes it visible.
 	 * 
-	 * @param relativeComponent
-	 *            position is relative to this component
-	 * @param xOffset
-	 *            offset of position
-	 * @param yOffset
-	 *            offset of position
+	 * @param location
 	 */
-	public void showAt(final Component relativeComponent, final int xOffset,
-			final int yOffset) {
-		final Point loc = relativeComponent.getLocationOnScreen();
-		setLocation(loc.x + xOffset, loc.y + yOffset);
+	public void showAt(final Point location) {
+		setLocation(location.x, location.y);
 		setVisible(true);
 	}
 }

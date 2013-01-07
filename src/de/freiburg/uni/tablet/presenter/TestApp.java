@@ -71,7 +71,8 @@ public class TestApp {
 					e.printStackTrace();
 				}
 			}
-		} else {
+		}
+		if (doc == null) {
 			System.out.println("Create new session");
 			doc = new DocumentEditor(_pageRenderer.getConfig());
 		}

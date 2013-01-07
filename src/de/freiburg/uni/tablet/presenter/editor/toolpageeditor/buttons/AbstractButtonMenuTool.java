@@ -4,7 +4,7 @@
  */
 package de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons;
 
-import java.awt.Component;
+import java.awt.Point;
 
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.IButtonAction;
@@ -38,8 +38,8 @@ public abstract class AbstractButtonMenuTool extends AbstractButtonAction {
 	}
 
 	@Override
-	public void perform(final Component button) {
-		_frame.showAt(button, button.getWidth(), 0);
+	public void perform(final Point desiredLocation) {
+		_frame.showAt(desiredLocation);
 	}
 	
 	@Override

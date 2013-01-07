@@ -5,6 +5,7 @@
 package de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons;
 
 import java.awt.Component;
+import java.awt.Point;
 import java.io.File;
 
 import javax.swing.JFileChooser;
@@ -60,15 +61,15 @@ public abstract class AbstractButtonSelectTool extends AbstractButtonAction {
 	}
 
 	@Override
-	public void perform(final Component button) {
+	public void perform(final Point desiredLocation) {
 		final ITool currentSelectedTool = getSelectedTool();
 		_tool.setSelectedValue(currentSelectedTool);
-		_tool.showAt(button, button.getWidth(), 0);
+		_tool.showAt(desiredLocation);
 		final ITool selectedTool = _tool.getSelectedValue();
 		if (!selectedTool.equals(currentSelectedTool)) {
 			setSelectedTool(selectedTool);
 		}
-		super.perform(button);
+		super.perform(desiredLocation);
 	}
 	
 	@Override

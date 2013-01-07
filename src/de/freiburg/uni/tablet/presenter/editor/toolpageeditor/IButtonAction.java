@@ -5,6 +5,7 @@
 package de.freiburg.uni.tablet.presenter.editor.toolpageeditor;
 
 import java.awt.Component;
+import java.awt.Point;
 
 import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
 
@@ -16,7 +17,7 @@ public interface IButtonAction {
 	/**
 	 * Performs the action
 	 */
-	void perform(Component button);
+	void perform(Point desiredLocation);
 	
 	/**
 	 * Text for the button.

@@ -100,7 +100,9 @@ public class JPageToolMenuFrame<T> extends JDialog {
 				}
 			}
 			JPageToolMenuFrame.this.setEnabled(false);
-			action.perform(JPageToolMenuFrame.this);
+			final Point loc = JPageToolMenuFrame.this.getLocationOnScreen();
+			loc.x += JPageToolMenuFrame.this.getWidth();
+			action.perform(loc);
 			JPageToolMenuFrame.this.setVisible(false);
 			_activeComponent = null;
 		} else {
@@ -135,24 +137,17 @@ public class JPageToolMenuFrame<T> extends JDialog {
 	}
 
 	/**
-	 * moves the component to the relative position and makes it visible.
+	 * Moves the component to the position and makes it visible.
 	 * 
-	 * @param relativeComponent
-	 *            position is relative to this component
-	 * @param xOffset
-	 *            offset of position
-	 * @param yOffset
-	 *            offset of position
+	 * @param location
 	 */
-	public void showAt(final Component relativeComponent, final int xOffset,
-			final int yOffset) {
+	public void showAt(Point location) {
 		_activeComponent = null;
 		JPageToolMenuFrame.this.setEnabled(true);
 		for (Component c : getContentPane().getComponents()) {
 			c.setEnabled(true);
 		}
-		final Point loc = relativeComponent.getLocationOnScreen();
-		setLocation(loc.x + xOffset, loc.y + yOffset);
+		setLocation(location.x, location.y);
 		setVisible(true);
 	}
 }

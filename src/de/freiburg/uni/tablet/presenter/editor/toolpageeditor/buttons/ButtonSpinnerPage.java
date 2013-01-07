@@ -79,7 +79,9 @@ public class ButtonSpinnerPage extends AbstractButtonAction {
 
 	@Override
 	public void onUpdateEditor(final DocumentEditor lastEditor) {
-		lastEditor.removeListener(_documentEditorListener);
+		if (lastEditor != null) {
+			lastEditor.removeListener(_documentEditorListener);
+		}
 		_editor.getDocumentEditor().addListener(_documentEditorListener);
 	}
 
