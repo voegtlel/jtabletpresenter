@@ -1,7 +1,6 @@
 package de.freiburg.uni.tablet.presenter.geometry;
 
 import java.util.HashMap;
-import java.util.Map.Entry;
 
 import de.freiburg.uni.tablet.presenter.document.Document;
 import de.freiburg.uni.tablet.presenter.document.DocumentPageLayer;
