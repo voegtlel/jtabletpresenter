@@ -5,6 +5,7 @@ import java.util.Map.Entry;
 
 import de.freiburg.uni.tablet.presenter.document.Document;
 import de.freiburg.uni.tablet.presenter.document.DocumentPageLayer;
+import de.freiburg.uni.tablet.presenter.list.LinkedElement;
 
 public class EraseInfo {
 	private final HashMap<Long, IRenderable> _modifiedObjects = new HashMap<Long, IRenderable>();
@@ -107,13 +108,17 @@ public class EraseInfo {
 	 * Applies all replace actions.
 	 */
 	public void applyModifications() {
-		for (final Entry<Long, IRenderable> entry : _modifiedObjects.entrySet()) {
-			final IRenderable renderable = _layer.getRenderable(entry.getKey());
-			_layer.removeRenderable(renderable);
-			IRenderable replacement = entry.getValue();
-			if (renderable.eraseEnd(this)) {
-				_layer.addRenderable(replacement);
+		for (LinkedElement<IRenderable> renderable = _layer.getRenderables().getFirst(); renderable != null;) {
+			LinkedElement<IRenderable> nextRenderable = renderable.getNext();
+			IRenderable replacement = _modifiedObjects.get(renderable.getData().getId());
+			if (replacement != null) {
+				System.out.println("Replace " + renderable.getData().getId() + " by " + replacement.getId());
+				_layer.removeRenderable(renderable.getData());
+				if (renderable.getData().eraseEnd(this)) {
+					_layer.addRenderable(replacement);
+				}
 			}
+			renderable = nextRenderable;
 		}
 	}
 }

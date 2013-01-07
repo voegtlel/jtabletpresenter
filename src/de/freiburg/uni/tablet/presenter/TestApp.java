@@ -54,19 +54,22 @@ public class TestApp {
 		_pageRenderer.setBounds(100, 100, 640, 480);
 		_pageRenderer.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		DocumentEditor doc = null;
-		if (_pageRenderer.getConfig().getBoolean("startup.autoload", false)) {
+		if (_pageRenderer.getConfig().getBoolean("autosave.loadStartup", false)) {
 			final File savedSession = new File("session.dat");
 			if (savedSession.exists())  {
 				try {
+					System.out.println("Loading session");
 					FileInputStream is = new FileInputStream(savedSession);
 					BinaryDeserializer bd = new BinaryDeserializer(is);
 					doc = bd.readSerializableClass();
 					is.close();
+					System.out.println("Session loaded");
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
 		} else {
+			System.out.println("Create new session");
 			doc = new DocumentEditor(_pageRenderer.getConfig());
 		}
 		_pageRenderer.setDocumentEditor(doc);
@@ -74,17 +77,21 @@ public class TestApp {
 		_pageRenderer.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
-				final File savedSession = new File("session.dat");
-				try {
-					FileOutputStream os = new FileOutputStream(savedSession);
-					BufferedOutputStream bos = new BufferedOutputStream(os);
-					BinarySerializer bs = new BinarySerializer(bos);
-					bs.writeSerializableClass(_pageRenderer.getDocumentEditor());
-					bs.close();
-					bos.close();
-					os.close();
-				} catch (IOException e1) {
-					e1.printStackTrace();
+				if (_pageRenderer.getConfig().getBoolean("autosave.saveExit", false)) {
+					final File savedSession = new File("session.dat");
+					try {
+						System.out.println("Saving session");
+						FileOutputStream os = new FileOutputStream(savedSession);
+						BufferedOutputStream bos = new BufferedOutputStream(os);
+						BinarySerializer bs = new BinarySerializer(bos);
+						bs.writeSerializableClass(_pageRenderer.getDocumentEditor());
+						bs.close();
+						bos.close();
+						os.close();
+						System.out.println("Session autosaved");
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
 				}
 			}
 		});

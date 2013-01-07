@@ -7,6 +7,8 @@ import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 
+import javax.swing.JOptionPane;
+
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 import de.freiburg.uni.tablet.presenter.geometry.AbstractRenderable;
 import de.freiburg.uni.tablet.presenter.geometry.BitmapImage;
@@ -28,8 +30,14 @@ public class ToolImage extends AbstractTool {
 
 	@Override
 	public void begin() {
-		_image = (BitmapImage) _editor.getDocumentEditor().getCurrentImage().cloneRenderable(_editor.getDocumentEditor().getDocument()
-				.getNextId());
+		BitmapImage currentImage = _editor.getDocumentEditor().getCurrentImage();
+		if (currentImage == null) {
+			JOptionPane.showMessageDialog(_editor.getPageEditor().getContainerComponent(),
+					"No image selected for image tool");
+		} else {
+			_image = (BitmapImage) currentImage.cloneRenderable(_editor.getDocumentEditor().getDocument()
+					.getNextId());
+		}
 	}
 
 	@Override
@@ -60,13 +68,15 @@ public class ToolImage extends AbstractTool {
 		_image = null;
 		_startData = null;
 
-		if (((result.getMaxX() - result.getMinX()) > 0)
-				|| ((result.getMaxY() - result.getMinY()) > 0)) {
-			_editor.getDocumentEditor().getActiveLayer().addRenderable(result);
+		if (result != null) {
+			if (((result.getMaxX() - result.getMinX()) > 0)
+					|| ((result.getMaxY() - result.getMinY()) > 0)) {
+				_editor.getDocumentEditor().getActiveLayer().addRenderable(result);
+			}
+			
+			_editor.getFrontRenderer().clear();
+			_editor.getPageEditor().clear(result);
 		}
-		
-		_editor.getFrontRenderer().clear();
-		_editor.getPageEditor().clear(result);
 	}
 
 	@Override
