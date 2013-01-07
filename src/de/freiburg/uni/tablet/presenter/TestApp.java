@@ -11,6 +11,8 @@ import java.io.IOException;
 
 import javax.swing.JFrame;
 
+import com.sun.jna.NativeLibrary;
+
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
@@ -49,6 +51,7 @@ public class TestApp {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
+		NativeLibrary.addSearchPath("freetype", ".");
 		_pageRenderer = new JPageEditor();
 		_pageRenderer.setTitle("JTabletPresenter v1.01");
 		_pageRenderer.setBounds(100, 100, 640, 480);
