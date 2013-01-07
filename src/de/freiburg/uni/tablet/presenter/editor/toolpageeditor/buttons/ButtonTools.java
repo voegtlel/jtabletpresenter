@@ -25,8 +25,8 @@ public class ButtonTools extends AbstractButtonMenuTool {
 		this._frame.addItem(new ButtonOpenFrom(editor));
 		this._frame.addItem(new ButtonSaveAs(editor));
 		//this._frame.addItem(new ButtonPreferences(editor));
-		this._frame.addItem(new ButtonPen(editor));
-		this._frame.addItem(new ButtonEraser(editor));
+		this._frame.addItem(new ButtonPrimary(editor));
+		this._frame.addItem(new ButtonSecondary(editor));
 		this._frame.addItem(new ButtonToolPage(editor));
 		this._frame.addItem(new ButtonToolDocument(editor));
 	}
