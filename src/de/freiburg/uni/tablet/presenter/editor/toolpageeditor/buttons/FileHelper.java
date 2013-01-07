@@ -53,7 +53,7 @@ public class FileHelper {
 
 		@Override
 		public boolean accept(final File f) {
-			return f.getPath().toLowerCase().endsWith(".jpd");
+			return f.getPath().toLowerCase().endsWith(".jpd") || f.isDirectory();
 		}
 	};
 	public static final FileFilter FILTER_presenterPageFile = new FileFilter() {
@@ -64,7 +64,7 @@ public class FileHelper {
 
 		@Override
 		public boolean accept(final File f) {
-			return f.getPath().toLowerCase().endsWith(".jpp");
+			return f.getPath().toLowerCase().endsWith(".jpp") || f.isDirectory();
 		}
 	};
 	public static final FileFilter FILTER_pdf = new FileFilter() {
@@ -75,7 +75,7 @@ public class FileHelper {
 
 		@Override
 		public boolean accept(final File f) {
-			return f.getPath().toLowerCase().endsWith(".pdf");
+			return f.getPath().toLowerCase().endsWith(".pdf") || f.isDirectory();
 		}
 	};
 	
