@@ -95,9 +95,6 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 	 * Create the panel.
 	 */
 	public JPageEditor() {
-		_config = new DocumentConfig();
-		setDocumentEditor(new DocumentEditor(_config));
-		initialize();
 		_documentListener = new DocumentAdapter() {
 			@Override
 			public void renderableRemoved(final IRenderable renderable,
@@ -134,6 +131,12 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 				onDocumentChanged(lastDocument);
 			}
 		};
+		_config = new DocumentConfig();
+		// Initialize dummy editor
+		_documentEditor = new DocumentEditor(_config);
+		_documentEditor.addListener(_documentEditorListener);
+		_documentEditor.getDocument().addListener(_documentListener);
+		initialize();
 	}
 
 	/**
@@ -183,7 +186,7 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 				new ButtonRedo(this), null, new ButtonColor(this), null,
 				new ButtonToggleFullscreen(this) });
 		registerShortcuts();
-		_config.write();
+		_config.write(false);
 	}
 
 	public void setToolButtons(final IButtonAction[] buttons) {
@@ -362,7 +365,9 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 	}
 
 	protected void onDocumentChanged(final Document lastDocument) {
-		lastDocument.removeListener(_documentListener);
+		if (lastDocument != null) {
+			lastDocument.removeListener(_documentListener);
+		}
 		_documentEditor.getDocument().addListener(_documentListener);
 		_pdfLayer.setDocument(_documentEditor.getDocument());
 	}
@@ -414,6 +419,10 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 				if (_pdfLayer != null) {
 					_pdfLayer.setDocument(_documentEditor.getDocument());
 				}
+				// Fire listeners
+				_documentEditor.setActiveLayerClientOnly(_documentEditor.isActiveLayerClientOnly());
+				_documentEditor.setCurrentPage(_documentEditor.getCurrentPage());
+				_documentEditorListener.documentChanged(null);
 			}
 			for (final IButtonAction button : _buttonActions) {
 				if (button != null) {

@@ -83,7 +83,7 @@ public class DocumentHistory {
 
 			@Override
 			public void currentPageChanged(final DocumentPage lastCurrentPage) {
-				if (!_isPerforming) {
+				if (!_isPerforming && (lastCurrentPage != null)) {
 					addAction(new ChangePageIndexAction(_documentEditor.getDocument().getClientId(), _documentEditor
 							.getCurrentPage(), lastCurrentPage));
 				}

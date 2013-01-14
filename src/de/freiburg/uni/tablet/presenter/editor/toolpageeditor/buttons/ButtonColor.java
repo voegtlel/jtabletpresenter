@@ -32,10 +32,10 @@ public class ButtonColor extends AbstractButtonAction {
 		_tool = new JPageToolMenuSelectFrame<Color>();
 		_tool.setSize(JPageToolButton.WIDTH_NORMAL * 2,
 				JPageToolButton.HEIGHT_NORMAL * 2);
-		_tool.addValue("/buttons/color-red.png", Color.RED);
-		_tool.addValue("/buttons/color-green.png", Color.GREEN);
-		_tool.addValue("/buttons/color-blue.png", Color.BLUE);
-		_tool.addValue("/buttons/color-black.png", Color.BLACK);
+		_tool.addValue("/buttons/color-red.png", editor.getConfig().getColor("color.red", new Color(0xbb0000)));
+		_tool.addValue("/buttons/color-green.png", editor.getConfig().getColor("color.green", new Color(0x00bb00)));
+		_tool.addValue("/buttons/color-blue.png", editor.getConfig().getColor("color.blue", new Color(0x0000bb)));
+		_tool.addValue("/buttons/color-black.png", editor.getConfig().getColor("color.black", new Color(0x000000)));
 	}
 
 	@Override

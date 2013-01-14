@@ -26,6 +26,7 @@ public class DocumentConfig {
 	}
 	
 	private List<KeyValue> _data = new ArrayList<KeyValue>();
+	private boolean _configChanged = false;
 	
 	public DocumentConfig() {
 		try {
@@ -58,6 +59,7 @@ public class DocumentConfig {
 			}
 		} catch(IOException e) {
 			e.printStackTrace();
+			_configChanged = true;
 		}
 	}
 	
@@ -65,16 +67,19 @@ public class DocumentConfig {
 		if (key == null) {
 			KeyValue keyValue = new KeyValue(null, value);
 			_data.add(keyValue);
+			_configChanged = true;
 			return keyValue;
 		}
 		for (KeyValue kv : _data) {
 			if(key.equals(kv.key)) {
 				kv.value = value;
+				_configChanged = true;
 				return kv;
 			}
 		}
 		KeyValue newEntry = new KeyValue(key, value);
 		_data.add(newEntry);
+		_configChanged = true;
 		return newEntry;
 	}
 	
@@ -92,6 +97,7 @@ public class DocumentConfig {
 		if (kv == null) {
 			kv = new KeyValue(key, defaultValue);
 			_data.add(kv);
+			_configChanged = true;
 		}
 		return kv.value.toString();
 	}
@@ -111,6 +117,7 @@ public class DocumentConfig {
 		if (keyValue == null) {
 			keyValue = new KeyValue(key, defaultValue);
 			_data.add(keyValue);
+			_configChanged = true;
 		}
 		return keyValue;
 	}
@@ -149,7 +156,6 @@ public class DocumentConfig {
 	}
 	
 	public Color getColor(String key, Color defaultValue) {
-		
 		KeyValue keyValue = getDefault(key, defaultValue);
 		if (keyValue.value instanceof String) {
 			long intVal = Long.parseLong(keyValue.value.toString(), 16);
@@ -161,32 +167,34 @@ public class DocumentConfig {
 		throw new IllegalStateException("Invalid config type for (color)" + key + ": " + keyValue.value.getClass().getName());
 	}
 	
-	public void write() {
-		try {
-			FileOutputStream fos = new FileOutputStream(new File("config.ini"));
-			BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fos);
-			OutputStreamWriter outputStreamWriter = new OutputStreamWriter(bufferedOutputStream);
-			BufferedWriter writer = new BufferedWriter(outputStreamWriter);
+	public void write(boolean force) {
+		if (_configChanged || force) {
 			try {
-				for (KeyValue data : _data) {
-					if (data.key == null) {
-						writer.write(data.value + "\r\n");
-					} else if (data.value instanceof Color) {
-						Color c = (Color) data.value;
-						writer.write(data.key + " = " + String.format("%08X", c.getRGB() | (c.getAlpha() << 24)) + "\r\n");
-					} else {
-						writer.write(data.key + " = " + data.value + "\r\n");
+				FileOutputStream fos = new FileOutputStream(new File("config.ini"));
+				BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fos);
+				OutputStreamWriter outputStreamWriter = new OutputStreamWriter(bufferedOutputStream);
+				BufferedWriter writer = new BufferedWriter(outputStreamWriter);
+				try {
+					for (KeyValue data : _data) {
+						if (data.key == null) {
+							writer.write(data.value + "\r\n");
+						} else if (data.value instanceof Color) {
+							Color c = (Color) data.value;
+							writer.write(data.key + " = " + String.format("%08X", c.getRGB() | (c.getAlpha() << 24)) + "\r\n");
+						} else {
+							writer.write(data.key + " = " + data.value + "\r\n");
+						}
 					}
+				} finally {
+					writer.close();
+					outputStreamWriter.close();
+					bufferedOutputStream.close();
+					fos.close();
 				}
-			} finally {
-				writer.close();
-				outputStreamWriter.close();
-				bufferedOutputStream.close();
-				fos.close();
+				
+			} catch(IOException e) {
+				e.printStackTrace();
 			}
-			
-		} catch(IOException e) {
-			e.printStackTrace();
 		}
 	}
 }
