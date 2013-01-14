@@ -5,8 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.freiburg.uni.tablet.presenter.document.Document;
+import de.freiburg.uni.tablet.presenter.document.DocumentConfig;
 import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
 import de.freiburg.uni.tablet.presenter.document.DocumentEditorAdapter;
+import de.freiburg.uni.tablet.presenter.document.DocumentEditorListener;
 import de.freiburg.uni.tablet.presenter.net.AcceptListener;
 import de.freiburg.uni.tablet.presenter.net.AcceptThread;
 import de.freiburg.uni.tablet.presenter.net.ClientThread;
@@ -14,25 +16,38 @@ import de.freiburg.uni.tablet.presenter.net.HistoryClient;
 
 public class NetworkPageEditor {
 	private DocumentEditor _documentEditor;
+	private DocumentEditorListener _documentEditorListener;
+
 	private AcceptThread _acceptThread;
 	private List<HistoryClient> _clients = new ArrayList<HistoryClient>();
 	private HistoryClient _client;
 
 	private String _address;
 	private boolean _enabled;
-
-	public NetworkPageEditor(DocumentEditor documentEditor) {
-		_documentEditor = documentEditor;
-		_documentEditor.addListener(new DocumentEditorAdapter() {
+	
+	public NetworkPageEditor(final DocumentConfig config) {
+		_documentEditorListener = new DocumentEditorAdapter() {
 			@Override
 			public void documentChanged(Document lastDocument) {
 				onDocumentChanged(lastDocument);
 			}
-		});
+		};
+		_address = config.getString("network.address", "0.0.0.0");
+		_enabled = config.getBoolean("network.enabled", false);
+		if (config.getBoolean("network.listening", false)) {
+			setListening(true);
+		}
+	}
+	
+	public void setDocumentEditor(final DocumentEditor documentEditor) {
+		if (_documentEditor != null) {
+			_documentEditor.removeListener(_documentEditorListener);
+		}
+		_documentEditor = documentEditor;
+		_documentEditor.addListener(_documentEditorListener);
 	}
 
-	private void onDocumentChanged(Document lastDocument) {
-
+	private void onDocumentChanged(final Document lastDocument) {
 	}
 
 	public void setListening(boolean listening) {
@@ -66,8 +81,8 @@ public class NetworkPageEditor {
 				if (_client != null) {
 					_client.close();
 				}
-				_client = new HistoryClient(new ClientThread(_address, 9135, 1000),
-						_documentEditor);
+				_client = new HistoryClient(new ClientThread(_address, 9135, 1000), true, true);
+				_client.setDocumentEditor(_documentEditor);
 				_client.start();
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -76,7 +91,8 @@ public class NetworkPageEditor {
 	}
 
 	private void onConnect(ClientThread thread) {
-		HistoryClient historyClient = new HistoryClient(thread, _documentEditor);
+		HistoryClient historyClient = new HistoryClient(thread, true, true);
+		historyClient.setDocumentEditor(_documentEditor);
 		try {
 			historyClient.start();
 			_clients.add(historyClient);

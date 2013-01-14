@@ -22,15 +22,18 @@ import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
 public class HistoryClient implements PackageReader, PackageWriter {
 	private final ClientThread _client;
 	private final Thread _receiveThread;
+	private DocumentEditor _documentEditor;
 
 	private final Object _threadSync = new Object();
 
 	private ByteBuffer _recvBuffer;
-	private DocumentEditor _documentEditor;
-
-	public HistoryClient(final ClientThread client, DocumentEditor documentEditor) {
+	private boolean _canReceive;
+	private boolean _canSend;
+	
+	public HistoryClient(final ClientThread client, boolean canReceive, boolean canSend) {
 		_client = client;
-		_documentEditor = documentEditor;
+		_canReceive = canReceive;
+		_canSend = canSend;
 		_client.addListener(new ClientListener() {
 			@Override
 			public void error(final Throwable t) {
@@ -57,21 +60,34 @@ public class HistoryClient implements PackageReader, PackageWriter {
 
 		_recvBuffer = ByteBuffer.allocateDirect(1024);
 	}
+	
+	public void setReceiveSend(boolean canReceive, boolean canSend) {
+		_canReceive = canReceive;
+		_canSend = canSend;
+	}
+	
+	public void setDocumentEditor(final DocumentEditor documentEditor) {
+		_documentEditor = documentEditor;
+	}
 
 	public void start() throws IOException {
 		_client.start();
 	}
 
 	protected void onClientConnected() {
-		_receiveThread.start();
+		if (_canReceive) {
+			_receiveThread.start();
+		}
 	}
 
 	protected void onClientDisconnected() {
 		synchronized (_threadSync) {
-			_receiveThread.interrupt();
-			try {
-				_receiveThread.join();
-			} catch (final InterruptedException e) {
+			if (_receiveThread != null) {
+				_receiveThread.interrupt();
+				try {
+					_receiveThread.join();
+				} catch (final InterruptedException e) {
+				}
 			}
 		}
 	}
@@ -102,40 +118,50 @@ public class HistoryClient implements PackageReader, PackageWriter {
 
 	@SuppressWarnings("deprecation")
 	public void close() {
-		try {
-			_receiveThread.join(500);
-		} catch (final InterruptedException e) {
-			e.printStackTrace();
-		}
-		if (_receiveThread.isAlive()) {
-			_receiveThread.stop();
+		if (_receiveThread != null) {
+			try {
+				_receiveThread.join(500);
+			} catch (final InterruptedException e) {
+				e.printStackTrace();
+			}
+			if (_receiveThread.isAlive()) {
+				_receiveThread.stop();
+			}
 		}
 	}
 
 	@Override
 	public void writePackage(byte[] data, int size) {
-		_client.send(data, 0, size);
+		if (_canSend) {
+			_client.send(data, 0, size);
+		}
 	}
 
 	@Override
 	public int readPackageSize() {
-		_recvBuffer.position(0);
-		_recvBuffer.limit(4);
-		_client.receive(_recvBuffer);
-		return _recvBuffer.getInt();
+		if (_canReceive) {
+			_recvBuffer.position(0);
+			_recvBuffer.limit(4);
+			_client.receive(_recvBuffer);
+			return _recvBuffer.getInt();
+		}
+		return 0;
 	}
 
 	@Override
 	public boolean readPackage(byte[] data, int count) {
-		if (_recvBuffer.capacity() < data.length) {
-			_recvBuffer = ByteBuffer.allocateDirect(data.length);
+		if (_canReceive) {
+			if (_recvBuffer.capacity() < data.length) {
+				_recvBuffer = ByteBuffer.allocateDirect(data.length);
+			}
+			_recvBuffer.position(0);
+			_recvBuffer.limit(count);
+			if (!_client.receive(_recvBuffer)) {
+				return false;
+			}
+			_recvBuffer.get(data, 0, count);
+			return true;
 		}
-		_recvBuffer.position(0);
-		_recvBuffer.limit(count);
-		if (!_client.receive(_recvBuffer)) {
-			return false;
-		}
-		_recvBuffer.get(data, 0, count);
-		return true;
+		return false;
 	}
 }
