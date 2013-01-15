@@ -93,7 +93,9 @@ public class DocumentPage implements IEntity {
 	 * @param pdfPageIndex
 	 */
 	public void setPdfPageIndex(int pdfPageIndex) {
+		int lastPdfPageIndex = _pdfPageIndex;
 		_pdfPageIndex = pdfPageIndex;
+		_document.firePdfPageIndexChanged(this, pdfPageIndex, lastPdfPageIndex);
 	}
 	
 	/**

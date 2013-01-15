@@ -95,7 +95,7 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 	 * Create the panel.
 	 * @param configFilename 
 	 */
-	public JPageEditor(final String configFilename) {
+	public JPageEditor(final DocumentConfig config) {
 		_documentListener = new DocumentAdapter() {
 			@Override
 			public void renderableRemoved(final IRenderable renderable,
@@ -107,6 +107,12 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 			public void renderableAdded(final IRenderable renderable,
 					final DocumentPageLayer layer) {
 				onRenderableAdded(renderable, layer);
+			}
+			
+			@Override
+			public void pdfPageIndexChanged(DocumentPage documentPage,
+					int pdfPageIndex, int lastPdfPageIndex) {
+				onPdfPageIndexChanged(documentPage, pdfPageIndex);
 			}
 		};
 
@@ -132,7 +138,7 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 				onDocumentChanged(lastDocument);
 			}
 		};
-		_config = new DocumentConfig(configFilename);
+		_config = config;
 		// Initialize dummy editor
 		_documentEditor = new DocumentEditor(_config);
 		_documentEditor.addListener(_documentEditorListener);
@@ -342,6 +348,13 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 		}
 		// Else the object is not on a visible layer
 		// _pageRenderer.clear();?
+	}
+	
+	protected void onPdfPageIndexChanged(DocumentPage documentPage,
+			int pdfPageIndex) {
+		if (documentPage == _documentEditor.getCurrentPage()) {
+			_pdfLayer.setPageIndex(pdfPageIndex);
+		}
 	}
 	
 	protected void onDocumentChanging() {

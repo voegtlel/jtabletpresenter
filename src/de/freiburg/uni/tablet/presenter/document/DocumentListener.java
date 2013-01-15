@@ -41,4 +41,11 @@ public interface DocumentListener {
 	 * @param lastPdf
 	 */
 	void pdfChanged(PdfSerializable lastPdf);
+
+	/**
+	 * Called, when the page index of a page was changed
+	 * @param documentPage
+	 * @param pdfPageIndex
+	 */
+	void pdfPageIndexChanged(DocumentPage documentPage, int pdfPageIndex, int lastPdfPageIndex);
 }

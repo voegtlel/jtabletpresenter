@@ -4,15 +4,15 @@
  */
 package de.freiburg.uni.tablet.presenter.document;
 
-import java.util.List;
-
 import java.util.ArrayList;
+import java.util.List;
 
 import de.freiburg.uni.tablet.presenter.actions.ActionGroup;
 import de.freiburg.uni.tablet.presenter.actions.AddPageAction;
 import de.freiburg.uni.tablet.presenter.actions.AddRenderableAction;
 import de.freiburg.uni.tablet.presenter.actions.ChangePageIndexAction;
 import de.freiburg.uni.tablet.presenter.actions.ChangePdfAction;
+import de.freiburg.uni.tablet.presenter.actions.ChangePdfPageIndexAction;
 import de.freiburg.uni.tablet.presenter.actions.IAction;
 import de.freiburg.uni.tablet.presenter.actions.RemovePageAction;
 import de.freiburg.uni.tablet.presenter.actions.RemoveRenderableAction;
@@ -75,6 +75,14 @@ public class DocumentHistory {
 			public void pdfChanged(final PdfSerializable lastPdf) {
 				if (!_isPerforming) {
 					addAction(new ChangePdfAction(_documentEditor.getDocument().getClientId(), lastPdf, _documentEditor.getDocument().getPdf()));
+				}
+			}
+			
+			@Override
+			public void pdfPageIndexChanged(DocumentPage documentPage,
+					int pdfPageIndex, int lastPdfPageIndex) {
+				if (!_isPerforming) {
+					addAction(new ChangePdfPageIndexAction(_documentEditor.getDocument().getClientId(), documentPage, pdfPageIndex, lastPdfPageIndex));
 				}
 			}
 		};

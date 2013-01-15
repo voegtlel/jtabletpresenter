@@ -16,29 +16,32 @@ import de.freiburg.uni.tablet.presenter.document.DocumentPage;
  * @author lukas
  * 
  */
-public class ChangePageIndexAction extends AbstractAction implements IAction, IBinarySerializable {
+public class ChangePdfPageIndexAction extends AbstractAction implements IAction, IBinarySerializable {
 	private final DocumentPage _page;
-	private final DocumentPage _lastPage;
+	private final int _pdfPageIndex;
+	private final int _lastPdfPageIndex;
 
 	/**
 	 * 
 	 */
-	public ChangePageIndexAction(int clientId, final DocumentPage page,
-			final DocumentPage lastPage) {
+	public ChangePdfPageIndexAction(int clientId, final DocumentPage page,
+			final int pdfPageIndex, final int lastPdfPageIndex) {
 		super(clientId);
 		_page = page;
-		_lastPage = lastPage;
+		_pdfPageIndex = pdfPageIndex;
+		_lastPdfPageIndex = lastPdfPageIndex;
 	}
 
 	/**
 	 * @throws IOException
 	 * 
 	 */
-	public ChangePageIndexAction(final BinaryDeserializer reader)
+	public ChangePdfPageIndexAction(final BinaryDeserializer reader)
 			throws IOException {
 		super(reader);
 		_page = reader.readObjectTable();
-		_lastPage = reader.readObjectTable();
+		_pdfPageIndex = reader.readInt();
+		_lastPdfPageIndex = reader.readInt();
 	}
 	
 	@Override
@@ -48,24 +51,25 @@ public class ChangePageIndexAction extends AbstractAction implements IAction, IB
 
 	@Override
 	public boolean hasUndoAction() {
-		return _lastPage != null;
+		return true;
 	}
 
 	@Override
 	public IAction getUndoAction(int clientId) {
-		return new ChangePageIndexAction(clientId, _lastPage, _page);
+		return new ChangePdfPageIndexAction(clientId, _page, _lastPdfPageIndex, _pdfPageIndex);
 	}
 
 	@Override
 	public void perform(final DocumentEditor editor) {
-		editor.setCurrentPage(_page);
+		_page.setPdfPageIndex(_pdfPageIndex);
 	}
 
 	@Override
 	public void serialize(final BinarySerializer writer) throws IOException {
 		super.serialize(writer);
 		writer.writeObjectTable(_page.getId(), _page);
-		writer.writeObjectTable(_lastPage.getId(), _lastPage);
+		writer.writeInt(_pdfPageIndex);
+		writer.writeInt(_lastPdfPageIndex);
 	}
 
 }

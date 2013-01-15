@@ -26,4 +26,9 @@ public abstract class DocumentAdapter implements DocumentListener {
 	@Override
 	public void pdfChanged(PdfSerializable lastPdf) {
 	}
+	
+	@Override
+	public void pdfPageIndexChanged(DocumentPage documentPage,
+			int pdfPageIndex, int lastPdfPageIndex) {
+	}
 }

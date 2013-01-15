@@ -15,6 +15,12 @@ import de.freiburg.uni.tablet.presenter.net2.ServerUpSync;
 
 public class ServerApp {
 
+	private AcceptThread _acceptDownThread;
+	private List<ServerDownSync> _downSyncs = new ArrayList<ServerDownSync>();
+	private List<ServerUpSync> _upSyncs = new ArrayList<ServerUpSync>();
+	private DocumentEditor _editor;
+	private AcceptThread _acceptUpThread;
+
 	/**
 	 * @param args
 	 */
@@ -24,55 +30,71 @@ public class ServerApp {
 			configFile = args[0];
 		}
 		
-		final AcceptThread acceptDownThread = new AcceptThread(8025);
-		final List<ServerDownSync> _downSyncs = new ArrayList<ServerDownSync>();
-		final List<ServerUpSync> _upSyncs = new ArrayList<ServerUpSync>();
-		final DocumentEditor editor = new DocumentEditor(new DocumentConfig(configFile));
-		acceptDownThread.addListener(new AcceptListener() {
-			@Override
-			public void clientConnected(final SocketChannel socket) {
-				try {
-					System.out.println("Down client connected from " + socket.getRemoteAddress());
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				final ServerDownSync client = new ServerDownSync(editor, socket);
-				client.start();
-				_downSyncs.add(client);
-			}
-		});
+		ServerApp serverApp = new ServerApp(new DocumentConfig(configFile));
 		
-		final AcceptThread acceptUpThread = new AcceptThread(8024);
-		acceptUpThread.addListener(new AcceptListener() {
-			@Override
-			public void clientConnected(final SocketChannel socket) {
-				try {
-					System.out.println("Up client connected from " + socket.getRemoteAddress());
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				final ServerUpSync client = new ServerUpSync(editor.getHistory(), socket);
-				client.start();
-				client.onActionPerformed(new SetDocumentAction(editor.getDocument().getClientId(), editor.getDocument()));
-				_upSyncs.add(client);
-			}
-		});
-		
-		System.out.println("Start");
-		
-		acceptDownThread.start();
-		acceptUpThread.start();
-		
+		serverApp.start();
 		try {
 			System.out.println("Ready");
 			System.out.println("Press any key to exit");
 			// Wait for exit
 			System.in.read();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		serverApp.stop();
+	}
+	
+	public ServerApp(final DocumentConfig config) {
+		_acceptUpThread = new AcceptThread(8024);
+		_acceptDownThread = new AcceptThread(8025);
+		_editor = new DocumentEditor(config);
+		
+		_acceptDownThread.addListener(new AcceptListener() {
+			@Override
+			public void clientConnected(final SocketChannel socket) {
+				onDownConnected(socket);
+			}
+		});
+		
+		_acceptUpThread.addListener(new AcceptListener() {
+			@Override
+			public void clientConnected(final SocketChannel socket) {
+				onUpClientConnected(socket);
+			}
+		});
+	}
+	
+	private void onDownConnected(final SocketChannel socket) {
+		try {
+			System.out.println("Down client connected from " + socket.getRemoteAddress());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		final ServerDownSync client = new ServerDownSync(_editor, socket);
+		client.start();
+		_downSyncs.add(client);
+	}
+	
+	private void onUpClientConnected(final SocketChannel socket) {
+		try {
+			System.out.println("Up client connected from " + socket.getRemoteAddress());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		final ServerUpSync client = new ServerUpSync(_editor.getHistory(), socket);
+		client.start();
+		client.onActionPerformed(new SetDocumentAction(_editor.getDocument().getClientId(), _editor.getDocument()));
+		_upSyncs.add(client);
+	}
+	
+	public void start() {
+		System.out.println("Start");
+		
+		_acceptDownThread.start();
+		_acceptUpThread.start();
+	}
+
+	public void stop() {
 		System.out.println("Stopping");
 		
 		for (ServerDownSync sync : _downSyncs) {
@@ -85,9 +107,9 @@ public class ServerApp {
 			sync.stop();
 		}
 		
-		acceptDownThread.close();
+		_acceptDownThread.close();
+		_acceptUpThread.close();
 		
 		System.out.println("Finished");
 	}
-
 }

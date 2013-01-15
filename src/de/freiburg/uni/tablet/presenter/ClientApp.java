@@ -16,6 +16,7 @@ import com.sun.jna.NativeLibrary;
 import de.freiburg.uni.tablet.presenter.actions.SetDocumentAction;
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
+import de.freiburg.uni.tablet.presenter.document.DocumentConfig;
 import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.JPageEditor;
 import de.freiburg.uni.tablet.presenter.net2.ClientDownSync;
@@ -24,32 +25,53 @@ import de.freiburg.uni.tablet.presenter.net2.ClientUpSync;
 public class ClientApp {
 
 	private JPageEditor _pageRenderer;
-	private String[] _args;
 
 	/**
 	 * Launch the application.
 	 */
 	public static void main(final String[] args) {
-		System.setProperty("sun.awt.noerasebackground", "true");
-		EventQueue.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					final ClientApp window = new ClientApp(args);
-					window._pageRenderer.setVisible(true);
-				} catch (final Exception e) {
-					e.printStackTrace();
+		String configFile = "config.ini";
+		if (args.length > 0) {
+			configFile = args[0];
+		}
+		
+		final DocumentConfig config = new DocumentConfig(configFile);
+		if (config.getBoolean("server.enabled", false)) {
+			ServerApp serverApp = new ServerApp(config);
+			serverApp.start();
+			try {
+				while(true) {
+					Thread.sleep(1000);
 				}
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
-		});
+		} else {
+			System.setProperty("sun.awt.noerasebackground", "true");
+			
+			EventQueue.invokeLater(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						final ClientApp window = new ClientApp(config);
+						window._pageRenderer.setVisible(true);
+					} catch (final Exception e) {
+						e.printStackTrace();
+					}
+				}
+			});
+		}
 	}
 
 	/**
 	 * Create the application.
 	 * @param args 
 	 */
-	public ClientApp(String[] args) {
-		_args = args;
+	public ClientApp(final DocumentConfig config) {
+		NativeLibrary.addSearchPath("freetype", ".");
+		
+		_pageRenderer = new JPageEditor(config);
+		
 		initialize();
 	}
 
@@ -57,13 +79,6 @@ public class ClientApp {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		String configFile = "config.ini";
-		if (_args.length > 0) {
-			configFile = _args[0];
-		}
-		
-		NativeLibrary.addSearchPath("freetype", ".");
-		_pageRenderer = new JPageEditor(configFile);
 		_pageRenderer.setTitle("JTabletPresenter v1.01");
 		_pageRenderer.setBounds(100, 100, 640, 480);
 		_pageRenderer.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

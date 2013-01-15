@@ -331,6 +331,13 @@ public class Document implements IEntity {
 			listener.pdfChanged(lastPdf);
 		}
 	}
+	
+	void firePdfPageIndexChanged(DocumentPage documentPage,
+			int pdfPageIndex, int lastPdfPageIndex) {
+		for (final DocumentListener listener : _listeners) {
+			listener.pdfPageIndexChanged(documentPage, pdfPageIndex, lastPdfPageIndex);
+		}
+	}
 
 	public void addListener(final DocumentListener listener) {
 		_listeners.add(listener);
