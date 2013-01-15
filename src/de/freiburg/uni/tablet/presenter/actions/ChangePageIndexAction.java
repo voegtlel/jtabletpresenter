@@ -40,6 +40,11 @@ public class ChangePageIndexAction extends AbstractAction implements IAction, IB
 		_page = reader.readObjectTable();
 		_lastPage = reader.readObjectTable();
 	}
+	
+	@Override
+	public boolean mustRedraw(DocumentEditor editor) {
+		return true;
+	}
 
 	@Override
 	public boolean hasUndoAction() {

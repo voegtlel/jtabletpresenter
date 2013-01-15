@@ -93,8 +93,9 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 
 	/**
 	 * Create the panel.
+	 * @param configFilename 
 	 */
-	public JPageEditor() {
+	public JPageEditor(final String configFilename) {
 		_documentListener = new DocumentAdapter() {
 			@Override
 			public void renderableRemoved(final IRenderable renderable,
@@ -131,7 +132,7 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 				onDocumentChanged(lastDocument);
 			}
 		};
-		_config = new DocumentConfig();
+		_config = new DocumentConfig(configFilename);
 		// Initialize dummy editor
 		_documentEditor = new DocumentEditor(_config);
 		_documentEditor.addListener(_documentEditorListener);

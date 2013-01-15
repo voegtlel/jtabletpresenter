@@ -41,6 +41,11 @@ public class AddRenderableAction extends AbstractAction implements IAction, IBin
 		_layer = reader.readObjectTable();
 		_renderable = reader.readObjectTable();
 	}
+	
+	@Override
+	public boolean mustRedraw(DocumentEditor editor) {
+		return editor.getCurrentPage() == _layer.getParent();
+	}
 
 	@Override
 	public boolean hasUndoAction() {

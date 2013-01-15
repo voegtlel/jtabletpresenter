@@ -53,6 +53,11 @@ public class AddPageAction extends AbstractAction implements IAction, IBinarySer
 	public void perform(final DocumentEditor editor) {
 		editor.getDocument().insertPage(_prevPage, _page);
 	}
+	
+	@Override
+	public boolean mustRedraw(DocumentEditor editor) {
+		return false;
+	}
 
 	@Override
 	public void serialize(final BinarySerializer writer) throws IOException {

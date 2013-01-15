@@ -40,6 +40,11 @@ public class ChangePdfAction extends AbstractAction implements IAction, IBinaryS
 		_oldPdf = reader.readObjectTable();
 		_newPdf = reader.readObjectTable();
 	}
+	
+	@Override
+	public boolean mustRedraw(DocumentEditor editor) {
+		return true;
+	}
 
 	@Override
 	public boolean hasUndoAction() {

@@ -4,6 +4,10 @@
  */
 package de.freiburg.uni.tablet.presenter.document;
 
+import java.util.List;
+
+import java.util.ArrayList;
+
 import de.freiburg.uni.tablet.presenter.actions.ActionGroup;
 import de.freiburg.uni.tablet.presenter.actions.AddPageAction;
 import de.freiburg.uni.tablet.presenter.actions.AddRenderableAction;
@@ -27,6 +31,8 @@ public class DocumentHistory {
 	private final DocumentEditor _documentEditor;
 	private final DocumentListener _documentListener;
 	private ActionGroup _currentActionGroup;
+	
+	private final List<DocumentHistoryListener> _listeners = new ArrayList<DocumentHistoryListener>();
 
 	private boolean _isPerforming = false;
 
@@ -118,6 +124,7 @@ public class DocumentHistory {
 			_top = _history.getLast();
 			_topNext = null;
 		}
+		fireActionAdded(action);
 	}
 
 	public boolean hasUndoAction() {
@@ -136,6 +143,7 @@ public class DocumentHistory {
 			_topNext = _top;
 			_top = _top.getPrevious();
 			undoAction.perform(_documentEditor);
+			fireActionPerformed(undoAction);
 			_isPerforming = false;
 		}
 	}
@@ -147,7 +155,28 @@ public class DocumentHistory {
 			_top = _topNext;
 			_topNext = _top.getNext();
 			_top.getData().perform(_documentEditor);
+			fireActionPerformed(_top.getData());
 			_isPerforming = false;
 		}
+	}
+	
+	protected void fireActionAdded(final IAction action) {
+		for (DocumentHistoryListener listener : _listeners) {
+			listener.actionAdded(action);
+		}
+	}
+	
+	protected void fireActionPerformed(final IAction action) {
+		for (DocumentHistoryListener listener : _listeners) {
+			listener.actionPerformed(action);
+		}
+	}
+	
+	public void removeListener(final DocumentHistoryListener listener) {
+		_listeners.remove(listener);
+	}
+	
+	public void addListener(final DocumentHistoryListener listener) {
+		_listeners.add(listener);
 	}
 }

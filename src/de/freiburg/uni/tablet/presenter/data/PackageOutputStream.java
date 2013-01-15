@@ -44,6 +44,7 @@ public class PackageOutputStream extends OutputStream {
 	public void nextPackage() {
 		byte[] data = _outputStream.toByteArray();
 		_packageWriter.writePackage(data, data.length);
+		_outputStream.reset();
 	}
 
 	/**

@@ -9,64 +9,58 @@ import java.io.IOException;
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.data.IBinarySerializable;
+import de.freiburg.uni.tablet.presenter.document.Document;
 import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
-import de.freiburg.uni.tablet.presenter.document.DocumentPageLayer;
-import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 
 /**
  * @author lukas
  * 
  */
-public class RemoveRenderableAction extends AbstractAction implements IAction, IBinarySerializable {
-	private final DocumentPageLayer _layer;
-	private final IRenderable _renderable;
+public class SetDocumentAction extends AbstractAction implements IAction, IBinarySerializable {
+	private Document _document;
 
 	/**
 	 * 
 	 */
-	public RemoveRenderableAction(int clientId, final DocumentPageLayer layer,
-			final IRenderable renderable) {
+	public SetDocumentAction(int clientId, final Document document) {
 		super(clientId);
-		_layer = layer;
-		_renderable = renderable;
+		_document = document;
 	}
 
 	/**
 	 * @throws IOException
 	 * 
 	 */
-	public RemoveRenderableAction(final BinaryDeserializer reader)
+	public SetDocumentAction(final BinaryDeserializer reader)
 			throws IOException {
 		super(reader);
-		_layer = reader.readObjectTable();
-		_renderable = reader.readObjectTable();
+		_document = reader.readObjectTable();
 	}
 	
 	@Override
 	public boolean mustRedraw(DocumentEditor editor) {
-		return editor.getCurrentPage() == _layer.getParent();
-	}
-
-	@Override
-	public boolean hasUndoAction() {
 		return true;
 	}
 
 	@Override
+	public boolean hasUndoAction() {
+		return false;
+	}
+
+	@Override
 	public IAction getUndoAction(int clientId) {
-		return new AddRenderableAction(clientId, _layer, _renderable);
+		return null;
 	}
 
 	@Override
 	public void perform(final DocumentEditor editor) {
-		_layer.removeRenderable(_renderable);
+		editor.setDocument(_document);
 	}
 
 	@Override
 	public void serialize(final BinarySerializer writer) throws IOException {
 		super.serialize(writer);
-		writer.writeObjectTable(_layer.getId(), _layer);
-		writer.writeObjectTable(_renderable.getId(), _renderable);
+		writer.writeObjectTable(_document.getId(), _document);
 	}
 
 }

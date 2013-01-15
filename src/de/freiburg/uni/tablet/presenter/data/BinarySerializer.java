@@ -92,6 +92,10 @@ public class BinarySerializer {
 		}
 	}
 	
+	public void flush() throws IOException {
+		_dataOutputStream.flush();
+	}
+	
 	public void close() throws IOException {
 		_dataOutputStream.close();
 	}

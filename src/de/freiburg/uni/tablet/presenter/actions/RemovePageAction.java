@@ -38,6 +38,11 @@ public class RemovePageAction extends AbstractAction implements IAction, IBinary
 		_prevPage = reader.readObjectTable();
 		_page = reader.readObjectTable();
 	}
+	
+	@Override
+	public boolean mustRedraw(DocumentEditor editor) {
+		return editor.getCurrentPage() == _page;
+	}
 
 	@Override
 	public boolean hasUndoAction() {

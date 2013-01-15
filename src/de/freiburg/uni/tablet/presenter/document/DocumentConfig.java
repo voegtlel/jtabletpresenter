@@ -28,9 +28,9 @@ public class DocumentConfig {
 	private List<KeyValue> _data = new ArrayList<KeyValue>();
 	private boolean _configChanged = false;
 	
-	public DocumentConfig() {
+	public DocumentConfig(String filename) {
 		try {
-			FileInputStream fis = new FileInputStream(new File("config.ini"));
+			FileInputStream fis = new FileInputStream(new File(filename));
 			BufferedInputStream bufferedInputStream = new BufferedInputStream(fis);
 			InputStreamReader inputStreamReader = new InputStreamReader(bufferedInputStream);
 			BufferedReader reader = new BufferedReader(inputStreamReader);
