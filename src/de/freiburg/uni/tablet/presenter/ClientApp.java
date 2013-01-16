@@ -79,7 +79,7 @@ public class ClientApp {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		_pageRenderer.setTitle("JTabletPresenter v1.01");
+		_pageRenderer.setTitle("JTabletPresenter v1.02");
 		_pageRenderer.setBounds(100, 100, 640, 480);
 		_pageRenderer.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
