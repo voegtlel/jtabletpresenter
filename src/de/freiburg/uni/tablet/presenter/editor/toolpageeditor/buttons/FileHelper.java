@@ -79,6 +79,16 @@ public class FileHelper {
 		}
 	};
 	
+	public static FileFilter stringToFilter(final String str) {
+		if ("pdf".equalsIgnoreCase(str)) {
+			return FILTER_pdf;
+		} else if ("jpp".equalsIgnoreCase(str)) {
+			return FILTER_presenterPageFile;
+		} else {
+			return FILTER_presenterDocumentFile;
+		}
+	}
+	
 	public static void saveDocument(Document document, File file) throws IOException {
 		final FileOutputStream fileOutputStream = new FileOutputStream(file);
 		

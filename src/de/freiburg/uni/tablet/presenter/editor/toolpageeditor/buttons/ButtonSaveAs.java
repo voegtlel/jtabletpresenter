@@ -30,6 +30,6 @@ public class ButtonSaveAs extends AbstractButtonAction {
 
 	@Override
 	public void performLater(final Component component) {
-		FileHelper.showSaveDialog(component, _editor, FileHelper.FILTER_pdf);
+		FileHelper.showSaveDialog(component, _editor, FileHelper.stringToFilter(_editor.getConfig().getString("save.defaultExt", "jpd")));
 	}
 }
