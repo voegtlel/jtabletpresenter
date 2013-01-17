@@ -18,12 +18,16 @@ import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
  */
 public class SetDocumentAction extends AbstractAction implements IAction, IBinarySerializable {
 	private Document _document;
+	
+	private int _newClientId;
 
 	/**
-	 * 
+	 * Action for setting a new document. Cannot be undone.
+	 * WARNING: This action clears the object table on serialization.
 	 */
-	public SetDocumentAction(int clientId, final Document document) {
+	public SetDocumentAction(int clientId, int newClientId, final Document document) {
 		super(clientId);
+		_newClientId = newClientId;
 		_document = document;
 	}
 
@@ -34,6 +38,8 @@ public class SetDocumentAction extends AbstractAction implements IAction, IBinar
 	public SetDocumentAction(final BinaryDeserializer reader)
 			throws IOException {
 		super(reader);
+		reader.resetState();
+		_newClientId = reader.readInt();
 		_document = reader.readObjectTable();
 	}
 	
@@ -54,12 +60,15 @@ public class SetDocumentAction extends AbstractAction implements IAction, IBinar
 
 	@Override
 	public void perform(final DocumentEditor editor) {
+		_document.setClientId(_newClientId);
 		editor.setDocument(_document);
 	}
 
 	@Override
 	public void serialize(final BinarySerializer writer) throws IOException {
 		super.serialize(writer);
+		writer.resetState();
+		writer.writeInt(_newClientId);
 		writer.writeObjectTable(_document.getId(), _document);
 	}
 

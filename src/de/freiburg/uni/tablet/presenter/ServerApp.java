@@ -20,6 +20,8 @@ public class ServerApp {
 	private List<ServerUpSync> _upSyncs = new ArrayList<ServerUpSync>();
 	private DocumentEditor _editor;
 	private AcceptThread _acceptUpThread;
+	
+	private int _nextClientId = 2;
 
 	/**
 	 * @param args
@@ -83,7 +85,7 @@ public class ServerApp {
 		}
 		final ServerUpSync client = new ServerUpSync(_editor.getHistory(), socket);
 		client.start();
-		client.onActionPerformed(new SetDocumentAction(_editor.getDocument().getClientId(), _editor.getDocument()));
+		client.onActionPerformed(new SetDocumentAction(_editor.getDocument().getClientId(), _nextClientId++, _editor.getDocument()));
 		_upSyncs.add(client);
 	}
 	

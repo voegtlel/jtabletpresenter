@@ -140,4 +140,9 @@ public class BinaryDeserializer {
 			throws IOException {
 		return readObjectTable(_defaultCtorArgTypes, _defaultCtorArgs);
 	}
+	
+	public void resetState() {
+		_objectTable.clear();
+		_stringTable.clear();
+	}
 }
