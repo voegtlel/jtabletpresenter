@@ -16,6 +16,7 @@ import de.freiburg.uni.tablet.presenter.actions.ChangePdfPageIndexAction;
 import de.freiburg.uni.tablet.presenter.actions.IAction;
 import de.freiburg.uni.tablet.presenter.actions.RemovePageAction;
 import de.freiburg.uni.tablet.presenter.actions.RemoveRenderableAction;
+import de.freiburg.uni.tablet.presenter.actions.SetDocumentAction;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 import de.freiburg.uni.tablet.presenter.list.LinkedElement;
 import de.freiburg.uni.tablet.presenter.list.LinkedElementList;
@@ -93,6 +94,11 @@ public class DocumentHistory {
 					lastDocument.removeListener(_documentListener);
 				}
 				_documentEditor.getDocument().addListener(_documentListener);
+				addAction(new SetDocumentAction(_documentEditor.getDocument().getClientId(), _documentEditor.getDocument().getClientId(), _documentEditor.getDocument()));
+				// Clear history
+				while (!_history.isEmpty()) {
+					_history.removeFirst();
+				}
 			}
 
 			@Override
@@ -121,16 +127,18 @@ public class DocumentHistory {
 	}
 
 	public void addAction(final IAction action) {
-		if (_currentActionGroup != null) {
-			_currentActionGroup.addAction(action);
-		} else {
-			if (_top == null) {
-				_history.addLast(action);
+		if (action.hasUndoAction()) {
+			if (_currentActionGroup != null) {
+				_currentActionGroup.addAction(action);
 			} else {
-				_history.setNext(_top, action);
+				if (_top == null) {
+					_history.addLast(action);
+				} else {
+					_history.setNext(_top, action);
+				}
+				_top = _history.getLast();
+				_topNext = null;
 			}
-			_top = _history.getLast();
-			_topNext = null;
 		}
 		fireActionAdded(action);
 	}

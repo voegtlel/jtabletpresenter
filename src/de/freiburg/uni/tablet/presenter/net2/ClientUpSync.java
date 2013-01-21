@@ -100,6 +100,7 @@ public class ClientUpSync {
 	public void onActionPerformed(final IAction action) {
 		if (_running) {
 			try {
+				System.out.println("Write up " + action.getClass().getName());
 				_serializer.writeSerializableClass(action);
 				_serializer.flush();
 				_outputStream.flush();

@@ -38,7 +38,7 @@ public class Document implements IEntity {
 	
 	private final LinkedElementList<DocumentPage> _pages = new LinkedElementList<DocumentPage>();
 
-	private final int _clientId;
+	private int _clientId;
 	private int _uniqueId = 1;
 
 	private final List<DocumentListener> _listeners = new LinkedList<DocumentListener>();
@@ -357,6 +357,11 @@ public class Document implements IEntity {
 			final DocumentPage page = reader.readObjectTable();
 			_pages.addLast(page);
 		}
+	}
+	
+	public void setClientId(int clientId) {
+		_clientId = clientId;
+		_uniqueId = 0;
 	}
 
 	@Override

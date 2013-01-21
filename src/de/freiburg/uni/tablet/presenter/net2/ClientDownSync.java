@@ -8,13 +8,8 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 
-import de.freiburg.uni.tablet.presenter.actions.ActionGroup;
-import de.freiburg.uni.tablet.presenter.actions.AddPageAction;
-import de.freiburg.uni.tablet.presenter.actions.AddRenderableAction;
-import de.freiburg.uni.tablet.presenter.actions.ChangePdfAction;
+import de.freiburg.uni.tablet.presenter.actions.ChangePageIndexAction;
 import de.freiburg.uni.tablet.presenter.actions.IAction;
-import de.freiburg.uni.tablet.presenter.actions.RemovePageAction;
-import de.freiburg.uni.tablet.presenter.actions.RemoveRenderableAction;
 import de.freiburg.uni.tablet.presenter.actions.SetDocumentAction;
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.PackageInputStream;
@@ -230,12 +225,7 @@ public class ClientDownSync {
 				if (action.mustRedraw(_editor)) {
 					_pageEditor.clear();
 				}
-			} else if ((action instanceof ActionGroup)
-					|| (action instanceof AddRenderableAction)
-					|| (action instanceof RemoveRenderableAction)
-					|| (action instanceof RemovePageAction)
-					|| (action instanceof AddPageAction)
-					|| (action instanceof ChangePdfAction)) {
+			} else if (!(action instanceof ChangePageIndexAction)) {
 				action.perform(_editor);
 				if (action.mustRedraw(_editor)) {
 					_pageEditor.clear();

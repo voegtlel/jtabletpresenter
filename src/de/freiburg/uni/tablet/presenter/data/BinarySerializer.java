@@ -92,6 +92,14 @@ public class BinarySerializer {
 		}
 	}
 	
+	/**
+	 * Resets the object table.
+	 */
+	public void resetState() {
+		_objectTable.clear();
+		_stringTable.clear();
+	}
+	
 	public void flush() throws IOException {
 		_dataOutputStream.flush();
 	}
