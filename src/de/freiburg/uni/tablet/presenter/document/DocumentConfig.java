@@ -159,7 +159,7 @@ public class DocumentConfig {
 		KeyValue keyValue = getDefault(key, defaultValue);
 		if (keyValue.value instanceof String) {
 			long intVal = Long.parseLong(keyValue.value.toString(), 16);
-			keyValue.value = new Color((int)(intVal & 0xff), (int)((intVal >> 8) & 0xff), (int)((intVal >> 16) & 0xff), (int)((intVal >> 24) & 0xff));
+			keyValue.value = new Color((int)((intVal >> 16) & 0xff), (int)((intVal >> 8) & 0xff), (int)((intVal >> 0) & 0xff), (int)((intVal >> 24) & 0xff));
 		}
 		if (keyValue.value instanceof Color) {
 			return (Color)keyValue.value;
