@@ -8,7 +8,6 @@ import java.io.IOException;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
-import de.freiburg.uni.tablet.presenter.data.IBinarySerializable;
 import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
 import de.freiburg.uni.tablet.presenter.list.LinkedElement;
 import de.freiburg.uni.tablet.presenter.list.LinkedElementList;
@@ -17,15 +16,14 @@ import de.freiburg.uni.tablet.presenter.list.LinkedElementList;
  * @author lukas
  * 
  */
-public class ActionGroup extends AbstractAction implements IAction, IBinarySerializable {
+public class ActionGroup implements IAction {
 	private final LinkedElementList<IAction> _actions = new LinkedElementList<IAction>();
 
 	/**
 	 * 
 	 * @param clientId
 	 */
-	public ActionGroup(int clientId) {
-		super(clientId);
+	public ActionGroup() {
 	}
 
 	/**
@@ -33,7 +31,6 @@ public class ActionGroup extends AbstractAction implements IAction, IBinarySeria
 	 * 
 	 */
 	public ActionGroup(final BinaryDeserializer reader) throws IOException {
-		super(reader);
 		int count = reader.readInt();
 		for (int i = 0; i < count; i++) {
 			_actions.addLast((IAction) reader.readSerializableClass());
@@ -67,11 +64,11 @@ public class ActionGroup extends AbstractAction implements IAction, IBinarySeria
 	}
 
 	@Override
-	public IAction getUndoAction(int clientId) {
-		ActionGroup undoAction = new ActionGroup(clientId);
+	public IAction getUndoAction() {
+		ActionGroup undoAction = new ActionGroup();
 		for (LinkedElement<IAction> e = _actions.getFirst(); e != null; e = e
 				.getNext()) {
-			undoAction.addAction(e.getData().getUndoAction(clientId));
+			undoAction.addAction(e.getData().getUndoAction());
 		}
 		return undoAction;
 	}
@@ -86,7 +83,6 @@ public class ActionGroup extends AbstractAction implements IAction, IBinarySeria
 
 	@Override
 	public void serialize(final BinarySerializer writer) throws IOException {
-		super.serialize(writer);
 		int count = (_actions.isEmpty()?0:_actions.getFirst().getNextCount());
 		writer.writeInt(count);
 		for (LinkedElement<IAction> e = _actions.getFirst(); e != null; e = e

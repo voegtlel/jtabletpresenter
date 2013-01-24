@@ -8,7 +8,7 @@ public class PageLayerBufferColor implements IPageLayerBuffer {
 	private int _width = 0;
 	private int _height = 0;
 	private Color _color = Color.WHITE;
-
+	
 	@Override
 	public void resize(final int width, final int height) {
 		_width = width;
@@ -23,9 +23,5 @@ public class PageLayerBufferColor implements IPageLayerBuffer {
 	public void drawBuffer(final Graphics2D g, final ImageObserver obs) {
 		g.setBackground(_color);
 		g.clearRect(0, 0, _width, _height);
-	}
-
-	@Override
-	public void clear() {
 	}
 }

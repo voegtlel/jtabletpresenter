@@ -19,10 +19,4 @@ public interface IPageLayerBuffer {
 	 * @param g
 	 */
 	void drawBuffer(final Graphics2D g, ImageObserver obs);
-
-	/**
-	 * Clears the buffer
-	 */
-	void clear();
-
 }

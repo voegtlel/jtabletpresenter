@@ -10,35 +10,41 @@ import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
+import de.freiburg.uni.tablet.presenter.document.PdfPageSerializable;
 
 /**
  * @author lukas
  * 
  */
-public class RemovePageAction implements IAction {
-	private final DocumentPage _prevPage;
+public class ChangePdfPageAction implements IAction {
 	private final DocumentPage _page;
+	private final PdfPageSerializable _pdfPage;
+	private final PdfPageSerializable _lastPdfPage;
 
 	/**
 	 * 
 	 */
-	public RemovePageAction(final DocumentPage prevPage, final DocumentPage page) {
-		_prevPage = prevPage;
+	public ChangePdfPageAction(final DocumentPage page,
+			final PdfPageSerializable pdfPage, final PdfPageSerializable lastPdfPage) {
 		_page = page;
+		_pdfPage = pdfPage;
+		_lastPdfPage = lastPdfPage;
 	}
 
 	/**
 	 * @throws IOException
 	 * 
 	 */
-	public RemovePageAction(final BinaryDeserializer reader) throws IOException {
-		_prevPage = reader.readObjectTable();
+	public ChangePdfPageAction(final BinaryDeserializer reader)
+			throws IOException {
 		_page = reader.readObjectTable();
+		_pdfPage = reader.readObjectTable();
+		_lastPdfPage = reader.readObjectTable();
 	}
 	
 	@Override
 	public boolean mustRedraw(DocumentEditor editor) {
-		return editor.getCurrentPage() == _page;
+		return true;
 	}
 
 	@Override
@@ -48,17 +54,19 @@ public class RemovePageAction implements IAction {
 
 	@Override
 	public IAction getUndoAction() {
-		return new AddPageAction(_prevPage, _page);
+		return new ChangePdfPageAction(_page, _lastPdfPage, _pdfPage);
 	}
 
 	@Override
 	public void perform(final DocumentEditor editor) {
-		editor.getDocument().removePage(_page);
+		_page.setPdfPage(_pdfPage);
 	}
 
 	@Override
 	public void serialize(final BinarySerializer writer) throws IOException {
-		writer.writeObjectTable(_prevPage);
 		writer.writeObjectTable(_page);
+		writer.writeObjectTable(_pdfPage);
+		writer.writeObjectTable(_lastPdfPage);
 	}
+
 }

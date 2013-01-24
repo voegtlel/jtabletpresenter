@@ -28,10 +28,10 @@ public class PageLayerBufferBack extends AbstractPageLayerBuffer implements
 		g.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS,
 				RenderingHints.VALUE_FRACTIONALMETRICS_ON);
 	}
-
+	
 	@Override
-	public void resize(final int width, final int height) {
-		super.resize(width, height);
+	protected void repaint() {
+		_graphics.clearRect(0, 0, _renderWidth, _renderHeight);
 		if (_repaintListener != null) {
 			_repaintListener.render(this);
 		}
@@ -62,12 +62,13 @@ public class PageLayerBufferBack extends AbstractPageLayerBuffer implements
 	@Override
 	public void draw(BufferedImage image, float x, float y, float width, float height) {
 		if (_graphics != null) {
-			draw(_graphics, image,  x, y, width, height, _displayRenderer.getObserver());
+			draw(_graphics, image, x, y, width, height, _displayRenderer.getObserver());
 		}
 	}
 
 	@Override
 	public void setRepaintListener(final IPageRepaintListener repaintListener) {
 		_repaintListener = repaintListener;
+		requireRepaint();
 	}
 }

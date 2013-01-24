@@ -31,9 +31,14 @@ public interface IPageFrontRenderer {
 	 * @param height
 	 */
 	void draw(BufferedImage image, float x, float y, float width, float height);
-
+	
 	/**
-	 * Clears the front buffer
+	 * Requires clear
+	 */
+	void requireClear();
+	
+	/**
+	 * Clear buffer
 	 */
 	void clear();
 }

@@ -4,13 +4,13 @@ import java.io.IOException;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
-import de.freiburg.uni.tablet.presenter.data.IBinarySerializable;
-import de.freiburg.uni.tablet.presenter.document.DocumentPageLayer;
+import de.freiburg.uni.tablet.presenter.data.IBinarySerializableId;
+import de.freiburg.uni.tablet.presenter.document.DocumentPage;
 
-public abstract class AbstractRenderable implements IBinarySerializable,
+public abstract class AbstractRenderable implements IBinarySerializableId,
 		IRenderable {
 	private final long _id;
-	private DocumentPageLayer _parent;
+	private DocumentPage _parent;
 
 	/**
 	 * Creates the renderable
@@ -30,12 +30,12 @@ public abstract class AbstractRenderable implements IBinarySerializable,
 	}
 
 	@Override
-	public void setParent(final DocumentPageLayer pageLayer) {
+	public void setParent(final DocumentPage pageLayer) {
 		_parent = pageLayer;
 	}
 
 	@Override
-	public DocumentPageLayer getParent() {
+	public DocumentPage getParent() {
 		return _parent;
 	}
 

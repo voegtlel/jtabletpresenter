@@ -20,7 +20,7 @@ import java.util.List;
 public class BinaryDeserializer {
 	private final DataInputStream _dataInputStream;
 	private final List<String> _stringTable = new ArrayList<String>();
-	private final HashMap<Long, IBinarySerializable> _objectTable = new HashMap<Long, IBinarySerializable>();
+	private final HashMap<Long, IBinarySerializableId> _objectTable = new HashMap<Long, IBinarySerializableId>();
 
 	private static final Class<?>[] _defaultCtorArgTypes = new Class<?>[] { BinaryDeserializer.class };
 	private final Object[] _defaultCtorArgs = new Object[] { this };
@@ -68,12 +68,12 @@ public class BinaryDeserializer {
 		}
 		return result;
 	}
-
-	public <T> T readSerializableClass() throws IOException {
+	
+	public <T extends IBinarySerializable> T readSerializableClass() throws IOException {
 		return readSerializableClass(_defaultCtorArgTypes, _defaultCtorArgs);
 	}
 
-	public <T> T readSerializableClass(final Class<?>[] ctorArgTypes,
+	public <T extends IBinarySerializable> T readSerializableClass(final Class<?>[] ctorArgTypes,
 			final Object[] ctorArgs) throws IOException {
 		final String className = readStringTable();
 		try {
@@ -111,11 +111,11 @@ public class BinaryDeserializer {
 	 * @param obj
 	 */
 	public void putObjectTable(final long identifier,
-			final IBinarySerializable obj) {
+			final IBinarySerializableId obj) {
 		_objectTable.put(identifier, obj);
 	}
 
-	public <T extends IBinarySerializable> T readObjectTable(
+	public <T extends IBinarySerializableId> T readObjectTable(
 			final Class<?>[] ctorArgTypes, final Object[] ctorArgs)
 			throws IOException {
 		final long identifier = readLong();
@@ -136,7 +136,7 @@ public class BinaryDeserializer {
 		}
 	}
 
-	public <T extends IBinarySerializable> T readObjectTable()
+	public <T extends IBinarySerializableId> T readObjectTable()
 			throws IOException {
 		return readObjectTable(_defaultCtorArgTypes, _defaultCtorArgs);
 	}

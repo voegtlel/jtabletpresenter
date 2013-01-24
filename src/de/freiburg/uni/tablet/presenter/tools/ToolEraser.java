@@ -7,7 +7,7 @@ import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 
-import de.freiburg.uni.tablet.presenter.document.DocumentPageLayer;
+import de.freiburg.uni.tablet.presenter.document.DocumentPage;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 import de.freiburg.uni.tablet.presenter.geometry.DataPoint;
 import de.freiburg.uni.tablet.presenter.geometry.EraseInfo;
@@ -36,13 +36,13 @@ public class ToolEraser extends AbstractTool {
 	@Override
 	public void begin() {
 		_eraseInfo = new EraseInfo(_editor.getDocumentEditor().getDocument(),
-				_editor.getDocumentEditor().getActiveLayer());
+				_editor.getDocumentEditor().getCurrentPage());
 	}
 
 	@Override
 	public void draw(final DataPoint data) {
-		final DocumentPageLayer activeLayer = _editor.getDocumentEditor()
-				.getActiveLayer();
+		final DocumentPage activeLayer = _editor.getDocumentEditor()
+				.getCurrentPage();
 		if (activeLayer != null) {
 			_eraseInfo.createCollisionInfo(data.getX(), data.getY(),
 					data.getXOrig(), data.getYOrig(),
@@ -62,8 +62,8 @@ public class ToolEraser extends AbstractTool {
 		_editor.getDocumentEditor().getHistory().endActionGroup();
 		_eraseInfo = null;
 
-		_editor.getFrontRenderer().clear();
-		_editor.getPageEditor().clear();
+		_editor.getFrontRenderer().requireClear();
+		_editor.getPageEditor().requireRepaint();
 	}
 
 	@Override

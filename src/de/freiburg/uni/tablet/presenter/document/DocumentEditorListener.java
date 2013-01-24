@@ -6,15 +6,9 @@ public interface DocumentEditorListener {
 	 * Fired, when the current page was changed
 	 * 
 	 * @param lastCurrentPage
+	 * @param lastCurrentBackPage
 	 */
-	void currentPageChanged(DocumentPage lastCurrentPage);
-
-	/**
-	 * Fired when the active layer was changed
-	 * 
-	 * @param lastActiveLayerClientOnly
-	 */
-	void activeLayerChanged(boolean lastActiveLayerClientOnly);
+	void currentPageChanged(DocumentPage lastCurrentPage, DocumentPage lastCurrentBackPage);
 
 	/**
 	 * Fired when the document was changed

@@ -45,14 +45,14 @@ public interface IPageBackRenderer {
 	void draw(BufferedImage image, float x, float y, float width, float height);
 
 	/**
-	 * Clears the buffer
-	 */
-	void clear();
-
-	/**
 	 * Sets the repaint listener
 	 * 
 	 * @param repaintListener
 	 */
 	void setRepaintListener(IPageRepaintListener repaintListener);
+	
+	/**
+	 * Requires full repainting on next render. Notifies display.
+	 */
+	void requireRepaint();
 }

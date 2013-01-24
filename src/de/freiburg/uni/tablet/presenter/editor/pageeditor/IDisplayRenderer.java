@@ -1,46 +1,9 @@
 package de.freiburg.uni.tablet.presenter.editor.pageeditor;
 
-import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.ImageObserver;
 
 public interface IDisplayRenderer {
-	/**
-	 * Gets the graphics for rendering
-	 * 
-	 * @return graphics object for rendering
-	 */
-	public Graphics2D createRenderer();
-	
-	/**
-	 * Gets an image observer
-	 * 
-	 * @return an image observer
-	 */
-	public ImageObserver getObserver();
-
-	/**
-	 * Updates the renderer
-	 * 
-	 * @param g
-	 *            graphics, previously created with createRenderer
-	 */
-	public void updateRenderer(Graphics2D g);
-
-	/**
-	 * Gets the width
-	 * 
-	 * @return
-	 */
-	public int getWidth();
-
-	/**
-	 * Gets the height
-	 * 
-	 * @return
-	 */
-	public int getHeight();
-
 	/**
 	 * Creates an image for buffering
 	 * 
@@ -54,4 +17,25 @@ public interface IDisplayRenderer {
 	 * @return
 	 */
 	public boolean isWorking();
+	
+	/**
+	 * Repaint is required (only draws the buffers, buffer repainting is managed in buffers)
+	 */
+	public void requireRepaint();
+
+	/**
+	 * Stops further repainting
+	 */
+	void suspendRepaint();
+
+	/**
+	 * Resume repainting
+	 */
+	void resumeRepaint();
+
+	/**
+	 * Gets an image observer
+	 * @return
+	 */
+	public ImageObserver getObserver();
 }

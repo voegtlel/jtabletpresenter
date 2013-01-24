@@ -12,23 +12,17 @@ import de.intarsys.tools.locator.FileLocator;
 
 public class PdfSerializable implements IEntity {
 	private final long _id;
-	private final IEntity _parent;
+	private final IDocument _parent;
 	private final PDDocument _document;
-
-	public PdfSerializable(final long id, final IEntity parent) {
-		_id = id;
-		_parent = parent;
-		_document = null;
-	}
 	
-	public PdfSerializable(final long id, final IEntity parent, final PDDocument document) {
-		_id = id;
+	public PdfSerializable(final IDocument parent, final PDDocument document) {
+		_id = parent.nextId();
 		_parent = parent;
 		_document = document;
 	}
 	
-	public PdfSerializable(final long id, final IEntity parent, final File srcFile) throws IOException {
-		_id = id;
+	public PdfSerializable(final IDocument parent, final File srcFile) throws IOException {
+		_id = parent.nextId();
 		_parent = parent;
 		try {
 			_document = PDDocument.createFromLocator(new FileLocator(srcFile));
@@ -44,14 +38,12 @@ public class PdfSerializable implements IEntity {
 	public PdfSerializable(final BinaryDeserializer reader) throws IOException {
 		_id = reader.readLong();
 		_parent = reader.readObjectTable();
-		int pdfNullCheck = reader.readInt();
+		final int pdfNullCheck = reader.readInt();
 		if (pdfNullCheck == 0) {
 			_document = null;
 		} else {
-			byte[] data = reader.readByteArray();
-			ByteArrayLocator loc = new ByteArrayLocator(data, "virtual", "pdf");
-			//ByteArrayInputStream bis = new ByteArrayInputStream(reader.readByteArray());
-			//ILocator loc = new StreamLocator(bis, "virtual", "pdf");
+			final byte[] data = reader.readByteArray();
+			final ByteArrayLocator loc = new ByteArrayLocator(data, "virtual", "pdf");
 			try {
 				_document = PDDocument.createFromLocator(loc);
 			} catch (COSLoadException e) {
@@ -64,19 +56,16 @@ public class PdfSerializable implements IEntity {
 	@Override
 	public void serialize(final BinarySerializer writer) throws IOException {
 		writer.writeLong(_id);
-		writer.writeObjectTable(_parent.getId(), _parent);
+		writer.writeObjectTable(_parent);
 		
 		if (_document == null) {
 			writer.writeInt(0);
 		} else {
 			writer.writeInt(1);
-			//ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			//ILocator loc = new StreamLocator(bos, "virtual", "pdf");
-			ByteArrayLocator loc = new ByteArrayLocator(null, "virtual", "pdf");
+			final ByteArrayLocator loc = new ByteArrayLocator(null, "virtual", "pdf");
 			_document.save(loc);
 			writer.writeByteArray(loc.getContent(), 0, (int)loc.getLength());
 			loc.delete();
-			//writer.writeByteArray(bos.toByteArray());
 		}
 	}
 
@@ -86,7 +75,16 @@ public class PdfSerializable implements IEntity {
 	}
 
 	@Override
-	public IEntity getParent() {
+	public IDocument getParent() {
 		return _parent;
+	}
+	
+	/**
+	 * Clones this object
+	 * @param newDocument
+	 * @return
+	 */
+	public PdfSerializable clone(final Document newDocument) {
+		return new PdfSerializable(newDocument, _document);
 	}
 }

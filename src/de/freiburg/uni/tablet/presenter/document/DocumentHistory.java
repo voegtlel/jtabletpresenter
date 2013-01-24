@@ -11,12 +11,10 @@ import de.freiburg.uni.tablet.presenter.actions.ActionGroup;
 import de.freiburg.uni.tablet.presenter.actions.AddPageAction;
 import de.freiburg.uni.tablet.presenter.actions.AddRenderableAction;
 import de.freiburg.uni.tablet.presenter.actions.ChangePageIndexAction;
-import de.freiburg.uni.tablet.presenter.actions.ChangePdfAction;
-import de.freiburg.uni.tablet.presenter.actions.ChangePdfPageIndexAction;
+import de.freiburg.uni.tablet.presenter.actions.ChangePdfPageAction;
 import de.freiburg.uni.tablet.presenter.actions.IAction;
 import de.freiburg.uni.tablet.presenter.actions.RemovePageAction;
 import de.freiburg.uni.tablet.presenter.actions.RemoveRenderableAction;
-import de.freiburg.uni.tablet.presenter.actions.SetDocumentAction;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 import de.freiburg.uni.tablet.presenter.list.LinkedElement;
 import de.freiburg.uni.tablet.presenter.list.LinkedElementList;
@@ -42,17 +40,17 @@ public class DocumentHistory {
 		_documentListener = new DocumentListener() {
 			@Override
 			public void renderableRemoved(final IRenderable renderable,
-					final DocumentPageLayer layer) {
+					final DocumentPage layer) {
 				if (!_isPerforming) {
-					addAction(new RemoveRenderableAction(_documentEditor.getDocument().getClientId(), layer, renderable));
+					addAction(new RemoveRenderableAction(layer, renderable));
 				}
 			}
 
 			@Override
 			public void renderableAdded(final IRenderable renderable,
-					final DocumentPageLayer layer) {
+					final DocumentPage layer) {
 				if (!_isPerforming) {
-					addAction(new AddRenderableAction(_documentEditor.getDocument().getClientId(), layer, renderable));
+					addAction(new AddRenderableAction(layer, renderable));
 				}
 			}
 
@@ -60,7 +58,7 @@ public class DocumentHistory {
 			public void pageRemoved(final DocumentPage prevPage,
 					final DocumentPage page) {
 				if (!_isPerforming) {
-					addAction(new RemovePageAction(_documentEditor.getDocument().getClientId(), prevPage, page));
+					addAction(new RemovePageAction(prevPage, page));
 				}
 			}
 
@@ -68,22 +66,15 @@ public class DocumentHistory {
 			public void pageInserted(final DocumentPage prevPage,
 					final DocumentPage page) {
 				if (!_isPerforming) {
-					addAction(new AddPageAction(_documentEditor.getDocument().getClientId(), prevPage, page));
+					addAction(new AddPageAction(prevPage, page));
 				}
 			}
 			
 			@Override
-			public void pdfChanged(final PdfSerializable lastPdf) {
+			public void pdfPageChanged(DocumentPage documentPage,
+					PdfPageSerializable lastPdfPage) {
 				if (!_isPerforming) {
-					addAction(new ChangePdfAction(_documentEditor.getDocument().getClientId(), lastPdf, _documentEditor.getDocument().getPdf()));
-				}
-			}
-			
-			@Override
-			public void pdfPageIndexChanged(DocumentPage documentPage,
-					int pdfPageIndex, int lastPdfPageIndex) {
-				if (!_isPerforming) {
-					addAction(new ChangePdfPageIndexAction(_documentEditor.getDocument().getClientId(), documentPage, pdfPageIndex, lastPdfPageIndex));
+					addAction(new ChangePdfPageAction(documentPage, documentPage.getPdfPage(), lastPdfPage));
 				}
 			}
 		};
@@ -94,17 +85,16 @@ public class DocumentHistory {
 					lastDocument.removeListener(_documentListener);
 				}
 				_documentEditor.getDocument().addListener(_documentListener);
-				addAction(new SetDocumentAction(_documentEditor.getDocument().getClientId(), _documentEditor.getDocument().getClientId(), _documentEditor.getDocument()));
+				addAction(new SetDocumentAction(_documentEditor.getDocument()));
 				// Clear history
-				while (!_history.isEmpty()) {
-					_history.removeFirst();
-				}
+				_history.clear();
 			}
-
+			
 			@Override
-			public void currentPageChanged(final DocumentPage lastCurrentPage) {
+			public void currentPageChanged(DocumentPage lastCurrentPage,
+					DocumentPage lastCurrentBackPage) {
 				if (!_isPerforming && (lastCurrentPage != null)) {
-					addAction(new ChangePageIndexAction(_documentEditor.getDocument().getClientId(), _documentEditor
+					addAction(new ChangePageIndexAction(_documentEditor
 							.getCurrentPage(), lastCurrentPage));
 				}
 			}
@@ -114,7 +104,7 @@ public class DocumentHistory {
 
 	public void beginActionGroup() {
 		if (_currentActionGroup == null) {
-			ActionGroup res = new ActionGroup(_documentEditor.getDocument().getClientId());
+			ActionGroup res = new ActionGroup();
 			addAction(res);
 			_currentActionGroup = res;
 		}
@@ -155,7 +145,7 @@ public class DocumentHistory {
 		if (_top != null && !_isPerforming) {
 			_isPerforming = true;
 			_currentActionGroup = null;
-			final IAction undoAction = _top.getData().getUndoAction(_documentEditor.getDocument().getClientId());
+			final IAction undoAction = _top.getData().getUndoAction();
 			_topNext = _top;
 			_top = _top.getPrevious();
 			undoAction.perform(_documentEditor);

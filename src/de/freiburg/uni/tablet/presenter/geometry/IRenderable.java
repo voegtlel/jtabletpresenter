@@ -1,6 +1,6 @@
 package de.freiburg.uni.tablet.presenter.geometry;
 
-import de.freiburg.uni.tablet.presenter.document.DocumentPageLayer;
+import de.freiburg.uni.tablet.presenter.document.DocumentPage;
 import de.freiburg.uni.tablet.presenter.document.IEntity;
 import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
 
@@ -26,7 +26,7 @@ public interface IRenderable extends IEntity {
 	/**
 	 * 
 	 */
-	void setParent(DocumentPageLayer pageLayer);
+	void setParent(DocumentPage pageLayer);
 
 	/**
 	 * Erase at a point and store history

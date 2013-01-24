@@ -51,7 +51,7 @@ public class ButtonSpinnerPage extends AbstractButtonAction {
 		});
 		_documentEditorListener = new DocumentEditorAdapter() {
 			@Override
-			public void currentPageChanged(final DocumentPage lastCurrentPage) {
+			public void currentPageChanged(final DocumentPage lastCurrentPage, final DocumentPage lastCurrentBackPage) {
 				onUpdateSpinner();
 			}
 		};
@@ -73,6 +73,11 @@ public class ButtonSpinnerPage extends AbstractButtonAction {
 		int newPageIndex = (Integer) _spinner.getValue() - 1;
 		if (_editor.getConfig().getBoolean("autosave.spinner", true)) {
 			FileHelper.autosave(_editor.getDocumentEditor());
+		}
+		if (newPageIndex >= _editor.getDocumentEditor().getMaxPageCount()) {
+			newPageIndex = _editor.getDocumentEditor().getMaxPageCount();
+		} else if (newPageIndex < 0) {
+			newPageIndex = 0;
 		}
 		_editor.getDocumentEditor().setCurrentPageByIndex(newPageIndex, true);
 	}

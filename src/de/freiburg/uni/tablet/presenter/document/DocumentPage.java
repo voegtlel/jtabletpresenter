@@ -5,51 +5,130 @@
 package de.freiburg.uni.tablet.presenter.document;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
+import de.freiburg.uni.tablet.presenter.editor.IPageRepaintListener;
+import de.freiburg.uni.tablet.presenter.geometry.EraseInfo;
+import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
+import de.freiburg.uni.tablet.presenter.list.LinkedElement;
+import de.freiburg.uni.tablet.presenter.list.LinkedElementList;
+import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
 
 /**
  * @author lukas
  * 
  */
-public class DocumentPage implements IEntity {
+public class DocumentPage implements IEntity, IPageRepaintListener {
 	private final long _id;
-	private final Document _document;
+	private final IDocumentNotify _document;
 
-	private final DocumentPageLayer _clientOnlyLayer;
-	private final DocumentPageLayer _serverSyncLayer;
+	private final LinkedElementList<IRenderable> _renderablesList = new LinkedElementList<IRenderable>();
+	private final HashMap<Long, IRenderable> _renderablesMap = new HashMap<Long, IRenderable>();
 	
-	private int _pdfPageIndex = -1;
+	private PdfPageSerializable _pdfPage = null;
 
 	/**
-	 * 
+	 * Creates a new document page for a document. The page will not be added to the document.
 	 */
-	public DocumentPage(final Document document) {
+	public DocumentPage(final IDocumentNotify document) {
 		_document = document;
-		_id = _document.getNextId();
-		_clientOnlyLayer = new DocumentPageLayer(this);
-		_serverSyncLayer = new DocumentPageLayer(this);
-	}
-
-	/**
-	 * 
-	 */
-	public DocumentPage(final long newId, final Document document) {
-		_document = document;
-		_id = newId;
-		_clientOnlyLayer = new DocumentPageLayer(this);
-		_serverSyncLayer = new DocumentPageLayer(this);
+		_id = _document.nextId();
 	}
 	
 	/**
 	 * Ctor for cloning
 	 */
-	private DocumentPage(final Document document, final DocumentPageLayer clientOnlyLayer, final DocumentPageLayer serverSyncLayer) {
-		_document = document;
-		_id = document.getNextId();
-		_clientOnlyLayer = clientOnlyLayer.clone(this);
-		_serverSyncLayer = serverSyncLayer.clone(this);
+	private DocumentPage(final IDocumentNotify document, final DocumentPage base) {
+		this(document);
+		for (LinkedElement<IRenderable> r = base._renderablesList.getFirst(); r != null; r = r
+				.getNext()) {
+			final IRenderable newRenderable = r.getData().cloneRenderable(_document.nextId());
+			_renderablesList.addLast(newRenderable);
+			_renderablesMap.put(newRenderable.getId(), newRenderable);
+		}
+	}
+
+	@Override
+	public IDocument getParent() {
+		return _document;
+	}
+
+	public void render(final IPageBackRenderer renderer) {
+		for (LinkedElement<IRenderable> r = _renderablesList.getFirst(); r != null; r = r
+				.getNext()) {
+			r.getData().render(renderer);
+		}
+	}
+
+	public void eraseAt(final EraseInfo eraseInfo) {
+		for (LinkedElement<IRenderable> r = _renderablesList.getFirst(); r != null; r = r
+				.getNext()) {
+			r.getData().eraseAt(eraseInfo);
+		}
+	}
+
+	public IRenderable getRenderable(final long id) {
+		return _renderablesMap.get(id);
+	}
+
+	public void addRenderable(final IRenderable renderable) {
+		_renderablesMap.put(renderable.getId(), renderable);
+		_renderablesList.addLast(renderable);
+		_document.fireRenderableAdded(renderable, this);
+	}
+
+	public void removeRenderable(final IRenderable renderable) {
+		_renderablesMap.remove(renderable.getId());
+		_renderablesList.remove(_renderablesList.getElement(renderable));
+		_document.fireRenderableRemoved(renderable, this);
+	}
+	
+	/**
+	 * Sets the index for a referenced pdf page
+	 * @param pdfPageIndex
+	 */
+	public void setPdfPage(final PdfPageSerializable page) {
+		final PdfPageSerializable lastPdfPage = _pdfPage;
+		_pdfPage = page;
+		_document.firePdfPageChanged(this, lastPdfPage);
+	}
+	
+	/**
+	 * Gets the index for a referenced pdf page
+	 * @return
+	 */
+	public PdfPageSerializable getPdfPage() {
+		return _pdfPage;
+	}
+	
+	/**
+	 * Gets the renderables
+	 * @return
+	 */
+	public LinkedElementList<IRenderable> getRenderables() {
+		return _renderablesList;
+	}
+	
+	/**
+	 * Clears the page
+	 */
+	public void clear() {
+		while (!_renderablesList.isEmpty()) {
+			final IRenderable removeElement = _renderablesList.getFirst().getData();
+			_renderablesList.removeFirst();
+			_document.fireRenderableRemoved(removeElement, this);
+		}
+		_renderablesMap.clear();
+	}
+	
+	/**
+	 * Checks if the page is empty
+	 * @return
+	 */
+	public boolean isEmpty() {
+		return _renderablesList.isEmpty();
 	}
 
 	@Override
@@ -57,110 +136,73 @@ public class DocumentPage implements IEntity {
 		return _id;
 	}
 
-	@Override
-	public Document getParent() {
-		return _document;
-	}
-
-	/**
-	 * Gets the client only layer
-	 * 
-	 * @return
-	 */
-	public DocumentPageLayer getClientOnlyLayer() {
-		return _clientOnlyLayer;
-	}
-
-	/**
-	 * Gets the server synchronized layer
-	 * 
-	 * @return
-	 */
-	public DocumentPageLayer getServerSyncLayer() {
-		return _serverSyncLayer;
-	}
-	
-	/**
-	 * Gets if the page is empty
-	 * @return
-	 */
-	public boolean isEmpty() {
-		return _clientOnlyLayer.isEmpty() && _serverSyncLayer.isEmpty();
-	}
-	
-	/**
-	 * Sets the index for a referenced pdf page
-	 * @param pdfPageIndex
-	 */
-	public void setPdfPageIndex(int pdfPageIndex) {
-		int lastPdfPageIndex = _pdfPageIndex;
-		_pdfPageIndex = pdfPageIndex;
-		_document.firePdfPageIndexChanged(this, pdfPageIndex, lastPdfPageIndex);
-	}
-	
-	/**
-	 * Gets the index for a referenced pdf page
-	 * @return
-	 */
-	public int getPdfPageIndex() {
-		return _pdfPageIndex;
-	}
-
-	public DocumentPage(final BinaryDeserializer reader) throws IOException {
+	public DocumentPage(final BinaryDeserializer reader)
+			throws IOException {
 		_id = reader.readLong();
 		reader.putObjectTable(this.getId(), this);
-		_pdfPageIndex = reader.readInt();
 		_document = reader.readObjectTable();
-		_clientOnlyLayer = reader.readObjectTable();
-		_serverSyncLayer = reader.readObjectTable();
+		_pdfPage = reader.readObjectTable();
+		final int count = reader.readInt();
+		for (int i = 0; i < count; i++) {
+			final IRenderable renderable = reader.readObjectTable();
+			_renderablesList.addLast(renderable);
+			_renderablesMap.put(renderable.getId(), renderable);
+		}
 	}
-
-	@Override
-	public void serialize(final BinarySerializer writer) throws IOException {
-		writer.writeLong(_id);
-		writer.writeInt(_pdfPageIndex);
-		writer.writeObjectTable(_document.getId(), _document);
-		writer.writeObjectTable(_clientOnlyLayer.getId(), _clientOnlyLayer);
-		writer.writeObjectTable(_serverSyncLayer.getId(), _serverSyncLayer);
-	}
-
+	
 	/**
-	 * Deserialize only this page
+	 * Deserialize only this page without its document.
 	 * @param reader
 	 * @param dummy null
 	 * @throws IOException
 	 */
 	public DocumentPage(final BinaryDeserializer reader, final Document dummy)
 			throws IOException {
-		_id = reader.readLong();
 		_document = null;
+		_id = reader.readLong();
 		reader.putObjectTable(_id, this);
-		_pdfPageIndex = reader.readInt();
-		_clientOnlyLayer = reader.readObjectTable();
-		_serverSyncLayer = reader.readObjectTable();
-	}
-
-	/**
-	 * Serialize this object directly, without its parent
-	 * 
-	 * @param writer
-	 * @throws IOException
-	 */
-	public void serializeDirect(final BinarySerializer writer)
-			throws IOException {
-		writer.putObjectTable(_id, this);
-		writer.writeLong(_id);
-		writer.writeInt(_pdfPageIndex);
-		writer.writeObjectTable(_clientOnlyLayer.getId(), _clientOnlyLayer);
-		writer.writeObjectTable(_serverSyncLayer.getId(), _serverSyncLayer);
+		_pdfPage = reader.readObjectTable();
+		final int count = reader.readInt();
+		for (int i = 0; i < count; i++) {
+			final IRenderable renderable = reader.readObjectTable();
+			_renderablesList.addLast(renderable);
+			_renderablesMap.put(renderable.getId(), renderable);
+		}
 	}
 	
 	/**
-	 * Clone this object to the dstDocument
+	 * Serialize this page without its document.
+	 * @param writer
+	 * @throws IOException
+	 */
+	public void serializeDirect(final BinarySerializer writer) throws IOException {
+		writer.writeLong(_id);
+		writer.writeObjectTable(_pdfPage);
+		writer.writeInt(_renderablesMap.size());
+		for (LinkedElement<IRenderable> r = _renderablesList.getFirst(); r != null; r = r
+				.getNext()) {
+			writer.writeObjectTable(r.getData());
+		}
+	}
+
+	@Override
+	public void serialize(final BinarySerializer writer) throws IOException {
+		writer.writeLong(_id);
+		writer.writeObjectTable(_document);
+		writer.writeObjectTable(_pdfPage);
+		writer.writeInt(_renderablesMap.size());
+		for (LinkedElement<IRenderable> r = _renderablesList.getFirst(); r != null; r = r
+				.getNext()) {
+			writer.writeObjectTable(r.getData());
+		}
+	}
+	
+	/**
+	 * Clone the page for a new document
 	 * @param dstDocument
 	 * @return
 	 */
-	public DocumentPage clone(Document dstDocument) {
-		return new DocumentPage(dstDocument, _clientOnlyLayer, _serverSyncLayer);
+	public DocumentPage clone(final IDocumentNotify dstDocument) {
+		return new DocumentPage(dstDocument, this);
 	}
 }

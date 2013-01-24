@@ -32,13 +32,6 @@ public class PageLayerBufferComposite implements IPageLayerBuffer {
 		_pageLayerBuffers.add(result);
 		return result;
 	}
-
-	public PageLayerBufferEditor addEditorBuffer() {
-		final PageLayerBufferEditor result = new PageLayerBufferEditor(
-				_displayRenderer);
-		_pageLayerBuffers.add(result);
-		return result;
-	}
 	
 	public PageLayerBufferPdf addPdfBuffer() {
 		final PageLayerBufferPdf result = new PageLayerBufferPdf(
@@ -49,13 +42,6 @@ public class PageLayerBufferComposite implements IPageLayerBuffer {
 
 	public PageLayerBufferComposite addComposite() {
 		final PageLayerBufferComposite result = new PageLayerBufferComposite(
-				_displayRenderer);
-		_pageLayerBuffers.add(result);
-		return result;
-	}
-
-	public <T> PageLayerBufferHashComposite<T> addHashComposite() {
-		final PageLayerBufferHashComposite<T> result = new PageLayerBufferHashComposite<T>(
 				_displayRenderer);
 		_pageLayerBuffers.add(result);
 		return result;
@@ -76,13 +62,6 @@ public class PageLayerBufferComposite implements IPageLayerBuffer {
 	public void drawBuffer(final Graphics2D g, final ImageObserver obs) {
 		for (final IPageLayerBuffer pageLayerBuffer : _pageLayerBuffers) {
 			pageLayerBuffer.drawBuffer(g, obs);
-		}
-	}
-
-	@Override
-	public void clear() {
-		for (final IPageLayerBuffer pageLayerBuffer : _pageLayerBuffers) {
-			pageLayerBuffer.clear();
 		}
 	}
 }

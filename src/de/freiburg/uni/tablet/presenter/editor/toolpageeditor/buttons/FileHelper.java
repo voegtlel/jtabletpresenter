@@ -21,6 +21,8 @@ import de.freiburg.uni.tablet.presenter.document.Document;
 import de.freiburg.uni.tablet.presenter.document.DocumentConfig;
 import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
+import de.freiburg.uni.tablet.presenter.document.PdfSerializable;
+import de.freiburg.uni.tablet.presenter.document.ServerDocument;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 import de.freiburg.uni.tablet.presenter.editor.pdf.PdfRenderer;
 import de.freiburg.uni.tablet.presenter.list.LinkedElement;
@@ -89,14 +91,14 @@ public class FileHelper {
 		}
 	}
 	
-	public static void saveDocument(Document document, File file) throws IOException {
+	public static void saveDocument(final ServerDocument document, final File file) throws IOException {
 		final FileOutputStream fileOutputStream = new FileOutputStream(file);
 		
 		final BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(
 				fileOutputStream);
 		final BinarySerializer binarySerializer = new BinarySerializer(
 				bufferedOutputStream);
-		binarySerializer.writeObjectTable(document.getId(), document);
+		binarySerializer.writeObjectTable(document);
 		binarySerializer.close();
 		bufferedOutputStream.close();
 		fileOutputStream.close();
@@ -107,31 +109,32 @@ public class FileHelper {
 		
 		final BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(
 				fileOutputStream);
-		final BinarySerializer binarySerializer = new BinarySerializer(
+		final BinarySerializer writer = new BinarySerializer(
 				bufferedOutputStream);
-		page.serializeDirect(binarySerializer);
-		binarySerializer.close();
+		page.serializeDirect(writer);
+		writer.close();
 		bufferedOutputStream.close();
 		fileOutputStream.close();
 	}
 	
-	public static void savePdf(Document document, DocumentConfig config, File file) throws IOException {
+	public static void savePdf(Document document, Document baseDocument, DocumentConfig config, File file) throws IOException {
 		Logger.getLogger(ButtonSaveAs.class.getName()).log(Level.INFO, "Render as PDF " + file.getPath());
 		try {
-			int pdfDefaultWidth = config.getInt("pdf.defaultWidth", 1024);
-			int pdfDefaultHeight = config.getInt("pdf.defaultHeight", 768);
-			boolean pdfIgnoreEmptyPages = config.getBoolean("pdf.ignoreEmptyPages", false);
-			boolean pdfShowPageNumber = config.getBoolean("pdf.showPageNumber", true);
-			boolean pdfIgnoreEmptyPageNumber = config.getBoolean("pdf.ignoreEmptyPageNumber", true);
-			float pdfThicknessFactor = config.getFloat("pdf.thicknessFactor", 0.2f);
-			PdfRenderer pdfRenderer = new PdfRenderer(file,
+			final int pdfDefaultWidth = config.getInt("pdf.defaultWidth", 1024);
+			final int pdfDefaultHeight = config.getInt("pdf.defaultHeight", 768);
+			final boolean pdfIgnoreEmptyPages = config.getBoolean("pdf.ignoreEmptyPages", false);
+			final boolean pdfShowPageNumber = config.getBoolean("pdf.showPageNumber", true);
+			final boolean pdfIgnoreEmptyPageNumber = config.getBoolean("pdf.ignoreEmptyPageNumber", true);
+			final float pdfThicknessFactor = config.getFloat("pdf.thicknessFactor", 0.2f);
+			final PdfRenderer pdfRenderer = new PdfRenderer(file,
 					pdfDefaultWidth, pdfDefaultHeight,
-					document.getPdf().getDocument(),
 					pdfIgnoreEmptyPages, pdfIgnoreEmptyPageNumber, pdfShowPageNumber, pdfThicknessFactor);
-			LinkedElement<DocumentPage> pages = document.getPages();
-			for(; pages != null; pages = pages.getNext()) {
-				pdfRenderer.nextPage(pages.getData().getPdfPageIndex());
-				pages.getData().getClientOnlyLayer().render(pdfRenderer);
+			LinkedElement<DocumentPage> page = document.getPages();
+			LinkedElement<DocumentPage> basePage = baseDocument.getPages();
+			for(; page != null; page = page.getNext()) {
+				pdfRenderer.nextPage(page.getData().getPdfPage());
+				basePage.getData().render(pdfRenderer);
+				page.getData().render(pdfRenderer);
 			}
 			pdfRenderer.close();
 		} catch (Exception e) {
@@ -165,7 +168,7 @@ public class FileHelper {
 					saveDocumentPage(editor.getDocumentEditor().getCurrentPage(), f);
 					return true;
 				} else if (f.getPath().toLowerCase().endsWith(".pdf")) {
-					savePdf(editor.getDocumentEditor().getDocument(), editor.getConfig(), f);
+					savePdf(editor.getDocumentEditor().getDocument(), editor.getDocumentEditor().getBaseDocument(), editor.getConfig(), f);
 					return true;
 				} else {
 					JOptionPane.showMessageDialog(component, "Can't save. Unrecognized file type.");
@@ -190,13 +193,13 @@ public class FileHelper {
 	 * @return
 	 * @throws IOException
 	 */
-	public static Document openDocument(File file) throws IOException {
+	public static ServerDocument openDocument(File file) throws IOException {
 		final FileInputStream fileInputStream = new FileInputStream(file);
 		final BufferedInputStream bufferedInputStream = new BufferedInputStream(
 				fileInputStream);
 		final BinaryDeserializer binaryDeserializer = new BinaryDeserializer(
 				bufferedInputStream);
-		final Document document = binaryDeserializer.readObjectTable();
+		final ServerDocument document = binaryDeserializer.readObjectTable();
 		bufferedInputStream.close();
 		fileInputStream.close();
 		return document;
@@ -240,15 +243,18 @@ public class FileHelper {
 					editor.getDocumentEditor().setCurrentPage(page);
 					return true;
 				} else if (f.getPath().toLowerCase().endsWith(".pdf")) {
-					final PdfModeOption defOpt = new PdfModeOption(Document.PDF_MODE_REINDEX, "Reindex Pages");
+					final PdfModeOption defOpt = new PdfModeOption(ServerDocument.PDF_MODE_CLEAR, "Clear all");
 					final Object dialogResult = JOptionPane.showInputDialog(component, "Select PDF Mode", "PDF Loading...", JOptionPane.QUESTION_MESSAGE, null, new Object[] {
 							defOpt,
-						new PdfModeOption(Document.PDF_MODE_KEEP_INDEX, "Keep Page Indices"),
-						new PdfModeOption(Document.PDF_MODE_APPEND, "Append Pdf Pages")
+						new PdfModeOption(ServerDocument.PDF_MODE_REINDEX, "Reindex Pages"),
+						new PdfModeOption(ServerDocument.PDF_MODE_KEEP_INDEX, "Keep Page Indices"),
+						new PdfModeOption(ServerDocument.PDF_MODE_APPEND, "Append Pdf Pages"),
+						defOpt
 					}, defOpt);
 					if (dialogResult != null) {
 						final PdfModeOption res = (PdfModeOption)dialogResult;
-						editor.getDocumentEditor().getDocument().setPdf(f, res.getKey());
+						final PdfSerializable pdf = new PdfSerializable(editor.getDocumentEditor().getDocument(), f);
+						editor.getDocumentEditor().getDocument().setPdfPages(pdf, res.getKey());
 						return true;
 					}
 				}

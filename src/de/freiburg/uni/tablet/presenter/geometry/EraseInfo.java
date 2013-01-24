@@ -3,7 +3,7 @@ package de.freiburg.uni.tablet.presenter.geometry;
 import java.util.HashMap;
 
 import de.freiburg.uni.tablet.presenter.document.Document;
-import de.freiburg.uni.tablet.presenter.document.DocumentPageLayer;
+import de.freiburg.uni.tablet.presenter.document.DocumentPage;
 import de.freiburg.uni.tablet.presenter.list.LinkedElement;
 
 public class EraseInfo {
@@ -11,9 +11,9 @@ public class EraseInfo {
 	private final HashMap<Long, HashMap<Integer, Object>> _objectsData = new HashMap<Long, HashMap<Integer, Object>>();
 	private final Document _document;
 	private CollisionInfo _collisionInfo;
-	private final DocumentPageLayer _layer;
+	private final DocumentPage _layer;
 
-	public EraseInfo(final Document document, final DocumentPageLayer layer) {
+	public EraseInfo(final Document document, final DocumentPage layer) {
 		_document = document;
 		_layer = layer;
 	}
@@ -87,7 +87,7 @@ public class EraseInfo {
 	 */
 	public IRenderable addModifiedObject(final IRenderable origObject) {
 		final IRenderable result = origObject.cloneRenderable(_document
-				.getNextId());
+				.nextId());
 		_modifiedObjects.put(origObject.getId(), result);
 		return result;
 	}

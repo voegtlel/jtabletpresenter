@@ -35,7 +35,7 @@ public class ToolImage extends AbstractTool {
 					"No image selected for image tool");
 		} else {
 			_image = (BitmapImage) currentImage.cloneRenderable(_editor.getDocumentEditor().getDocument()
-					.getNextId());
+					.nextId());
 		}
 	}
 
@@ -70,11 +70,11 @@ public class ToolImage extends AbstractTool {
 		if (result != null) {
 			if (((result.getMaxX() - result.getMinX()) > 0)
 					|| ((result.getMaxY() - result.getMinY()) > 0)) {
-				_editor.getDocumentEditor().getActiveLayer().addRenderable(result);
+				_editor.getDocumentEditor().getCurrentPage().addRenderable(result);
 			}
 			
-			_editor.getFrontRenderer().clear();
-			_editor.getPageEditor().clear(result);
+			_editor.getFrontRenderer().requireClear();
+			_editor.getPageEditor().requireRepaint();
 		}
 	}
 

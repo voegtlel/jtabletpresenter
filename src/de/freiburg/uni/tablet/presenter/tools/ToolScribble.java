@@ -29,7 +29,7 @@ public class ToolScribble extends AbstractTool {
 	@Override
 	public void begin() {
 		_scribble = new Scribble(_editor.getDocumentEditor().getDocument()
-				.getNextId(), _editor.getDocumentEditor().getCurrentPen());
+				.nextId(), _editor.getDocumentEditor().getCurrentPen());
 	}
 
 	@Override
@@ -56,10 +56,10 @@ public class ToolScribble extends AbstractTool {
 		_scribble = null;
 		_lastData = null;
 
-		_editor.getDocumentEditor().getActiveLayer().addRenderable(result);
+		_editor.getDocumentEditor().getCurrentPage().addRenderable(result);
 
-		_editor.getFrontRenderer().clear();
-		_editor.getPageEditor().clear(result);
+		_editor.getFrontRenderer().requireClear();
+		_editor.getPageEditor().requireRepaint();
 	}
 
 	@Override

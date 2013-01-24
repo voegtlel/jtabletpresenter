@@ -9,7 +9,7 @@ import java.nio.ByteBuffer;
 
 import de.freiburg.uni.tablet.presenter.actions.IAction;
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
-import de.freiburg.uni.tablet.presenter.data.IBinarySerializable;
+import de.freiburg.uni.tablet.presenter.data.IBinarySerializableId;
 import de.freiburg.uni.tablet.presenter.data.PackageInputStream;
 import de.freiburg.uni.tablet.presenter.data.PackageInputStream.PackageReader;
 import de.freiburg.uni.tablet.presenter.data.PackageOutputStream.PackageWriter;
@@ -105,7 +105,7 @@ public class HistoryClient implements PackageReader, PackageWriter {
 		while (_client.isRunning()) {
 			try {
 				packageInputStream.nextPackage();
-				IBinarySerializable readObject = reader.readObjectTable();
+				IBinarySerializableId readObject = reader.readObjectTable();
 				if (readObject instanceof IAction) {
 					IAction action = (IAction) readObject;
 					action.perform(_documentEditor);

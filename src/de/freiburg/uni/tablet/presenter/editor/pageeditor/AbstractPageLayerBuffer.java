@@ -17,11 +17,18 @@ import de.freiburg.uni.tablet.presenter.page.IPen;
 public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer {
 	protected Graphics2D _graphics = null;
 	protected Image _imageBuffer = null;
+	
+	private Object _repaintSync = new Object();
 
+	private boolean _requireResize = true;
+	private int _newWidth = 1;
+	private int _newHeight = 1;
+	private boolean _requireRepaint = true;
+	
 	private boolean _isEmpty = true;
 
-	private int _renderWidth = 1;
-	private int _renderHeight = 1;
+	protected int _renderWidth = 1;
+	protected int _renderHeight = 1;
 
 	protected float _renderFactorX = 1;
 	protected float _renderFactorY = 1;
@@ -32,8 +39,15 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer {
 
 	public AbstractPageLayerBuffer(final IDisplayRenderer displayRenderer) {
 		_displayRenderer = displayRenderer;
-		if (_displayRenderer.isWorking()) {
-			resize(_displayRenderer.getWidth(), _displayRenderer.getHeight());
+	}
+	
+	/**
+	 * Called to mark that a repaint is required
+	 */
+	public void requireRepaint() {
+		synchronized (_repaintSync) {
+			_requireRepaint = true;
+			_displayRenderer.requireRepaint();
 		}
 	}
 
@@ -43,31 +57,57 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer {
 	 * @param g
 	 */
 	protected abstract void setRenderingHints(Graphics2D g);
+	
+	/**
+	 * Repaints all objects to graphics
+	 */
+	protected abstract void repaint();
 
 	@Override
 	public void resize(final int width, final int height) {
-		_renderWidth = width;
-		_renderHeight = height;
-		_renderFactorX = width;
-		_renderFactorY = height;
-
-		if (_graphics != null) {
-			_graphics.dispose();
+		synchronized (_repaintSync) {
+			_newWidth = width;
+			_newHeight = height;
+			_requireResize = true;
 		}
-
-		final int imgWidth = Math.max(width, 1);
-		final int imgHeight = Math.max(height, 1);
-		_imageBuffer = _displayRenderer.createImageBuffer(imgWidth, imgHeight,
-				Transparency.TRANSLUCENT);
-		_graphics = (Graphics2D) _imageBuffer.getGraphics();
-		setRenderingHints(_graphics);
-		_graphics.setBackground(new Color(0, true));
-		_isEmpty = true;
-		System.out.println("Resized: " + width + "x" + height);
 	}
 
 	@Override
 	public void drawBuffer(final Graphics2D g, final ImageObserver obs) {
+		boolean requireResize;
+		synchronized (_repaintSync) {
+			requireResize = _requireResize;
+			_renderWidth = _newWidth;
+			_renderHeight = _newHeight;
+			_renderFactorX = _renderWidth;
+			_renderFactorY = _renderHeight;
+		}
+		if (requireResize) {
+			if (_graphics != null) {
+				_graphics.dispose();
+			}
+
+			final int imgWidth = Math.max(_renderWidth, 1);
+			final int imgHeight = Math.max(_renderHeight, 1);
+			_imageBuffer = _displayRenderer.createImageBuffer(imgWidth, imgHeight,
+					Transparency.TRANSLUCENT);
+			_graphics = (Graphics2D) _imageBuffer.getGraphics();
+			setRenderingHints(_graphics);
+			_graphics.setBackground(new Color(0, true));
+			_isEmpty = true;
+			System.out.println("Resized: " + _renderWidth + "x" + _renderHeight);
+		}
+		boolean requireRepaint = false;
+		synchronized (_repaintSync) {
+			requireRepaint = _requireRepaint;
+			_requireRepaint = false;
+		}
+		if (requireRepaint) {
+			if (_graphics != null) {
+				_isEmpty = true;
+				repaint();
+			}
+		}
 		if (!_isEmpty) {
 			g.drawImage(_imageBuffer, 0, 0, obs);
 		}
@@ -144,19 +184,11 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer {
 	 * @param height
 	 * @param obs (optional)
 	 */
-	protected void draw(final Graphics2D g, final BufferedImage image, final float x, final float y, final float width, final float height, ImageObserver obs) {
-		AffineTransform t = AffineTransform.getScaleInstance(_renderFactorX, _renderFactorY);
+	protected void draw(final Graphics2D g, final BufferedImage image, final float x, final float y, final float width, final float height, final ImageObserver obs) {
+		final AffineTransform t = AffineTransform.getScaleInstance(_renderFactorX, _renderFactorY);
 		t.translate(x, y);
 		t.scale(width/(float)image.getWidth(obs), height/(float)image.getHeight(obs));
 		g.drawImage(image, t, obs);
 		_isEmpty = false;
-	}
-
-	@Override
-	public void clear() {
-		if (_graphics != null) {
-			_isEmpty = true;
-			_graphics.clearRect(0, 0, _renderWidth, _renderHeight);
-		}
 	}
 }

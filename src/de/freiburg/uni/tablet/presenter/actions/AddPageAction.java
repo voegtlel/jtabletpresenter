@@ -8,7 +8,6 @@ import java.io.IOException;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
-import de.freiburg.uni.tablet.presenter.data.IBinarySerializable;
 import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
 
@@ -16,15 +15,14 @@ import de.freiburg.uni.tablet.presenter.document.DocumentPage;
  * @author lukas
  * 
  */
-public class AddPageAction extends AbstractAction implements IAction, IBinarySerializable {
+public class AddPageAction implements IAction {
 	private final DocumentPage _prevPage;
 	private final DocumentPage _page;
 
 	/**
 	 * 
 	 */
-	public AddPageAction(int clientId, final DocumentPage prevPage, final DocumentPage page) {
-		super(clientId);
+	public AddPageAction(final DocumentPage prevPage, final DocumentPage page) {
 		_prevPage = prevPage;
 		_page = page;
 	}
@@ -34,7 +32,6 @@ public class AddPageAction extends AbstractAction implements IAction, IBinarySer
 	 * 
 	 */
 	public AddPageAction(final BinaryDeserializer reader) throws IOException {
-		super(reader);
 		_prevPage = reader.readObjectTable();
 		_page = reader.readObjectTable();
 	}
@@ -45,8 +42,8 @@ public class AddPageAction extends AbstractAction implements IAction, IBinarySer
 	}
 
 	@Override
-	public IAction getUndoAction(int clientId) {
-		return new RemovePageAction(clientId, _prevPage, _page);
+	public IAction getUndoAction() {
+		return new RemovePageAction(_prevPage, _page);
 	}
 
 	@Override
@@ -61,8 +58,7 @@ public class AddPageAction extends AbstractAction implements IAction, IBinarySer
 
 	@Override
 	public void serialize(final BinarySerializer writer) throws IOException {
-		super.serialize(writer);
-		writer.writeObjectTable(_prevPage.getId(), _prevPage);
-		writer.writeObjectTable(_page.getId(), _page);
+		writer.writeObjectTable(_prevPage);
+		writer.writeObjectTable(_page);
 	}
 }

@@ -29,7 +29,6 @@ public class ButtonUndo extends AbstractButtonAction {
 	public void performLater(final Component component) {
 		if (_editor.getDocumentEditor().getHistory().hasUndoAction()) {
 			_editor.getDocumentEditor().getHistory().undo();
-			_editor.getPageEditor().clear();
 		}
 	}
 }

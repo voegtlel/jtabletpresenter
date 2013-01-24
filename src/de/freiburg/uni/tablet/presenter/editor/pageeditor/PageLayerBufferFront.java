@@ -3,14 +3,39 @@ package de.freiburg.uni.tablet.presenter.editor.pageeditor;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
+import java.awt.image.ImageObserver;
 
 import de.freiburg.uni.tablet.presenter.page.IPageFrontRenderer;
 import de.freiburg.uni.tablet.presenter.page.IPen;
 
 public class PageLayerBufferFront extends AbstractPageLayerBuffer implements
 		IPageFrontRenderer {
+	private Object _renderSync = new Object();
+	private boolean _requireClear = true;
+	
 	public PageLayerBufferFront(final IDisplayRenderer displayRenderer) {
 		super(displayRenderer);
+	}
+	
+	@Override
+	public void requireClear() {
+		_requireClear = true;
+		requireRepaint();
+	}
+	
+	@Override
+	protected void repaint() {
+		if (_requireClear) {
+			_requireClear = false;
+			_graphics.clearRect(0, 0, _renderWidth, _renderHeight);
+		}
+	}
+	
+	@Override
+	public void drawBuffer(final Graphics2D g, final ImageObserver obs) {
+		synchronized (_renderSync) {
+			super.drawBuffer(g, obs);
+		}
 	}
 
 	@Override
@@ -28,40 +53,42 @@ public class PageLayerBufferFront extends AbstractPageLayerBuffer implements
 	@Override
 	public void draw(final IPen pen, final float x1, final float y1,
 			final float x2, final float y2) {
-		if (_graphics != null) {
-			final Graphics2D g = _displayRenderer.createRenderer();
-			if (g != null) {
-				setRenderingHints(g);
-				draw(g, pen, x1, y1, x2, y2);
+		synchronized (_renderSync) {
+			if (_graphics != null) {
+				draw(_graphics, pen, x1, y1, x2, y2);
+				requireRepaint();
 			}
-			draw(_graphics, pen, x1, y1, x2, y2);
-			_displayRenderer.updateRenderer(g);
 		}
 	}
 
 	@Override
 	public void draw(final IPen pen, final float x, final float y) {
-		if (_graphics != null) {
-			final Graphics2D g = _displayRenderer.createRenderer();
-			if (g != null) {
-				setRenderingHints(g);
-				draw(g, pen, x, y);
+		synchronized (_renderSync) {
+			if (_graphics != null) {
+				draw(_graphics, pen, x, y);
+				requireRepaint();
 			}
-			draw(_graphics, pen, x, y);
-			_displayRenderer.updateRenderer(g);
 		}
 	}
 	
 	@Override
 	public void draw(final BufferedImage image, final float x, final float y, final float width, final float height) {
-		if (_graphics != null) {
-			final Graphics2D g = _displayRenderer.createRenderer();
-			if (g != null) {
-				setRenderingHints(g);
-				draw(g, image, x, y, width, height, _displayRenderer.getObserver());
+		synchronized (_renderSync) {
+			if (_graphics != null) {
+				draw(_graphics, image, x, y, width, height, _displayRenderer.getObserver());
+				requireRepaint();
 			}
-			draw(_graphics, image, x, y, width, height, _displayRenderer.getObserver());
-			_displayRenderer.updateRenderer(g);
+		}
+	}
+	
+	@Override
+	public void clear() {
+		synchronized (_renderSync) {
+			if (_graphics != null) {
+				_requireClear = false;
+				_graphics.clearRect(0, 0, _renderWidth, _renderHeight);
+				requireRepaint();
+			}
 		}
 	}
 }

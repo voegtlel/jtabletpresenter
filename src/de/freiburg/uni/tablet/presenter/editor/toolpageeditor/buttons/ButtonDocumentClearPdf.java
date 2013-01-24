@@ -6,8 +6,8 @@ package de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons;
 
 import java.awt.Component;
 
+import de.freiburg.uni.tablet.presenter.document.ServerDocument;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
-import de.intarsys.pdf.pd.PDDocument;
 
 /**
  * @author lukas
@@ -28,6 +28,6 @@ public class ButtonDocumentClearPdf extends AbstractButtonAction {
 
 	@Override
 	public void performLater(final Component component) {
-		_editor.getDocumentEditor().getDocument().setPdf((PDDocument)null, -1);
+		_editor.getDocumentEditor().getDocument().setPdfPages(null, ServerDocument.PDF_MODE_CLEAR);
 	}
 }

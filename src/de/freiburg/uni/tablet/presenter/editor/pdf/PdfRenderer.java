@@ -13,6 +13,7 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.freiburg.uni.tablet.presenter.document.PdfPageSerializable;
 import de.freiburg.uni.tablet.presenter.editor.IPageRepaintListener;
 import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
 import de.freiburg.uni.tablet.presenter.page.IPen;
@@ -38,7 +39,6 @@ public class PdfRenderer implements IPageBackRenderer {
 	private final Line2D.Float _lineRenderer = new Line2D.Float();
 
 	private Map<Object, Object> _baseCopiedMap = new HashMap<Object, Object>();
-	private PDDocument _baseDocument;
 	private PDDocument _pdf;
 	private PDPage _page;
 	private PDForm _form;
@@ -57,19 +57,13 @@ public class PdfRenderer implements IPageBackRenderer {
 	private float _thicknessFactor;
 	private boolean _ignoreEmptyPageNumber;
 	
-	public PdfRenderer(File file, float screenSizeX, float screenSizeY, PDDocument baseDocument, boolean ignoreEmptyPage, boolean ignoreEmptyPageNumber, boolean showPageNumber, float thicknessFactor) throws Exception {
+	public PdfRenderer(final File file, final float screenSizeX, final float screenSizeY, final boolean ignoreEmptyPage, final boolean ignoreEmptyPageNumber, final boolean showPageNumber, final float thicknessFactor) throws Exception {
 		_ignoreEmptyPage = ignoreEmptyPage;
 		_ignoreEmptyPageNumber = ignoreEmptyPageNumber;
 		_showPageNumber = showPageNumber;
 		_thicknessFactor = thicknessFactor;
-		if (baseDocument != null) {
-			_baseDocument = baseDocument;
-			System.out.println("copy pdf");
-			_pdf = PDDocument.createNew();
-		} else {
-			System.out.println("create pdf");
-			_pdf = PDDocument.createNew();
-		}
+		System.out.println("create pdf");
+		_pdf = PDDocument.createNew();
 		_pageSize = new CDSRectangle(0f, 0f, screenSizeX, screenSizeY);
 		_file = file;
 		if (_showPageNumber) {
@@ -133,14 +127,14 @@ public class PdfRenderer implements IPageBackRenderer {
 		}
 	}
 	
-	public void nextPage(final int sourcePageIndex) throws Exception {
+	public void nextPage(final PdfPageSerializable page) throws Exception {
 		if (_creator != null && _wasEmptyPage && _ignoreEmptyPage && _form == null) {
 			return;
 		}
 		endPage();
-		if (sourcePageIndex >= 0 && sourcePageIndex < _baseDocument.getPageTree().getCount()) {
-			PDPage sourcePage = _baseDocument.getPageTree().getPageAt(sourcePageIndex);
-			System.out.println("copy page " + sourcePageIndex);
+		if (page != null) {
+			final PDPage sourcePage = page.getPage();
+			System.out.println("copy page");
 			_page = (PDPage) PDPage.META.createFromCos(sourcePage.cosGetObject().copyDeep(_baseCopiedMap));
 			_pdf.addPageNode(_page);
 		} else {
@@ -205,7 +199,7 @@ public class PdfRenderer implements IPageBackRenderer {
 		try {
 			_creator.setStrokeColorRGB(pen.getColor().getRed()/255f, pen.getColor().getGreen()/255f, pen.getColor().getBlue()/255f);
 			_creator.setLineWidth(pen.getThickness() * _thicknessFactor);
-			PathIterator pathIterator = path.getPathIterator(AffineTransform.getScaleInstance(
+			final PathIterator pathIterator = path.getPathIterator(AffineTransform.getScaleInstance(
 					_renderFactorX, _renderFactorY));
 			double[] coords = new double[6];
 			while (!pathIterator.isDone()) {
@@ -231,13 +225,13 @@ public class PdfRenderer implements IPageBackRenderer {
 	@Override
 	public void draw(BufferedImage image, float x, float y, float width, float height) {
 		try {
-			BufferedImage rgbImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
-			Graphics g = rgbImage.getGraphics();
+			final BufferedImage rgbImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
+			final Graphics g = rgbImage.getGraphics();
 			g.drawImage(image, 0, 0, image.getWidth(), image.getHeight(), 0, 0, image.getWidth(), image.getHeight(), null);
 			g.dispose();
-			ImageConverterAwt2Pdf converter = new ImageConverterAwt2Pdf(rgbImage);
+			final ImageConverterAwt2Pdf converter = new ImageConverterAwt2Pdf(rgbImage);
 			converter.setPreferJpeg(true);
-			PDImage pdImage = converter.getPDImage();
+			final PDImage pdImage = converter.getPDImage();
 			_creator.saveState();
 			_creator.transform(width * _renderFactorX, 0, 0, height * _renderFactorY, x * _renderFactorX, (1f - y - height) * _renderFactorY );
 			_creator.doXObject(null, pdImage);
@@ -247,10 +241,10 @@ public class PdfRenderer implements IPageBackRenderer {
 		}
 		_wasEmptyPage = false;
 	}
-
+	
 	@Override
-	public void clear() {
-		throw new IllegalStateException("Can't clear pdf");
+	public void requireRepaint() {
+		throw new IllegalStateException("Can't repaint pdf");
 	}
 
 	@Override

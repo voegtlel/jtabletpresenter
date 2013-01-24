@@ -29,7 +29,6 @@ public class ButtonRedo extends AbstractButtonAction {
 	public void performLater(final Component component) {
 		if (_editor.getDocumentEditor().getHistory().hasRedoAction()) {
 			_editor.getDocumentEditor().getHistory().redo();
-			_editor.getPageEditor().clear();
 		}
 	}
 }

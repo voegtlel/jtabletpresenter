@@ -11,8 +11,4 @@ public class PageLayerBufferNull implements IPageLayerBuffer {
 	@Override
 	public void drawBuffer(final Graphics2D g, final ImageObserver obs) {
 	}
-
-	@Override
-	public void clear() {
-	}
 }

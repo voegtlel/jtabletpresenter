@@ -92,6 +92,23 @@ public class LinkedElementList<T> {
 	public LinkedElement<T> getLast() {
 		return _last;
 	}
+	
+	public int getCount() {
+		if (_first == null) {
+			return 0;
+		}
+		return _first.getNextCount();
+	}
+	
+	public void clear() {
+		LinkedElement<T> next = null;
+		for (LinkedElement<T> j = _first; j != null; j = next) {
+			next = j.getNext();
+			j.setPrevious(null);
+			j.setNext(null);
+		}
+		_first = _last = null;
+	}
 
 	public LinkedElementList<T> splitAt(final LinkedElement<T> first) {
 		final LinkedElementList<T> newList = new LinkedElementList<T>();
@@ -170,7 +187,7 @@ public class LinkedElementList<T> {
 	}
 
 	/**
-	 * Finds the object by .equals.
+	 * Finds the object by its index or returns null if out of range.
 	 * 
 	 * @param object
 	 * @return

@@ -15,20 +15,16 @@ public abstract class DocumentAdapter implements DocumentListener {
 
 	@Override
 	public void renderableAdded(final IRenderable renderable,
-			final DocumentPageLayer layer) {
+			final DocumentPage layer) {
 	}
 
 	@Override
 	public void renderableRemoved(final IRenderable renderable,
-			final DocumentPageLayer layer) {
-	}
-
-	@Override
-	public void pdfChanged(PdfSerializable lastPdf) {
+			final DocumentPage layer) {
 	}
 	
 	@Override
-	public void pdfPageIndexChanged(DocumentPage documentPage,
-			int pdfPageIndex, int lastPdfPageIndex) {
+	public void pdfPageChanged(final DocumentPage documentPage,
+			final PdfPageSerializable lastPdfPage) {
 	}
 }

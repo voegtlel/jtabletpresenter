@@ -13,7 +13,6 @@ import javax.swing.JFrame;
 
 import com.sun.jna.NativeLibrary;
 
-import de.freiburg.uni.tablet.presenter.actions.SetDocumentAction;
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.document.DocumentConfig;
@@ -85,7 +84,7 @@ public class ClientApp {
 		
 		DocumentEditor doc = null;
 		if (_pageRenderer.getConfig().getBoolean("client.down.enabled", false)) {
-			doc = new DocumentEditor(_pageRenderer.getConfig());
+			doc = new DocumentEditor();
 			ClientDownSync clientDownSync = new ClientDownSync(doc, _pageRenderer.getPageEditor());
 			
 			System.out.println("Connect remote");
@@ -119,19 +118,18 @@ public class ClientApp {
 			}
 			if (doc == null) {
 				System.out.println("Create new session");
-				doc = new DocumentEditor(_pageRenderer.getConfig());
+				doc = new DocumentEditor();
 			}
 		}
 		_pageRenderer.setDocumentEditor(doc);
 		
 		if (_pageRenderer.getConfig().getBoolean("client.up.enabled", false)) {
-			doc.setActiveLayerClientOnly(false);
 			ClientUpSync clientSync = new ClientUpSync(doc.getHistory());
 			System.out.println("Connect remote");
 			clientSync.start(_pageRenderer.getConfig().getString("client.up.host", ""),
 					_pageRenderer.getConfig().getInt("client.up.port", 8025),
 					_pageRenderer.getConfig().getInt("client.up.timeout", 5000000));
-			clientSync.onActionPerformed(new SetDocumentAction(doc.getDocument().getClientId(), doc.getDocument().getClientId(), doc.getDocument()));
+			//clientSync.onActionPerformed(new SetDocumentAction(doc.getDocument().getClientId(), doc.getDocument().getClientId(), doc.getDocument()));
 		}
 		
 		_pageRenderer.addWindowListener(new WindowAdapter() {
