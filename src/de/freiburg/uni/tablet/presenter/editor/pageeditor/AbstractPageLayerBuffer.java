@@ -75,12 +75,16 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer {
 	@Override
 	public void drawBuffer(final Graphics2D g, final ImageObserver obs) {
 		boolean requireResize;
+		boolean requireRepaint;
 		synchronized (_repaintSync) {
 			requireResize = _requireResize;
+			_requireResize = false;
 			_renderWidth = _newWidth;
 			_renderHeight = _newHeight;
 			_renderFactorX = _renderWidth;
 			_renderFactorY = _renderHeight;
+			requireRepaint = _requireRepaint;
+			_requireRepaint = false;
 		}
 		if (requireResize) {
 			if (_graphics != null) {
@@ -95,22 +99,23 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer {
 			setRenderingHints(_graphics);
 			_graphics.setBackground(new Color(0, true));
 			_isEmpty = true;
+			requireRepaint = true;
 			System.out.println("Resized: " + _renderWidth + "x" + _renderHeight);
-		}
-		boolean requireRepaint = false;
-		synchronized (_repaintSync) {
-			requireRepaint = _requireRepaint;
-			_requireRepaint = false;
 		}
 		if (requireRepaint) {
 			if (_graphics != null) {
-				_isEmpty = true;
 				repaint();
 			}
 		}
 		if (!_isEmpty) {
+			System.out.println("Draw buffer image");
 			g.drawImage(_imageBuffer, 0, 0, obs);
 		}
+	}
+	
+	protected void clear(final Graphics2D g) {
+		g.clearRect(0, 0, _renderWidth, _renderHeight);
+		_isEmpty = true;
 	}
 
 	/**

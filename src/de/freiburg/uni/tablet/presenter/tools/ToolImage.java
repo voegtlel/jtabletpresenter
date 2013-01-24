@@ -57,6 +57,7 @@ public class ToolImage extends AbstractTool {
 						_image.getImage(),
 						x1, y1, x2-x1,
 						y2-y1);
+				_editor.getPageEditor().requireRepaint();
 			}
 		}
 	}

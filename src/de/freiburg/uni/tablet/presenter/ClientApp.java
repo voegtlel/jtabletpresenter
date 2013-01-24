@@ -1,5 +1,6 @@
 package de.freiburg.uni.tablet.presenter;
 
+import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -17,9 +18,11 @@ import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.document.DocumentConfig;
 import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
+import de.freiburg.uni.tablet.presenter.document.ServerDocument;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.JPageEditor;
 import de.freiburg.uni.tablet.presenter.net2.ClientDownSync;
 import de.freiburg.uni.tablet.presenter.net2.ClientUpSync;
+import de.freiburg.uni.tablet.presenter.page.SolidPen;
 
 public class ClientApp {
 
@@ -121,6 +124,7 @@ public class ClientApp {
 				doc = new DocumentEditor();
 			}
 		}
+		doc.setCurrentPen(new SolidPen(_pageRenderer.getConfig().getFloat("editor.defaultPen.thickness", 1f), _pageRenderer.getConfig().getColor("editor.defaultPen.color", Color.black)));
 		_pageRenderer.setDocumentEditor(doc);
 		
 		if (_pageRenderer.getConfig().getBoolean("client.up.enabled", false)) {
@@ -153,6 +157,8 @@ public class ClientApp {
 				}
 			}
 		});
+		
+		doc.setDocument(new ServerDocument(1));
 
 		/*
 		 * _pageRenderer.setPage(new DefaultPage());

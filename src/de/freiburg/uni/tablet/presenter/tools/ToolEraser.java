@@ -52,16 +52,19 @@ public class ToolEraser extends AbstractTool {
 					_checkOnlyBoundaries);
 			activeLayer.eraseAt(_eraseInfo);
 			_editor.getFrontRenderer().draw(_pen, data.getX(), data.getY());
+			_editor.getPageEditor().requireRepaint();
 		}
 	}
 
 	@Override
 	public void end() {
+		_editor.getPageEditor().suspendRepaint();
 		_editor.getDocumentEditor().getHistory().beginActionGroup();
 		_eraseInfo.applyModifications();
 		_editor.getDocumentEditor().getHistory().endActionGroup();
 		_eraseInfo = null;
 
+		_editor.getPageEditor().resumeRepaint();
 		_editor.getFrontRenderer().requireClear();
 		_editor.getPageEditor().requireRepaint();
 	}

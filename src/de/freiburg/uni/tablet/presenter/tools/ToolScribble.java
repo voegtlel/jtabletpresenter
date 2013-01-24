@@ -47,6 +47,7 @@ public class ToolScribble extends AbstractTool {
 			}
 			_scribble.addPoint(data);
 			_lastData = data;
+			_editor.getPageEditor().requireRepaint();
 		}
 	}
 

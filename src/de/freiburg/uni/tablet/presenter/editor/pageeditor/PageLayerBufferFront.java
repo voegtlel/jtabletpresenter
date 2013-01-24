@@ -26,14 +26,16 @@ public class PageLayerBufferFront extends AbstractPageLayerBuffer implements
 	@Override
 	protected void repaint() {
 		if (_requireClear) {
+			System.out.println("Clear front");
 			_requireClear = false;
-			_graphics.clearRect(0, 0, _renderWidth, _renderHeight);
+			clear(_graphics);
 		}
 	}
 	
 	@Override
 	public void drawBuffer(final Graphics2D g, final ImageObserver obs) {
 		synchronized (_renderSync) {
+			System.out.println("Draw front");
 			super.drawBuffer(g, obs);
 		}
 	}
@@ -85,8 +87,9 @@ public class PageLayerBufferFront extends AbstractPageLayerBuffer implements
 	public void clear() {
 		synchronized (_renderSync) {
 			if (_graphics != null) {
+				System.out.println("Clear front immediately");
 				_requireClear = false;
-				_graphics.clearRect(0, 0, _renderWidth, _renderHeight);
+				clear(_graphics);
 				requireRepaint();
 			}
 		}

@@ -75,4 +75,14 @@ public interface IPageEditor {
 	 * Require repaint
 	 */
 	void requireRepaint();
+
+	/**
+	 * Suspends repainting
+	 */
+	void suspendRepaint();
+	
+	/**
+	 * Resumes repainting
+	 */
+	void resumeRepaint();
 }

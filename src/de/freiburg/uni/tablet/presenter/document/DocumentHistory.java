@@ -85,7 +85,7 @@ public class DocumentHistory {
 					lastDocument.removeListener(_documentListener);
 				}
 				_documentEditor.getDocument().addListener(_documentListener);
-				addAction(new SetDocumentAction(_documentEditor.getDocument()));
+				//TODO addAction(new SetDocumentAction(_documentEditor.getDocument()));
 				// Clear history
 				_history.clear();
 			}
@@ -99,7 +99,6 @@ public class DocumentHistory {
 				}
 			}
 		});
-		_documentEditor.getDocument().addListener(_documentListener);
 	}
 
 	public void beginActionGroup() {

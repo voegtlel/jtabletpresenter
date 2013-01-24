@@ -6,8 +6,12 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Toolkit;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.image.BufferStrategy;
 import java.awt.image.ImageObserver;
+
+import javax.swing.SwingUtilities;
 
 import jpen.owner.multiAwt.AwtPenToolkit;
 import de.freiburg.uni.tablet.presenter.editor.pageeditor.IPageLayerBuffer;
@@ -43,8 +47,6 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 		super();
 		setIgnoreRepaint(true);
 		
-		createBufferStrategy(2);
-		
 		_renderThread = new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -56,24 +58,53 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 			}
 		});
 		
+		addComponentListener(new ComponentListener() {
+			@Override
+			public void componentShown(ComponentEvent e) {
+			}
+			
+			@Override
+			public void componentResized(ComponentEvent e) {
+				requireRepaint();
+			}
+			
+			@Override
+			public void componentHidden(ComponentEvent e) {
+				stop();
+			}
+			
+			@Override
+			public void componentMoved(ComponentEvent e) {
+			}
+		});
+		
 		_pagePenDispatcher = new PagePenDispatcher();
 		AwtPenToolkit.addPenListener(this, _pagePenDispatcher);
 		AwtPenToolkit.getPenManager().pen.levelEmulator
 				.setPressureTriggerForLeftCursorButton(0.5f);
+		start();
 	}
 	
 	/**
 	 * Start the rendering thread
 	 */
-	public void start() {
-		_renderThread.start();
+	protected void start() {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				_running = true;
+				createBufferStrategy(2);
+				_renderThread.start();
+				System.out.println("Start render thread");
+			}
+		});
 	}
 	
 	/**
 	 * Stop the rendering thread
 	 */
 	@SuppressWarnings("deprecation")
-	public void stop() {
+	protected void stop() {
 		if (_renderThread.isAlive()) {
 			synchronized (_repaintMonitor) {
 				_running = false;
@@ -106,17 +137,22 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 		while (_running) {
 			synchronized (_repaintMonitor) {
 				while ((_suspendRepaintCounter > 0 || !_requiresRepaint) && _running) {
+					System.out.println("Repaint wait");
 					_repaintMonitor.wait();
+					System.out.println("Repaint notify");
 					// Return to notifying thread
 					_repaintMonitor.notifyAll();
 				}
 				_requiresRepaint = false;
 			}
+			System.out.println("Repaint perform");
 			if (_running) {
+				System.out.println("Repaint draw");
 				// Perform actual repaint
 				paint(null);
 			}
 		}
+		System.out.println("Repaint Exit");
 	}
 	
 	@Override
@@ -157,6 +193,7 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 				_renderBuffer.resize(_lastRenderWidth, _lastRenderHeight);
 			}
 		}
+		requireRepaint();
 	}
 	
 	@Override

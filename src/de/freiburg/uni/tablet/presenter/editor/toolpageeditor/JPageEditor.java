@@ -133,7 +133,7 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 		// Initialize dummy editor
 		_documentEditor = new DocumentEditor();
 		_documentEditor.addListener(_documentEditorListener);
-		_documentEditor.getDocument().addListener(_documentListener);
+		//_documentEditor.getDocument().addListener(_documentListener);
 		initialize();
 	}
 
@@ -166,8 +166,6 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 				new ButtonToggleFullscreen(this) });
 		registerShortcuts();
 		_config.write(false);
-		
-		pageRenderer.start();
 	}
 
 	public void setToolButtons(final IButtonAction[] buttons) {
@@ -339,7 +337,9 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 		if (lastDocument != null) {
 			lastDocument.removeListener(_documentListener);
 		}
-		_documentEditor.getDocument().addListener(_documentListener);
+		if (_documentEditor.getDocument() != null) {
+			_documentEditor.getDocument().addListener(_documentListener);
+		}
 		onCurrentPageChanged();
 	}
 	
@@ -365,14 +365,18 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 	public void setDocumentEditor(final DocumentEditor documentEditor) {
 		if (_documentEditor != documentEditor) {
 			if (_documentEditor != null) {
-				_documentEditor.getDocument().removeListener(_documentListener);
+				if (_documentEditor.getDocument() != null) {
+					_documentEditor.getDocument().removeListener(_documentListener);
+				}
 				_documentEditor.removeListener(_documentEditorListener);
 			}
 			final DocumentEditor lastEditor = _documentEditor;
 			_documentEditor = documentEditor;
 			if (_documentEditor != null) {
 				_documentEditor.addListener(_documentEditorListener);
-				_documentEditor.getDocument().addListener(_documentListener);
+				if (_documentEditor.getDocument() != null) {
+					_documentEditor.getDocument().addListener(_documentListener);
+				}
 				// Fire listeners
 				_documentEditor.setCurrentPage(_documentEditor.getCurrentPage());
 				onCurrentPageChanged();
