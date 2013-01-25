@@ -7,14 +7,6 @@ import de.freiburg.uni.tablet.presenter.editor.IPageRepaintListener;
 
 public interface IPageBackRenderer {
 	/**
-	 * Draws a line for the background grid.
-	 * 
-	 * @param pen
-	 *            pen
-	 */
-	void drawGridLine(IPen pen, float x1, float y1, float x2, float y2);
-
-	/**
 	 * Renders a path.
 	 * 
 	 * @param pen

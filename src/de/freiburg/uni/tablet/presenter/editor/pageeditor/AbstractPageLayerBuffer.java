@@ -15,8 +15,8 @@ import java.awt.image.ImageObserver;
 import de.freiburg.uni.tablet.presenter.page.IPen;
 
 public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer {
-	protected Graphics2D _graphics = null;
-	protected Image _imageBuffer = null;
+	private Graphics2D _graphics = null;
+	private Image _imageBuffer = null;
 	
 	private Object _repaintSync = new Object();
 
@@ -113,75 +113,79 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer {
 		}
 	}
 	
-	protected void clear(final Graphics2D g) {
-		g.clearRect(0, 0, _renderWidth, _renderHeight);
-		_isEmpty = true;
+	/**
+	 * Clears the graphics
+	 */
+	public void clear() {
+		if (_graphics != null) {
+			_graphics.clearRect(0, 0, _renderWidth, _renderHeight);
+			_isEmpty = true;
+		}
 	}
 
 	/**
 	 * Draws a line
 	 * 
-	 * @param g
-	 *            destination graphics
 	 * @param pen
 	 * @param x1
 	 * @param y1
 	 * @param x2
 	 * @param y2
 	 */
-	protected void draw(final Graphics2D g, final IPen pen, final float x1,
+	public void draw(final IPen pen, final float x1,
 			final float y1, final float x2, final float y2) {
-		_lineRenderer.x1 = x1 * _renderFactorX;
-		_lineRenderer.y1 = y1 * _renderFactorY;
-		_lineRenderer.x2 = x2 * _renderFactorX;
-		_lineRenderer.y2 = y2 * _renderFactorY;
-		g.setStroke(pen.getStroke());
-		g.setPaint(pen.getColor());
-		g.draw(_lineRenderer);
-		_isEmpty = false;
+		if (_graphics != null) {
+			_lineRenderer.x1 = x1 * _renderFactorX;
+			_lineRenderer.y1 = y1 * _renderFactorY;
+			_lineRenderer.x2 = x2 * _renderFactorX;
+			_lineRenderer.y2 = y2 * _renderFactorY;
+			_graphics.setStroke(pen.getStroke());
+			_graphics.setPaint(pen.getColor());
+			_graphics.draw(_lineRenderer);
+			_isEmpty = false;
+		}
 	}
 
 	/**
 	 * Draws a dot
 	 * 
-	 * @param g
-	 *            destination graphics
 	 * @param pen
 	 * @param x
 	 * @param y
 	 */
-	protected void draw(final Graphics2D g, final IPen pen, final float x,
+	public void draw(final IPen pen, final float x,
 			final float y) {
-		_ellipseRenderer.x = x * _renderFactorX - pen.getThickness() / 2.0f;
-		_ellipseRenderer.y = y * _renderFactorY - pen.getThickness() / 2.0f;
-		_ellipseRenderer.width = pen.getThickness();
-		_ellipseRenderer.height = pen.getThickness();
-		g.setPaint(pen.getColor());
-		g.fill(_ellipseRenderer);
-		_isEmpty = false;
+		if (_graphics != null) {
+			_ellipseRenderer.x = x * _renderFactorX - pen.getThickness() / 2.0f;
+			_ellipseRenderer.y = y * _renderFactorY - pen.getThickness() / 2.0f;
+			_ellipseRenderer.width = pen.getThickness();
+			_ellipseRenderer.height = pen.getThickness();
+			_graphics.setPaint(pen.getColor());
+			_graphics.fill(_ellipseRenderer);
+			_isEmpty = false;
+		}
 	}
 
 	/**
 	 * Draws a path
 	 * 
-	 * @param g
-	 *            destination graphics
 	 * @param pen
 	 * @param path
 	 */
-	protected void draw(final Graphics2D g, final IPen pen, final Path2D path) {
-		g.setPaint(pen.getColor());
-		g.setStroke(pen.getStroke());
-		final Shape transformedPath = path
-				.createTransformedShape(AffineTransform.getScaleInstance(
-						_renderFactorX, _renderFactorY));
-		g.draw(transformedPath);
-		_isEmpty = false;
+	public void draw(final IPen pen, final Path2D path) {
+		if (_graphics != null) {
+			_graphics.setPaint(pen.getColor());
+			_graphics.setStroke(pen.getStroke());
+			final Shape transformedPath = path
+					.createTransformedShape(AffineTransform.getScaleInstance(
+							_renderFactorX, _renderFactorY));
+			_graphics.draw(transformedPath);
+			_isEmpty = false;
+		}
 	}
 	
 	/**
 	 * Draws an image
-	 * @param g
 	 * @param image
 	 * @param x
 	 * @param y
@@ -189,11 +193,13 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer {
 	 * @param height
 	 * @param obs (optional)
 	 */
-	protected void draw(final Graphics2D g, final BufferedImage image, final float x, final float y, final float width, final float height, final ImageObserver obs) {
-		final AffineTransform t = AffineTransform.getScaleInstance(_renderFactorX, _renderFactorY);
-		t.translate(x, y);
-		t.scale(width/(float)image.getWidth(obs), height/(float)image.getHeight(obs));
-		g.drawImage(image, t, obs);
-		_isEmpty = false;
+	public void draw(final BufferedImage image, final float x, final float y, final float width, final float height) {
+		if (_graphics != null) {
+			final AffineTransform t = AffineTransform.getScaleInstance(_renderFactorX, _renderFactorY);
+			t.translate(x, y);
+			t.scale(width/(float)image.getWidth(_displayRenderer.getObserver()), height/(float)image.getHeight(_displayRenderer.getObserver()));
+			_graphics.drawImage(image, t, _displayRenderer.getObserver());
+			_isEmpty = false;
+		}
 	}
 }

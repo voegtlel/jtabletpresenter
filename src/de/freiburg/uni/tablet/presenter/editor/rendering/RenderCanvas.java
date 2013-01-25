@@ -2,6 +2,7 @@ package de.freiburg.uni.tablet.presenter.editor.rendering;
 
 import java.awt.Canvas;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -163,6 +164,7 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 			if ((width != _lastRenderWidth) || (height != _lastRenderHeight)) {
 				_lastRenderWidth = width;
 				_lastRenderHeight = height;
+				_pagePenDispatcher.setDrawSize(new Dimension(width, height));
 				if (_renderBuffer != null) {
 					_renderBuffer.resize(width, height);
 				}

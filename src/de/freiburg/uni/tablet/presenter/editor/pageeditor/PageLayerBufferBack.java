@@ -2,12 +2,9 @@ package de.freiburg.uni.tablet.presenter.editor.pageeditor;
 
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
-import java.awt.geom.Path2D;
-import java.awt.image.BufferedImage;
 
 import de.freiburg.uni.tablet.presenter.editor.IPageRepaintListener;
 import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
-import de.freiburg.uni.tablet.presenter.page.IPen;
 
 public class PageLayerBufferBack extends AbstractPageLayerBuffer implements
 		IPageBackRenderer {
@@ -31,38 +28,9 @@ public class PageLayerBufferBack extends AbstractPageLayerBuffer implements
 	
 	@Override
 	protected void repaint() {
-		_graphics.clearRect(0, 0, _renderWidth, _renderHeight);
+		clear();
 		if (_repaintListener != null) {
 			_repaintListener.render(this);
-		}
-	}
-
-	@Override
-	public void draw(final IPen pen, final Path2D path) {
-		if (_graphics != null) {
-			draw(_graphics, pen, path);
-		}
-	}
-
-	@Override
-	public void draw(final IPen pen, final float x, final float y) {
-		if (_graphics != null) {
-			draw(_graphics, pen, x, y);
-		}
-	}
-
-	@Override
-	public void drawGridLine(final IPen pen, final float x1, final float y1,
-			final float x2, final float y2) {
-		if (_graphics != null) {
-			draw(_graphics, pen, x1, y1, x2, y2);
-		}
-	}
-	
-	@Override
-	public void draw(BufferedImage image, float x, float y, float width, float height) {
-		if (_graphics != null) {
-			draw(_graphics, image, x, y, width, height, _displayRenderer.getObserver());
 		}
 	}
 

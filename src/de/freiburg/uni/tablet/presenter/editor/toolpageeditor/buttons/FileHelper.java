@@ -21,6 +21,7 @@ import de.freiburg.uni.tablet.presenter.document.Document;
 import de.freiburg.uni.tablet.presenter.document.DocumentConfig;
 import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
+import de.freiburg.uni.tablet.presenter.document.IEditableDocument;
 import de.freiburg.uni.tablet.presenter.document.PdfSerializable;
 import de.freiburg.uni.tablet.presenter.document.ServerDocument;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
@@ -91,7 +92,7 @@ public class FileHelper {
 		}
 	}
 	
-	public static void saveDocument(final ServerDocument document, final File file) throws IOException {
+	public static void saveDocument(final IEditableDocument document, final File file) throws IOException {
 		final FileOutputStream fileOutputStream = new FileOutputStream(file);
 		
 		final BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(
@@ -193,13 +194,13 @@ public class FileHelper {
 	 * @return
 	 * @throws IOException
 	 */
-	public static ServerDocument openDocument(File file) throws IOException {
+	public static IEditableDocument openDocument(File file) throws IOException {
 		final FileInputStream fileInputStream = new FileInputStream(file);
 		final BufferedInputStream bufferedInputStream = new BufferedInputStream(
 				fileInputStream);
 		final BinaryDeserializer binaryDeserializer = new BinaryDeserializer(
 				bufferedInputStream);
-		final ServerDocument document = binaryDeserializer.readObjectTable();
+		final IEditableDocument document = binaryDeserializer.readObjectTable();
 		bufferedInputStream.close();
 		fileInputStream.close();
 		return document;
@@ -237,18 +238,18 @@ public class FileHelper {
 					editor.getDocumentEditor().setDocument(openDocument(f));
 					return true;
 				} else if (f.getPath().toLowerCase().endsWith(".jpp")) {
-					final DocumentPage page = openPage(f).clone(editor.getDocumentEditor().getDocument());
+					final DocumentPage page = editor.getDocumentEditor().getDocument().clonePage(openPage(f));
 					editor.getDocumentEditor().getDocument().insertPage(
 							editor.getDocumentEditor().getCurrentPage(), page);
 					editor.getDocumentEditor().setCurrentPage(page);
 					return true;
 				} else if (f.getPath().toLowerCase().endsWith(".pdf")) {
-					final PdfModeOption defOpt = new PdfModeOption(ServerDocument.PDF_MODE_CLEAR, "Clear all");
+					final PdfModeOption defOpt = new PdfModeOption(IEditableDocument.PDF_MODE_CLEAR, "Clear all");
 					final Object dialogResult = JOptionPane.showInputDialog(component, "Select PDF Mode", "PDF Loading...", JOptionPane.QUESTION_MESSAGE, null, new Object[] {
 							defOpt,
-						new PdfModeOption(ServerDocument.PDF_MODE_REINDEX, "Reindex Pages"),
-						new PdfModeOption(ServerDocument.PDF_MODE_KEEP_INDEX, "Keep Page Indices"),
-						new PdfModeOption(ServerDocument.PDF_MODE_APPEND, "Append Pdf Pages"),
+						new PdfModeOption(IEditableDocument.PDF_MODE_REINDEX, "Reindex Pages"),
+						new PdfModeOption(IEditableDocument.PDF_MODE_KEEP_INDEX, "Keep Page Indices"),
+						new PdfModeOption(IEditableDocument.PDF_MODE_APPEND, "Append Pdf Pages"),
 						defOpt
 					}, defOpt);
 					if (dialogResult != null) {

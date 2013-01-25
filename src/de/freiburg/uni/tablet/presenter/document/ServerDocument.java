@@ -7,24 +7,7 @@ import de.freiburg.uni.tablet.presenter.list.LinkedElement;
 import de.intarsys.pdf.pd.PDPage;
 import de.intarsys.pdf.pd.PDPageTree;
 
-public class ServerDocument extends Document {
-	/**
-	 * Reset indices and use first page as first pdf page
-	 */
-	public static final int PDF_MODE_REINDEX = 0;
-	/**
-	 * Keep current indices and append if needed
-	 */
-	public static final int PDF_MODE_KEEP_INDEX = 1;
-	/**
-	 * Append the loaded pdf to the end of the document
-	 */
-	public static final int PDF_MODE_APPEND = 2;
-	/**
-	 * Clear all pages and reindex
-	 */
-	public static final int PDF_MODE_CLEAR = 3;
-
+public class ServerDocument extends Document implements IEditableDocument {
 	/**
 	 * Create a new server document.
 	 */
@@ -39,12 +22,10 @@ public class ServerDocument extends Document {
 	 */
 	protected ServerDocument(final int docId, final ServerDocument base) {
 		super(docId, base);
+		_pages.addFirst(new DocumentPage(this));
 	}
 	
-	/**
-	 * Sets the background pdf
-	 * @param document
-	 */
+	@Override
 	public void setPdfPages(final PdfSerializable document, int pdfMode) {
 		if (document != null) {
 			if (pdfMode == PDF_MODE_REINDEX) {
@@ -125,13 +106,7 @@ public class ServerDocument extends Document {
 		}
 	}
 
-	/**
-	 * Gets a page by its index
-	 * 
-	 * @param index
-	 * @param createIfNotExisting
-	 * @return
-	 */
+	@Override
 	public DocumentPage getPageByIndex(final int index,
 			final boolean createIfNotExisting) {
 		// Search manually for performance
@@ -154,69 +129,34 @@ public class ServerDocument extends Document {
 		return page;
 	}
 	
-	/**
-	 * Adds a document page
-	 * 
-	 * @return
-	 * @throws IOException 
-	 */
-	public DocumentPage addPage(final BinaryDeserializer reader) throws IOException {
-		final DocumentPage result = new DocumentPage(reader, this);
+	private DocumentPage addPage(final DocumentPage page) {
+		if (page.getParent() != this) {
+			return addPage(page.clone(this));
+		}
 		final DocumentPage prevData = _pages.getLast() != null ? _pages
 				.getLast().getData() : null;
-		_pages.addLast(result);
-		firePageInserted(prevData, result);
-		return result;
+		_pages.addLast(page);
+		firePageInserted(prevData, page);
+		return page;
 	}
 	
-	/**
-	 * Adds a document page
-	 * 
-	 * @return
-	 */
+	@Override
+	public DocumentPage addPage(final BinaryDeserializer reader) throws IOException {
+		return addPage(new DocumentPage(reader, this));
+	}
+	
+	@Override
 	public DocumentPage addPage() {
-		final DocumentPage result = new DocumentPage(this);
-		final DocumentPage prevData = _pages.getLast() != null ? _pages
-				.getLast().getData() : null;
-		_pages.addLast(result);
-		firePageInserted(prevData, result);
-		return result;
+		return addPage(new DocumentPage(this));
 	}
 
-	/**
-	 * Inserts a page after the given page.
-	 * 
-	 * @param afterPage
-	 *            the previous page to the inserted page (null for first)
-	 * @return
-	 */
-	public DocumentPage insertPage(final DocumentPage afterPage) {
-		final DocumentPage result = new DocumentPage(this);
-		if (afterPage != null) {
-			final LinkedElement<DocumentPage> element = _pages
-					.getElementByInstance(afterPage);
-			if (element == null) {
-				throw new IllegalArgumentException("afterPage not in document");
-			}
-			_pages.insertAfter(element, result);
-			firePageInserted(element.getData(), result);
-		} else {
-			_pages.addFirst(result);
-			firePageInserted(null, result);
-		}
-		return result;
-	}
-
-	/**
-	 * Inserts a page after the given page.
-	 * 
-	 * @param afterPage
-	 *            the previous page to the inserted page (null for first)
-	 * @return
-	 */
+	@Override
 	public DocumentPage insertPage(final DocumentPage afterPage,
 			final DocumentPage page) {
 		if (page.getParent() != this) {
+			return insertPage(afterPage, page.clone(this));
+		}
+		if (afterPage != null && afterPage.getParent() != this) {
 			throw new IllegalStateException("Page has invalid parent");
 		}
 		if (afterPage != null) {
@@ -233,13 +173,13 @@ public class ServerDocument extends Document {
 		}
 		return page;
 	}
+	
+	@Override
+	public DocumentPage insertPage(final DocumentPage afterPage) {
+		return insertPage(afterPage, new DocumentPage(this));
+	}
 
-	/**
-	 * Removes a page.
-	 * 
-	 * @param page
-	 *            the page to remove
-	 */
+	@Override
 	public void removePage(final DocumentPage page) {
 		if (page.getParent() != this) {
 			throw new IllegalStateException("Page has invalid parent");
@@ -249,27 +189,35 @@ public class ServerDocument extends Document {
 		if (element == null) {
 			throw new IllegalArgumentException("afterPage not in document");
 		}
+		if (_pages.hasOne()) {
+			addPage();
+		}
 		final LinkedElement<DocumentPage> prevPage = element.getPrevious();
 		_pages.remove(element);
 		firePageRemoved(prevPage.getData(), element.getData());
 	}
 	
-	/**
-	 * Removes all pages
-	 */
+	@Override
 	public void clear() {
-		while (!_pages.isEmpty()) {
+		addPage();
+		while (!_pages.hasOne()) {
 			final LinkedElement<DocumentPage> element = _pages.getFirst();
 			_pages.removeFirst();
 			firePageRemoved(null, element.getData());
 		}
 	}
 	
+	@Override
+	public DocumentPage clonePage(final DocumentPage page) {
+		return page.clone(this);
+	}
+	
 	public ServerDocument(final BinaryDeserializer reader) throws IOException {
 		super(reader);
 	}
 	
-	public ServerDocument clone(final int docId) {
+	@Override
+	public IEditableDocument clone(final int docId) {
 		return new ServerDocument(docId, this);
 	}
 }

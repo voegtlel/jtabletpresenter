@@ -79,15 +79,16 @@ public class DocumentHistory {
 			}
 		};
 		_documentEditor.addListener(new DocumentEditorAdapter() {
+			
 			@Override
-			public void documentChanged(final Document lastDocument) {
+			public void documentChanged(IEditableDocument lastDocument) {
 				if (lastDocument != null) {
 					lastDocument.removeListener(_documentListener);
 				}
 				_documentEditor.getDocument().addListener(_documentListener);
 				//TODO addAction(new SetDocumentAction(_documentEditor.getDocument()));
 				// Clear history
-				_history.clear();
+				clear();
 			}
 			
 			@Override
@@ -100,7 +101,19 @@ public class DocumentHistory {
 			}
 		});
 	}
+	
+	/**
+	 * Clear history
+	 */
+	public void clear() {
+		_history.clear();
+		_top = null;
+		_topNext = null;
+	}
 
+	/**
+	 * Begin an action group
+	 */
 	public void beginActionGroup() {
 		if (_currentActionGroup == null) {
 			ActionGroup res = new ActionGroup();
@@ -109,12 +122,19 @@ public class DocumentHistory {
 		}
 	}
 
+	/**
+	 * End action group
+	 */
 	public void endActionGroup() {
 		if (_currentActionGroup != null) {
 			_currentActionGroup = null;
 		}
 	}
 
+	/**
+	 * Add an action if the action has undo capabilities. Always fires events
+	 * @param action
+	 */
 	public void addAction(final IAction action) {
 		if (action.hasUndoAction()) {
 			if (_currentActionGroup != null) {
@@ -132,14 +152,25 @@ public class DocumentHistory {
 		fireActionAdded(action);
 	}
 
+	/**
+	 * Checks if there is an undoable action
+	 * @return
+	 */
 	public boolean hasUndoAction() {
 		return _top != null;
 	}
 
+	/**
+	 * Checks if there is a redoable action
+	 * @return
+	 */
 	public boolean hasRedoAction() {
 		return _topNext != null;
 	}
 
+	/**
+	 * Performs undo or does nothing if not available
+	 */
 	public void undo() {
 		if (_top != null && !_isPerforming) {
 			_isPerforming = true;
@@ -153,6 +184,9 @@ public class DocumentHistory {
 		}
 	}
 
+	/**
+	 * Performs redo or does nothing if not available
+	 */
 	public void redo() {
 		if (_topNext != null && !_isPerforming) {
 			_isPerforming = true;

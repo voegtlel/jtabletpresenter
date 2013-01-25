@@ -18,7 +18,7 @@ public class DocumentEditor implements IBinarySerializableId {
 
 	private Document _baseDocument = null;
 	
-	private ServerDocument _document = null;
+	private IEditableDocument _document = null;
 	private final DocumentHistory _history;
 	private DocumentPage _currentPage = null;
 	private DocumentPage _currentBackPage = null;
@@ -159,20 +159,27 @@ public class DocumentEditor implements IBinarySerializableId {
 		// Create all pages
 		_document.getPageByIndex(length - 1, true);
 	}
+	
+	/**
+	 * @return
+	 */
+	public Document getBaseDocument() {
+		return _baseDocument;
+	}
 
 	/**
 	 * @return
 	 */
-	public ServerDocument getDocument() {
+	public IEditableDocument getDocument() {
 		return _document;
 	}
 
 	/**
 	 * @param document
 	 */
-	public void setDocument(final ServerDocument document) {
+	public void setDocument(final IEditableDocument document) {
 		fireChanging();
-		final ServerDocument lastDocument = _document;
+		final IEditableDocument lastDocument = _document;
 		_document = document;
 		fireDocumentChanged(lastDocument);
 		setCurrentPage(document.getPageByIndex(0, true));
@@ -199,7 +206,7 @@ public class DocumentEditor implements IBinarySerializableId {
 		}
 	}
 
-	private void fireDocumentChanged(final Document lastDocument) {
+	private void fireDocumentChanged(final IEditableDocument lastDocument) {
 		for (final DocumentEditorListener listener : _listeners) {
 			listener.documentChanged(lastDocument);
 		}

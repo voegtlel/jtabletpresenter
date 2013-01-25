@@ -3,7 +3,6 @@ package de.freiburg.uni.tablet.presenter.editor.pdf;
 import java.awt.Graphics;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
-import java.awt.geom.Line2D;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
@@ -36,7 +35,6 @@ public class PdfRenderer implements IPageBackRenderer {
 	private float _renderFactorY = 1;
 
 	private final Ellipse2D.Float _ellipseRenderer = new Ellipse2D.Float();
-	private final Line2D.Float _lineRenderer = new Line2D.Float();
 
 	private Map<Object, Object> _baseCopiedMap = new HashMap<Object, Object>();
 	private PDDocument _pdf;
@@ -163,20 +161,6 @@ public class PdfRenderer implements IPageBackRenderer {
 		_renderFactorY = _pageSize.getHeight();
 	}
 	
-	@Override
-	public void drawGridLine(final IPen pen, final float x1,
-			final float y1, final float x2, final float y2) {
-		_lineRenderer.x1 = x1 * _renderFactorX;
-		_lineRenderer.y1 = _renderFactorY - y1 * _renderFactorY;
-		_lineRenderer.x2 = x2 * _renderFactorX;
-		_lineRenderer.y2 = _renderFactorY - y2 * _renderFactorY;
-		_creator.setStrokeColorRGB(pen.getColor().getRed()/255f, pen.getColor().getGreen()/255f, pen.getColor().getBlue()/255f);
-		_creator.setLineWidth(pen.getThickness() * _thicknessFactor);
-		_creator.penMoveTo(_lineRenderer.x1, _lineRenderer.y1);
-		_creator.penLineTo(_lineRenderer.x2, _lineRenderer.y2);
-		_creator.pathStroke();
-	}
-
 	@Override
 	public void draw(final IPen pen, final float x,
 			final float y) {

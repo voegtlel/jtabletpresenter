@@ -15,7 +15,7 @@ public interface DocumentEditorListener {
 	 * 
 	 * @param lastDocument
 	 */
-	void documentChanged(Document lastDocument);
+	void documentChanged(IEditableDocument lastDocument);
 
 	/**
 	 * Fired when something is about to change
