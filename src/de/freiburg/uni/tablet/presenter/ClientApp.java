@@ -11,17 +11,19 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 import com.sun.jna.NativeLibrary;
 
+import de.freiburg.uni.tablet.presenter.actions.SetServerDocumentAction;
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.document.DocumentConfig;
-import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
 import de.freiburg.uni.tablet.presenter.document.ServerDocument;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.JPageEditor;
 import de.freiburg.uni.tablet.presenter.net2.ClientDownSync;
 import de.freiburg.uni.tablet.presenter.net2.ClientUpSync;
+import de.freiburg.uni.tablet.presenter.net2.NetSyncListener;
 import de.freiburg.uni.tablet.presenter.page.SolidPen;
 
 public class ClientApp {
@@ -85,24 +87,39 @@ public class ClientApp {
 		_pageRenderer.setBounds(100, 100, 640, 480);
 		_pageRenderer.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-		DocumentEditor doc = null;
+		_pageRenderer.getDocumentEditor().setDocument(new ServerDocument(1));
+		
 		if (_pageRenderer.getConfig().getBoolean("client.down.enabled", false)) {
-			doc = new DocumentEditor();
-			ClientDownSync clientDownSync = new ClientDownSync(doc, _pageRenderer.getPageEditor());
+			final ClientDownSync clientDownSync = new ClientDownSync(_pageRenderer.getDocumentEditor(), _pageRenderer.getPageEditor());
+			clientDownSync.setAuthToken(_pageRenderer.getConfig().getString("client.down.authToken", ""));
+			clientDownSync.setClientName(_pageRenderer.getConfig().getString("client.down.name", "Client"));
+			
+			clientDownSync.addListener(new NetSyncListener() {
+				@Override
+				public void onError(final Exception e) {
+					JOptionPane.showMessageDialog(_pageRenderer, "Error: " + e.toString());
+				}
+				
+				@Override
+				public void onDisconnected() {
+					int res = JOptionPane.showConfirmDialog(_pageRenderer, "Disconnected. Reconnect?");
+					if (res == JOptionPane.OK_OPTION) {
+						clientDownSync.start(_pageRenderer.getConfig().getString("client.down.host", ""),
+								_pageRenderer.getConfig().getInt("client.down.port", 8024),
+								_pageRenderer.getConfig().getInt("client.down.timeout", 5000));
+					}
+				}
+				
+				@Override
+				public void onConnected() {
+					System.out.println("Connected");
+				}
+			});
 			
 			System.out.println("Connect remote");
 			clientDownSync.start(_pageRenderer.getConfig().getString("client.down.host", ""),
 					_pageRenderer.getConfig().getInt("client.down.port", 8024),
-					_pageRenderer.getConfig().getInt("client.down.timeout", 5000000));
-			System.out.println("Wait for document...");
-			try {
-				while (!clientDownSync.hasDocument()) {
-					Thread.sleep(100);
-				}
-			} catch (InterruptedException e1) {
-				e1.printStackTrace();
-			}
-			System.out.println("Done");
+					_pageRenderer.getConfig().getInt("client.down.timeout", 5000));
 		} else {
 			if (_pageRenderer.getConfig().getBoolean("autosave.loadStartup", false)) {
 				final File savedSession = new File("session.dat");
@@ -111,7 +128,7 @@ public class ClientApp {
 						System.out.println("Loading session");
 						FileInputStream is = new FileInputStream(savedSession);
 						BinaryDeserializer bd = new BinaryDeserializer(is);
-						doc = bd.readSerializableClass();
+						_pageRenderer.getDocumentEditor().deserialize(bd);
 						is.close();
 						System.out.println("Session loaded");
 					} catch (IOException e) {
@@ -119,25 +136,38 @@ public class ClientApp {
 					}
 				}
 			}
-			if (doc == null) {
-				System.out.println("Create new session");
-				doc = new DocumentEditor();
-			}
 		}
-		doc.setCurrentPen(new SolidPen(_pageRenderer.getConfig().getFloat("editor.defaultPen.thickness", 1f), _pageRenderer.getConfig().getColor("editor.defaultPen.color", Color.black)));
-		//_pageRenderer.setDocumentEditor(doc);
-		// TODO: Temporary create fixed
-		_pageRenderer.getDocumentEditor().setDocument(new ServerDocument(1));
-		// TODO: Double performing (see 3 lines above)
 		_pageRenderer.getDocumentEditor().setCurrentPen(new SolidPen(_pageRenderer.getConfig().getFloat("editor.defaultPen.thickness", 1f), _pageRenderer.getConfig().getColor("editor.defaultPen.color", Color.black)));
 		
 		if (_pageRenderer.getConfig().getBoolean("client.up.enabled", false)) {
-			ClientUpSync clientSync = new ClientUpSync(doc.getHistory());
+			final ClientUpSync clientSync = new ClientUpSync(_pageRenderer.getDocumentEditor().getHistory());
+			clientSync.setAuthToken(_pageRenderer.getConfig().getString("client.up.authToken", ""));
+			clientSync.setClientName(_pageRenderer.getConfig().getString("client.up.name", "Client"));
+			clientSync.addListener(new NetSyncListener() {
+				@Override
+				public void onError(final Exception e) {
+					JOptionPane.showMessageDialog(_pageRenderer, "Error: " + e.toString());
+				}
+				
+				@Override
+				public void onDisconnected() {
+					int res = JOptionPane.showConfirmDialog(_pageRenderer, "Disconnected. Reconnect?");
+					if (res == JOptionPane.OK_OPTION) {
+						clientSync.start(_pageRenderer.getConfig().getString("client.down.host", ""),
+								_pageRenderer.getConfig().getInt("client.down.port", 8025),
+								_pageRenderer.getConfig().getInt("client.down.timeout", 5000));
+					}
+				}
+				
+				@Override
+				public void onConnected() {
+				}
+			});
 			System.out.println("Connect remote");
 			clientSync.start(_pageRenderer.getConfig().getString("client.up.host", ""),
 					_pageRenderer.getConfig().getInt("client.up.port", 8025),
-					_pageRenderer.getConfig().getInt("client.up.timeout", 5000000));
-			//clientSync.onActionPerformed(new SetDocumentAction(doc.getDocument().getClientId(), doc.getDocument().getClientId(), doc.getDocument()));
+					_pageRenderer.getConfig().getInt("client.up.timeout", 5000));
+			clientSync.onActionPerformed(new SetServerDocumentAction(_pageRenderer.getDocumentEditor().getDocument()));
 		}
 		
 		_pageRenderer.addWindowListener(new WindowAdapter() {
@@ -161,8 +191,6 @@ public class ClientApp {
 				}
 			}
 		});
-		
-		doc.setDocument(new ServerDocument(1));
 
 		/*
 		 * _pageRenderer.setPage(new DefaultPage());

@@ -26,7 +26,7 @@ public class PackageInputStream extends InputStream {
 	}
 	
 	@Override
-	public int read(byte[] b, int off, int len) throws IOException {
+	public int read(final byte[] b, final int off, final int len) throws IOException {
 		return _inputStream.read(b, off, len);
 	}
 	
@@ -36,12 +36,12 @@ public class PackageInputStream extends InputStream {
 	}
 	
 	@Override
-	public long skip(long n) throws IOException {
+	public long skip(final long n) throws IOException {
 		return _inputStream.skip(n);
 	}
 	
 	@Override
-	public int read(byte[] b) throws IOException {
+	public int read(final byte[] b) throws IOException {
 		return _inputStream.read(b);
 	}
 	
@@ -54,7 +54,14 @@ public class PackageInputStream extends InputStream {
 	 * Gets the next package from the source
 	 */
 	public boolean nextPackage() {
-		int packageSize = _packageReader.readPackageSize();
+		final int packageSize = _packageReader.readPackageSize();
+		return nextPackageRaw(packageSize);
+	}
+	
+	/**
+	 * Gets the next package from the source
+	 */
+	public boolean nextPackageRaw(final int packageSize) {
 		if (_buffer.length < packageSize) {
 			int n = packageSize - 1;
 			n = n | (n >> 1);

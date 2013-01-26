@@ -40,17 +40,6 @@ public class ActionGroup implements IAction {
 	public void addAction(IAction action) {
 		_actions.addLast(action);
 	}
-	
-	@Override
-	public boolean mustRedraw(final DocumentEditor editor) {
-		for (LinkedElement<IAction> e = _actions.getFirst(); e != null; e = e
-				.getNext()) {
-			if (e.getData().mustRedraw(editor)) {
-				return true;
-			}
-		}
-		return false;
-	}
 
 	@Override
 	public boolean hasUndoAction() {

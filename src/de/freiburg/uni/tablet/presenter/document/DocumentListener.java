@@ -9,7 +9,7 @@ public interface DocumentListener {
 	 * @param prevPage
 	 * @param page
 	 */
-	void pageInserted(DocumentPage prevPage, DocumentPage page);
+	void pageInserted(IEditableDocument document, DocumentPage prevPage, DocumentPage page);
 
 	/**
 	 * Called, when a page was removed
@@ -17,7 +17,7 @@ public interface DocumentListener {
 	 * @param index
 	 * @param page
 	 */
-	void pageRemoved(DocumentPage prevPage, DocumentPage page);
+	void pageRemoved(IEditableDocument document, DocumentPage prevPage, DocumentPage page);
 
 	/**
 	 * Called, when a renderable was added
@@ -51,4 +51,11 @@ public interface DocumentListener {
 	 * @param renderable
 	 */
 	void renderableModified(IRenderable renderable, DocumentPage page);
+	
+	/**
+	 * Called, when a modifying a renderable ends
+	 * @param page
+	 * @param renderable
+	 */
+	void renderableModifyEnd(IRenderable renderable, DocumentPage page);
 }

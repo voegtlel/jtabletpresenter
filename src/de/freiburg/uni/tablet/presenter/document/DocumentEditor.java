@@ -27,7 +27,6 @@ public class DocumentEditor implements IBinarySerializableId {
 
 	public DocumentEditor() {
 		_history = new DocumentHistory(this);
-		//_currentPen = new SolidPen(config.getFloat("editor.defaultPen.thickness", 1f), config.getColor("editor.defaultPen.color", Color.black));
 	}
 
 	/**
@@ -151,13 +150,22 @@ public class DocumentEditor implements IBinarySerializableId {
 	 */
 	public void setBaseDocument(final IDocument baseDocument) {
 		fireChanging();
+		final IDocument lastDocument = _baseDocument;
 		_baseDocument = baseDocument;
-		int length = _baseDocument.getPageCount();
-		if (getCurrentPageIndex() >= length) {
-			setCurrentPageByIndex(length - 1, true);
+		fireBaseDocumentChanged(lastDocument);
+		boolean pageChanged = false;
+		if (_baseDocument != null) {
+			int length = _baseDocument.getPageCount();
+			if (getCurrentPageIndex() >= length) {
+				setCurrentPageByIndex(length - 1, true);
+				pageChanged = true;
+			}
+			// Create all pages
+			_document.getPageByIndex(length - 1, true);
 		}
-		// Create all pages
-		_document.getPageByIndex(length - 1, true);
+		if (!pageChanged) {
+			setCurrentPage(_currentPage);
+		}
 	}
 	
 	/**
@@ -211,6 +219,12 @@ public class DocumentEditor implements IBinarySerializableId {
 			listener.documentChanged(lastDocument);
 		}
 	}
+	
+	private void fireBaseDocumentChanged(final IDocument lastDocument) {
+		for (final DocumentEditorListener listener : _listeners) {
+			listener.baseDocumentChanged(lastDocument);
+		}
+	}
 
 	/**
 	 * @return
@@ -221,8 +235,10 @@ public class DocumentEditor implements IBinarySerializableId {
 
 	public DocumentEditor(final BinaryDeserializer reader) throws IOException {
 		_document = reader.readObjectTable();
+		_baseDocument = reader.readObjectTable();
 		_currentPen = reader.readSerializableClass();
-		_currentPage = reader.readObjectTable();
+		int pageIndex = reader.readInt();
+		setCurrentPageByIndex(pageIndex, false);
 		_history = new DocumentHistory(this);
 	}
 
@@ -231,7 +247,20 @@ public class DocumentEditor implements IBinarySerializableId {
 		writer.writeObjectTable(_document);
 		writer.writeObjectTable(_baseDocument);
 		writer.writeSerializableClass(_currentPen);
-		writer.writeObjectTable(_currentPage);
+		writer.writeInt(getCurrentPageIndex());
+	}
+	
+	/**
+	 * Override this by deserializing an editor
+	 * @param reader
+	 * @throws IOException
+	 */
+	public void deserialize(final BinaryDeserializer reader) throws IOException {
+		setDocument((IEditableDocument) reader.readObjectTable());
+		setBaseDocument((IEditableDocument) reader.readObjectTable());
+		setCurrentPen((IPen) reader.readSerializableClass());
+		int pageIndex = reader.readInt();
+		setCurrentPageByIndex(pageIndex, false);
 	}
 
 	@Override

@@ -136,7 +136,7 @@ public class ServerDocument extends Document implements IEditableDocument {
 		final DocumentPage prevData = _pages.getLast() != null ? _pages
 				.getLast().getData() : null;
 		_pages.addLast(page);
-		firePageInserted(prevData, page);
+		firePageInserted(this, prevData, page);
 		return page;
 	}
 	
@@ -166,10 +166,10 @@ public class ServerDocument extends Document implements IEditableDocument {
 				throw new IllegalArgumentException("afterPage not in document");
 			}
 			_pages.insertAfter(element, page);
-			firePageInserted(element.getData(), page);
+			firePageInserted(this, element.getData(), page);
 		} else {
 			_pages.addFirst(page);
-			firePageInserted(null, page);
+			firePageInserted(this, null, page);
 		}
 		return page;
 	}
@@ -194,7 +194,7 @@ public class ServerDocument extends Document implements IEditableDocument {
 		}
 		final LinkedElement<DocumentPage> prevPage = element.getPrevious();
 		_pages.remove(element);
-		firePageRemoved(prevPage.getData(), element.getData());
+		firePageRemoved(this, prevPage.getData(), element.getData());
 	}
 	
 	@Override
@@ -203,7 +203,7 @@ public class ServerDocument extends Document implements IEditableDocument {
 		while (!_pages.hasOne()) {
 			final LinkedElement<DocumentPage> element = _pages.getFirst();
 			_pages.removeFirst();
-			firePageRemoved(null, element.getData());
+			firePageRemoved(this, null, element.getData());
 		}
 	}
 	

@@ -7,6 +7,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Toolkit;
+import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.image.BufferStrategy;
@@ -59,23 +60,10 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 			}
 		});
 		
-		addComponentListener(new ComponentListener() {
-			@Override
-			public void componentShown(ComponentEvent e) {
-			}
-			
+		addComponentListener(new ComponentAdapter() {
 			@Override
 			public void componentResized(ComponentEvent e) {
 				requireRepaint();
-			}
-			
-			@Override
-			public void componentHidden(ComponentEvent e) {
-				stop();
-			}
-			
-			@Override
-			public void componentMoved(ComponentEvent e) {
 			}
 		});
 		
@@ -83,13 +71,12 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 		AwtPenToolkit.addPenListener(this, _pagePenDispatcher);
 		AwtPenToolkit.getPenManager().pen.levelEmulator
 				.setPressureTriggerForLeftCursorButton(0.5f);
-		start();
 	}
 	
 	/**
 	 * Start the rendering thread
 	 */
-	protected void start() {
+	public void start() {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
@@ -105,7 +92,7 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 	 * Stop the rendering thread
 	 */
 	@SuppressWarnings("deprecation")
-	protected void stop() {
+	public void stop() {
 		if (_renderThread.isAlive()) {
 			synchronized (_repaintMonitor) {
 				_running = false;

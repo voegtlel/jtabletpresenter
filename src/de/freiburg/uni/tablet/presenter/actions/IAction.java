@@ -32,11 +32,4 @@ public interface IAction extends IBinarySerializable {
 	 * @param editor
 	 */
 	void perform(DocumentEditor editor);
-	
-	/**
-	 * Checks if the action consequences a redraw
-	 * @param editor
-	 * @return
-	 */
-	boolean mustRedraw(DocumentEditor editor);
 }

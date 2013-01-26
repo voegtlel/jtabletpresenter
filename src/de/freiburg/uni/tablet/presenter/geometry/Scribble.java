@@ -144,6 +144,9 @@ public class Scribble extends AbstractRenderable {
 	
 	@Override
 	public boolean eraseEnd(final EraseInfo eraseInfo) {
+		if (!_segments.isEmpty()) {
+			_parent.fireRenderableModifyEnd(this);
+		}
 		return !_segments.isEmpty();
 	}
 
@@ -169,10 +172,7 @@ public class Scribble extends AbstractRenderable {
 	public Scribble(final BinaryDeserializer reader) throws IOException {
 		super(reader);
 		_pen = reader.readSerializableClass();
-		final int count = reader.readInt();
-		for (int i = 0; i < count; i++) {
-			_segments.addLast(new ScribbleSegment(reader));
-		}
+		deserializeData(reader);
 	}
 
 	@Override
@@ -180,6 +180,21 @@ public class Scribble extends AbstractRenderable {
 		super.serialize(writer);
 		writer.writeSerializableClass(_pen);
 		// Always has first
+		serializeData(writer);
+	}
+	
+	@Override
+	public void deserializeData(final BinaryDeserializer reader) throws IOException {
+		final int count = reader.readInt();
+		_segments.clear();
+		for (int i = 0; i < count; i++) {
+			_segments.addLast(new ScribbleSegment(reader));
+		}
+		_parent.fireRenderableModified(this);
+	}
+	
+	@Override
+	public void serializeData(final BinarySerializer writer) throws IOException {
 		writer.writeInt(_segments.getFirst().getNextCount());
 		for (LinkedElement<ScribbleSegment> element = _segments.getFirst(); element != null; element = element
 				.getNext()) {

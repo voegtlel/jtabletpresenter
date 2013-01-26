@@ -15,6 +15,8 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.List;
 
 import javax.swing.AbstractAction;
@@ -32,6 +34,7 @@ import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
 import de.freiburg.uni.tablet.presenter.document.DocumentEditorAdapter;
 import de.freiburg.uni.tablet.presenter.document.DocumentListener;
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
+import de.freiburg.uni.tablet.presenter.document.IDocument;
 import de.freiburg.uni.tablet.presenter.document.IEditableDocument;
 import de.freiburg.uni.tablet.presenter.document.PdfPageSerializable;
 import de.freiburg.uni.tablet.presenter.editor.IPageEditor;
@@ -113,6 +116,12 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 					final DocumentPage page) {
 				onRenderableChanged(renderable, page);
 			}
+			
+			@Override
+			public void renderableModifyEnd(final IRenderable renderable,
+					final DocumentPage page) {
+				// Not interesting here
+			}
 		};
 
 		_documentEditor.addListener(new DocumentEditorAdapter() {
@@ -131,6 +140,11 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 			public void documentChanged(final IEditableDocument lastDocument) {
 				onDocumentChanged(lastDocument);
 			}
+			
+			@Override
+			public void baseDocumentChanged(final IDocument lastDocument) {
+				onBaseDocumentChanged(lastDocument);
+			}
 		});
 		_config = config;
 		initialize();
@@ -141,6 +155,18 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 	 */
 	private void initialize() {
 		getContentPane().setLayout(new BorderLayout(0, 0));
+		
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowOpened(WindowEvent e) {
+				onWindowOpened();
+			}
+			
+			@Override
+			public void windowClosing(WindowEvent e) {
+				onWindowClosing();
+			}
+		});
 		
 		final RenderCanvas pageRenderer = new RenderCanvas();
 		_pageRenderer = pageRenderer;
@@ -168,6 +194,14 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 		registerShortcuts();
 		
 		_config.write(false);
+	}
+
+	protected void onWindowClosing() {
+		_pageRenderer.stop();
+	}
+
+	protected void onWindowOpened() {
+		_pageRenderer.start();
 	}
 
 	public void setToolButtons(final IButtonAction[] buttons) {
@@ -349,6 +383,15 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 		}
 		if (_documentEditor.getDocument() != null) {
 			_documentEditor.getDocument().addListener(_documentListener);
+		}
+	}
+	
+	protected void onBaseDocumentChanged(final IDocument lastDocument) {
+		if (lastDocument != null) {
+			lastDocument.removeListener(_documentListener);
+		}
+		if (_documentEditor.getBaseDocument() != null) {
+			_documentEditor.getBaseDocument().addListener(_documentListener);
 		}
 	}
 	

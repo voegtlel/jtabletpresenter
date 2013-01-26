@@ -122,6 +122,7 @@ public class BitmapImage extends AbstractRenderable {
 			ellipse.height *= (float)_image.getHeight() / _height;
 			System.out.println("Ellipse: " + ellipse.x + ", " + ellipse.y + ", " + ellipse.width + "x" + ellipse.height);
 			g.fill(ellipse);
+			_parent.fireRenderableModified(this);
 		}
 		return true;
 	}
@@ -130,30 +131,44 @@ public class BitmapImage extends AbstractRenderable {
 	public boolean eraseEnd(final EraseInfo eraseInfo) {
 		final Graphics2D graphics = eraseInfo.getObjectData(this, DATA_ID_GRAPHICS2D);
 		graphics.dispose();
-		Rectangle newRect = new Rectangle();
-		BufferedImage reducedImage = BitmapHelper.reduceImage(_image, newRect);
+		final Rectangle newRect = new Rectangle();
+		final BufferedImage reducedImage = BitmapHelper.reduceImage(_image, newRect);
 		if (reducedImage == null) {
 			System.out.println("Full Reduced");
 			return false;
 		}
-		_image = reducedImage;
-		try {
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			ImageIO.write(reducedImage, "PNG", bos);
-			_fileData = bos.toByteArray();
-			int origWidth = _image.getWidth();
-			int origHeight = _image.getHeight();
-			_x = _x + _width * (float)newRect.x / (float)origWidth;
-			_y = _y + _height * (float)newRect.y / (float)origHeight;
-			_width = _width * (float)newRect.width / (float)origWidth;
-			_height = _height * (float)newRect.height / (float)origHeight;
-			System.out.println("Stored new image data for " + _x + ", " + _y + ", " + _width + "x" + _height);
-		} catch (IOException e) {
-			e.printStackTrace();
-			return false;
+		if (_image != reducedImage) {
+			_image = reducedImage;
+			try {
+				final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+				ImageIO.write(reducedImage, "PNG", bos);
+				_fileData = bos.toByteArray();
+				final int origWidth = _image.getWidth();
+				final int origHeight = _image.getHeight();
+				_x = _x + _width * (float)newRect.x / (float)origWidth;
+				_y = _y + _height * (float)newRect.y / (float)origHeight;
+				_width = _width * (float)newRect.width / (float)origWidth;
+				_height = _height * (float)newRect.height / (float)origHeight;
+				System.out.println("Stored new image data for " + _x + ", " + _y + ", " + _width + "x" + _height);
+			} catch (IOException e) {
+				e.printStackTrace();
+				return false;
+			}
+			_parent.fireRenderableModified(this);
 		}
+		_parent.fireRenderableModifyEnd(this); 
 		System.out.println("End Successfull");
 		return true;
+	}
+	
+	@Override
+	public boolean collides(final CollisionInfo collisionInfo) {
+		return collisionInfo.collides(_x, _y, _x + _width, _y + _height);
+	}
+
+	@Override
+	public void render(final IPageBackRenderer renderer) {
+		renderer.draw(_image, _x, _y, _width, _height);
 	}
 	
 	public void setLocation(float x, float y) {
@@ -177,37 +192,7 @@ public class BitmapImage extends AbstractRenderable {
 	public float getY() {
 		return _y;
 	}
-
-	@Override
-	public boolean collides(final CollisionInfo collisionInfo) {
-		return collisionInfo.collides(_x, _y, _x + _width, _y + _height);
-	}
-
-	@Override
-	public void render(final IPageBackRenderer renderer) {
-		renderer.draw(_image, _x, _y, _width, _height);
-	}
-
-	public BitmapImage(final BinaryDeserializer reader) throws IOException {
-		super(reader);
-		_x = reader.readFloat();
-		_y = reader.readFloat();
-		_width = reader.readFloat();
-		_height = reader.readFloat();
-		_fileData = reader.readByteArray();
-		_image = readImage(_fileData);
-	}
-
-	@Override
-	public void serialize(final BinarySerializer writer) throws IOException {
-		super.serialize(writer);
-		writer.writeFloat(_x);
-		writer.writeFloat(_y);
-		writer.writeFloat(_width);
-		writer.writeFloat(_height);
-		writer.writeByteArray(_fileData, 0, _fileData.length);
-	}
-
+	
 	@Override
 	public float getMinX() {
 		return Math.min(_x, _x + _width);
@@ -231,5 +216,36 @@ public class BitmapImage extends AbstractRenderable {
 	@Override
 	public float getRadius() {
 		return 0;
+	}
+
+	public BitmapImage(final BinaryDeserializer reader) throws IOException {
+		super(reader);
+		deserializeData(reader);
+	}
+
+	@Override
+	public void serialize(final BinarySerializer writer) throws IOException {
+		super.serialize(writer);
+		serializeData(writer);
+	}
+	
+	@Override
+	public void deserializeData(final BinaryDeserializer reader) throws IOException {
+		_x = reader.readFloat();
+		_y = reader.readFloat();
+		_width = reader.readFloat();
+		_height = reader.readFloat();
+		_fileData = reader.readByteArray();
+		_image = readImage(_fileData);
+		_parent.fireRenderableModified(this);
+	}
+	
+	@Override
+	public void serializeData(final BinarySerializer writer) throws IOException {
+		writer.writeFloat(_x);
+		writer.writeFloat(_y);
+		writer.writeFloat(_width);
+		writer.writeFloat(_height);
+		writer.writeByteArray(_fileData, 0, _fileData.length);
 	}
 }

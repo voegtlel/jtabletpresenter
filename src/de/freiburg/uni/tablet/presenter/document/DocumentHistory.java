@@ -15,6 +15,7 @@ import de.freiburg.uni.tablet.presenter.actions.ChangePdfPageAction;
 import de.freiburg.uni.tablet.presenter.actions.IAction;
 import de.freiburg.uni.tablet.presenter.actions.RemovePageAction;
 import de.freiburg.uni.tablet.presenter.actions.RemoveRenderableAction;
+import de.freiburg.uni.tablet.presenter.actions.RenderableModifiedAction;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 import de.freiburg.uni.tablet.presenter.list.LinkedElement;
 import de.freiburg.uni.tablet.presenter.list.LinkedElementList;
@@ -55,18 +56,18 @@ public class DocumentHistory {
 			}
 
 			@Override
-			public void pageRemoved(final DocumentPage prevPage,
+			public void pageRemoved(final IEditableDocument document, final DocumentPage prevPage,
 					final DocumentPage page) {
 				if (!_isPerforming) {
-					addAction(new RemovePageAction(prevPage, page));
+					addAction(new RemovePageAction(document, prevPage, page));
 				}
 			}
 
 			@Override
-			public void pageInserted(final DocumentPage prevPage,
+			public void pageInserted(final IEditableDocument document, final DocumentPage prevPage,
 					final DocumentPage page) {
 				if (!_isPerforming) {
-					addAction(new AddPageAction(prevPage, page));
+					addAction(new AddPageAction(document, prevPage, page));
 				}
 			}
 			
@@ -81,6 +82,14 @@ public class DocumentHistory {
 			@Override
 			public void renderableModified(final IRenderable renderable,
 					final DocumentPage page) {
+			}
+			
+			@Override
+			public void renderableModifyEnd(final IRenderable renderable,
+					final DocumentPage page) {
+				if (!_isPerforming) {
+					addAction(new RenderableModifiedAction(renderable));
+				}
 			}
 		};
 		_documentEditor.addListener(new DocumentEditorAdapter() {

@@ -10,19 +10,22 @@ import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
+import de.freiburg.uni.tablet.presenter.document.IEditableDocument;
 
 /**
  * @author lukas
  * 
  */
 public class RemovePageAction implements IAction {
+	private final IEditableDocument _document;
 	private final DocumentPage _prevPage;
 	private final DocumentPage _page;
 
 	/**
 	 * 
 	 */
-	public RemovePageAction(final DocumentPage prevPage, final DocumentPage page) {
+	public RemovePageAction(final IEditableDocument document, final DocumentPage prevPage, final DocumentPage page) {
+		_document = document;
 		_prevPage = prevPage;
 		_page = page;
 	}
@@ -32,13 +35,9 @@ public class RemovePageAction implements IAction {
 	 * 
 	 */
 	public RemovePageAction(final BinaryDeserializer reader) throws IOException {
+		_document = reader.readObjectTable();
 		_prevPage = reader.readObjectTable();
 		_page = reader.readObjectTable();
-	}
-	
-	@Override
-	public boolean mustRedraw(DocumentEditor editor) {
-		return editor.getCurrentPage() == _page;
 	}
 
 	@Override
@@ -48,16 +47,17 @@ public class RemovePageAction implements IAction {
 
 	@Override
 	public IAction getUndoAction() {
-		return new AddPageAction(_prevPage, _page);
+		return new AddPageAction(_document, _prevPage, _page);
 	}
 
 	@Override
 	public void perform(final DocumentEditor editor) {
-		editor.getDocument().removePage(_page);
+		_document.removePage(_page);
 	}
 
 	@Override
 	public void serialize(final BinarySerializer writer) throws IOException {
+		writer.writeObjectTable(_document);
 		writer.writeObjectTable(_prevPage);
 		writer.writeObjectTable(_page);
 	}

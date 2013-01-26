@@ -9,54 +9,49 @@ import java.io.IOException;
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
-import de.freiburg.uni.tablet.presenter.document.DocumentPage;
+import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 
 /**
  * @author lukas
  * 
  */
-public class ChangePageIndexAction implements IAction {
-	private final DocumentPage _page;
-	private final DocumentPage _lastPage;
+public class RenderableModifiedAction implements IAction {
+	private final IRenderable _renderableInstance;
 
 	/**
 	 * 
 	 */
-	public ChangePageIndexAction(final DocumentPage page,
-			final DocumentPage lastPage) {
-		_page = page;
-		_lastPage = lastPage;
+	public RenderableModifiedAction(final IRenderable renderable) {
+		_renderableInstance = renderable;
 	}
 
 	/**
 	 * @throws IOException
 	 * 
 	 */
-	public ChangePageIndexAction(final BinaryDeserializer reader)
+	public RenderableModifiedAction(final BinaryDeserializer reader)
 			throws IOException {
-		_page = reader.readObjectTable();
-		_lastPage = reader.readObjectTable();
+		_renderableInstance = reader.readObjectTable();
+		_renderableInstance.deserializeData(reader);
 	}
 
 	@Override
 	public boolean hasUndoAction() {
-		return _lastPage != null;
+		return false;
 	}
 
 	@Override
 	public IAction getUndoAction() {
-		return new ChangePageIndexAction(_lastPage, _page);
+		return null;
 	}
 
 	@Override
 	public void perform(final DocumentEditor editor) {
-		editor.setCurrentPage(_page);
 	}
 
 	@Override
 	public void serialize(final BinarySerializer writer) throws IOException {
-		writer.writeObjectTable(_page);
-		writer.writeObjectTable(_lastPage);
+		writer.writeObjectTable(_renderableInstance);
+		_renderableInstance.serializeData(writer);
 	}
-
 }

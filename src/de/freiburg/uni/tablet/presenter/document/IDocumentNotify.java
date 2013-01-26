@@ -12,4 +12,6 @@ public interface IDocumentNotify extends IDocument {
 			PdfPageSerializable lastPdfPage);
 
 	void fireRenderableModified(IRenderable renderable, DocumentPage documentPage);
+	
+	void fireRenderableModifyEnd(IRenderable renderable, DocumentPage documentPage);
 }

@@ -5,16 +5,20 @@ import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.freiburg.uni.tablet.presenter.actions.SetDocumentAction;
+import de.freiburg.uni.tablet.presenter.actions.SetClientDocumentAction;
 import de.freiburg.uni.tablet.presenter.document.DocumentConfig;
 import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
 import de.freiburg.uni.tablet.presenter.net2.AcceptListener;
 import de.freiburg.uni.tablet.presenter.net2.AcceptThread;
+import de.freiburg.uni.tablet.presenter.net2.NetSyncListener;
 import de.freiburg.uni.tablet.presenter.net2.ServerDownSync;
 import de.freiburg.uni.tablet.presenter.net2.ServerUpSync;
 
 public class ServerApp {
-
+	private String _name;
+	private String _authTokenDown;
+	private String _authTokenUp;
+	
 	private AcceptThread _acceptDownThread;
 	private List<ServerDownSync> _downSyncs = new ArrayList<ServerDownSync>();
 	private List<ServerUpSync> _upSyncs = new ArrayList<ServerUpSync>();
@@ -47,9 +51,13 @@ public class ServerApp {
 	}
 	
 	public ServerApp(final DocumentConfig config) {
-		_acceptUpThread = new AcceptThread(8024);
-		_acceptDownThread = new AcceptThread(8025);
-		_editor = new DocumentEditor(config);
+		_name = config.getString("server.name", "Server");
+		_authTokenDown = config.getString("server.down.authToken", "");
+		_authTokenUp = config.getString("server.up.authToken", "");
+		
+		_acceptUpThread = new AcceptThread(config.getInt("server.up.port", 8024));
+		_acceptDownThread = new AcceptThread(config.getInt("server.down.port", 8025));
+		_editor = new DocumentEditor();
 		
 		_acceptDownThread.addListener(new AcceptListener() {
 			@Override
@@ -72,7 +80,24 @@ public class ServerApp {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		final ServerDownSync client = new ServerDownSync(_editor, socket);
+		final ServerDownSync client = new ServerDownSync(_editor, socket, _authTokenDown);
+		client.setClientId(_nextClientId++);
+		client.addListener(new NetSyncListener() {
+			@Override
+			public void onError(Exception e) {
+			}
+			
+			@Override
+			public void onDisconnected() {
+				System.out.println("Remove client " + client.getClientId() + " -> " + client.getClientName());
+				_downSyncs.remove(client);
+			}
+			
+			@Override
+			public void onConnected() {
+				System.out.println("Client " + client.getClientId() + " -> " + client.getClientName() + " connected");
+			}
+		});
 		client.start();
 		_downSyncs.add(client);
 	}
@@ -83,9 +108,26 @@ public class ServerApp {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		final ServerUpSync client = new ServerUpSync(_editor.getHistory(), socket);
+		final ServerUpSync client = new ServerUpSync(_editor.getHistory(), socket, _authTokenUp);
+		client.setClientId(_nextClientId++);
+		client.addListener(new NetSyncListener() {
+			@Override
+			public void onError(Exception e) {
+			}
+			
+			@Override
+			public void onDisconnected() {
+				System.out.println("Remove client " + client.getClientId() + " -> " + client.getClientName());
+				_upSyncs.remove(client);
+			}
+			
+			@Override
+			public void onConnected() {
+				System.out.println("Client " + client.getClientId() + " -> " + client.getClientName() + " connected");
+			}
+		});
 		client.start();
-		client.onActionPerformed(new SetDocumentAction(_editor.getDocument().getClientId(), _nextClientId++, _editor.getDocument()));
+		client.onActionPerformed(new SetClientDocumentAction(_editor.getDocument()));
 		_upSyncs.add(client);
 	}
 	

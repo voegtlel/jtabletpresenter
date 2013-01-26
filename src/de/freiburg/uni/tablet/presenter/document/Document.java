@@ -83,15 +83,15 @@ public class Document implements IDocumentNotify {
 		return null;
 	}
 
-	protected void firePageInserted(final DocumentPage prevPage, final DocumentPage page) {
+	protected void firePageInserted(final IEditableDocument document, final DocumentPage prevPage, final DocumentPage page) {
 		for (final DocumentListener listener : _listeners) {
-			listener.pageInserted(prevPage, page);
+			listener.pageInserted(document, prevPage, page);
 		}
 	}
 
-	protected void firePageRemoved(final DocumentPage prevPage, final DocumentPage page) {
+	protected void firePageRemoved(final IEditableDocument document, final DocumentPage prevPage, final DocumentPage page) {
 		for (final DocumentListener listener : _listeners) {
-			listener.pageRemoved(prevPage, page);
+			listener.pageRemoved(document, prevPage, page);
 		}
 	}
 
@@ -115,6 +115,13 @@ public class Document implements IDocumentNotify {
 	public void fireRenderableModified(final IRenderable renderable, final DocumentPage page) {
 		for (final DocumentListener listener : _listeners) {
 			listener.renderableModified(renderable, page);
+		}
+	}
+	
+	@Override
+	public void fireRenderableModifyEnd(final IRenderable renderable, final DocumentPage page) {
+		for (final DocumentListener listener : _listeners) {
+			listener.renderableModifyEnd(renderable, page);
 		}
 	}
 	

@@ -5,12 +5,12 @@ import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 public abstract class DocumentAdapter implements DocumentListener {
 
 	@Override
-	public void pageInserted(final DocumentPage prevPage,
+	public void pageInserted(final IEditableDocument document, final DocumentPage prevPage,
 			final DocumentPage page) {
 	}
 
 	@Override
-	public void pageRemoved(final DocumentPage prevPage, final DocumentPage page) {
+	public void pageRemoved(final IEditableDocument document, final DocumentPage prevPage, final DocumentPage page) {
 	}
 
 	@Override

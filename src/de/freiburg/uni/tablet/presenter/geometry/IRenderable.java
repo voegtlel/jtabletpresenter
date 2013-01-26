@@ -1,5 +1,9 @@
 package de.freiburg.uni.tablet.presenter.geometry;
 
+import java.io.IOException;
+
+import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
+import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
 import de.freiburg.uni.tablet.presenter.document.IEntity;
 import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
@@ -88,4 +92,18 @@ public interface IRenderable extends IEntity {
 	 * @return
 	 */
 	float getRadius();
+
+	/**
+	 * Updates the data of the renderable to load data from a reader
+	 * @param reader
+	 * @throws IOException 
+	 */
+	void deserializeData(BinaryDeserializer reader) throws IOException;
+	
+	/**
+	 * Stores the inner data of the renderable
+	 * @param writer
+	 * @throws IOException 
+	 */
+	void serializeData(BinarySerializer writer) throws IOException;
 }

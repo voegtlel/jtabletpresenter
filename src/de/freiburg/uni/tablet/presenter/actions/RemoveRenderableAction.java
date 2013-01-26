@@ -41,11 +41,6 @@ public class RemoveRenderableAction implements IAction {
 		_afterRenderable = reader.readObjectTable();
 		_renderable = reader.readObjectTable();
 	}
-	
-	@Override
-	public boolean mustRedraw(DocumentEditor editor) {
-		return editor.getCurrentPage() == _page;
-	}
 
 	@Override
 	public boolean hasUndoAction() {

@@ -174,6 +174,14 @@ public class DocumentPage implements IEntity, IPageRepaintListener {
 	public void fireRenderableModified(final IRenderable renderable) {
 		_document.fireRenderableModified(renderable, this);
 	}
+	
+	/**
+	 * Called by renderable, when modifying ends
+	 * @param renderable
+	 */
+	public void fireRenderableModifyEnd(final IRenderable renderable) {
+		_document.fireRenderableModifyEnd(renderable, this);
+	}
 
 	public DocumentPage(final BinaryDeserializer reader)
 			throws IOException {

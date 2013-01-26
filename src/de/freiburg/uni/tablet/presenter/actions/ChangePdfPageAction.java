@@ -41,11 +41,6 @@ public class ChangePdfPageAction implements IAction {
 		_pdfPage = reader.readObjectTable();
 		_lastPdfPage = reader.readObjectTable();
 	}
-	
-	@Override
-	public boolean mustRedraw(DocumentEditor editor) {
-		return true;
-	}
 
 	@Override
 	public boolean hasUndoAction() {

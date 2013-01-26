@@ -19,12 +19,12 @@ public class PackageOutputStream extends OutputStream {
 	}
 	
 	@Override
-	public void write(int b) throws IOException {
+	public void write(final int b) throws IOException {
 		_outputStream.write(b);
 	}
 	
 	@Override
-	public void write(byte[] b, int off, int len) throws IOException {
+	public void write(final byte[] b, final int off, final int len) throws IOException {
 		_outputStream.write(b, off, len);
 	}
 	
@@ -42,9 +42,20 @@ public class PackageOutputStream extends OutputStream {
 	 * Sends the next package to the stream
 	 */
 	public void nextPackage() {
-		byte[] data = _outputStream.toByteArray();
+		final byte[] data = _outputStream.toByteArray();
 		_packageWriter.writePackage(data, data.length);
 		_outputStream.reset();
+	}
+	
+	/**
+	 * Sends the next package to the stream without the size header and returns the sent size
+	 * @return sent data size
+	 */
+	public int nextPackageRaw() {
+		final byte[] data = _outputStream.toByteArray();
+		_packageWriter.writePackageRaw(data, data.length);
+		_outputStream.reset();
+		return data.length;
 	}
 
 	/**
@@ -57,5 +68,10 @@ public class PackageOutputStream extends OutputStream {
 		 * writes the next package
 		 */
 		void writePackage(byte[] data, int size);
+		
+		/**
+		 * writes the next package
+		 */
+		void writePackageRaw(byte[] data, int size);
 	}
 }
