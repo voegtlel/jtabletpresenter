@@ -39,18 +39,18 @@ public class DocumentHistory {
 		_documentEditor = documentEditor;
 		_documentListener = new DocumentListener() {
 			@Override
-			public void renderableRemoved(final IRenderable renderable,
-					final DocumentPage layer) {
+			public void renderableRemoved(final IRenderable afterRenderable, final IRenderable renderable,
+					final DocumentPage page) {
 				if (!_isPerforming) {
-					addAction(new RemoveRenderableAction(layer, renderable));
+					addAction(new RemoveRenderableAction(page, afterRenderable, renderable));
 				}
 			}
 
 			@Override
-			public void renderableAdded(final IRenderable renderable,
-					final DocumentPage layer) {
+			public void renderableAdded(final IRenderable afterRenderable, final IRenderable renderable,
+					final DocumentPage page) {
 				if (!_isPerforming) {
-					addAction(new AddRenderableAction(layer, renderable));
+					addAction(new AddRenderableAction(page, afterRenderable, renderable));
 				}
 			}
 
@@ -76,6 +76,11 @@ public class DocumentHistory {
 				if (!_isPerforming) {
 					addAction(new ChangePdfPageAction(documentPage, documentPage.getPdfPage(), lastPdfPage));
 				}
+			}
+			
+			@Override
+			public void renderableModified(final IRenderable renderable,
+					final DocumentPage page) {
 			}
 		};
 		_documentEditor.addListener(new DocumentEditorAdapter() {

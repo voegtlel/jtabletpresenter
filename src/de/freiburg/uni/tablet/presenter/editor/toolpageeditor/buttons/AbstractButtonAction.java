@@ -11,7 +11,6 @@ import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.SwingUtilities;
 
-import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.IButtonAction;
 
@@ -73,21 +72,17 @@ public abstract class AbstractButtonAction extends AbstractAction implements IBu
 	
 	public void performLater(final Component component) {
 	}
-
-	@Override
-	public void onUpdateEditor(final DocumentEditor lastEditor) {
-	}
 	
 	@Override
-	public void actionPerformed(ActionEvent e) {
-		Component c = (Component)e.getSource();
-		Point loc = c.getLocation();
+	public void actionPerformed(final ActionEvent e) {
+		final Component c = (Component)e.getSource();
+		final Point loc = c.getLocation();
 		loc.x += c.getWidth();
 		perform(loc);
 	}
 	
 	@Override
-	public IButtonAction getButton(String name) {
+	public IButtonAction getButton(final String name) {
 		if (name.equals(this._name)) {
 			return this;
 		}

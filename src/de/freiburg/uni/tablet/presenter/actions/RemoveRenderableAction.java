@@ -18,14 +18,16 @@ import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
  */
 public class RemoveRenderableAction implements IAction {
 	private final DocumentPage _page;
+	private final IRenderable _afterRenderable;
 	private final IRenderable _renderable;
 
 	/**
 	 * 
 	 */
 	public RemoveRenderableAction(final DocumentPage layer,
-			final IRenderable renderable) {
+			final IRenderable afterRenderable, final IRenderable renderable) {
 		_page = layer;
+		_afterRenderable = afterRenderable;
 		_renderable = renderable;
 	}
 
@@ -36,6 +38,7 @@ public class RemoveRenderableAction implements IAction {
 	public RemoveRenderableAction(final BinaryDeserializer reader)
 			throws IOException {
 		_page = reader.readObjectTable();
+		_afterRenderable = reader.readObjectTable();
 		_renderable = reader.readObjectTable();
 	}
 	
@@ -51,7 +54,7 @@ public class RemoveRenderableAction implements IAction {
 
 	@Override
 	public IAction getUndoAction() {
-		return new AddRenderableAction(_page, _renderable);
+		return new AddRenderableAction(_page, _afterRenderable, _renderable);
 	}
 
 	@Override
@@ -62,6 +65,7 @@ public class RemoveRenderableAction implements IAction {
 	@Override
 	public void serialize(final BinarySerializer writer) throws IOException {
 		writer.writeObjectTable(_page);
+		writer.writeObjectTable(_afterRenderable);
 		writer.writeObjectTable(_renderable);
 	}
 

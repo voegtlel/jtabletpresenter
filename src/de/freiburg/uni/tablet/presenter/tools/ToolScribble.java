@@ -11,10 +11,10 @@ import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 import de.freiburg.uni.tablet.presenter.geometry.AbstractRenderable;
 import de.freiburg.uni.tablet.presenter.geometry.DataPoint;
 import de.freiburg.uni.tablet.presenter.geometry.Scribble;
+import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
 
 public class ToolScribble extends AbstractTool {
 	private Scribble _scribble = null;
-	private DataPoint _lastData = null;
 
 	/**
 	 * 
@@ -28,26 +28,22 @@ public class ToolScribble extends AbstractTool {
 
 	@Override
 	public void begin() {
-		_scribble = new Scribble(_editor.getDocumentEditor().getDocument()
-				.nextId(), _editor.getDocumentEditor().getCurrentPen());
+		_scribble = new Scribble(_editor.getDocumentEditor().getCurrentPage(), _editor.getDocumentEditor().getCurrentPen());
+		_editor.getFrontRenderer().setRepaintListener(this);
+	}
+	
+	@Override
+	public void render(final IPageBackRenderer renderer) {
+		if (_scribble != null) {
+			_scribble.render(renderer);
+		}
 	}
 
 	@Override
 	public void draw(final DataPoint data) {
 		if (_scribble != null) {
-			if (_lastData != null) {
-				_editor.getFrontRenderer().draw(
-						_editor.getDocumentEditor().getCurrentPen(),
-						_lastData.getX(), _lastData.getY(), data.getX(),
-						data.getY());
-			} else {
-				_editor.getFrontRenderer().draw(
-						_editor.getDocumentEditor().getCurrentPen(),
-						data.getX(), data.getY());
-			}
 			_scribble.addPoint(data);
-			_lastData = data;
-			_editor.getPageEditor().requireRepaint();
+			_editor.getFrontRenderer().requireRepaint();
 		}
 	}
 
@@ -55,12 +51,16 @@ public class ToolScribble extends AbstractTool {
 	public void end() {
 		final AbstractRenderable result = _scribble;
 		_scribble = null;
-		_lastData = null;
 
-		_editor.getDocumentEditor().getCurrentPage().addRenderable(result);
-
-		_editor.getFrontRenderer().requireClear();
-		_editor.getPageEditor().requireRepaint();
+		_editor.getPageEditor().suspendRepaint();
+		if (result != null) {
+			_editor.getDocumentEditor().getCurrentPage().addRenderable(result);
+		}
+		
+		_editor.getFrontRenderer().setRepaintListener(null);
+		
+		_editor.getFrontRenderer().requireRepaint();
+		_editor.getPageEditor().resumeRepaint();
 	}
 
 	@Override

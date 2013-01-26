@@ -212,7 +212,9 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 	public void requireRepaint() {
 		synchronized (_repaintMonitor) {
 			_requiresRepaint = true;
-			_repaintMonitor.notifyAll();
+			if (_suspendRepaintCounter == 0) {
+				_repaintMonitor.notifyAll();
+			}
 		}
 	}
 	
@@ -227,7 +229,7 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 	public void resumeRepaint() {
 		synchronized (_repaintMonitor) {
 			_suspendRepaintCounter--;
-			if (_suspendRepaintCounter == 0) {
+			if (_suspendRepaintCounter == 0 && _requiresRepaint) {
 				_repaintMonitor.notifyAll();
 			}
 		}

@@ -16,7 +16,7 @@ public class DocumentEditor implements IBinarySerializableId {
 	private File _currentImageFile = null;
 	private BitmapImage _currentImage = null;
 
-	private Document _baseDocument = null;
+	private IDocument _baseDocument = null;
 	
 	private IEditableDocument _document = null;
 	private final DocumentHistory _history;
@@ -93,7 +93,6 @@ public class DocumentEditor implements IBinarySerializableId {
 	 */
 	public void setCurrentPageByIndex(final int index,
 			final boolean createIfNotExisting) {
-		// TODO: Check calling methods for result
 		if (_baseDocument != null) {
 			// Only verify here
 			DocumentPage backPage = _baseDocument.getPageByIndex(index);
@@ -139,17 +138,18 @@ public class DocumentEditor implements IBinarySerializableId {
 	
 	/**
 	 * @param imageFile
+	 * @throws IOException 
 	 */
-	public void setCurrentImageFile(File imageFile) {
+	public void setCurrentImageFile(File imageFile) throws IOException {
 		_currentImageFile = imageFile;
-		_currentImage = new BitmapImage(0, imageFile, 0, 0, 0, 0);
+		_currentImage = new BitmapImage(_currentPage, imageFile, 0, 0, 0, 0);
 	}
 	
 	/**
 	 * 
 	 * @param baseDocument
 	 */
-	public void setBaseDocument(final Document baseDocument) {
+	public void setBaseDocument(final IDocument baseDocument) {
 		fireChanging();
 		_baseDocument = baseDocument;
 		int length = _baseDocument.getPageCount();
@@ -163,7 +163,7 @@ public class DocumentEditor implements IBinarySerializableId {
 	/**
 	 * @return
 	 */
-	public Document getBaseDocument() {
+	public IDocument getBaseDocument() {
 		return _baseDocument;
 	}
 

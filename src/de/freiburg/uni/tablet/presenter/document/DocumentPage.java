@@ -5,12 +5,12 @@
 package de.freiburg.uni.tablet.presenter.document;
 
 import java.io.IOException;
-import java.util.HashMap;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.editor.IPageRepaintListener;
-import de.freiburg.uni.tablet.presenter.geometry.EraseInfo;
+import de.freiburg.uni.tablet.presenter.geometry.CollisionInfo;
+import de.freiburg.uni.tablet.presenter.geometry.CollisionListener;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 import de.freiburg.uni.tablet.presenter.list.LinkedElement;
 import de.freiburg.uni.tablet.presenter.list.LinkedElementList;
@@ -25,7 +25,6 @@ public class DocumentPage implements IEntity, IPageRepaintListener {
 	private final IDocumentNotify _document;
 
 	private final LinkedElementList<IRenderable> _renderablesList = new LinkedElementList<IRenderable>();
-	private final HashMap<Long, IRenderable> _renderablesMap = new HashMap<Long, IRenderable>();
 	
 	private PdfPageSerializable _pdfPage = null;
 
@@ -44,9 +43,8 @@ public class DocumentPage implements IEntity, IPageRepaintListener {
 		this(document);
 		for (LinkedElement<IRenderable> r = base._renderablesList.getFirst(); r != null; r = r
 				.getNext()) {
-			final IRenderable newRenderable = r.getData().cloneRenderable(_document.nextId());
+			final IRenderable newRenderable = r.getData().cloneRenderable(this);
 			_renderablesList.addLast(newRenderable);
-			_renderablesMap.put(newRenderable.getId(), newRenderable);
 		}
 	}
 
@@ -55,6 +53,7 @@ public class DocumentPage implements IEntity, IPageRepaintListener {
 		return _document;
 	}
 
+	@Override
 	public void render(final IPageBackRenderer renderer) {
 		for (LinkedElement<IRenderable> r = _renderablesList.getFirst(); r != null; r = r
 				.getNext()) {
@@ -62,27 +61,58 @@ public class DocumentPage implements IEntity, IPageRepaintListener {
 		}
 	}
 
-	public void eraseAt(final EraseInfo eraseInfo) {
-		for (LinkedElement<IRenderable> r = _renderablesList.getFirst(); r != null; r = r
-				.getNext()) {
-			r.getData().eraseAt(eraseInfo);
+	/**
+	 * Collides the given info with the renderables and calls listener for each renderable hit
+	 * @param collisionInfo
+	 * @param listener
+	 */
+	public void collideWith(final CollisionInfo collisionInfo, final CollisionListener listener) {
+		for (LinkedElement<IRenderable> r = _renderablesList.getFirst(); r != null; ) {
+			LinkedElement<IRenderable> next = r.getNext();
+			if (r.getData().collides(collisionInfo)) {
+				listener.collides(r.getData());
+			}
+			r = next;
 		}
 	}
-
-	public IRenderable getRenderable(final long id) {
-		return _renderablesMap.get(id);
-	}
-
+	
+	/**
+	 * Adds a renderable
+	 * @param renderable
+	 */
 	public void addRenderable(final IRenderable renderable) {
-		_renderablesMap.put(renderable.getId(), renderable);
-		_renderablesList.addLast(renderable);
-		_document.fireRenderableAdded(renderable, this);
+		insertRenderable((_renderablesList.isEmpty()?null:_renderablesList.getLast().getData()), renderable);
 	}
 
-	public void removeRenderable(final IRenderable renderable) {
-		_renderablesMap.remove(renderable.getId());
-		_renderablesList.remove(_renderablesList.getElement(renderable));
-		_document.fireRenderableRemoved(renderable, this);
+	/**
+	 * Inserts a renderable
+	 * @param afterRenderable
+	 * @param renderable
+	 */
+	public void insertRenderable(final IRenderable afterRenderable, final IRenderable renderable) {
+		if (afterRenderable != null) {
+			final LinkedElement<IRenderable> element = _renderablesList.getElementByInstance(afterRenderable);
+			_renderablesList.insertAfter(element, renderable);
+		} else {
+			_renderablesList.addFirst(renderable);
+		}
+		_document.fireRenderableAdded(afterRenderable, renderable, this);
+	}
+
+	/**
+	 * Removes a renderable and returns the previous element
+	 * @param renderable
+	 * @return
+	 */
+	public IRenderable removeRenderable(final IRenderable renderable) {
+		final LinkedElement<IRenderable> element = _renderablesList.getElementByInstance(renderable);
+		IRenderable previous = null;
+		if (element.getPrevious() != null) {
+			previous = element.getPrevious().getData();
+		}
+		_renderablesList.remove(element);
+		_document.fireRenderableRemoved(previous, renderable, this);
+		return previous;
 	}
 	
 	/**
@@ -104,11 +134,13 @@ public class DocumentPage implements IEntity, IPageRepaintListener {
 	}
 	
 	/**
-	 * Gets the renderables
-	 * @return
+	 * Replaces a renderable
+	 * @param renderable
+	 * @param newRenderable
 	 */
-	public LinkedElementList<IRenderable> getRenderables() {
-		return _renderablesList;
+	public void replaceRenderable(final IRenderable renderable, final IRenderable newRenderable) {
+		IRenderable previous = removeRenderable(renderable);
+		insertRenderable(previous, newRenderable);
 	}
 	
 	/**
@@ -118,9 +150,8 @@ public class DocumentPage implements IEntity, IPageRepaintListener {
 		while (!_renderablesList.isEmpty()) {
 			final IRenderable removeElement = _renderablesList.getFirst().getData();
 			_renderablesList.removeFirst();
-			_document.fireRenderableRemoved(removeElement, this);
+			_document.fireRenderableRemoved(null, removeElement, this);
 		}
-		_renderablesMap.clear();
 	}
 	
 	/**
@@ -135,6 +166,14 @@ public class DocumentPage implements IEntity, IPageRepaintListener {
 	public long getId() {
 		return _id;
 	}
+	
+	/**
+	 * Called by renderable, when modified
+	 * @param renderable
+	 */
+	public void fireRenderableModified(final IRenderable renderable) {
+		_document.fireRenderableModified(renderable, this);
+	}
 
 	public DocumentPage(final BinaryDeserializer reader)
 			throws IOException {
@@ -146,7 +185,6 @@ public class DocumentPage implements IEntity, IPageRepaintListener {
 		for (int i = 0; i < count; i++) {
 			final IRenderable renderable = reader.readObjectTable();
 			_renderablesList.addLast(renderable);
-			_renderablesMap.put(renderable.getId(), renderable);
 		}
 	}
 	
@@ -156,7 +194,7 @@ public class DocumentPage implements IEntity, IPageRepaintListener {
 	 * @param dummy null
 	 * @throws IOException
 	 */
-	public DocumentPage(final BinaryDeserializer reader, final Document dummy)
+	public DocumentPage(final BinaryDeserializer reader, final IDocument dummy)
 			throws IOException {
 		_document = null;
 		_id = reader.readLong();
@@ -166,7 +204,6 @@ public class DocumentPage implements IEntity, IPageRepaintListener {
 		for (int i = 0; i < count; i++) {
 			final IRenderable renderable = reader.readObjectTable();
 			_renderablesList.addLast(renderable);
-			_renderablesMap.put(renderable.getId(), renderable);
 		}
 	}
 	
@@ -178,7 +215,7 @@ public class DocumentPage implements IEntity, IPageRepaintListener {
 	public void serializeDirect(final BinarySerializer writer) throws IOException {
 		writer.writeLong(_id);
 		writer.writeObjectTable(_pdfPage);
-		writer.writeInt(_renderablesMap.size());
+		writer.writeInt(_renderablesList.getCount());
 		for (LinkedElement<IRenderable> r = _renderablesList.getFirst(); r != null; r = r
 				.getNext()) {
 			writer.writeObjectTable(r.getData());
@@ -190,7 +227,7 @@ public class DocumentPage implements IEntity, IPageRepaintListener {
 		writer.writeLong(_id);
 		writer.writeObjectTable(_document);
 		writer.writeObjectTable(_pdfPage);
-		writer.writeInt(_renderablesMap.size());
+		writer.writeInt(_renderablesList.getCount());
 		for (LinkedElement<IRenderable> r = _renderablesList.getFirst(); r != null; r = r
 				.getNext()) {
 			writer.writeObjectTable(r.getData());

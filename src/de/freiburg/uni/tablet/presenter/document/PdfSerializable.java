@@ -84,7 +84,7 @@ public class PdfSerializable implements IEntity {
 	 * @param newDocument
 	 * @return
 	 */
-	public PdfSerializable clone(final Document newDocument) {
+	public PdfSerializable clone(final IDocument newDocument) {
 		return new PdfSerializable(newDocument, _document);
 	}
 }

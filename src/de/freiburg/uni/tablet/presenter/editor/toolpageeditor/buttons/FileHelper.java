@@ -17,13 +17,12 @@ import javax.swing.filechooser.FileFilter;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
-import de.freiburg.uni.tablet.presenter.document.Document;
 import de.freiburg.uni.tablet.presenter.document.DocumentConfig;
 import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
+import de.freiburg.uni.tablet.presenter.document.IDocument;
 import de.freiburg.uni.tablet.presenter.document.IEditableDocument;
 import de.freiburg.uni.tablet.presenter.document.PdfSerializable;
-import de.freiburg.uni.tablet.presenter.document.ServerDocument;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 import de.freiburg.uni.tablet.presenter.editor.pdf.PdfRenderer;
 import de.freiburg.uni.tablet.presenter.list.LinkedElement;
@@ -118,7 +117,7 @@ public class FileHelper {
 		fileOutputStream.close();
 	}
 	
-	public static void savePdf(Document document, Document baseDocument, DocumentConfig config, File file) throws IOException {
+	public static void savePdf(IDocument document, IDocument baseDocument, DocumentConfig config, File file) throws IOException {
 		Logger.getLogger(ButtonSaveAs.class.getName()).log(Level.INFO, "Render as PDF " + file.getPath());
 		try {
 			final int pdfDefaultWidth = config.getInt("pdf.defaultWidth", 1024);

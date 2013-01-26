@@ -20,6 +20,7 @@ import javax.imageio.ImageIO;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
+import de.freiburg.uni.tablet.presenter.document.DocumentPage;
 import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
 
 public class BitmapImage extends AbstractRenderable {
@@ -35,22 +36,12 @@ public class BitmapImage extends AbstractRenderable {
 	private byte[] _fileData;
 	private BufferedImage _image;
 
-	public BitmapImage(final long id, final File file, float x, float y, float width, float height) {
-		super(id);
-		_x = x;
-		_y = y;
-		_width = width;
-		_height = height;
-		try {
-			_fileData = readFile(file);
-			_image = readImage(_fileData);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	public BitmapImage(final DocumentPage parent, final File file, float x, float y, float width, float height) throws IOException {
+		this(parent, readFile(file), null, x, y, width, height);
 	}
 	
-	public BitmapImage(final long id, final byte[] fileData, BufferedImage image, float x, float y, float width, float height) {
-		super(id);
+	public BitmapImage(final DocumentPage parent, final byte[] fileData, BufferedImage image, float x, float y, float width, float height) {
+		super(parent);
 		_fileData = fileData;
 		_x = x;
 		_y = y;
@@ -68,8 +59,8 @@ public class BitmapImage extends AbstractRenderable {
 	}
 	
 	public static byte[] readFile(final File file) throws IOException {
-		RandomAccessFile raf = new RandomAccessFile(file, "r");
-		byte[] data = new byte[(int) raf.getChannel().size()];
+		final RandomAccessFile raf = new RandomAccessFile(file, "r");
+		final byte[] data = new byte[(int) raf.getChannel().size()];
 		raf.readFully(data);
 		raf.close();
 		System.out.println("Read file " + file);
@@ -77,59 +68,49 @@ public class BitmapImage extends AbstractRenderable {
 	}
 	
 	public static BufferedImage readImage(final byte[] data) throws IOException {
-		BufferedImage input = ImageIO.read(new ByteArrayInputStream(data));
+		final BufferedImage input = ImageIO.read(new ByteArrayInputStream(data));
 		int w = input.getWidth();
 		int h = input.getHeight();
 		System.out.println("Read image " + w + "x" + h);
-		BufferedImage result = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-		Graphics g = result.getGraphics();
+		final BufferedImage result = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+		final Graphics g = result.getGraphics();
 		g.drawImage(input, 0, 0, w, h, 0, 0, w, h, null);
 		g.dispose();
 		return result;
 	}
 
 	@Override
-	public IRenderable cloneRenderable(final long id) {
-		System.out.println("clone image " + getId() + " -> " + id);
-		ColorModel m = _image.getColorModel();
-		WritableRaster wr = _image.copyData(null);
-		BufferedImage clone = new BufferedImage(m, wr, m.isAlphaPremultiplied(), null);
-		return new BitmapImage(id, _fileData, clone, _x, _y, _width, _height);
+	public BitmapImage cloneRenderable(final DocumentPage page) {
+		System.out.println("clone image " + getId());
+		final ColorModel m = _image.getColorModel();
+		final WritableRaster wr = _image.copyData(null);
+		final BufferedImage clone = new BufferedImage(m, wr, m.isAlphaPremultiplied(), null);
+		return new BitmapImage(page, _fileData, clone, _x, _y, _width, _height);
+	}
+	
+	@Override
+	public boolean eraseStart(final EraseInfo eraseInfo) {
+		if (eraseInfo.getCollisionInfo().isCheckOnlyBoundaries()) {
+			return false;
+		}
+		final Ellipse2D.Float ellipse = new Ellipse2D.Float();
+		final Graphics2D graphics = (Graphics2D)_image.createGraphics();
+		graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		graphics.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+		graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+		graphics.setComposite(AlphaComposite.Clear);
+		graphics.setColor(new Color(0, 0, 0, 0));
+		eraseInfo.addObjectData(this, DATA_ID_GRAPHICS2D, graphics);
+		eraseInfo.addObjectData(this, DATA_ID_ELLIPSE, ellipse);
+		return true;
 	}
 
 	@Override
-	public void eraseAt(final EraseInfo eraseInfo) {
-		BitmapImage modifiedObjectInstance = (BitmapImage) eraseInfo
-				.getModifiedObject(this);
-		if (modifiedObjectInstance == null) {
-			if (collides(eraseInfo.getCollisionInfo())) {
-				modifiedObjectInstance = (BitmapImage) eraseInfo
-						.addModifiedObject(this);
-				if (!eraseInfo.getCollisionInfo().isCheckOnlyBoundaries()) {
-					Ellipse2D.Float ellipse = new Ellipse2D.Float();
-					Graphics2D graphics = (Graphics2D)modifiedObjectInstance._image.createGraphics();
-					graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-					graphics.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
-					graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-					graphics.setComposite(AlphaComposite.Clear);
-					graphics.setColor(new Color(0, 0, 0, 0));
-					eraseInfo.addObjectData(modifiedObjectInstance, DATA_ID_GRAPHICS2D, graphics);
-					eraseInfo.addObjectData(modifiedObjectInstance, DATA_ID_ELLIPSE, ellipse);
-				}
-			}
-		}
-
-		if (modifiedObjectInstance != null && !eraseInfo.getCollisionInfo().isCheckOnlyBoundaries()) {
-			modifiedObjectInstance.eraseAtDirect(eraseInfo.getCollisionInfo(),
-					(Graphics2D)eraseInfo.getObjectData(modifiedObjectInstance, DATA_ID_GRAPHICS2D),
-					(Ellipse2D.Float)eraseInfo.getObjectData(modifiedObjectInstance, DATA_ID_ELLIPSE));
-		}
-	}
-
-	public void eraseAtDirect(final CollisionInfo collisionInfo, final Graphics2D graphics, final Ellipse2D.Float ellipse) {
-		if (collisionInfo.isCheckOnlyBoundaries()) {
-			return;
-		}
+	public boolean eraseAt(final EraseInfo eraseInfo) {
+		final Graphics2D g = (Graphics2D)eraseInfo.getObjectData(this, DATA_ID_GRAPHICS2D);
+		final Ellipse2D.Float ellipse = (Ellipse2D.Float)eraseInfo.getObjectData(this, DATA_ID_ELLIPSE);
+		final CollisionInfo collisionInfo = eraseInfo.getCollisionInfo();
+		
 		if (collides(collisionInfo)) {
 			ellipse.x = collisionInfo.getCenterX() - collisionInfo.getRadiusX() - _x;
 			ellipse.y = collisionInfo.getCenterY() - collisionInfo.getRadiusY() - _y;
@@ -140,44 +121,36 @@ public class BitmapImage extends AbstractRenderable {
 			ellipse.width *= (float)_image.getWidth() / _width;
 			ellipse.height *= (float)_image.getHeight() / _height;
 			System.out.println("Ellipse: " + ellipse.x + ", " + ellipse.y + ", " + ellipse.width + "x" + ellipse.height);
-			graphics.fill(ellipse);
+			g.fill(ellipse);
 		}
+		return true;
 	}
 	
 	@Override
 	public boolean eraseEnd(final EraseInfo eraseInfo) {
-		if (eraseInfo.getCollisionInfo().isCheckOnlyBoundaries()) {
+		final Graphics2D graphics = eraseInfo.getObjectData(this, DATA_ID_GRAPHICS2D);
+		graphics.dispose();
+		Rectangle newRect = new Rectangle();
+		BufferedImage reducedImage = BitmapHelper.reduceImage(_image, newRect);
+		if (reducedImage == null) {
+			System.out.println("Full Reduced");
 			return false;
 		}
-		BitmapImage modifiedObjectInstance = (BitmapImage) eraseInfo
-				.getModifiedObject(this);
-		if (modifiedObjectInstance != null) {
-			Graphics2D graphics = eraseInfo.getObjectData(modifiedObjectInstance, DATA_ID_GRAPHICS2D);
-			graphics.dispose();
-			Rectangle newRect = new Rectangle();
-			BufferedImage reducedImage = BitmapHelper.reduceImage(modifiedObjectInstance._image, newRect);
-			if (reducedImage == null) {
-				System.out.println("Full Reduced");
-				return false;
-			}
-			modifiedObjectInstance._image = reducedImage;
-			try {
-				ByteArrayOutputStream bos = new ByteArrayOutputStream();
-				ImageIO.write(reducedImage, "PNG", bos);
-				modifiedObjectInstance._fileData = bos.toByteArray();
-				int origWidth = _image.getWidth();
-				int origHeight = _image.getHeight();
-				modifiedObjectInstance._x = _x + _width * (float)newRect.x / (float)origWidth;
-				modifiedObjectInstance._y = _y + _height * (float)newRect.y / (float)origHeight;
-				modifiedObjectInstance._width = _width * (float)newRect.width / (float)origWidth;
-				modifiedObjectInstance._height = _height * (float)newRect.height / (float)origHeight;
-				System.out.println("Stored new image data for " + modifiedObjectInstance._x + ", " + modifiedObjectInstance._y + ", " + modifiedObjectInstance._width + "x" + modifiedObjectInstance._height);
-			} catch (IOException e) {
-				e.printStackTrace();
-				return false;
-			}
-		} else {
-			System.out.println("End Empty");
+		_image = reducedImage;
+		try {
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			ImageIO.write(reducedImage, "PNG", bos);
+			_fileData = bos.toByteArray();
+			int origWidth = _image.getWidth();
+			int origHeight = _image.getHeight();
+			_x = _x + _width * (float)newRect.x / (float)origWidth;
+			_y = _y + _height * (float)newRect.y / (float)origHeight;
+			_width = _width * (float)newRect.width / (float)origWidth;
+			_height = _height * (float)newRect.height / (float)origHeight;
+			System.out.println("Stored new image data for " + _x + ", " + _y + ", " + _width + "x" + _height);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
 		}
 		System.out.println("End Successfull");
 		return true;

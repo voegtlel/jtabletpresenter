@@ -22,18 +22,20 @@ public interface DocumentListener {
 	/**
 	 * Called, when a renderable was added
 	 * 
-	 * @param renderable
-	 * @param layer
+	 * @param renderableAfter
+	 * @param renderable 
+	 * @param page
 	 */
-	void renderableAdded(IRenderable renderable, DocumentPage layer);
+	void renderableAdded(IRenderable renderableAfter, IRenderable renderable, DocumentPage page);
 
 	/**
 	 * Called, when a renderable was removed
 	 * 
+	 * @param renderableAfter
 	 * @param renderable
-	 * @param layer
+	 * @param page
 	 */
-	void renderableRemoved(IRenderable renderable, DocumentPage layer);
+	void renderableRemoved(IRenderable renderableAfter, IRenderable renderable, DocumentPage page);
 	
 	/**
 	 * Called, when a pdf page assignment was changed
@@ -42,4 +44,11 @@ public interface DocumentListener {
 	 */
 	void pdfPageChanged(DocumentPage documentPage,
 			PdfPageSerializable lastPdfPage);
+
+	/**
+	 * Called, when a renderable was modified
+	 * @param page
+	 * @param renderable
+	 */
+	void renderableModified(IRenderable renderable, DocumentPage page);
 }

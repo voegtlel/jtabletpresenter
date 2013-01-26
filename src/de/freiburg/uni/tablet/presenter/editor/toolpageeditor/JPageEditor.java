@@ -25,15 +25,14 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 
-import de.freiburg.uni.tablet.presenter.document.Document;
 import de.freiburg.uni.tablet.presenter.document.DocumentAdapter;
 import de.freiburg.uni.tablet.presenter.document.DocumentConfig;
 import de.freiburg.uni.tablet.presenter.document.DocumentConfig.KeyValue;
 import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
 import de.freiburg.uni.tablet.presenter.document.DocumentEditorAdapter;
-import de.freiburg.uni.tablet.presenter.document.DocumentEditorListener;
 import de.freiburg.uni.tablet.presenter.document.DocumentListener;
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
+import de.freiburg.uni.tablet.presenter.document.IEditableDocument;
 import de.freiburg.uni.tablet.presenter.document.PdfPageSerializable;
 import de.freiburg.uni.tablet.presenter.editor.IPageEditor;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
@@ -52,7 +51,7 @@ import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonTogg
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonTools;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonUndo;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
-import de.freiburg.uni.tablet.presenter.page.IPageFrontRenderer;
+import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
 
 /**
  * @author lukas
@@ -74,11 +73,9 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 	private PageLayerBufferBack _serverSyncLayer;
 	private PageLayerBufferFront _frontLayer;
 
-	private DocumentEditor _documentEditor;
+	private DocumentEditor _documentEditor = new DocumentEditor();
 
 	private final DocumentListener _documentListener;
-
-	private final DocumentEditorListener _documentEditorListener;
 
 	private IButtonAction[] _buttonActions = new IButtonAction[] {};
 
@@ -94,46 +91,48 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 	public JPageEditor(final DocumentConfig config) {
 		_documentListener = new DocumentAdapter() {
 			@Override
-			public void renderableRemoved(final IRenderable renderable,
-					final DocumentPage layer) {
-				onRenderableRemoved(renderable, layer);
+			public void renderableRemoved(final IRenderable renderableAfter,
+					final IRenderable renderable, final DocumentPage page) {
+				onRenderableChanged(renderable, page);
 			}
 
 			@Override
-			public void renderableAdded(final IRenderable renderable,
-					final DocumentPage layer) {
-				onRenderableAdded(renderable, layer);
+			public void renderableAdded(final IRenderable renderableAfter,
+					final IRenderable renderable, final DocumentPage page) {
+				onRenderableAdded(renderable, page);
 			}
 			
 			@Override
-			public void pdfPageChanged(DocumentPage documentPage,
-					PdfPageSerializable lastPdfPage) {
+			public void pdfPageChanged(final DocumentPage documentPage,
+					final PdfPageSerializable lastPdfPage) {
 				onPdfPageChanged(documentPage, lastPdfPage);
+			}
+			
+			@Override
+			public void renderableModified(final IRenderable renderable,
+					final DocumentPage page) {
+				onRenderableChanged(renderable, page);
 			}
 		};
 
-		_documentEditorListener = new DocumentEditorAdapter() {
+		_documentEditor.addListener(new DocumentEditorAdapter() {
 			@Override
 			public void changing() {
 				onDocumentChanging();
 			}
 			
 			@Override
-			public void currentPageChanged(DocumentPage lastCurrentPage,
-					DocumentPage lastCurrentBackPage) {
+			public void currentPageChanged(final DocumentPage lastCurrentPage,
+					final DocumentPage lastCurrentBackPage) {
 				onCurrentPageChanged();
 			}
-
+			
 			@Override
-			public void documentChanged(final Document lastDocument) {
+			public void documentChanged(final IEditableDocument lastDocument) {
 				onDocumentChanged(lastDocument);
 			}
-		};
+		});
 		_config = config;
-		// Initialize dummy editor
-		_documentEditor = new DocumentEditor();
-		_documentEditor.addListener(_documentEditorListener);
-		//_documentEditor.getDocument().addListener(_documentListener);
 		initialize();
 	}
 
@@ -142,6 +141,7 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 	 */
 	private void initialize() {
 		getContentPane().setLayout(new BorderLayout(0, 0));
+		
 		final RenderCanvas pageRenderer = new RenderCanvas();
 		_pageRenderer = pageRenderer;
 		getContentPane().add(pageRenderer.getContainerComponent(),
@@ -164,7 +164,9 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 				new ButtonSpinnerPage(this), null, new ButtonUndo(this),
 				new ButtonRedo(this), null, new ButtonColor(this), null,
 				new ButtonToggleFullscreen(this) });
+		
 		registerShortcuts();
+		
 		_config.write(false);
 	}
 
@@ -220,7 +222,7 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 	}
 	
 	private void registerShortcuts() {
-		List<KeyValue> shortcuts = _config.getAll("shortcut.");
+		final List<KeyValue> shortcuts = _config.getAll("shortcut.");
 		for (KeyValue item : shortcuts) {
 			final String actionName = item.key.substring(9);
 			int lastIndex = actionName.lastIndexOf('.');
@@ -269,7 +271,7 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 
 	@Override
 	public boolean isFullscreen() {
-		return isUndecorated();
+		return this.isUndecorated();
 	}
 
 	@Override
@@ -294,11 +296,13 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 		}
 	}
 
-	protected void onRenderableRemoved(final IRenderable renderable,
+	protected void onRenderableChanged(final IRenderable renderable,
 			final DocumentPage page) {
 		// Redraw all objects on page
 		if (page == _documentEditor.getCurrentPage()) {
 			_clientOnlyLayer.requireRepaint();
+		} else if (page == _documentEditor.getCurrentBackPage()) {
+			_serverSyncLayer.requireRepaint();
 		}
 		// Else the object was not on a visible layer
 	}
@@ -308,13 +312,17 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 		// Draw new object
 		if (page == _documentEditor.getCurrentPage()) {
 			renderable.render(_clientOnlyLayer);
+			_pageRenderer.requireRepaint();
+		} else if (page == _documentEditor.getCurrentBackPage()) {
+			renderable.render(_serverSyncLayer);
+			_pageRenderer.requireRepaint();
 		}
 		// Else the object is not on a visible layer
 	}
 	
-	protected void onPdfPageChanged(DocumentPage documentPage,
-			PdfPageSerializable lastPdfPage) {
-		if (documentPage == _documentEditor.getCurrentPage()) {
+	protected void onPdfPageChanged(final DocumentPage documentPage,
+			final PdfPageSerializable lastPdfPage) {
+		if ((documentPage == _documentEditor.getCurrentPage()) || (documentPage == _documentEditor.getCurrentBackPage())) {
 			_pdfLayer.setPdfPage(documentPage.getPdfPage());
 		}
 	}
@@ -330,21 +338,22 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 		// Next PDF Page
 		if (_documentEditor.getCurrentBackPage() != null) {
 			_pdfLayer.setPdfPage(_documentEditor.getCurrentBackPage().getPdfPage());
+		} else {
+			_pdfLayer.setPdfPage(_documentEditor.getCurrentPage().getPdfPage());
 		}
 	}
 
-	protected void onDocumentChanged(final Document lastDocument) {
+	protected void onDocumentChanged(final IEditableDocument lastDocument) {
 		if (lastDocument != null) {
 			lastDocument.removeListener(_documentListener);
 		}
 		if (_documentEditor.getDocument() != null) {
 			_documentEditor.getDocument().addListener(_documentListener);
 		}
-		onCurrentPageChanged();
 	}
 	
 	@Override
-	public IPageFrontRenderer getFrontRenderer() {
+	public IPageBackRenderer getFrontRenderer() {
 		return _frontLayer;
 	}
 
@@ -360,33 +369,5 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 	
 	public DocumentConfig getConfig() {
 		return _config;
-	}
-
-	public void setDocumentEditor(final DocumentEditor documentEditor) {
-		if (_documentEditor != documentEditor) {
-			if (_documentEditor != null) {
-				if (_documentEditor.getDocument() != null) {
-					_documentEditor.getDocument().removeListener(_documentListener);
-				}
-				_documentEditor.removeListener(_documentEditorListener);
-			}
-			final DocumentEditor lastEditor = _documentEditor;
-			_documentEditor = documentEditor;
-			if (_documentEditor != null) {
-				_documentEditor.addListener(_documentEditorListener);
-				if (_documentEditor.getDocument() != null) {
-					_documentEditor.getDocument().addListener(_documentListener);
-				}
-				// Fire listeners
-				_documentEditor.setCurrentPage(_documentEditor.getCurrentPage());
-				onCurrentPageChanged();
-				_documentEditorListener.documentChanged(null);
-			}
-			for (final IButtonAction button : _buttonActions) {
-				if (button != null) {
-					button.onUpdateEditor(lastEditor);
-				}
-			}
-		}
 	}
 }

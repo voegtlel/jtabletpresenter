@@ -10,13 +10,14 @@ import de.freiburg.uni.tablet.presenter.document.DocumentPage;
 public abstract class AbstractRenderable implements IBinarySerializableId,
 		IRenderable {
 	private final long _id;
-	private DocumentPage _parent;
+	protected final DocumentPage _parent;
 
 	/**
 	 * Creates the renderable
 	 */
-	protected AbstractRenderable(final long id) {
-		_id = id;
+	protected AbstractRenderable(final DocumentPage parent) {
+		_parent = parent;
+		_id = parent.getParent().nextId();
 	}
 
 	/**
@@ -27,11 +28,6 @@ public abstract class AbstractRenderable implements IBinarySerializableId,
 	@Override
 	public long getId() {
 		return _id;
-	}
-
-	@Override
-	public void setParent(final DocumentPage pageLayer) {
-		_parent = pageLayer;
 	}
 
 	@Override
@@ -47,10 +43,12 @@ public abstract class AbstractRenderable implements IBinarySerializableId,
 	protected AbstractRenderable(final BinaryDeserializer reader)
 			throws IOException {
 		_id = reader.readLong();
+		_parent = reader.readObjectTable();
 	}
 
 	@Override
 	public void serialize(final BinarySerializer writer) throws IOException {
 		writer.writeLong(_id);
+		writer.writeObjectTable(_parent);
 	}
 }

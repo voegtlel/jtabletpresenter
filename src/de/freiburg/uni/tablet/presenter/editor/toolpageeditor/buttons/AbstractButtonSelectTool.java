@@ -7,6 +7,7 @@ package de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons;
 import java.awt.Component;
 import java.awt.Point;
 import java.io.File;
+import java.io.IOException;
 
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
@@ -31,12 +32,12 @@ public abstract class AbstractButtonSelectTool extends AbstractButtonAction {
 
 	private final JPageToolMenuSelectFrame<ITool> _tool;
 
-	protected ToolScribble _toolScribble;
+	protected final ToolScribble _toolScribble;
 
-	protected ToolEraser _toolEraser;
-	protected ToolEraser _toolDeleter;
+	protected final ToolEraser _toolEraser;
+	protected final ToolEraser _toolDeleter;
 	
-	protected ToolImage _toolImage;
+	protected final ToolImage _toolImage;
 	
 	/**
 	 * Creates the action with an editor.
@@ -77,8 +78,8 @@ public abstract class AbstractButtonSelectTool extends AbstractButtonAction {
 		final ITool selectedTool = _tool.getSelectedValue();
 		if (selectedTool == _toolImage) {
 			// Select image to insert
-			JFileChooser fileChooser = new JFileChooser();
-			FileFilter imageFilter = new FileFilter() {
+			final JFileChooser fileChooser = new JFileChooser();
+			final FileFilter imageFilter = new FileFilter() {
 				@Override
 				public String getDescription() {
 					return "Images (.jpeg, .jpg, .png, .gif, .tiff, .tif)";
@@ -102,12 +103,17 @@ public abstract class AbstractButtonSelectTool extends AbstractButtonAction {
 			fileChooser.addChoosableFileFilter(imageFilter);
 			fileChooser.setFileFilter(imageFilter);
 			if (fileChooser.showOpenDialog(component) == JFileChooser.APPROVE_OPTION) {
-				_editor.getDocumentEditor().setCurrentImageFile(fileChooser.getSelectedFile());
+				try {
+					_editor.getDocumentEditor().setCurrentImageFile(fileChooser.getSelectedFile());
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
 	}
 	
-	public ITool getTool(String name) {
+	public ITool getTool(final String name) {
 		if (name.equals("scribble")) {
 			return _toolScribble;
 		} else if (name.equals("eraser")) {
@@ -120,7 +126,7 @@ public abstract class AbstractButtonSelectTool extends AbstractButtonAction {
 		return null;
 	}
 
-	public abstract void setSelectedTool(ITool tool);
+	public abstract void setSelectedTool(final ITool tool);
 
 	public abstract ITool getSelectedTool();
 }

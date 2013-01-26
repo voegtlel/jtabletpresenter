@@ -96,18 +96,25 @@ public class Document implements IDocumentNotify {
 	}
 
 	@Override
-	public void fireRenderableAdded(final IRenderable renderable,
+	public void fireRenderableAdded(final IRenderable afterRenderable, final IRenderable renderable,
 			final DocumentPage page) {
 		for (final DocumentListener listener : _listeners) {
-			listener.renderableAdded(renderable, page);
+			listener.renderableAdded(afterRenderable, renderable, page);
 		}
 	}
-
+	
 	@Override
-	public void fireRenderableRemoved(final IRenderable renderable,
-			final DocumentPage page) {
+	public void fireRenderableRemoved(final IRenderable afterRenderable,
+			final IRenderable renderable, final DocumentPage page) {
 		for (final DocumentListener listener : _listeners) {
-			listener.renderableRemoved(renderable, page);
+			listener.renderableRemoved(afterRenderable, renderable, page);
+		}
+	}
+	
+	@Override
+	public void fireRenderableModified(final IRenderable renderable, final DocumentPage page) {
+		for (final DocumentListener listener : _listeners) {
+			listener.renderableModified(renderable, page);
 		}
 	}
 	

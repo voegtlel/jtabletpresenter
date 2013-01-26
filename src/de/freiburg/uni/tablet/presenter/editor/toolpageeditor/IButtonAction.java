@@ -7,8 +7,6 @@ package de.freiburg.uni.tablet.presenter.editor.toolpageeditor;
 import java.awt.Component;
 import java.awt.Point;
 
-import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
-
 /**
  * @author lukas
  * 
@@ -41,11 +39,6 @@ public interface IButtonAction {
 	 * @return control
 	 */
 	Component getControl();
-
-	/**
-	 * Called, when the editor object was changed
-	 */
-	void onUpdateEditor(DocumentEditor lastEditor);
 	
 	/**
 	 * Gets the button with the given name

@@ -12,7 +12,6 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
 import de.freiburg.uni.tablet.presenter.document.DocumentEditorAdapter;
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
@@ -29,7 +28,6 @@ public class ButtonSpinnerPage extends AbstractButtonAction {
 	private static final long serialVersionUID = 1L;
 	
 	private final JSpinner _spinner;
-	private final DocumentEditorAdapter _documentEditorListener;
 
 	/**
 	 * Creates the action with an editor.
@@ -49,13 +47,12 @@ public class ButtonSpinnerPage extends AbstractButtonAction {
 				onSpinnnerChanged();
 			}
 		});
-		_documentEditorListener = new DocumentEditorAdapter() {
+		_editor.getDocumentEditor().addListener(new DocumentEditorAdapter() {
 			@Override
 			public void currentPageChanged(final DocumentPage lastCurrentPage, final DocumentPage lastCurrentBackPage) {
 				onUpdateSpinner();
 			}
-		};
-		_editor.getDocumentEditor().addListener(_documentEditorListener);
+		});
 	}
 
 	protected void onUpdateSpinner() {
@@ -80,14 +77,6 @@ public class ButtonSpinnerPage extends AbstractButtonAction {
 			newPageIndex = 0;
 		}
 		_editor.getDocumentEditor().setCurrentPageByIndex(newPageIndex, true);
-	}
-
-	@Override
-	public void onUpdateEditor(final DocumentEditor lastEditor) {
-		if (lastEditor != null) {
-			lastEditor.removeListener(_documentEditorListener);
-		}
-		_editor.getDocumentEditor().addListener(_documentEditorListener);
 	}
 
 	@Override

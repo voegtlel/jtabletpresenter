@@ -91,10 +91,11 @@ public class ScribbleSegment implements IBinarySerializable {
 	 * 
 	 * @param collisionInfo
 	 *            erase information
-	 * @return splitted path or null, if not splitted
+	 * @return new element if splitted path, this if modified or null if not modified
 	 */
 	public ScribbleSegment eraseAt(final CollisionInfo collisionInfo) {
 		if (!_hasBoundary || collisionInfo.collides(_minX, _minY, _maxX, _maxY)) {
+			boolean wasModified = false;
 			_minX = Float.MAX_VALUE;
 			_minY = Float.MAX_VALUE;
 			_maxX = Float.MIN_VALUE;
@@ -103,6 +104,7 @@ public class ScribbleSegment implements IBinarySerializable {
 				final LinkedElement<DataPoint> next = e.getNext();
 				if (collisionInfo.collides(e.getData().getX(), e.getData()
 						.getY())) {
+					wasModified = true;
 					if (collisionInfo.isCheckOnlyBoundaries()) {
 						while (!_points.isEmpty()) {
 							_points.removeFirst();
@@ -131,6 +133,9 @@ public class ScribbleSegment implements IBinarySerializable {
 				e = next;
 			}
 			_hasBoundary = true;
+			if (wasModified) {
+				return this;
+			}
 		}
 		return null;
 	}

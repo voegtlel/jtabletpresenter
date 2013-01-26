@@ -125,7 +125,11 @@ public class ClientApp {
 			}
 		}
 		doc.setCurrentPen(new SolidPen(_pageRenderer.getConfig().getFloat("editor.defaultPen.thickness", 1f), _pageRenderer.getConfig().getColor("editor.defaultPen.color", Color.black)));
-		_pageRenderer.setDocumentEditor(doc);
+		//_pageRenderer.setDocumentEditor(doc);
+		// TODO: Temporary create fixed
+		_pageRenderer.getDocumentEditor().setDocument(new ServerDocument(1));
+		// TODO: Double performing (see 3 lines above)
+		_pageRenderer.getDocumentEditor().setCurrentPen(new SolidPen(_pageRenderer.getConfig().getFloat("editor.defaultPen.thickness", 1f), _pageRenderer.getConfig().getColor("editor.defaultPen.color", Color.black)));
 		
 		if (_pageRenderer.getConfig().getBoolean("client.up.enabled", false)) {
 			ClientUpSync clientSync = new ClientUpSync(doc.getHistory());

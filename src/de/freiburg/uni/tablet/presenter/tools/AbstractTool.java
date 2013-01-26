@@ -5,9 +5,10 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 
+import de.freiburg.uni.tablet.presenter.editor.IPageRepaintListener;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 
-public abstract class AbstractTool implements ITool {
+public abstract class AbstractTool implements ITool, IPageRepaintListener {
 	private boolean _isActive = false;
 	private Cursor _cursor = null;
 	protected final IToolPageEditor _editor;

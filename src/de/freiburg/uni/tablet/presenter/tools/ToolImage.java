@@ -12,6 +12,7 @@ import javax.swing.JOptionPane;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 import de.freiburg.uni.tablet.presenter.geometry.BitmapImage;
 import de.freiburg.uni.tablet.presenter.geometry.DataPoint;
+import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
 
 public class ToolImage extends AbstractTool {
 	private BitmapImage _image = null;
@@ -26,17 +27,24 @@ public class ToolImage extends AbstractTool {
 		super(editor);
 		updateCursor();
 	}
+	
+	@Override
+	public void render(final IPageBackRenderer renderer) {
+		if (_image != null) {
+			_image.render(renderer);
+		}
+	}
 
 	@Override
 	public void begin() {
-		BitmapImage currentImage = _editor.getDocumentEditor().getCurrentImage();
+		final BitmapImage currentImage = _editor.getDocumentEditor().getCurrentImage();
 		if (currentImage == null) {
 			JOptionPane.showMessageDialog(_editor.getPageEditor().getContainerComponent(),
 					"No image selected for image tool");
 		} else {
-			_image = (BitmapImage) currentImage.cloneRenderable(_editor.getDocumentEditor().getDocument()
-					.nextId());
+			_image = currentImage.cloneRenderable(_editor.getDocumentEditor().getCurrentPage());
 		}
+		_editor.getFrontRenderer().setRepaintListener(this);
 	}
 
 	@Override
@@ -46,18 +54,13 @@ public class ToolImage extends AbstractTool {
 				_image.setLocation(data.getX(), data.getY());
 				_startData = data;
 			} else {
-				float x1 = Math.min(data.getX(), _startData.getX());
-				float y1 = Math.min(data.getY(), _startData.getY());
-				float x2 = Math.max(data.getX(), _startData.getX());
-				float y2 = Math.max(data.getY(), _startData.getY());
+				final float x1 = Math.min(data.getX(), _startData.getX());
+				final float y1 = Math.min(data.getY(), _startData.getY());
+				final float x2 = Math.max(data.getX(), _startData.getX());
+				final float y2 = Math.max(data.getY(), _startData.getY());
 				_image.setLocation(x1, y1);
 				_image.setSize(x2-x1, y2-y1);
-				_editor.getFrontRenderer().clear();
-				_editor.getFrontRenderer().draw(
-						_image.getImage(),
-						x1, y1, x2-x1,
-						y2-y1);
-				_editor.getPageEditor().requireRepaint();
+				_editor.getFrontRenderer().requireRepaint();
 			}
 		}
 	}
@@ -68,15 +71,16 @@ public class ToolImage extends AbstractTool {
 		_image = null;
 		_startData = null;
 
-		if (result != null) {
-			if (((result.getMaxX() - result.getMinX()) > 0)
-					|| ((result.getMaxY() - result.getMinY()) > 0)) {
-				_editor.getDocumentEditor().getCurrentPage().addRenderable(result);
-			}
-			
-			_editor.getFrontRenderer().requireClear();
-			_editor.getPageEditor().requireRepaint();
+		_editor.getPageEditor().suspendRepaint();
+		if (result != null && (((result.getMaxX() - result.getMinX()) > 0)
+				|| ((result.getMaxY() - result.getMinY()) > 0))) {
+			_editor.getDocumentEditor().getCurrentPage().addRenderable(result);
 		}
+		
+		_editor.getFrontRenderer().setRepaintListener(null);
+		
+		_editor.getFrontRenderer().requireRepaint();
+		_editor.getPageEditor().resumeRepaint();
 	}
 
 	@Override

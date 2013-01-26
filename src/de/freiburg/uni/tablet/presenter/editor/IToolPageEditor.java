@@ -6,7 +6,7 @@ package de.freiburg.uni.tablet.presenter.editor;
 
 import de.freiburg.uni.tablet.presenter.document.DocumentConfig;
 import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
-import de.freiburg.uni.tablet.presenter.page.IPageFrontRenderer;
+import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
 
 /**
  * @author lukas
@@ -40,7 +40,7 @@ public interface IToolPageEditor {
 	 * 
 	 * @return
 	 */
-	IPageFrontRenderer getFrontRenderer();
+	IPageBackRenderer getFrontRenderer();
 
 	/**
 	 * Gets the page editor

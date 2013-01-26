@@ -8,12 +8,11 @@ public interface IRenderable extends IEntity {
 	/**
 	 * Creates a clone of this renderable with a new id
 	 * 
-	 * @param id
-	 *            id of clone
+	 * @param parent
 	 * 
 	 * @return
 	 */
-	IRenderable cloneRenderable(long id);
+	IRenderable cloneRenderable(DocumentPage parent);
 
 	/**
 	 * Renders the object
@@ -24,22 +23,26 @@ public interface IRenderable extends IEntity {
 	void render(IPageBackRenderer renderer);
 
 	/**
-	 * 
-	 */
-	void setParent(DocumentPage pageLayer);
-
-	/**
-	 * Erase at a point and store history
-	 * 
+	 * Begin erasing this instance.
 	 * @param eraseInfo
+	 * @param replacingInstance the instance replacing this renderable after the erase
+	 * @return false if the object is empty and should be removed
 	 */
-	void eraseAt(EraseInfo eraseInfo);
+	boolean eraseStart(EraseInfo eraseInfo);
 	
 	/**
-	 * Ends the erase process
+	 * Erase at a point.
+	 * 
+	 * @param eraseInfo
+	 * @return false if the object is empty and should be removed
+	 */
+	boolean eraseAt(EraseInfo eraseInfo);
+	
+	/**
+	 * Ends the erase process.
 	 * @param eraseInfo 
 	 * 
-	 * @return if false, the object is now empty an thus can be removed
+	 * @return false if the object is empty and should be removed
 	 */
 	boolean eraseEnd(EraseInfo eraseInfo);
 

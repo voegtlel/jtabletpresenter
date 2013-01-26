@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
+import de.freiburg.uni.tablet.presenter.document.DocumentPage;
 import de.freiburg.uni.tablet.presenter.list.LinkedElement;
 import de.freiburg.uni.tablet.presenter.list.LinkedElementList;
 import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
@@ -14,14 +15,14 @@ public class Scribble extends AbstractRenderable {
 
 	private final IPen _pen;
 
-	public Scribble(final long id, final IPen pen) {
-		super(id);
+	public Scribble(final DocumentPage parent, final IPen pen) {
+		super(parent);
 		_pen = pen;
 	}
 
 	@Override
-	public IRenderable cloneRenderable(final long id) {
-		final Scribble result = new Scribble(id, _pen);
+	public IRenderable cloneRenderable(final DocumentPage parent) {
+		final Scribble result = new Scribble(parent, _pen);
 		for (LinkedElement<ScribbleSegment> segment = _segments.getFirst(); segment != null; segment = segment
 				.getNext()) {
 			result._segments.addLast(segment.getData().cloneRenderable());
@@ -39,6 +40,7 @@ public class Scribble extends AbstractRenderable {
 			_segments.addLast(new ScribbleSegment());
 		}
 		_segments.getLast().getData().addPoint(data);
+		_parent.fireRenderableModified(this);
 	}
 
 	/**
@@ -104,37 +106,28 @@ public class Scribble extends AbstractRenderable {
 	public float getRadius() {
 		return _pen.getThickness();
 	}
-
+	
+	
 	@Override
-	public void eraseAt(final EraseInfo eraseInfo) {
-		Scribble modifiedObjectInstance = (Scribble) eraseInfo
-				.getModifiedObject(this);
-		if (modifiedObjectInstance == null) {
-			if (collides(eraseInfo.getCollisionInfo())) {
-				modifiedObjectInstance = (Scribble) eraseInfo
-						.addModifiedObject(this);
-			}
-		}
-
-		if (modifiedObjectInstance != null) {
-			modifiedObjectInstance.eraseAtDirect(eraseInfo.getCollisionInfo());
-		}
+	public boolean eraseStart(final EraseInfo eraseInfo) {
+		return true;
 	}
-
-	/**
-	 * Performs the erase
-	 * @param collisionInfo
-	 */
-	private void eraseAtDirect(final CollisionInfo collisionInfo) {
+	
+	@Override
+	public boolean eraseAt(final EraseInfo eraseInfo) {
+		boolean wasModified = false;
 		for (LinkedElement<ScribbleSegment> seg = _segments.getFirst(); seg != null;) {
 			LinkedElement<ScribbleSegment> nextSeg = seg.getNext();
-			final ScribbleSegment newSeg = seg.getData().eraseAt(collisionInfo);
+			final ScribbleSegment newSeg = seg.getData().eraseAt(eraseInfo.getCollisionInfo());
 			if (newSeg != null) {
-				if (collisionInfo.isCheckOnlyBoundaries()) {
-					_segments.remove(seg);
-				} else {
-					_segments.insertAfter(seg, newSeg);
-					nextSeg = seg.getNext();
+				wasModified = true;
+				if (newSeg != seg.getData()) {
+					if (eraseInfo.getCollisionInfo().isCheckOnlyBoundaries()) {
+						_segments.remove(seg);
+					} else {
+						_segments.insertAfter(seg, newSeg);
+						nextSeg = seg.getNext();
+					}
 				}
 			}
 			if (seg.getData().isEmpty()) {
@@ -142,17 +135,16 @@ public class Scribble extends AbstractRenderable {
 			}
 			seg = nextSeg;
 		}
+		if (wasModified) {
+			_parent.fireRenderableModified(this);
+		}
+		return !_segments.isEmpty();
 	}
 	
 	
 	@Override
 	public boolean eraseEnd(final EraseInfo eraseInfo) {
-		Scribble modifiedObjectInstance = (Scribble) eraseInfo
-				.getModifiedObject(this);
-		if (modifiedObjectInstance != null) {
-			return !modifiedObjectInstance._segments.isEmpty();
-		}
-		return false;
+		return !_segments.isEmpty();
 	}
 
 	@Override

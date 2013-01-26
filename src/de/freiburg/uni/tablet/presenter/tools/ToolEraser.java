@@ -6,18 +6,24 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
+import java.util.HashMap;
 
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
+import de.freiburg.uni.tablet.presenter.geometry.CollisionListener;
 import de.freiburg.uni.tablet.presenter.geometry.DataPoint;
 import de.freiburg.uni.tablet.presenter.geometry.EraseInfo;
+import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
+import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
 import de.freiburg.uni.tablet.presenter.page.IPen;
 import de.freiburg.uni.tablet.presenter.page.SolidPen;
 
-public class ToolEraser extends AbstractTool {
+public class ToolEraser extends AbstractTool implements CollisionListener {
 	private final IPen _pen;
 
 	private EraseInfo _eraseInfo = null;
+	private DocumentPage _erasePage = null;
+	private final HashMap<Long, IRenderable> _replacedObjects = new HashMap<Long, IRenderable>();
 
 	private boolean _checkOnlyBoundaries = false;
 
@@ -32,41 +38,77 @@ public class ToolEraser extends AbstractTool {
 		_checkOnlyBoundaries = checkOnlyBoundaries;
 		updateCursor();
 	}
+	
+	@Override
+	public void render(final IPageBackRenderer renderer) {
+	}
 
 	@Override
 	public void begin() {
-		_eraseInfo = new EraseInfo(_editor.getDocumentEditor().getDocument(),
-				_editor.getDocumentEditor().getCurrentPage());
+		_editor.getDocumentEditor().getHistory().beginActionGroup();
+		
+		_eraseInfo = new EraseInfo();
+		_erasePage = _editor.getDocumentEditor().getCurrentPage();
+		_replacedObjects.clear();
+		
+		_editor.getFrontRenderer().setRepaintListener(this);
 	}
 
 	@Override
 	public void draw(final DataPoint data) {
-		final DocumentPage activeLayer = _editor.getDocumentEditor()
-				.getCurrentPage();
-		if (activeLayer != null) {
+		if (_erasePage != null) {
+			_editor.getPageEditor().suspendRepaint();
 			_eraseInfo.createCollisionInfo(data.getX(), data.getY(),
 					data.getXOrig(), data.getYOrig(),
 					data.getX() / data.getXOrig() * _pen.getThickness() / 2.0f,
 					data.getY() / data.getYOrig() * _pen.getThickness() / 2.0f,
 					_pen.getThickness(), _pen.getThickness(),
 					_checkOnlyBoundaries);
-			activeLayer.eraseAt(_eraseInfo);
-			_editor.getFrontRenderer().draw(_pen, data.getX(), data.getY());
-			_editor.getPageEditor().requireRepaint();
+			_erasePage.collideWith(_eraseInfo.getCollisionInfo(), this);
+			_editor.getPageEditor().resumeRepaint();
 		}
+	}
+	
+	@Override
+	public void collides(final IRenderable data) {
+		IRenderable replacedInstance = _replacedObjects.get(data.getId());
+		if (replacedInstance == null) {
+			replacedInstance = data.cloneRenderable(_erasePage);
+			final IRenderable prevRenderable = _erasePage.removeRenderable(data);
+			if (replacedInstance.eraseStart(_eraseInfo)) {
+				_replacedObjects.put(replacedInstance.getId(), replacedInstance);
+				_erasePage.insertRenderable(prevRenderable, replacedInstance);
+			} else {
+				replacedInstance = null;
+			}
+		}
+		if (replacedInstance != null) {
+			if (!replacedInstance.eraseAt(_eraseInfo)) {
+				_replacedObjects.remove(replacedInstance.getId());
+				_erasePage.removeRenderable(replacedInstance);
+			}
+		}
+		_editor.getPageEditor().requireRepaint();
 	}
 
 	@Override
 	public void end() {
 		_editor.getPageEditor().suspendRepaint();
-		_editor.getDocumentEditor().getHistory().beginActionGroup();
-		_eraseInfo.applyModifications();
+		for (IRenderable renderable : _replacedObjects.values()) {
+			if (!renderable.eraseEnd(_eraseInfo)) {
+				_erasePage.removeRenderable(renderable);
+			}
+		}
+		
 		_editor.getDocumentEditor().getHistory().endActionGroup();
+		
 		_eraseInfo = null;
+		_replacedObjects.clear();
+		
+		_editor.getFrontRenderer().setRepaintListener(null);
 
+		_editor.getFrontRenderer().requireRepaint();
 		_editor.getPageEditor().resumeRepaint();
-		_editor.getFrontRenderer().requireClear();
-		_editor.getPageEditor().requireRepaint();
 	}
 
 	@Override
