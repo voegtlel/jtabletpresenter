@@ -60,6 +60,12 @@ public class Document implements IDocumentNotify {
 	}
 	
 	@Override
+	public boolean hasPage(final DocumentPage page) {
+		final int result = _pages.getElementIndex(page);
+		return result != -1;
+	}
+	
+	@Override
 	public int getPageIndex(final DocumentPage page) {
 		final int result = _pages.getElementIndex(page);
 		if (result == -1) {

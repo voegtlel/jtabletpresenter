@@ -1,5 +1,7 @@
 package de.freiburg.uni.tablet.presenter.document;
 
+import de.freiburg.uni.tablet.presenter.page.IPen;
+
 public interface DocumentEditorListener {
 
 	/**
@@ -28,5 +30,11 @@ public interface DocumentEditorListener {
 	 * Fired when something is about to change
 	 */
 	void changing();
+	
+	/**
+	 * Fired when the current pen was changed
+	 * @param lastPen
+	 */
+	void currentPenChanged(IPen lastPen);
 
 }

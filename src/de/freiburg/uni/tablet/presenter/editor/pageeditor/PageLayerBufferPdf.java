@@ -84,13 +84,6 @@ public class PageLayerBufferPdf implements IPageLayerBuffer {
 			requiresRepaint = _requireRepaint;
 			page = ((_pdfPage == null)?null:_pdfPage.getPage());
 		}
-		if (_pdfPage == null) {
-			System.out.println("PDF changed to null");
-			
-		} else {
-			System.out.println("PDF changed to " + _pdfPage.getId());
-			
-		}
 		if (page == null) {
 			destroyBuffer();
 		} else {

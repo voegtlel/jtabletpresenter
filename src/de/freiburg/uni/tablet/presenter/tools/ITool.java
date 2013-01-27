@@ -35,4 +35,9 @@ public interface ITool {
 	 * Called, when the mouse leaves this tool
 	 */
 	void out();
+
+	/**
+	 * Call to update cursor
+	 */
+	void invalidateCursor();
 }

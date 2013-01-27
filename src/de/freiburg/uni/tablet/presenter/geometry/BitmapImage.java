@@ -80,7 +80,7 @@ public class BitmapImage extends AbstractRenderable {
 	}
 
 	@Override
-	public BitmapImage cloneRenderable(final DocumentPage page) {
+	synchronized public BitmapImage cloneRenderable(final DocumentPage page) {
 		System.out.println("clone image " + getId());
 		final ColorModel m = _image.getColorModel();
 		final WritableRaster wr = _image.copyData(null);
@@ -89,7 +89,7 @@ public class BitmapImage extends AbstractRenderable {
 	}
 	
 	@Override
-	public boolean eraseStart(final EraseInfo eraseInfo) {
+	synchronized public boolean eraseStart(final EraseInfo eraseInfo) {
 		if (eraseInfo.getCollisionInfo().isCheckOnlyBoundaries()) {
 			return false;
 		}
@@ -106,7 +106,7 @@ public class BitmapImage extends AbstractRenderable {
 	}
 
 	@Override
-	public boolean eraseAt(final EraseInfo eraseInfo) {
+	synchronized public boolean eraseAt(final EraseInfo eraseInfo) {
 		final Graphics2D g = (Graphics2D)eraseInfo.getObjectData(this, DATA_ID_GRAPHICS2D);
 		final Ellipse2D.Float ellipse = (Ellipse2D.Float)eraseInfo.getObjectData(this, DATA_ID_ELLIPSE);
 		final CollisionInfo collisionInfo = eraseInfo.getCollisionInfo();
@@ -128,7 +128,7 @@ public class BitmapImage extends AbstractRenderable {
 	}
 	
 	@Override
-	public boolean eraseEnd(final EraseInfo eraseInfo) {
+	synchronized public boolean eraseEnd(final EraseInfo eraseInfo) {
 		final Graphics2D graphics = eraseInfo.getObjectData(this, DATA_ID_GRAPHICS2D);
 		graphics.dispose();
 		final Rectangle newRect = new Rectangle();
@@ -167,7 +167,7 @@ public class BitmapImage extends AbstractRenderable {
 	}
 
 	@Override
-	public void render(final IPageBackRenderer renderer) {
+	synchronized public void render(final IPageBackRenderer renderer) {
 		renderer.draw(_image, _x, _y, _width, _height);
 	}
 	
@@ -224,13 +224,13 @@ public class BitmapImage extends AbstractRenderable {
 	}
 
 	@Override
-	public void serialize(final BinarySerializer writer) throws IOException {
+	synchronized public void serialize(final BinarySerializer writer) throws IOException {
 		super.serialize(writer);
 		serializeData(writer);
 	}
 	
 	@Override
-	public void deserializeData(final BinaryDeserializer reader) throws IOException {
+	synchronized public void deserializeData(final BinaryDeserializer reader) throws IOException {
 		_x = reader.readFloat();
 		_y = reader.readFloat();
 		_width = reader.readFloat();
@@ -241,7 +241,7 @@ public class BitmapImage extends AbstractRenderable {
 	}
 	
 	@Override
-	public void serializeData(final BinarySerializer writer) throws IOException {
+	synchronized public void serializeData(final BinarySerializer writer) throws IOException {
 		writer.writeFloat(_x);
 		writer.writeFloat(_y);
 		writer.writeFloat(_width);

@@ -16,15 +16,17 @@ public class ServerDownSync extends ServerSync {
 	
 	private void receiveThread() throws IOException {
 		while (_running) {
-			System.out.println("Down wait for package");
 			if (!_packageInputStreamSync.nextPackage()) {
 				System.out.println("Down cancel package");
 				break;
 			}
-			System.out.println("Down package read");
-			final IAction action = _readerSync.readSerializableClass();
-			System.out.println("Read action " + action.getClass().getName());
-			action.perform(_editor);
+			try {
+				final IAction action = _readerSync.readSerializableClass();
+				System.out.println("Read action " + action.getClass().getName());
+				action.perform(_editor);
+			} catch (IOException e) {
+				throw e;
+			}
 		}
 	}
 	

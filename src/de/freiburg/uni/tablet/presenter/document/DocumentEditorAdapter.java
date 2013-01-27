@@ -1,5 +1,7 @@
 package de.freiburg.uni.tablet.presenter.document;
 
+import de.freiburg.uni.tablet.presenter.page.IPen;
+
 public abstract class DocumentEditorAdapter implements DocumentEditorListener {
 
 	@Override
@@ -16,5 +18,9 @@ public abstract class DocumentEditorAdapter implements DocumentEditorListener {
 	
 	@Override
 	public void changing() {
+	}
+	
+	@Override
+	public void currentPenChanged(final IPen lastPen) {
 	}
 }

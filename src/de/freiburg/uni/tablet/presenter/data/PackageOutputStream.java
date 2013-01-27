@@ -38,6 +38,15 @@ public class PackageOutputStream extends OutputStream {
 		_outputStream.write(b);
 	}
 	
+	/*public void debugPrintData() {
+		final StringBuilder data = new StringBuilder();
+		byte[] byteArray = _outputStream.toByteArray();
+		for (int i = 0; i < byteArray.length; i++) {
+			data.append(String.format("%02x ", (int)byteArray[i] & 0xff));
+		}
+		System.out.println(data.toString());
+	}*/
+	
 	/**
 	 * Sends the next package to the stream
 	 */

@@ -58,6 +58,14 @@ public class PackageInputStream extends InputStream {
 		return nextPackageRaw(packageSize);
 	}
 	
+	/*public void debugPrintData() {
+		final StringBuilder data = new StringBuilder();
+		for (int i = 0; i < _debugBufferUsedSize; i++) {
+			data.append(String.format("%02x ", (int)_buffer[i] & 0xff));
+		}
+		System.out.println(data.toString());
+	}*/
+	
 	/**
 	 * Gets the next package from the source
 	 */

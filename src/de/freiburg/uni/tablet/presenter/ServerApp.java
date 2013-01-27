@@ -127,7 +127,7 @@ public class ServerApp {
 			}
 		});
 		client.start();
-		client.onActionPerformed(new SetClientDocumentAction(_editor.getDocument()));
+		client.onActionPerformed(new SetClientDocumentAction(_editor.getDocument(), _editor.getCurrentPageIndex()));
 		_upSyncs.add(client);
 	}
 	

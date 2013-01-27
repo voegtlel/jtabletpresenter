@@ -83,6 +83,9 @@ public class BinarySerializer {
 		}
 		final Object data = _objectTable.get(obj.getId());
 		if (data != null) {
+			if (data != obj) {
+				throw new IllegalStateException("Object table out of sync");
+			}
 			writeLong(obj.getId());
 		} else {
 			_objectTable.put(obj.getId(), obj);
@@ -90,6 +93,15 @@ public class BinarySerializer {
 			writeSerializableClass(obj);
 		}
 	}
+	
+	/*public void debugPrint() {
+		for (Map.Entry<String, Integer> entry : _stringTable.entrySet()) {
+			System.out.println("str[" + entry.getKey() + "] = " + entry.getValue());
+		}
+		for (Map.Entry<Long,IBinarySerializableId> entry : _objectTable.entrySet()) {
+			System.out.println("obj[" + String.format("%16x", entry.getKey()) + "] = " + entry.getValue().getClass().getName());
+		}
+	}*/
 	
 	/**
 	 * Resets the object table.

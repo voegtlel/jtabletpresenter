@@ -9,7 +9,6 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
 import java.awt.image.BufferStrategy;
 import java.awt.image.ImageObserver;
 
@@ -125,22 +124,18 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 		while (_running) {
 			synchronized (_repaintMonitor) {
 				while ((_suspendRepaintCounter > 0 || !_requiresRepaint) && _running) {
-					System.out.println("Repaint wait");
 					_repaintMonitor.wait();
-					System.out.println("Repaint notify");
 					// Return to notifying thread
 					_repaintMonitor.notifyAll();
 				}
 				_requiresRepaint = false;
 			}
-			System.out.println("Repaint perform");
 			if (_running) {
-				System.out.println("Repaint draw");
 				// Perform actual repaint
 				paint(null);
 			}
 		}
-		System.out.println("Repaint Exit");
+		System.out.println("Repaint thread exit");
 	}
 	
 	@Override
@@ -162,7 +157,12 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 				final Graphics2D graphics = (Graphics2D) strategy.getDrawGraphics();
 				
 				if (_renderBuffer != null) {
-					_renderBuffer.drawBuffer(graphics, this);
+					try {
+						_renderBuffer.drawBuffer(graphics, this);
+					} catch(Exception e) {
+						e.printStackTrace();
+						requireRepaint();
+					}
 				}
 				
 				if (graphics != null) {

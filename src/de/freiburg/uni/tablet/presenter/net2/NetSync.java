@@ -155,6 +155,10 @@ public abstract class NetSync {
 			final long timeout) {
 		System.out.println("Connecting to " + host + ":" + port + " (timeout: " + timeout + "ms)");
 		
+		_readerSync.resetState();
+		_writerSync.resetState();
+		_writerAsync.resetState();
+		
 		_running = true;
 		_thread = new Thread() {
 			@Override
@@ -173,6 +177,10 @@ public abstract class NetSync {
 	 */
 	protected void start() {
 		System.out.println("Start client");
+		
+		_readerSync.resetState();
+		_writerSync.resetState();
+		_writerAsync.resetState();
 		
 		_running = true;
 		_thread = new Thread() {
@@ -260,30 +268,26 @@ public abstract class NetSync {
 	 */
 	protected void sendThread() throws IOException {
 		while (_running) {
-			System.out.println("Run");
 			// Perform action
 			synchronized (_threadSync) {
-				System.out.println("Thread sync");
 				// We send more data
 				if (_sendBuffersFilled.isEmpty()) {
 					try {
-						System.out.println("Wait");
 						_threadSync.wait();
 						// Immediately let the calling thread continue
-						System.out.println("Notify");
 						_threadSync.notifyAll();
-						System.out.println("Continue");
 					} catch (InterruptedException e) {
-						break;
+						continue;
 					}
 				} else {
 					System.out.println("Client peek buffer");
 					final ByteBuffer buffer = _sendBuffersFilled
-							.peek();
-					System.out.println("Client up write " + buffer.remaining() + " bytes");
+							.getFirst();
+					int writeSize = buffer.remaining();
 					_socket.write(buffer);
+					System.out.println("Wrote " + (writeSize - buffer.remaining()) + "/" + writeSize + " bytes");
 					if (buffer.remaining() == 0) {
-						_sendBuffersFilled.pop();
+						_sendBuffersFilled.removeFirst();
 						System.out.println("Reuse buffer");
 						if (buffer.capacity() <= BUFFER_SIZE) {
 							_sendBuffersFree.addLast(buffer);
@@ -307,7 +311,6 @@ public abstract class NetSync {
 	 */
 	private boolean receive(final ByteBuffer buffer) {
 		try {
-			// Infinite loop
 			while (_running && buffer.remaining() > 0) {
 				// Perform action
 				synchronized (_threadSync) {
@@ -369,7 +372,6 @@ public abstract class NetSync {
 	 * @return
 	 */
 	private int readPackageSizeSync() {
-		System.out.println("Reading package size...");
 		_readSizeBuffer.clear();
 		receive(_readSizeBuffer);
 		int size = _readSizeBuffer.getInt();
@@ -420,7 +422,7 @@ public abstract class NetSync {
 			if (_sendBuffersFree.isEmpty()) {
 				buffer = ByteBuffer.allocateDirect(BUFFER_SIZE);
 			} else {
-				buffer = _sendBuffersFree.pop();
+				buffer = _sendBuffersFree.removeFirst();
 				buffer.clear();
 			}
 			if (!raw) {
@@ -478,9 +480,9 @@ public abstract class NetSync {
 			System.out.println("Send packet sync: " + length);
 			if (_sendBuffersFree.isEmpty()) {
 				final ByteBuffer newBuffer = ByteBuffer.allocateDirect(BUFFER_SIZE);
-				_sendBuffersFree.push(newBuffer);
+				_sendBuffersFree.addLast(newBuffer);
 			}
-			final ByteBuffer buffer = _sendBuffersFree.peek();
+			final ByteBuffer buffer = _sendBuffersFree.getFirst();
 			buffer.clear();
 			if (!raw) {
 				buffer.putInt(length);

@@ -16,6 +16,7 @@ import de.freiburg.uni.tablet.presenter.actions.IAction;
 import de.freiburg.uni.tablet.presenter.actions.RemovePageAction;
 import de.freiburg.uni.tablet.presenter.actions.RemoveRenderableAction;
 import de.freiburg.uni.tablet.presenter.actions.RenderableModifiedAction;
+import de.freiburg.uni.tablet.presenter.actions.SetServerDocumentAction;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 import de.freiburg.uni.tablet.presenter.list.LinkedElement;
 import de.freiburg.uni.tablet.presenter.list.LinkedElementList;
@@ -93,14 +94,13 @@ public class DocumentHistory {
 			}
 		};
 		_documentEditor.addListener(new DocumentEditorAdapter() {
-			
 			@Override
 			public void documentChanged(IEditableDocument lastDocument) {
 				if (lastDocument != null) {
 					lastDocument.removeListener(_documentListener);
 				}
 				_documentEditor.getDocument().addListener(_documentListener);
-				//TODO addAction(new SetDocumentAction(_documentEditor.getDocument()));
+				addAction(new SetServerDocumentAction(_documentEditor.getDocument(), _documentEditor.getCurrentPageIndex()));
 				// Clear history
 				clear();
 			}
@@ -108,7 +108,7 @@ public class DocumentHistory {
 			@Override
 			public void currentPageChanged(DocumentPage lastCurrentPage,
 					DocumentPage lastCurrentBackPage) {
-				if (!_isPerforming && (lastCurrentPage != null)) {
+				if (!_isPerforming && (lastCurrentPage != null) && (lastCurrentPage.getParent() == _documentEditor.getDocument())) {
 					addAction(new ChangePageIndexAction(_documentEditor
 							.getCurrentPage(), lastCurrentPage));
 				}

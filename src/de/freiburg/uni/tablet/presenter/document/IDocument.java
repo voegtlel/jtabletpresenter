@@ -14,9 +14,17 @@ public interface IDocument extends IEntity {
 	 * @return
 	 */
 	int getPageCount();
+	
+	/**
+	 * Gets if the document has the given page
+	 * 
+	 * @param page
+	 * @return true if page is contained
+	 */
+	boolean hasPage(DocumentPage page);
 
 	/**
-	 * Gets a pages index
+	 * Gets a page index
 	 * 
 	 * @param page
 	 * @return index or exception

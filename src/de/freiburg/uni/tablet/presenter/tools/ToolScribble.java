@@ -7,15 +7,17 @@ import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 
+import de.freiburg.uni.tablet.presenter.document.DocumentEditorAdapter;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 import de.freiburg.uni.tablet.presenter.geometry.AbstractRenderable;
 import de.freiburg.uni.tablet.presenter.geometry.DataPoint;
 import de.freiburg.uni.tablet.presenter.geometry.Scribble;
 import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
+import de.freiburg.uni.tablet.presenter.page.IPen;
 
 public class ToolScribble extends AbstractTool {
 	private Scribble _scribble = null;
-
+	
 	/**
 	 * 
 	 * @param container
@@ -23,24 +25,30 @@ public class ToolScribble extends AbstractTool {
 	 */
 	public ToolScribble(final IToolPageEditor editor) {
 		super(editor);
+		editor.getDocumentEditor().addListener(new DocumentEditorAdapter() {
+			@Override
+			public void currentPenChanged(final IPen lastPen) {
+				updateCursor();
+			}
+		});
 		updateCursor();
 	}
 
 	@Override
-	public void begin() {
+	synchronized public void begin() {
 		_scribble = new Scribble(_editor.getDocumentEditor().getCurrentPage(), _editor.getDocumentEditor().getCurrentPen());
 		_editor.getFrontRenderer().setRepaintListener(this);
 	}
 	
 	@Override
-	public void render(final IPageBackRenderer renderer) {
+	synchronized public void render(final IPageBackRenderer renderer) {
 		if (_scribble != null) {
 			_scribble.render(renderer);
 		}
 	}
 
 	@Override
-	public void draw(final DataPoint data) {
+	synchronized public void draw(final DataPoint data) {
 		if (_scribble != null) {
 			_scribble.addPoint(data);
 			_editor.getFrontRenderer().requireRepaint();
@@ -48,7 +56,7 @@ public class ToolScribble extends AbstractTool {
 	}
 
 	@Override
-	public void end() {
+	synchronized public void end() {
 		final AbstractRenderable result = _scribble;
 		_scribble = null;
 

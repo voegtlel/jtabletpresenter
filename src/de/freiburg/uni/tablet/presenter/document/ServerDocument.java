@@ -13,6 +13,7 @@ public class ServerDocument extends Document implements IEditableDocument {
 	 */
 	public ServerDocument(final int docId) {
 		super(docId);
+		_pages.addFirst(new DocumentPage(this));
 	}
 	
 	/**
@@ -22,7 +23,6 @@ public class ServerDocument extends Document implements IEditableDocument {
 	 */
 	protected ServerDocument(final int docId, final ServerDocument base) {
 		super(docId, base);
-		_pages.addFirst(new DocumentPage(this));
 	}
 	
 	@Override

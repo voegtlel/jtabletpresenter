@@ -17,12 +17,14 @@ import de.freiburg.uni.tablet.presenter.document.IEditableDocument;
  */
 public class SetClientDocumentAction implements IAction {
 	private final IEditableDocument _document;
+	private final int _currentPageIndex;
 
 	/**
 	 * 
 	 */
-	public SetClientDocumentAction(final IEditableDocument document) {
+	public SetClientDocumentAction(final IEditableDocument document, final int currentPageIndex) {
 		_document = document;
+		_currentPageIndex = currentPageIndex;
 	}
 
 	/**
@@ -31,11 +33,13 @@ public class SetClientDocumentAction implements IAction {
 	 */
 	public SetClientDocumentAction(final BinaryDeserializer reader)
 			throws IOException {
+		reader.resetState();
 		_document = reader.readObjectTable();
+		_currentPageIndex = reader.readInt();
 	}
 	
 	public SetServerDocumentAction getServerAction() {
-		return new SetServerDocumentAction(_document);
+		return new SetServerDocumentAction(_document, _currentPageIndex);
 	}
 
 	@Override
@@ -50,12 +54,14 @@ public class SetClientDocumentAction implements IAction {
 
 	@Override
 	public void perform(final DocumentEditor editor) {
-		editor.setBaseDocument(_document);
+		editor.setDocument(_document);
+		editor.setCurrentPageByIndex(_currentPageIndex, false);
 	}
 
 	@Override
 	public void serialize(final BinarySerializer writer) throws IOException {
+		writer.resetState();
 		writer.writeObjectTable(_document);
+		writer.writeInt(_currentPageIndex);
 	}
-
 }

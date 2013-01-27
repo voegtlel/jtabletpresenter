@@ -56,10 +56,18 @@ public class DocumentEditor implements IBinarySerializableId {
 		fireChanging();
 		final DocumentPage lastPage = _currentPage;
 		final DocumentPage lastBackPage = _currentBackPage;
-		_currentPage = page;
-		if (_baseDocument != null) {
-			int pageIndex = _document.getPageIndex(page);
-			_currentBackPage = _baseDocument.getPageByIndex(pageIndex);
+		if (_document.hasPage(page)) {
+			_currentPage = page;
+			if (_baseDocument != null) {
+				int pageIndex = _document.getPageIndex(page);
+				_currentBackPage = _baseDocument.getPageByIndex(pageIndex);
+			}
+		} else if ((_baseDocument != null) && _baseDocument.hasPage(page)) {
+			_currentBackPage = page;
+			int pageIndex = _baseDocument.getPageIndex(page);
+			_currentPage = _document.getPageByIndex(pageIndex, true);
+		} else {
+			throw new IllegalArgumentException("Page not in document");
 		}
 		fireCurrentPageChanged(lastPage, lastBackPage);
 	}
@@ -118,7 +126,10 @@ public class DocumentEditor implements IBinarySerializableId {
 	 * @param currentPen
 	 */
 	public void setCurrentPen(final IPen currentPen) {
+		fireChanging();
+		final IPen lastPen = _currentPen;
 		_currentPen = currentPen;
+		fireCurrentPenChanged(lastPen);
 	}
 	
 	/**
@@ -140,6 +151,7 @@ public class DocumentEditor implements IBinarySerializableId {
 	 * @throws IOException 
 	 */
 	public void setCurrentImageFile(File imageFile) throws IOException {
+		fireChanging();
 		_currentImageFile = imageFile;
 		_currentImage = new BitmapImage(_currentPage, imageFile, 0, 0, 0, 0);
 	}
@@ -156,12 +168,13 @@ public class DocumentEditor implements IBinarySerializableId {
 		boolean pageChanged = false;
 		if (_baseDocument != null) {
 			int length = _baseDocument.getPageCount();
+			// Create all pages
+			_document.getPageByIndex(length - 1, true);
+			// Set page index
 			if (getCurrentPageIndex() >= length) {
 				setCurrentPageByIndex(length - 1, true);
 				pageChanged = true;
 			}
-			// Create all pages
-			_document.getPageByIndex(length - 1, true);
 		}
 		if (!pageChanged) {
 			setCurrentPage(_currentPage);
@@ -189,8 +202,15 @@ public class DocumentEditor implements IBinarySerializableId {
 		fireChanging();
 		final IEditableDocument lastDocument = _document;
 		_document = document;
+		
+		final DocumentPage lastPage = _currentPage;
+		final DocumentPage lastBackPage = _currentBackPage;
+		_currentPage = document.getPageByIndex(0, true);
+		if (_baseDocument != null) {
+			_currentBackPage = _baseDocument.getPageByIndex(0);
+		}
 		fireDocumentChanged(lastDocument);
-		setCurrentPage(document.getPageByIndex(0, true));
+		fireCurrentPageChanged(lastPage, lastBackPage);
 	}
 	
 
@@ -223,6 +243,12 @@ public class DocumentEditor implements IBinarySerializableId {
 	private void fireBaseDocumentChanged(final IDocument lastDocument) {
 		for (final DocumentEditorListener listener : _listeners) {
 			listener.baseDocumentChanged(lastDocument);
+		}
+	}
+	
+	private void fireCurrentPenChanged(final IPen lastPen) {
+		for (final DocumentEditorListener listener : _listeners) {
+			listener.currentPenChanged(lastPen);
 		}
 	}
 

@@ -29,14 +29,14 @@ public class ToolImage extends AbstractTool {
 	}
 	
 	@Override
-	public void render(final IPageBackRenderer renderer) {
+	synchronized public void render(final IPageBackRenderer renderer) {
 		if (_image != null) {
 			_image.render(renderer);
 		}
 	}
 
 	@Override
-	public void begin() {
+	synchronized public void begin() {
 		final BitmapImage currentImage = _editor.getDocumentEditor().getCurrentImage();
 		if (currentImage == null) {
 			JOptionPane.showMessageDialog(_editor.getPageEditor().getContainerComponent(),
@@ -48,7 +48,7 @@ public class ToolImage extends AbstractTool {
 	}
 
 	@Override
-	public void draw(final DataPoint data) {
+	synchronized public void draw(final DataPoint data) {
 		if (_image != null) {
 			if (_startData == null) {
 				_image.setLocation(data.getX(), data.getY());
@@ -66,7 +66,7 @@ public class ToolImage extends AbstractTool {
 	}
 
 	@Override
-	public void end() {
+	synchronized public void end() {
 		final BitmapImage result = _image;
 		_image = null;
 		_startData = null;

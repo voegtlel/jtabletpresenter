@@ -167,7 +167,7 @@ public class ClientApp {
 			clientSync.start(_pageRenderer.getConfig().getString("client.up.host", ""),
 					_pageRenderer.getConfig().getInt("client.up.port", 8025),
 					_pageRenderer.getConfig().getInt("client.up.timeout", 5000));
-			clientSync.onActionPerformed(new SetServerDocumentAction(_pageRenderer.getDocumentEditor().getDocument()));
+			clientSync.onActionPerformed(new SetServerDocumentAction(_pageRenderer.getDocumentEditor().getDocument(), _pageRenderer.getDocumentEditor().getCurrentPageIndex()));
 		}
 		
 		_pageRenderer.addWindowListener(new WindowAdapter() {

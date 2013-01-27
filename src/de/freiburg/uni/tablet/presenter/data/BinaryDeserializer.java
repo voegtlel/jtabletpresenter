@@ -141,6 +141,15 @@ public class BinaryDeserializer {
 		return readObjectTable(_defaultCtorArgTypes, _defaultCtorArgs);
 	}
 	
+	/*public void debugPrint() {
+		for (int i = 0; i < _stringTable.size(); i++) {
+			System.out.println("str[" + i + "] = " + _stringTable.get(i));
+		}
+		for (Map.Entry<Long,IBinarySerializableId> entry : _objectTable.entrySet()) {
+			System.out.println("obj[" + String.format("%16x", entry.getKey()) + "] = " + entry.getValue().getClass().getName());
+		}
+	}*/
+	
 	public void resetState() {
 		_objectTable.clear();
 		_stringTable.clear();

@@ -109,12 +109,12 @@ public class Scribble extends AbstractRenderable {
 	
 	
 	@Override
-	public boolean eraseStart(final EraseInfo eraseInfo) {
+	synchronized public boolean eraseStart(final EraseInfo eraseInfo) {
 		return true;
 	}
 	
 	@Override
-	public boolean eraseAt(final EraseInfo eraseInfo) {
+	synchronized public boolean eraseAt(final EraseInfo eraseInfo) {
 		boolean wasModified = false;
 		for (LinkedElement<ScribbleSegment> seg = _segments.getFirst(); seg != null;) {
 			LinkedElement<ScribbleSegment> nextSeg = seg.getNext();
@@ -143,7 +143,7 @@ public class Scribble extends AbstractRenderable {
 	
 	
 	@Override
-	public boolean eraseEnd(final EraseInfo eraseInfo) {
+	synchronized public boolean eraseEnd(final EraseInfo eraseInfo) {
 		if (!_segments.isEmpty()) {
 			_parent.fireRenderableModifyEnd(this);
 		}
@@ -162,7 +162,7 @@ public class Scribble extends AbstractRenderable {
 	}
 
 	@Override
-	public void render(final IPageBackRenderer renderer) {
+	synchronized public void render(final IPageBackRenderer renderer) {
 		for (LinkedElement<ScribbleSegment> e = _segments.getFirst(); e != null; e = e
 				.getNext()) {
 			e.getData().render(_pen, renderer);
@@ -176,7 +176,7 @@ public class Scribble extends AbstractRenderable {
 	}
 
 	@Override
-	public void serialize(final BinarySerializer writer) throws IOException {
+	synchronized public void serialize(final BinarySerializer writer) throws IOException {
 		super.serialize(writer);
 		writer.writeSerializableClass(_pen);
 		// Always has first
@@ -184,17 +184,18 @@ public class Scribble extends AbstractRenderable {
 	}
 	
 	@Override
-	public void deserializeData(final BinaryDeserializer reader) throws IOException {
+	synchronized public void deserializeData(final BinaryDeserializer reader) throws IOException {
 		final int count = reader.readInt();
 		_segments.clear();
 		for (int i = 0; i < count; i++) {
 			_segments.addLast(new ScribbleSegment(reader));
 		}
 		_parent.fireRenderableModified(this);
+		_parent.fireRenderableModifyEnd(this);
 	}
 	
 	@Override
-	public void serializeData(final BinarySerializer writer) throws IOException {
+	synchronized public void serializeData(final BinarySerializer writer) throws IOException {
 		writer.writeInt(_segments.getFirst().getNextCount());
 		for (LinkedElement<ScribbleSegment> element = _segments.getFirst(); element != null; element = element
 				.getNext()) {

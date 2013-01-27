@@ -108,7 +108,6 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer {
 			}
 		}
 		if (!_isEmpty) {
-			System.out.println("Draw buffer image");
 			g.drawImage(_imageBuffer, 0, 0, obs);
 		}
 	}
