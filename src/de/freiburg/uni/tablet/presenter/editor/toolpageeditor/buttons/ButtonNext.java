@@ -30,7 +30,10 @@ public class ButtonNext extends AbstractButtonAction {
 		if (_editor.getConfig().getBoolean("autosave.next", true)) {
 			FileHelper.autosave(_editor.getDocumentEditor());
 		}
-		_editor.getDocumentEditor().setCurrentPageByIndex(
-				_editor.getDocumentEditor().getCurrentPageIndex() + 1, true);
+		int currentPageIndex = _editor.getDocumentEditor().getCurrentPageIndex();
+		if (currentPageIndex < _editor.getDocumentEditor().getMaxPageCount() - 1) {
+			_editor.getDocumentEditor().setCurrentPageByIndex(
+					currentPageIndex + 1, true);
+		}
 	}
 }

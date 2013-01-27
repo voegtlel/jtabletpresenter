@@ -3,6 +3,8 @@ package de.freiburg.uni.tablet.presenter.net2;
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
 import java.util.LinkedList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import de.freiburg.uni.tablet.presenter.actions.IAction;
 import de.freiburg.uni.tablet.presenter.actions.SetClientDocumentAction;
@@ -11,6 +13,8 @@ import de.freiburg.uni.tablet.presenter.document.DocumentHistory;
 import de.freiburg.uni.tablet.presenter.document.DocumentHistoryListener;
 
 public class ServerUpSync extends ServerSync {
+	private static final Logger LOGGER = Logger.getLogger(ServerUpSync.class.getName());
+	
 	private final LinkedList<IAction> _actions = new LinkedList<IAction>();
 	
 	public ServerUpSync(final DocumentHistory history, final SocketChannel socket, final String requiredAuthToken) {
@@ -55,15 +59,14 @@ public class ServerUpSync extends ServerSync {
 						continue;
 					}
 				} else {
-					System.out.println("Client pop buffer");
 					final IAction action = _actions.removeFirst();
 					if (action instanceof SetServerDocumentAction) {
-						System.out.println("Write up " + action.getClass().getName());
+						LOGGER.log(Level.INFO, "Write up " + action.getClass().getName());
 						SetClientDocumentAction clientAction = ((SetServerDocumentAction)action).getClientAction();
 						System.out.println(" --> " + clientAction.getClass().getName());
 						_writerSync.writeSerializableClass(clientAction);
 					} else {
-						System.out.println("Write up " + action.getClass().getName());
+						LOGGER.log(Level.INFO, "Write up " + action.getClass().getName());
 						_writerSync.writeSerializableClass(action);
 					}
 					_writerSync.flush();

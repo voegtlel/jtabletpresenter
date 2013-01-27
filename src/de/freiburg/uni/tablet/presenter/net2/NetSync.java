@@ -9,6 +9,8 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
@@ -16,11 +18,13 @@ import de.freiburg.uni.tablet.presenter.data.PackageInputStream;
 import de.freiburg.uni.tablet.presenter.data.PackageOutputStream;
 
 public abstract class NetSync {
+	private static final Logger LOGGER = Logger.getLogger(NetSync.class.getName());
+	
 	public static final int CLIENT_HEADER_MAGIC = 0x6153556;
 	public static final int SERVER_HEADER_MAGIC = 0x6429451;
 	
 	// 512k buffer
-	private static final int BUFFER_SIZE = 1024*512;
+	private static final int BUFFER_SIZE = 1024*32;
 	
 	public static final boolean SPLIT_PACKAGES = true;
 	
@@ -39,7 +43,6 @@ public abstract class NetSync {
 	protected final PackageOutputStream _packageOutputStreamSync;
 	protected final BinarySerializer _writerSync;
 	
-	private final ByteBuffer _readSizeBuffer = ByteBuffer.allocateDirect(4);
 	private final ByteBuffer _readBuffer = ByteBuffer.allocateDirect(BUFFER_SIZE);
 	
 	private final ByteBuffer _sendBuffer = ByteBuffer.allocateDirect(BUFFER_SIZE);
@@ -51,12 +54,24 @@ public abstract class NetSync {
 		_packageInputStreamSync = new PackageInputStream(new PackageInputStream.PackageReader() {
 			@Override
 			public int readPackageSize() {
-				return readPackageSizeSync();
+				try {
+					return readPackageSizeSync();
+				} catch (IOException e) {
+					e.printStackTrace();
+					fireError(e);
+					return -1;
+				}
 			}
 			
 			@Override
 			public boolean readPackage(final byte[] data, final int count) {
-				return readSync(data, count);
+				try {
+					return readSync(data, count);
+				} catch (IOException e) {
+					e.printStackTrace();
+					fireError(e);
+					return false;
+				}
 			}
 		});
 		_packageOutputStreamSync = new PackageOutputStream(new PackageOutputStream.PackageWriter() {
@@ -96,7 +111,7 @@ public abstract class NetSync {
 	 */
 	@SuppressWarnings("deprecation")
 	public void stop() {
-		System.out.println("Stop client");
+		LOGGER.log(Level.INFO, "Stop client");
 		_running = false;
 		try {
 			if (_socket != null) {
@@ -139,7 +154,7 @@ public abstract class NetSync {
 	 */
 	protected void start(final String host, final int port,
 			final long timeout) {
-		System.out.println("Connecting to " + host + ":" + port + " (timeout: " + timeout + "ms)");
+		LOGGER.log(Level.INFO, "Connecting to " + host + ":" + port + " (timeout: " + timeout + "ms)");
 		
 		_readerSync.resetState();
 		_writerSync.resetState();
@@ -161,7 +176,7 @@ public abstract class NetSync {
 	 * @param timeout
 	 */
 	protected void start() {
-		System.out.println("Start client");
+		LOGGER.log(Level.INFO, "Start client");
 		
 		_readerSync.resetState();
 		_writerSync.resetState();
@@ -200,7 +215,7 @@ public abstract class NetSync {
 
 			_socket.connect(socketAddress);
 			
-			System.out.println("connect");
+			LOGGER.log(Level.INFO, "connect");
 		}
 
 		boolean isConnected = false;
@@ -216,12 +231,12 @@ public abstract class NetSync {
 			_connectSelector.close();
 			_connectSelector = null;
 			if (!isConnected) {
-				System.out.println("Not connected");
+				LOGGER.log(Level.WARNING, "Not connected");
 				_socket.close();
 				_socket = null;
 			} else {
 				_socket.finishConnect();
-				System.out.println("Connected");
+				LOGGER.log(Level.INFO, "Connected");
 				_socket.configureBlocking(true);
 			}
 		}
@@ -242,7 +257,7 @@ public abstract class NetSync {
 			_socket.configureBlocking(true);
 			_socket.finishConnect();
 			
-			System.out.println("connected");
+			LOGGER.log(Level.INFO, "connected");
 		}
 	}
 	
@@ -287,66 +302,32 @@ public abstract class NetSync {
 	}*/
 	
 	/**
-	 * Read bytes from the network. If there cannot be read as many bytes as
-	 * there is space in buffer, false is returned.
-	 * 
-	 * @param buffer
-	 * @return success
-	 */
-	private boolean receive(final ByteBuffer buffer) {
-		try {
-			while (_running && buffer.remaining() > 0) {
-				// Perform action
-				synchronized (_threadSync) {
-					// We receive more data
-					if (_socket.read(buffer) == -1) {
-						// EOS
-						System.out.println("End of stream");
-						break;
-					}
-					if (!_socket.isConnected()) {
-						System.out.println("Not connected");
-						return false;
-					}
-				}
-			}
-		} catch (final IOException e) {
-			fireError(e);
-			try {
-				_socket.close();
-			} catch (final IOException e1) {
-			}
-			return false;
-		}
-		// Flip buffer
-		buffer.flip();
-		return true;
-	}
-	
-	/**
 	 * Reads data
 	 * @param data
 	 * @param count
 	 * @return
+	 * @throws IOException 
 	 */
-	protected boolean readSync(final byte[] data, final int count) {
-		System.out.println("Read package (" + count + " bytes)");
-		if (count > _readBuffer.capacity()) {
-			// Extra large packet
-			ByteBuffer tempBuffer = ByteBuffer.allocateDirect(count);
-			if (!receive(tempBuffer)) {
-				System.out.println("Cancel reading");
-				return false;
+	protected boolean readSync(final byte[] data, final int count) throws IOException {
+		// We need to synchronize
+		synchronized (_threadSync) {
+			int iOffset = 0;
+			int iLength = count;
+			LOGGER.log(Level.INFO, "Recv sync: " + count);
+			
+			while (iLength > 0) {
+				_readBuffer.clear();
+				_readBuffer.limit(Math.min(_readBuffer.capacity(), iLength));
+				int read = _socket.read(_readBuffer);
+				if (read == -1) {
+					return false;
+				}
+				_readBuffer.flip();
+				_readBuffer.get(data, iOffset, read);
+				iOffset += read;
+				iLength -= read;
+				LOGGER.log(Level.INFO, "Channel read " + read + " (" + (count - iLength) + "/" + count + " bytes)");
 			}
-			tempBuffer.get(data, 0, count);
-		} else {
-			_readBuffer.clear();
-			_readBuffer.limit(count);
-			if (!receive(_readBuffer)) {
-				System.out.println("Cancel reading");
-				return false;
-			}
-			_readBuffer.get(data, 0, count);
 		}
 		return true;
 	}
@@ -354,13 +335,24 @@ public abstract class NetSync {
 	/**
 	 * Reads a packet size
 	 * @return
+	 * @throws IOException 
 	 */
-	private int readPackageSizeSync() {
-		_readSizeBuffer.clear();
-		receive(_readSizeBuffer);
-		int size = _readSizeBuffer.getInt();
-		System.out.println("Read package size " + size + " bytes");
-		return size;
+	private int readPackageSizeSync() throws IOException {
+		synchronized (_threadSync) {
+			_readBuffer.clear();
+			_readBuffer.limit(4);
+			LOGGER.log(Level.INFO, "Try get package size");
+			while (_readBuffer.hasRemaining()) {
+				int read = _socket.read(_readBuffer);
+				if (read == -1) {
+					return 0;
+				}
+			}
+			_readBuffer.flip();
+			int size = _readBuffer.getInt();
+			LOGGER.log(Level.INFO, "Read package size " + size + " bytes");
+			return size;
+		}
 	}
 	
 	/**
@@ -373,7 +365,6 @@ public abstract class NetSync {
 	 * @throws IOException 
 	 */
 	protected void sendPacketSync(final byte[] data, final int offset, final int length, final boolean raw) throws IOException {
-		// We need to synchronize
 		synchronized (_threadSync) {
 			int iOffset = offset;
 			int iLength = length;
@@ -381,22 +372,23 @@ public abstract class NetSync {
 			if (!raw) {
 				_sendBuffer.putInt(length);
 			}
-			_sendBuffer.flip();
-			System.out.println("Send packet sync: " + length);
+			LOGGER.log(Level.INFO, "Send packet sync: " + length);
 			
-			while (_sendBuffer.hasRemaining() || (iLength > 0)) {
-				int pos = _sendBuffer.position();
-				_sendBuffer.position(_sendBuffer.limit());
-				_sendBuffer.limit(_sendBuffer.capacity());
+			while (iLength > 0) {
 				int write = Math.min(_sendBuffer.remaining(), iLength);
 				_sendBuffer.put(data, iOffset, write);
 				iOffset += write;
 				iLength -= write;
-				System.out.println("Buffer written " + write + " (" + (length - iLength) + "/" + length + " bytes)");
-				_sendBuffer.limit(_sendBuffer.position());
-				_sendBuffer.position(pos);
-				int written = _socket.write(_sendBuffer);
-				System.out.println("Channel written " + written + " bytes");
+				LOGGER.log(Level.INFO, "Buffer written " + write + " (" + (length - iLength) + "/" + length + " bytes)");
+				_sendBuffer.flip();
+				while (_sendBuffer.hasRemaining()) {
+					int written = _socket.write(_sendBuffer);
+					if (written == -1) {
+						throw new IOException("End of stream");
+					}
+					LOGGER.log(Level.INFO, "Channel written " + written + " bytes");
+				}
+				_sendBuffer.clear();
 			}
 		}
 	}
@@ -421,19 +413,26 @@ public abstract class NetSync {
 	 */
 	protected void disconnect() {
 		if (_socket != null) {
-			try {
-				//_socket.shutdownInput();
-				//_socket.shutdownOutput();
-				_socket.close();
-				_socket = null;
-			} catch (IOException e) {
-				fireError(e);
+			synchronized (_threadSync) {
+				try {
+					_socket.shutdownInput();
+					_socket.shutdownOutput();
+				} catch (IOException e) {
+				}
+				try {
+					_socket.shutdownInput();
+					_socket.shutdownOutput();
+					_socket.close();
+					_socket = null;
+				} catch (IOException e) {
+					fireError(e);
+				}
 			}
 		}
 	}
 	
 	protected void fireError(final IOException e) {
-		System.out.println("error event");
+		LOGGER.log(Level.INFO, "error event");
 		e.printStackTrace();
 		for (NetSyncListener l : _listeners) {
 			l.onError(e);
@@ -441,14 +440,14 @@ public abstract class NetSync {
 	}
 
 	protected void fireDisconnected() {
-		System.out.println("disconnected event");
+		LOGGER.log(Level.INFO, "disconnected event");
 		for (NetSyncListener l : _listeners) {
 			l.onDisconnected();
 		}
 	}
 	
 	protected void fireConnected() {
-		System.out.println("connected event");
+		LOGGER.log(Level.INFO, "connected event");
 		for (NetSyncListener l : _listeners) {
 			l.onConnected();
 		}

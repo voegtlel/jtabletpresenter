@@ -255,7 +255,7 @@ public class ScribbleSegment implements IBinarySerializable {
 
 	@Override
 	public void serialize(final BinarySerializer writer) throws IOException {
-		writer.writeInt(_points.isEmpty()?0:_points.getCount());
+		writer.writeInt(_points.getCount());
 
 		for (LinkedElement<DataPoint> element = _points.getFirst(); element != null; element = element
 				.getNext()) {

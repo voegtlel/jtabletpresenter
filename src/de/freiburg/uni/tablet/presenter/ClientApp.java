@@ -9,6 +9,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -34,6 +36,8 @@ public class ClientApp {
 	 * Launch the application.
 	 */
 	public static void main(final String[] args) {
+		Logger.getLogger("de.freiburg.uni.tablet.presenter.net2").setLevel(Level.ALL);
+		
 		String configFile = "config.ini";
 		if (args.length > 0) {
 			configFile = args[0];

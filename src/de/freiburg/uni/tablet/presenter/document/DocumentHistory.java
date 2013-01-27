@@ -130,7 +130,6 @@ public class DocumentHistory {
 	 */
 	public void beginActionGroup() {
 		if (_currentActionGroup == null) {
-			System.out.println(">Add action group");
 			_currentActionGroup = new ActionGroup();
 		}
 	}
@@ -142,7 +141,6 @@ public class DocumentHistory {
 		if (_currentActionGroup != null) {
 			ActionGroup currentActionGroup = _currentActionGroup;
 			_currentActionGroup = null;
-			System.out.println("<End action group");
 			if (!currentActionGroup.isEmpty()) {
 				addAction(currentActionGroup);
 			}
@@ -154,21 +152,19 @@ public class DocumentHistory {
 	 * @param action
 	 */
 	public void addAction(final IAction action) {
-		if (action.hasUndoAction()) {
-			if (_currentActionGroup != null) {
-				System.out.println("Add action to group: " + action.getClass().getName());
-				_currentActionGroup.addAction(action);
+		if (_currentActionGroup != null) {
+			System.out.println("Add action to group: " + action.getClass().getName());
+			_currentActionGroup.addAction(action);
+		} else if (action.hasUndoAction()) {
+			if (_top == null) {
+				_history.addLast(action);
 			} else {
-				if (_top == null) {
-					_history.addLast(action);
-				} else {
-					_history.setNext(_top, action);
-				}
-				_top = _history.getLast();
-				_topNext = null;
-				fireActionAdded(action);
+				_history.setNext(_top, action);
 			}
-		} else {
+			_top = _history.getLast();
+			_topNext = null;
+		}
+		if (!(action instanceof ActionGroup)) {
 			fireActionAdded(action);
 		}
 	}

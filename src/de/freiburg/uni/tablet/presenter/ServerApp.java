@@ -4,10 +4,13 @@ import java.io.IOException;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import de.freiburg.uni.tablet.presenter.actions.SetClientDocumentAction;
 import de.freiburg.uni.tablet.presenter.document.DocumentConfig;
 import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
+import de.freiburg.uni.tablet.presenter.document.ServerDocument;
 import de.freiburg.uni.tablet.presenter.net2.AcceptListener;
 import de.freiburg.uni.tablet.presenter.net2.AcceptThread;
 import de.freiburg.uni.tablet.presenter.net2.NetSyncListener;
@@ -31,6 +34,8 @@ public class ServerApp {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		Logger.getLogger("de.freiburg.uni.tablet.presenter.net2").setLevel(Level.ALL);
+		
 		String configFile = "config.ini";
 		if (args.length > 0) {
 			configFile = args[0];
@@ -58,6 +63,7 @@ public class ServerApp {
 		_acceptUpThread = new AcceptThread(config.getInt("server.up.port", 8024));
 		_acceptDownThread = new AcceptThread(config.getInt("server.down.port", 8025));
 		_editor = new DocumentEditor();
+		_editor.setDocument(new ServerDocument(1));
 		
 		_acceptDownThread.addListener(new AcceptListener() {
 			@Override

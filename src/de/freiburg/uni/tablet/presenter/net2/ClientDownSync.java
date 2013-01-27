@@ -1,12 +1,16 @@
 package de.freiburg.uni.tablet.presenter.net2;
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import de.freiburg.uni.tablet.presenter.actions.IAction;
 import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
 import de.freiburg.uni.tablet.presenter.editor.IPageEditor;
 
 public class ClientDownSync extends ClientSync {
+	private static final Logger LOGGER = Logger.getLogger(ClientDownSync.class.getName());
+	
 	protected final DocumentEditor _editor;
 	protected final IPageEditor _pageEditor;
 	
@@ -18,12 +22,12 @@ public class ClientDownSync extends ClientSync {
 	private void receiveThread() throws IOException {
 		while (_running) {
 			if (!_packageInputStreamSync.nextPackage()) {
-				System.out.println("Down cancel package");
+				LOGGER.log(Level.WARNING, "Down cancel package");
 				break;
 			}
 			final IAction action = _readerSync.readSerializableClass();
 			_pageEditor.suspendRepaint();
-			System.out.println("Read action " + action.getClass().getName());
+			LOGGER.log(Level.INFO, "Read action " + action.getClass().getName());
 			action.perform(_editor);
 			_pageEditor.resumeRepaint();
 		}

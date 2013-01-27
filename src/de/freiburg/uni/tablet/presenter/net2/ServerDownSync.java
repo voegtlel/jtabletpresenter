@@ -2,11 +2,15 @@ package de.freiburg.uni.tablet.presenter.net2;
 
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import de.freiburg.uni.tablet.presenter.actions.IAction;
 import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
 
 public class ServerDownSync extends ServerSync {
+	private static final Logger LOGGER = Logger.getLogger(ServerDownSync.class.getName());
+	
 	private DocumentEditor _editor;
 	
 	public ServerDownSync(final DocumentEditor editor, final SocketChannel socket, final String requiredAuthToken) {
@@ -16,14 +20,16 @@ public class ServerDownSync extends ServerSync {
 	
 	private void receiveThread() throws IOException {
 		while (_running) {
+			LOGGER.log(Level.INFO, "Receive next package");
 			if (!_packageInputStreamSync.nextPackage()) {
-				System.out.println("Down cancel package");
+				LOGGER.log(Level.WARNING, "Down cancel package");
 				break;
 			}
 			try {
 				final IAction action = _readerSync.readSerializableClass();
-				System.out.println("Read action " + action.getClass().getName());
+				LOGGER.log(Level.INFO, "Read action " + action.getClass().getName());
 				action.perform(_editor);
+				LOGGER.log(Level.INFO, "Action " + action.getClass().getName() + " performed");
 			} catch (IOException e) {
 				throw e;
 			}

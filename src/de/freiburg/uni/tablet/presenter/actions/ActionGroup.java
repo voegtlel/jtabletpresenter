@@ -49,11 +49,11 @@ public class ActionGroup implements IAction {
 	public boolean hasUndoAction() {
 		for (LinkedElement<IAction> e = _actions.getFirst(); e != null; e = e
 				.getNext()) {
-			if (!e.getData().hasUndoAction()) {
-				return false;
+			if (e.getData().hasUndoAction()) {
+				return true;
 			}
 		}
-		return true;
+		return false;
 	}
 
 	@Override
@@ -61,7 +61,9 @@ public class ActionGroup implements IAction {
 		ActionGroup undoAction = new ActionGroup();
 		for (LinkedElement<IAction> e = _actions.getFirst(); e != null; e = e
 				.getNext()) {
-			undoAction.addAction(e.getData().getUndoAction());
+			if (e.getData().hasUndoAction()) {
+				undoAction.addAction(e.getData().getUndoAction());
+			}
 		}
 		return undoAction;
 	}
@@ -76,7 +78,7 @@ public class ActionGroup implements IAction {
 
 	@Override
 	public void serialize(final BinarySerializer writer) throws IOException {
-		int count = (_actions.isEmpty()?0:_actions.getCount());
+		int count = _actions.getCount();
 		writer.writeInt(count);
 		for (LinkedElement<IAction> e = _actions.getFirst(); e != null; e = e
 				.getNext()) {
