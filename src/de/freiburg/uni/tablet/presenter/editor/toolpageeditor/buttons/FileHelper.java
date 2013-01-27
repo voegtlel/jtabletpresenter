@@ -129,12 +129,15 @@ public class FileHelper {
 			final PdfRenderer pdfRenderer = new PdfRenderer(file,
 					pdfDefaultWidth, pdfDefaultHeight,
 					pdfIgnoreEmptyPages, pdfIgnoreEmptyPageNumber, pdfShowPageNumber, pdfThicknessFactor);
-			LinkedElement<DocumentPage> page = document.getPages();
-			LinkedElement<DocumentPage> basePage = baseDocument.getPages();
-			for(; page != null; page = page.getNext()) {
-				pdfRenderer.nextPage(page.getData().getPdfPage());
-				basePage.getData().render(pdfRenderer);
-				page.getData().render(pdfRenderer);
+			final int count = document.getPageCount();
+			for(int i = 0; i < count; i++) {
+				final DocumentPage page = document.getPageByIndex(i);
+				final DocumentPage basePage = ((baseDocument != null)?baseDocument.getPageByIndex(i):null);
+				pdfRenderer.nextPage((basePage != null)?basePage.getPdfPage():page.getPdfPage());
+				if (basePage != null) {
+					basePage.render(pdfRenderer);
+				}
+				page.render(pdfRenderer);
 			}
 			pdfRenderer.close();
 		} catch (Exception e) {

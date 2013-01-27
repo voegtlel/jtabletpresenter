@@ -260,8 +260,11 @@ public class DocumentEditor implements IBinarySerializableId {
 	}
 
 	public DocumentEditor(final BinaryDeserializer reader) throws IOException {
+		reader.resetState();
 		_document = reader.readObjectTable();
+		reader.resetState();
 		_baseDocument = reader.readObjectTable();
+		reader.resetState();
 		_currentPen = reader.readSerializableClass();
 		int pageIndex = reader.readInt();
 		setCurrentPageByIndex(pageIndex, false);
@@ -271,7 +274,9 @@ public class DocumentEditor implements IBinarySerializableId {
 	@Override
 	public void serialize(final BinarySerializer writer) throws IOException {
 		writer.writeObjectTable(_document);
+		writer.resetState();
 		writer.writeObjectTable(_baseDocument);
+		writer.resetState();
 		writer.writeSerializableClass(_currentPen);
 		writer.writeInt(getCurrentPageIndex());
 	}

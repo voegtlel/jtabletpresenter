@@ -40,6 +40,10 @@ public class ActionGroup implements IAction {
 	public void addAction(IAction action) {
 		_actions.addLast(action);
 	}
+	
+	public boolean isEmpty() {
+		return _actions.isEmpty();
+	}
 
 	@Override
 	public boolean hasUndoAction() {
@@ -72,7 +76,7 @@ public class ActionGroup implements IAction {
 
 	@Override
 	public void serialize(final BinarySerializer writer) throws IOException {
-		int count = (_actions.isEmpty()?0:_actions.getFirst().getNextCount());
+		int count = (_actions.isEmpty()?0:_actions.getCount());
 		writer.writeInt(count);
 		for (LinkedElement<IAction> e = _actions.getFirst(); e != null; e = e
 				.getNext()) {

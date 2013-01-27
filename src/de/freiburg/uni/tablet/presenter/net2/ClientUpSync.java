@@ -1,6 +1,7 @@
 package de.freiburg.uni.tablet.presenter.net2;
 
 import java.io.IOException;
+import java.util.LinkedList;
 
 import de.freiburg.uni.tablet.presenter.actions.IAction;
 import de.freiburg.uni.tablet.presenter.actions.SetClientDocumentAction;
@@ -9,6 +10,8 @@ import de.freiburg.uni.tablet.presenter.document.DocumentHistory;
 import de.freiburg.uni.tablet.presenter.document.DocumentHistoryListener;
 
 public class ClientUpSync extends ClientSync {
+	private final LinkedList<IAction> _actions = new LinkedList<IAction>();
+	
 	public ClientUpSync(final DocumentHistory history) {
 		history.addListener(new DocumentHistoryListener() {
 			@Override
@@ -25,22 +28,47 @@ public class ClientUpSync extends ClientSync {
 	
 	public void onActionPerformed(final IAction action) {
 		if (_running) {
-			try {
-				if (action instanceof SetClientDocumentAction) {
-					System.out.println("Write up " + action.getClass().getName());
-					SetServerDocumentAction serverAction = ((SetClientDocumentAction)action).getServerAction();
-					System.out.println(" --> " + serverAction.getClass().getName());
-					_writerAsync.writeSerializableClass(serverAction);
+			synchronized (_threadSync) {
+				System.out.println("Enqueue " + action.getClass().getName());
+				_actions.addLast(action);
+				_threadSync.notifyAll();
+			}
+		}
+	}
+	
+	/**
+	 * Writes the actions
+	 * @throws IOException
+	 */
+	private void sendThread() throws IOException {
+		while (_running) {
+			// Perform action
+			synchronized (_threadSync) {
+				// We send more data
+				if (_actions.isEmpty()) {
+					try {
+						_threadSync.wait();
+						// Immediately let the calling thread continue
+						_threadSync.notifyAll();
+					} catch (InterruptedException e) {
+						continue;
+					}
 				} else {
-					System.out.println("Write up " + action.getClass().getName());
-					_writerAsync.writeSerializableClass(action);
+					System.out.println("Client pop buffer");
+					final IAction action = _actions.removeFirst();
+					if (action instanceof SetClientDocumentAction) {
+						System.out.println("Write up " + action.getClass().getName());
+						SetServerDocumentAction serverAction = ((SetClientDocumentAction)action).getServerAction();
+						System.out.println(" --> " + serverAction.getClass().getName());
+						_writerSync.writeSerializableClass(serverAction);
+					} else {
+						System.out.println("Write up " + action.getClass().getName());
+						_writerSync.writeSerializableClass(action);
+					}
+					_writerSync.flush();
+					_packageOutputStreamSync.flush();
+					_packageOutputStreamSync.nextPackage();
 				}
-				_writerAsync.flush();
-				_packageOutputStreamAsync.flush();
-				_packageOutputStreamAsync.nextPackage();
-			} catch (IOException e) {
-				e.printStackTrace();
-				fireError(e);
 			}
 		}
 	}

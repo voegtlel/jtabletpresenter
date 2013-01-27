@@ -8,7 +8,6 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
@@ -23,6 +22,8 @@ public abstract class NetSync {
 	// 512k buffer
 	private static final int BUFFER_SIZE = 1024*512;
 	
+	public static final boolean SPLIT_PACKAGES = true;
+	
 	private final List<NetSyncListener> _listeners = new ArrayList<NetSyncListener>();
 	
 	private SocketChannel _socket;
@@ -35,16 +36,13 @@ public abstract class NetSync {
 	protected final PackageInputStream _packageInputStreamSync;
 	protected final BinaryDeserializer _readerSync;
 	
-	protected final PackageOutputStream _packageOutputStreamAsync;
-	protected final BinarySerializer _writerAsync;
-	
 	protected final PackageOutputStream _packageOutputStreamSync;
 	protected final BinarySerializer _writerSync;
 	
-	private final LinkedList<ByteBuffer> _sendBuffersFree = new LinkedList<ByteBuffer>();
-	private final LinkedList<ByteBuffer> _sendBuffersFilled = new LinkedList<ByteBuffer>();
 	private final ByteBuffer _readSizeBuffer = ByteBuffer.allocateDirect(4);
 	private final ByteBuffer _readBuffer = ByteBuffer.allocateDirect(BUFFER_SIZE);
+	
+	private final ByteBuffer _sendBuffer = ByteBuffer.allocateDirect(BUFFER_SIZE);
 	
 	/**
 	 * Create sync with empty socket
@@ -59,17 +57,6 @@ public abstract class NetSync {
 			@Override
 			public boolean readPackage(final byte[] data, final int count) {
 				return readSync(data, count);
-			}
-		});
-		_packageOutputStreamAsync = new PackageOutputStream(new PackageOutputStream.PackageWriter() {
-			@Override
-			public void writePackage(final byte[] data, final int size) {
-				sendPacketAsync(data, 0, size, false);
-			}
-			
-			@Override
-			public void writePackageRaw(final byte[] data, final int size) {
-				sendPacketAsync(data, 0, size, true);
 			}
 		});
 		_packageOutputStreamSync = new PackageOutputStream(new PackageOutputStream.PackageWriter() {
@@ -91,7 +78,6 @@ public abstract class NetSync {
 				}
 			}
 		});
-		_writerAsync = new BinarySerializer(_packageOutputStreamAsync);
 		_readerSync = new BinaryDeserializer(_packageInputStreamSync);
 		_writerSync = new BinarySerializer(_packageOutputStreamSync);
 	}
@@ -157,7 +143,6 @@ public abstract class NetSync {
 		
 		_readerSync.resetState();
 		_writerSync.resetState();
-		_writerAsync.resetState();
 		
 		_running = true;
 		_thread = new Thread() {
@@ -180,7 +165,6 @@ public abstract class NetSync {
 		
 		_readerSync.resetState();
 		_writerSync.resetState();
-		_writerAsync.resetState();
 		
 		_running = true;
 		_thread = new Thread() {
@@ -266,7 +250,7 @@ public abstract class NetSync {
 	 * Method for continous sending data from internal buffers
 	 * @throws IOException
 	 */
-	protected void sendThread() throws IOException {
+	/*protected void sendThread() throws IOException {
 		while (_running) {
 			// Perform action
 			synchronized (_threadSync) {
@@ -300,7 +284,7 @@ public abstract class NetSync {
 				}
 			}
 		}
-	}
+	}*/
 	
 	/**
 	 * Read bytes from the network. If there cannot be read as many bytes as
@@ -380,88 +364,6 @@ public abstract class NetSync {
 	}
 	
 	/**
-	 * Puts the given data in the send-queue.
-	 * 
-	 * @param data
-	 * @param offset
-	 * @param length
-	 * @param raw
-	 */
-	private void sendLargePacketAsync(final byte[] data, final int offset, final int length, final boolean raw) {
-		// We need to synchronize
-		synchronized (_threadSync) {
-			System.out.println("Send large packet: " + length);
-			final ByteBuffer buffer = ByteBuffer.allocateDirect(length + 4);
-			if (!raw) {
-				buffer.putInt(length);
-			}
-			buffer.put(data, offset, length);
-			buffer.flip();
-			_sendBuffersFilled.addLast(buffer);
-			_threadSync.notifyAll();
-		}
-	}
-	
-	/**
-	 * Puts the given data in the send-queue.
-	 * 
-	 * @param data
-	 * @param offset
-	 * @param length
-	 * @param raw
-	 */
-	private void sendPacketAsync(final byte[] data, final int offset, final int length, final boolean raw) {
-		if (length - 4 > BUFFER_SIZE) {
-			sendLargePacketAsync(data, offset, length, raw);
-			return;
-		}
-		// We need to synchronize
-		synchronized (_threadSync) {
-			System.out.println("Send packet: " + length);
-			ByteBuffer buffer;
-			if (_sendBuffersFree.isEmpty()) {
-				buffer = ByteBuffer.allocateDirect(BUFFER_SIZE);
-			} else {
-				buffer = _sendBuffersFree.removeFirst();
-				buffer.clear();
-			}
-			if (!raw) {
-				buffer.putInt(length);
-			}
-			buffer.put(data, offset, length);
-			buffer.flip();
-			_sendBuffersFilled.addLast(buffer);
-			_threadSync.notifyAll();
-		}
-	}
-	
-	/**
-	 * Puts the given data in the send-queue.
-	 * 
-	 * @param data
-	 * @param offset
-	 * @param length
-	 * @param raw
-	 * @throws IOException 
-	 */
-	private void sendLargePacketSync(final byte[] data, final int offset, final int length, final boolean raw) throws IOException {
-		// We need to synchronize
-		synchronized (_threadSync) {
-			System.out.println("Send large packet sync: " + length);
-			final ByteBuffer buffer = ByteBuffer.allocateDirect(length + 4);
-			if (!raw) {
-				buffer.putInt(length);
-			}
-			buffer.put(data, offset, length);
-			buffer.flip();
-			
-			while (buffer.hasRemaining()) {
-				_socket.write(buffer);
-			}
-		}
-	}
-	
-	/**
 	 * Sends the given data
 	 * 
 	 * @param data
@@ -471,27 +373,30 @@ public abstract class NetSync {
 	 * @throws IOException 
 	 */
 	protected void sendPacketSync(final byte[] data, final int offset, final int length, final boolean raw) throws IOException {
-		if (length - 4 > BUFFER_SIZE) {
-			sendLargePacketSync(data, offset, length, raw);
-			return;
-		}
 		// We need to synchronize
 		synchronized (_threadSync) {
-			System.out.println("Send packet sync: " + length);
-			if (_sendBuffersFree.isEmpty()) {
-				final ByteBuffer newBuffer = ByteBuffer.allocateDirect(BUFFER_SIZE);
-				_sendBuffersFree.addLast(newBuffer);
-			}
-			final ByteBuffer buffer = _sendBuffersFree.getFirst();
-			buffer.clear();
+			int iOffset = offset;
+			int iLength = length;
+			_sendBuffer.clear();
 			if (!raw) {
-				buffer.putInt(length);
+				_sendBuffer.putInt(length);
 			}
-			buffer.put(data, offset, length);
-			buffer.flip();
+			_sendBuffer.flip();
+			System.out.println("Send packet sync: " + length);
 			
-			while (buffer.hasRemaining()) {
-				_socket.write(buffer);
+			while (_sendBuffer.hasRemaining() || (iLength > 0)) {
+				int pos = _sendBuffer.position();
+				_sendBuffer.position(_sendBuffer.limit());
+				_sendBuffer.limit(_sendBuffer.capacity());
+				int write = Math.min(_sendBuffer.remaining(), iLength);
+				_sendBuffer.put(data, iOffset, write);
+				iOffset += write;
+				iLength -= write;
+				System.out.println("Buffer written " + write + " (" + (length - iLength) + "/" + length + " bytes)");
+				_sendBuffer.limit(_sendBuffer.position());
+				_sendBuffer.position(pos);
+				int written = _socket.write(_sendBuffer);
+				System.out.println("Channel written " + written + " bytes");
 			}
 		}
 	}

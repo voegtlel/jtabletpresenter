@@ -130,9 +130,8 @@ public class DocumentHistory {
 	 */
 	public void beginActionGroup() {
 		if (_currentActionGroup == null) {
-			ActionGroup res = new ActionGroup();
-			addAction(res);
-			_currentActionGroup = res;
+			System.out.println(">Add action group");
+			_currentActionGroup = new ActionGroup();
 		}
 	}
 
@@ -141,7 +140,12 @@ public class DocumentHistory {
 	 */
 	public void endActionGroup() {
 		if (_currentActionGroup != null) {
+			ActionGroup currentActionGroup = _currentActionGroup;
 			_currentActionGroup = null;
+			System.out.println("<End action group");
+			if (!currentActionGroup.isEmpty()) {
+				addAction(currentActionGroup);
+			}
 		}
 	}
 
@@ -152,6 +156,7 @@ public class DocumentHistory {
 	public void addAction(final IAction action) {
 		if (action.hasUndoAction()) {
 			if (_currentActionGroup != null) {
+				System.out.println("Add action to group: " + action.getClass().getName());
 				_currentActionGroup.addAction(action);
 			} else {
 				if (_top == null) {
@@ -161,9 +166,11 @@ public class DocumentHistory {
 				}
 				_top = _history.getLast();
 				_topNext = null;
+				fireActionAdded(action);
 			}
+		} else {
+			fireActionAdded(action);
 		}
-		fireActionAdded(action);
 	}
 
 	/**

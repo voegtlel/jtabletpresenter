@@ -54,7 +54,7 @@ public class SetClientDocumentAction implements IAction {
 
 	@Override
 	public void perform(final DocumentEditor editor) {
-		editor.setDocument(_document);
+		editor.setBaseDocument(_document);
 		editor.setCurrentPageByIndex(_currentPageIndex, false);
 	}
 

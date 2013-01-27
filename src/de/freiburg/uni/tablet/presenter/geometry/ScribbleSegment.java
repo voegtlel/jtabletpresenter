@@ -168,8 +168,7 @@ public class ScribbleSegment implements IBinarySerializable {
 	 */
 	public void bake() {
 		if (!_points.isEmpty() && !_points.hasOne()) {
-			_path = new Path2D.Float(Path2D.WIND_NON_ZERO, _points.getFirst()
-					.getNextCount());
+			_path = new Path2D.Float(Path2D.WIND_NON_ZERO, _points.getCount());
 			LinkedElement<DataPoint> e = _points.getFirst();
 			_path.moveTo(e.getData().getX(), e.getData().getY());
 			for (e = e.getNext(); e != null; e = e.getNext()) {
@@ -256,7 +255,7 @@ public class ScribbleSegment implements IBinarySerializable {
 
 	@Override
 	public void serialize(final BinarySerializer writer) throws IOException {
-		writer.writeInt(_points.isEmpty()?0:_points.getFirst().getNextCount());
+		writer.writeInt(_points.isEmpty()?0:_points.getCount());
 
 		for (LinkedElement<DataPoint> element = _points.getFirst(); element != null; element = element
 				.getNext()) {
