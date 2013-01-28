@@ -60,7 +60,6 @@ public abstract class NetSync {
 					e.printStackTrace();
 					fireError(e);
 					disconnect();
-					fireDisconnected();
 					return 0;
 				}
 			}
@@ -95,7 +94,6 @@ public abstract class NetSync {
 				} catch (IOException e) {
 					fireError(e);
 					disconnect();
-					fireDisconnected();
 				}
 			}
 		});
