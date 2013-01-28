@@ -48,8 +48,9 @@ public class ClientApp {
 			ServerApp serverApp = new ServerApp(config);
 			serverApp.start();
 			try {
-				while(true) {
-					Thread.sleep(1000);
+				Object o = new Object();
+				while (true) {
+					o.wait();
 				}
 			} catch (InterruptedException e) {
 				e.printStackTrace();

@@ -96,7 +96,10 @@ public class ServerApp {
 			@Override
 			public void onDisconnected() {
 				System.out.println("Remove client " + client.getClientId() + " -> " + client.getClientName());
-				_downSyncs.remove(client);
+				synchronized (_downSyncs) {
+					client.dispose();
+					_downSyncs.remove(client);
+				}
 			}
 			
 			@Override
@@ -105,7 +108,9 @@ public class ServerApp {
 			}
 		});
 		client.start();
-		_downSyncs.add(client);
+		synchronized (_downSyncs) {
+			_downSyncs.add(client);
+		}
 	}
 	
 	private void onUpClientConnected(final SocketChannel socket) {
@@ -124,7 +129,10 @@ public class ServerApp {
 			@Override
 			public void onDisconnected() {
 				System.out.println("Remove client " + client.getClientId() + " -> " + client.getClientName());
-				_upSyncs.remove(client);
+				synchronized (_upSyncs) {
+					client.dispose();
+					_upSyncs.remove(client);
+				}
 			}
 			
 			@Override
@@ -134,7 +142,9 @@ public class ServerApp {
 		});
 		client.start();
 		client.onActionPerformed(new SetClientDocumentAction(_editor.getDocument(), _editor.getCurrentPageIndex()));
-		_upSyncs.add(client);
+		synchronized (_upSyncs) {
+			_upSyncs.add(client);
+		}
 	}
 	
 	public void start() {

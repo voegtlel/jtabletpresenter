@@ -25,7 +25,6 @@ import de.freiburg.uni.tablet.presenter.document.IEditableDocument;
 import de.freiburg.uni.tablet.presenter.document.PdfSerializable;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 import de.freiburg.uni.tablet.presenter.editor.pdf.PdfRenderer;
-import de.freiburg.uni.tablet.presenter.list.LinkedElement;
 
 public class FileHelper {
 	private static class PdfModeOption {

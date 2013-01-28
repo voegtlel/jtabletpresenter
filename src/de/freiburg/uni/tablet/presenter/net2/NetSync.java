@@ -59,7 +59,9 @@ public abstract class NetSync {
 				} catch (IOException e) {
 					e.printStackTrace();
 					fireError(e);
-					return -1;
+					disconnect();
+					fireDisconnected();
+					return 0;
 				}
 			}
 			
@@ -70,6 +72,8 @@ public abstract class NetSync {
 				} catch (IOException e) {
 					e.printStackTrace();
 					fireError(e);
+					disconnect();
+					fireDisconnected();
 					return false;
 				}
 			}
@@ -81,6 +85,8 @@ public abstract class NetSync {
 					sendPacketSync(data, 0, size, false);
 				} catch (IOException e) {
 					fireError(e);
+					disconnect();
+					fireDisconnected();
 				}
 			}
 			
@@ -90,6 +96,8 @@ public abstract class NetSync {
 					sendPacketSync(data, 0, size, true);
 				} catch (IOException e) {
 					fireError(e);
+					disconnect();
+					fireDisconnected();
 				}
 			}
 		});
@@ -311,6 +319,9 @@ public abstract class NetSync {
 	protected boolean readSync(final byte[] data, final int count) throws IOException {
 		// We need to synchronize
 		synchronized (_threadSync) {
+			if (_socket == null || !_socket.isConnected()) {
+				return false;
+			}
 			int iOffset = 0;
 			int iLength = count;
 			LOGGER.log(Level.INFO, "Recv sync: " + count);
@@ -320,7 +331,7 @@ public abstract class NetSync {
 				_readBuffer.limit(Math.min(_readBuffer.capacity(), iLength));
 				int read = _socket.read(_readBuffer);
 				if (read == -1) {
-					return false;
+					throw new IOException("Disconnected");
 				}
 				_readBuffer.flip();
 				_readBuffer.get(data, iOffset, read);
@@ -339,13 +350,16 @@ public abstract class NetSync {
 	 */
 	private int readPackageSizeSync() throws IOException {
 		synchronized (_threadSync) {
+			if (_socket == null || !_socket.isConnected()) {
+				throw new IOException("End of stream");
+			}
 			_readBuffer.clear();
 			_readBuffer.limit(4);
 			LOGGER.log(Level.INFO, "Try get package size");
 			while (_readBuffer.hasRemaining()) {
 				int read = _socket.read(_readBuffer);
 				if (read == -1) {
-					return 0;
+					throw new IOException("End of stream");
 				}
 			}
 			_readBuffer.flip();
@@ -366,6 +380,9 @@ public abstract class NetSync {
 	 */
 	protected void sendPacketSync(final byte[] data, final int offset, final int length, final boolean raw) throws IOException {
 		synchronized (_threadSync) {
+			if (_socket == null || !_socket.isConnected()) {
+				throw new IOException("End of stream");
+			}
 			int iOffset = offset;
 			int iLength = length;
 			_sendBuffer.clear();
@@ -412,19 +429,18 @@ public abstract class NetSync {
 	 * Disconnect socket
 	 */
 	protected void disconnect() {
-		if (_socket != null) {
-			synchronized (_threadSync) {
+		synchronized (_threadSync) {
+			if (_socket != null && _socket.isOpen()) {
+				_running = false;
 				try {
 					_socket.shutdownInput();
 					_socket.shutdownOutput();
 				} catch (IOException e) {
 				}
 				try {
-					_socket.shutdownInput();
-					_socket.shutdownOutput();
 					_socket.close();
-					_socket = null;
 				} catch (IOException e) {
+					_socket = null;
 					fireError(e);
 				}
 			}
@@ -459,5 +475,14 @@ public abstract class NetSync {
 	
 	public void removeListener(final NetSyncListener listener) {
 		_listeners.remove(listener);
+	}
+	
+	public void dispose() {
+		synchronized (_threadSync) {
+			if (_socket.isOpen()) {
+				disconnect();
+				fireDisconnected();
+			}
+		}
 	}
 }

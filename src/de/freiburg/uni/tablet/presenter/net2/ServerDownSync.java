@@ -40,7 +40,9 @@ public class ServerDownSync extends ServerSync {
 	protected void dataThread() {
 		try {
 			connectThread();
-			initData();
+			if (!initData()) {
+				throw new IOException("Invalid server");
+			}
 			if (!_authToken.equals(_requiredAuthToken)) {
 				throw new IOException("Auth tokens do not match (got " + _authToken + ")");
 			}

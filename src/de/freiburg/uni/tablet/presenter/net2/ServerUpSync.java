@@ -16,20 +16,32 @@ public class ServerUpSync extends ServerSync {
 	private static final Logger LOGGER = Logger.getLogger(ServerUpSync.class.getName());
 	
 	private final LinkedList<IAction> _actions = new LinkedList<IAction>();
+
+	private DocumentHistoryListener _documentHistoryListener;
+
+	private DocumentHistory _history;
 	
 	public ServerUpSync(final DocumentHistory history, final SocketChannel socket, final String requiredAuthToken) {
 		super(socket, requiredAuthToken);
-		history.addListener(new DocumentHistoryListener() {
+		_history = history;
+		_documentHistoryListener = new DocumentHistoryListener() {
 			@Override
 			public void actionPerformed(final IAction action) {
-				onActionPerformed(action);
+				synchronized (_history) {
+					onActionPerformed(action);
+				}
 			}
 			
 			@Override
 			public void actionAdded(final IAction action) {
-				onActionPerformed(action);
+				synchronized (_history) {
+					onActionPerformed(action);
+				}
 			}
-		});
+		};
+		synchronized (_history) {
+			_history.addListener(_documentHistoryListener);
+		}
 	}
 	
 	public void onActionPerformed(final IAction action) {
@@ -81,7 +93,9 @@ public class ServerUpSync extends ServerSync {
 	protected void dataThread() {
 		try {
 			connectThread();
-			initData();
+			if (!initData()) {
+				throw new IOException("Invalid server");
+			}
 			if (!_authToken.equals(_requiredAuthToken)) {
 				throw new IOException("Auth tokens do not match (got " + _authToken + ")");
 			}
@@ -95,4 +109,11 @@ public class ServerUpSync extends ServerSync {
 		}
 	}
 
+	@Override
+	public void dispose() {
+		super.dispose();
+		synchronized (_history) {
+			_history.removeListener(_documentHistoryListener);
+		}
+	}
 }

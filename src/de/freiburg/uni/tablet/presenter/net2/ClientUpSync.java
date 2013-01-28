@@ -15,9 +15,14 @@ public class ClientUpSync extends ClientSync {
 	private static final Logger LOGGER = Logger.getLogger(ClientUpSync.class.getName());
 	
 	private final LinkedList<IAction> _actions = new LinkedList<IAction>();
+
+	private DocumentHistoryListener _documentHistoryListener;
+
+	private DocumentHistory _history;
 	
 	public ClientUpSync(final DocumentHistory history) {
-		history.addListener(new DocumentHistoryListener() {
+		_history = history;
+		_documentHistoryListener = new DocumentHistoryListener() {
 			@Override
 			public void actionPerformed(final IAction action) {
 				onActionPerformed(action);
@@ -27,7 +32,8 @@ public class ClientUpSync extends ClientSync {
 			public void actionAdded(final IAction action) {
 				onActionPerformed(action);
 			}
-		});
+		};
+		history.addListener(_documentHistoryListener);
 	}
 	
 	public void onActionPerformed(final IAction action) {
@@ -95,5 +101,11 @@ public class ClientUpSync extends ClientSync {
 			disconnect();
 			fireDisconnected();
 		}
+	}
+	
+	@Override
+	public void dispose() {
+		super.dispose();
+		_history.removeListener(_documentHistoryListener);
 	}
 }
