@@ -51,7 +51,6 @@ public class ClientDownSync extends ClientSync {
 		} catch (final IOException e) {
 			fireError(e);
 			disconnect();
-			fireDisconnected();
 		}
 	}
 }

@@ -52,7 +52,6 @@ public class ServerDownSync extends ServerSync {
 		} catch (final IOException e) {
 			fireError(e);
 			disconnect();
-			fireDisconnected();
 		}
 	}
 }

@@ -73,7 +73,6 @@ public abstract class NetSync {
 					e.printStackTrace();
 					fireError(e);
 					disconnect();
-					fireDisconnected();
 					return false;
 				}
 			}
@@ -86,7 +85,6 @@ public abstract class NetSync {
 				} catch (IOException e) {
 					fireError(e);
 					disconnect();
-					fireDisconnected();
 				}
 			}
 			
@@ -134,7 +132,7 @@ public abstract class NetSync {
 				if (_thread != null) {
 					_thread.join(100);
 				}
-				if (_socket != null) {
+				if (_socket != null && _socket.isOpen()) {
 					_socket.close();
 					_socket = null;
 				}
@@ -270,46 +268,6 @@ public abstract class NetSync {
 	}
 	
 	/**
-	 * Method for continous sending data from internal buffers
-	 * @throws IOException
-	 */
-	/*protected void sendThread() throws IOException {
-		while (_running) {
-			// Perform action
-			synchronized (_threadSync) {
-				// We send more data
-				if (_sendBuffersFilled.isEmpty()) {
-					try {
-						_threadSync.wait();
-						// Immediately let the calling thread continue
-						_threadSync.notifyAll();
-					} catch (InterruptedException e) {
-						continue;
-					}
-				} else {
-					System.out.println("Client peek buffer");
-					final ByteBuffer buffer = _sendBuffersFilled
-							.getFirst();
-					int writeSize = buffer.remaining();
-					_socket.write(buffer);
-					System.out.println("Wrote " + (writeSize - buffer.remaining()) + "/" + writeSize + " bytes");
-					if (buffer.remaining() == 0) {
-						_sendBuffersFilled.removeFirst();
-						System.out.println("Reuse buffer");
-						if (buffer.capacity() <= BUFFER_SIZE) {
-							_sendBuffersFree.addLast(buffer);
-						}
-					}
-				}
-				if (!_socket.isConnected()) {
-					System.out.println("Not connected");
-					break;
-				}
-			}
-		}
-	}*/
-	
-	/**
 	 * Reads data
 	 * @param data
 	 * @param count
@@ -320,7 +278,7 @@ public abstract class NetSync {
 		// We need to synchronize
 		synchronized (_threadSync) {
 			if (_socket == null || !_socket.isConnected()) {
-				return false;
+				throw new IOException("Not connected");
 			}
 			int iOffset = 0;
 			int iLength = count;
@@ -331,6 +289,7 @@ public abstract class NetSync {
 				_readBuffer.limit(Math.min(_readBuffer.capacity(), iLength));
 				int read = _socket.read(_readBuffer);
 				if (read == -1) {
+					disconnect();
 					throw new IOException("Disconnected");
 				}
 				_readBuffer.flip();
@@ -359,6 +318,7 @@ public abstract class NetSync {
 			while (_readBuffer.hasRemaining()) {
 				int read = _socket.read(_readBuffer);
 				if (read == -1) {
+					disconnect();
 					throw new IOException("End of stream");
 				}
 			}
@@ -381,7 +341,7 @@ public abstract class NetSync {
 	protected void sendPacketSync(final byte[] data, final int offset, final int length, final boolean raw) throws IOException {
 		synchronized (_threadSync) {
 			if (_socket == null || !_socket.isConnected()) {
-				throw new IOException("End of stream");
+				throw new IOException("Not connected");
 			}
 			int iOffset = offset;
 			int iLength = length;
@@ -401,6 +361,7 @@ public abstract class NetSync {
 				while (_sendBuffer.hasRemaining()) {
 					int written = _socket.write(_sendBuffer);
 					if (written == -1) {
+						disconnect();
 						throw new IOException("End of stream");
 					}
 					LOGGER.log(Level.INFO, "Channel written " + written + " bytes");
@@ -433,12 +394,15 @@ public abstract class NetSync {
 			if (_socket != null && _socket.isOpen()) {
 				_running = false;
 				try {
-					_socket.shutdownInput();
-					_socket.shutdownOutput();
+					if (_socket.isConnected()) {
+						_socket.shutdownInput();
+						_socket.shutdownOutput();
+					}
 				} catch (IOException e) {
 				}
 				try {
 					_socket.close();
+					fireDisconnected();
 				} catch (IOException e) {
 					_socket = null;
 					fireError(e);
