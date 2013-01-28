@@ -50,7 +50,9 @@ public class ClientApp {
 			try {
 				Object o = new Object();
 				while (true) {
-					o.wait();
+					synchronized (o) {
+						o.wait();	
+					}
 				}
 			} catch (InterruptedException e) {
 				e.printStackTrace();
