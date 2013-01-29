@@ -55,8 +55,8 @@ public class DownClient extends ClientSync {
 	@Override
 	protected void onThread() throws IOException {
 		try {
-			final BinaryDeserializer reader = SocketHelper.getReader(_readPipe.source());
-			final BinarySerializer writer = SocketHelper.getWriter(_connection);
+			final BinaryDeserializer reader = new BinaryDeserializer(_readPipe.source());
+			final BinarySerializer writer = new BinarySerializer(_connection);
 			performInit(writer, reader, _connection);
 			while (true) {
 				final IAction action = reader.readSerializableClass();

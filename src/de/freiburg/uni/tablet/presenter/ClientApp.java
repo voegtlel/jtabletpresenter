@@ -9,6 +9,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.channels.SeekableByteChannel;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -149,10 +152,12 @@ public class ClientApp {
 				if (savedSession.exists())  {
 					try {
 						System.out.println("Loading session");
-						FileInputStream is = new FileInputStream(savedSession);
-						BinaryDeserializer bd = new BinaryDeserializer(is);
+						//FileInputStream is = new FileInputStream(savedSession);
+						SeekableByteChannel bs = Files.newByteChannel(savedSession.toPath(), StandardOpenOption.READ);
+						BinaryDeserializer bd = new BinaryDeserializer(bs);
 						_pageRenderer.getDocumentEditor().deserialize(bd);
-						is.close();
+						bs.close();
+						//is.close();
 						System.out.println("Session loaded");
 					} catch (IOException e) {
 						e.printStackTrace();
@@ -212,13 +217,15 @@ public class ClientApp {
 					final File savedSession = new File("session.dat");
 					try {
 						System.out.println("Saving session");
-						FileOutputStream os = new FileOutputStream(savedSession);
-						BufferedOutputStream bos = new BufferedOutputStream(os);
-						BinarySerializer bs = new BinarySerializer(bos);
+						//FileOutputStream os = new FileOutputStream(savedSession);
+						//BufferedOutputStream bos = new BufferedOutputStream(os);
+						SeekableByteChannel bc = Files.newByteChannel(savedSession.toPath(), StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
+						BinarySerializer bs = new BinarySerializer(bc);
 						bs.writeSerializableClass(_pageRenderer.getDocumentEditor());
-						bs.close();
-						bos.close();
-						os.close();
+						bc.close();
+						//bs.close();
+						//bos.close();
+						//os.close();
 						System.out.println("Session autosaved");
 					} catch (IOException e1) {
 						e1.printStackTrace();

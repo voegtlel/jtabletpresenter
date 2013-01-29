@@ -4,9 +4,12 @@
  */
 package de.freiburg.uni.tablet.presenter.data;
 
-import java.io.DataOutputStream;
+import java.io.EOFException;
+import java.io.Flushable;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.channels.WritableByteChannel;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
 /**
@@ -14,44 +17,82 @@ import java.util.HashMap;
  * 
  */
 public class BinarySerializer {
-	private final DataOutputStream _dataOutputStream;
+	private final ByteBuffer _buffer = ByteBuffer.allocateDirect(128);
+	private final WritableByteChannel _channel;
 	private final HashMap<String, Integer> _stringTable = new HashMap<String, Integer>();
 	private final HashMap<Long, IBinarySerializableId> _objectTable = new HashMap<Long, IBinarySerializableId>();
 
 	/**
 	 * 
 	 */
-	public BinarySerializer(final OutputStream stream) {
-		_dataOutputStream = new DataOutputStream(stream);
+	public BinarySerializer(final WritableByteChannel channel) {
+		_channel = channel;
+	}
+	
+	public void write(final ByteBuffer buffer) throws IOException {
+		while (buffer.hasRemaining()) {
+			final int res = _channel.write(buffer);
+			if (res == -1) {
+				throw new EOFException();
+			}
+		}
 	}
 
 	public void writeBoolean(final boolean value) throws IOException {
-		_dataOutputStream.writeBoolean(value);
+		_buffer.clear();
+		_buffer.put(value?(byte)255:(byte)0);
+		_buffer.flip();
+		write(_buffer);
 	}
 
 	public void writeInt(final int value) throws IOException {
-		_dataOutputStream.writeInt(value);
+		_buffer.clear();
+		_buffer.putInt(value);
+		_buffer.flip();
+		write(_buffer);
 	}
 
 	public void writeFloat(final float value) throws IOException {
-		_dataOutputStream.writeFloat(value);
+		_buffer.clear();
+		_buffer.putFloat(value);
+		_buffer.flip();
+		write(_buffer);
 	}
 
 	public void writeDouble(final double value) throws IOException {
-		_dataOutputStream.writeDouble(value);
+		_buffer.clear();
+		_buffer.putDouble(value);
+		_buffer.flip();
+		write(_buffer);
 	}
 
 	public void writeString(final String value) throws IOException {
-		_dataOutputStream.writeUTF(value);
+		_buffer.clear();
+		final byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
+		writeByteArray(bytes, 0, bytes.length);
 	}
 
 	public void writeLong(final long value) throws IOException {
-		_dataOutputStream.writeLong(value);
+		_buffer.clear();
+		_buffer.putLong(value);
+		_buffer.flip();
+		write(_buffer);
 	}
 	
-	public void writeByteArray(byte[] data, int offset, int length) throws IOException {
-		_dataOutputStream.writeInt(length);
-		_dataOutputStream.write(data, 0, length);
+	public void writeByteArray(final byte[] data, final int offset, final int length) throws IOException {
+		_buffer.clear();
+		_buffer.putInt(length);
+		int off = offset;
+		int len = length;
+		while (len > 0) {
+			final int write = Math.min(_buffer.remaining(), len);
+			_buffer.put(data, off, write);
+			_buffer.flip();
+			write(_buffer);
+			len -= write;
+			off += write;
+			_buffer.clear();
+		}
 	}
 
 	public void writeSerializableClass(final IBinarySerializable serializable)
@@ -110,12 +151,10 @@ public class BinarySerializer {
 		_objectTable.clear();
 		_stringTable.clear();
 	}
-	
+
 	public void flush() throws IOException {
-		_dataOutputStream.flush();
-	}
-	
-	public void close() throws IOException {
-		_dataOutputStream.close();
+		if (_channel instanceof Flushable) {
+			((Flushable) _channel).flush();
+		}
 	}
 }

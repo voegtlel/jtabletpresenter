@@ -4,11 +4,13 @@
  */
 package de.freiburg.uni.tablet.presenter.data;
 
-import java.io.DataInputStream;
+import java.io.EOFException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.ByteBuffer;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,7 +20,8 @@ import java.util.List;
  * 
  */
 public class BinaryDeserializer {
-	private final DataInputStream _dataInputStream;
+	private final ByteBuffer _buffer = ByteBuffer.allocateDirect(128);
+	private final ReadableByteChannel _channel;
 	private final List<String> _stringTable = new ArrayList<String>();
 	private final HashMap<Long, IBinarySerializableId> _objectTable = new HashMap<Long, IBinarySerializableId>();
 
@@ -28,43 +31,77 @@ public class BinaryDeserializer {
 	/**
 	 * 
 	 */
-	public BinaryDeserializer(final InputStream stream) {
-		_dataInputStream = new DataInputStream(stream);
+	public BinaryDeserializer(final ReadableByteChannel channel) {
+		_channel = channel;
+	}
+	
+	public void read(final ByteBuffer buffer) throws IOException {
+		while (buffer.hasRemaining()) {
+			final int read = _channel.read(buffer);
+			if (read < 0) {
+				throw new EOFException("result: " + read);
+			}
+		}
 	}
 
 	public boolean readBoolean() throws IOException {
-		return _dataInputStream.readBoolean();
+		_buffer.clear();
+		_buffer.limit(1);
+		read(_buffer);
+		_buffer.flip();
+		return _buffer.get() != 0;
 	}
 
 	public int readInt() throws IOException {
-		return _dataInputStream.readInt();
+		_buffer.clear();
+		_buffer.limit(4);
+		read(_buffer);
+		_buffer.flip();
+		return _buffer.getInt();
 	}
 
 	public float readFloat() throws IOException {
-		return _dataInputStream.readFloat();
+		_buffer.clear();
+		_buffer.limit(4);
+		read(_buffer);
+		_buffer.flip();
+		return _buffer.getFloat();
 	}
 
 	public double readDouble() throws IOException {
-		return _dataInputStream.readDouble();
+		_buffer.clear();
+		_buffer.limit(8);
+		read(_buffer);
+		_buffer.flip();
+		return _buffer.getDouble();
 	}
 
 	public String readString() throws IOException {
-		return _dataInputStream.readUTF();
+		final byte[] strData = readByteArray();
+		return new String(strData, StandardCharsets.UTF_8);
 	}
 
 	public long readLong() throws IOException {
-		return _dataInputStream.readLong();
+		_buffer.clear();
+		_buffer.limit(8);
+		read(_buffer);
+		_buffer.flip();
+		return _buffer.getLong();
 	}
 	
 	public byte[] readByteArray() throws IOException {
-		int size = _dataInputStream.readInt();
-		byte[] result = new byte[size];
+		int size = readInt();
+		int off = 0;
+		final byte[] result = new byte[size];
 		while (size > 0) {
-			int read = _dataInputStream.read(result, result.length - size, size);
-			if (read < 0) {
-				throw new IOException("Unexpected end of stream");
-			}
-			size -= read;
+			_buffer.clear();
+			final int count = Math.min(_buffer.capacity(), size);
+			_buffer.limit(count);
+			read(_buffer);
+			_buffer.flip();
+			_buffer.get(result, off, count);
+			size -= count;
+			off += count;
 		}
 		return result;
 	}

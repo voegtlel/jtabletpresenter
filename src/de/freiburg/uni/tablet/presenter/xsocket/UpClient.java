@@ -74,13 +74,13 @@ public class UpClient extends ClientSync {
 		try {
 			LOGGER.log(Level.INFO, "Initialize connection");
 			
-			final BinarySerializer writer = SocketHelper.getWriter(_blockingConnection);
-			final BinaryDeserializer reader = SocketHelper.getReader(_blockingConnection);
+			final BinarySerializer writer = new BinarySerializer(_blockingConnection);
+			final BinaryDeserializer reader = new BinaryDeserializer(_blockingConnection);
 			// Exchange init
 			performInit(writer, reader, _blockingConnection);
 			// Send initial data
 			LOGGER.log(Level.INFO, "Serialize init doc");
-			new SetServerDocumentAction(_editor.getDocument(), _editor.getCurrentPageIndex()).serialize(writer);
+			writer.writeSerializableClass(new SetServerDocumentAction(_editor.getDocument(), _editor.getCurrentPageIndex()));
 			LOGGER.log(Level.INFO, "Serialize init doc done");
 			while (true) {
 				final IAction action;
@@ -99,7 +99,7 @@ public class UpClient extends ClientSync {
 				}
 				// Write action
 				LOGGER.log(Level.INFO, "Serialize " + action.getClass().getName());
-				action.serialize(writer);
+				writer.writeSerializableClass(action);
 				LOGGER.log(Level.INFO, "Serialize " + action.getClass().getName() + " done");
 			}
 		} finally {

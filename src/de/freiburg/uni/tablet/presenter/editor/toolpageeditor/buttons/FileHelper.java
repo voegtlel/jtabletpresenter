@@ -1,13 +1,12 @@
 package de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons;
 
 import java.awt.Component;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.channels.SeekableByteChannel;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -91,29 +90,21 @@ public class FileHelper {
 	}
 	
 	public static void saveDocument(final IEditableDocument document, final File file) throws IOException {
-		final FileOutputStream fileOutputStream = new FileOutputStream(file);
+		final SeekableByteChannel fileChannel = Files.newByteChannel(file.toPath(), StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 		
-		final BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(
-				fileOutputStream);
-		final BinarySerializer binarySerializer = new BinarySerializer(
-				bufferedOutputStream);
-		binarySerializer.writeObjectTable(document);
-		binarySerializer.close();
-		bufferedOutputStream.close();
-		fileOutputStream.close();
+		final BinarySerializer writer = new BinarySerializer(
+				fileChannel);
+		writer.writeObjectTable(document);
+		fileChannel.close();
 	}
 	
 	public static void saveDocumentPage(DocumentPage page, File file) throws IOException {
-		final FileOutputStream fileOutputStream = new FileOutputStream(file);
+		final SeekableByteChannel fileChannel = Files.newByteChannel(file.toPath(), StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 		
-		final BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(
-				fileOutputStream);
 		final BinarySerializer writer = new BinarySerializer(
-				bufferedOutputStream);
+				fileChannel);
 		page.serializeDirect(writer);
-		writer.close();
-		bufferedOutputStream.close();
-		fileOutputStream.close();
+		fileChannel.close();
 	}
 	
 	public static void savePdf(IDocument document, IDocument baseDocument, DocumentConfig config, File file) throws IOException {
@@ -196,14 +187,12 @@ public class FileHelper {
 	 * @throws IOException
 	 */
 	public static IEditableDocument openDocument(File file) throws IOException {
-		final FileInputStream fileInputStream = new FileInputStream(file);
-		final BufferedInputStream bufferedInputStream = new BufferedInputStream(
-				fileInputStream);
-		final BinaryDeserializer binaryDeserializer = new BinaryDeserializer(
-				bufferedInputStream);
-		final IEditableDocument document = binaryDeserializer.readObjectTable();
-		bufferedInputStream.close();
-		fileInputStream.close();
+		final SeekableByteChannel fileChannel = Files.newByteChannel(file.toPath(), StandardOpenOption.READ);
+		
+		final BinaryDeserializer reader = new BinaryDeserializer(fileChannel);
+		final IEditableDocument document = reader.readObjectTable();
+		fileChannel.close();
+		
 		return document;
 	}
 	
@@ -215,14 +204,11 @@ public class FileHelper {
 	 * @throws IOException
 	 */
 	public static DocumentPage openPage(File file) throws IOException {
-		final FileInputStream fileInputStream = new FileInputStream(file);
-		final BufferedInputStream bufferedInputStream = new BufferedInputStream(
-				fileInputStream);
-		final BinaryDeserializer binaryDeserializer = new BinaryDeserializer(
-				bufferedInputStream);
-		final DocumentPage page = new DocumentPage(binaryDeserializer, null);
-		bufferedInputStream.close();
-		fileInputStream.close();
+		final SeekableByteChannel fileChannel = Files.newByteChannel(file.toPath(), StandardOpenOption.READ);
+		
+		final BinaryDeserializer reader = new BinaryDeserializer(fileChannel);
+		final DocumentPage page = new DocumentPage(reader, null);
+		fileChannel.close();
 		return page;
 	}
 	
