@@ -17,16 +17,15 @@ import javax.swing.JOptionPane;
 
 import com.sun.jna.NativeLibrary;
 
-import de.freiburg.uni.tablet.presenter.actions.SetServerDocumentAction;
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.document.DocumentConfig;
 import de.freiburg.uni.tablet.presenter.document.ServerDocument;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.JPageEditor;
-import de.freiburg.uni.tablet.presenter.net2.ClientDownSync;
-import de.freiburg.uni.tablet.presenter.net2.ClientUpSync;
-import de.freiburg.uni.tablet.presenter.net2.NetSyncListener;
 import de.freiburg.uni.tablet.presenter.page.SolidPen;
+import de.freiburg.uni.tablet.presenter.xsocket.ClientListener;
+import de.freiburg.uni.tablet.presenter.xsocket.DownClient;
+import de.freiburg.uni.tablet.presenter.xsocket.UpClient;
 
 public class ClientApp {
 
@@ -36,7 +35,7 @@ public class ClientApp {
 	 * Launch the application.
 	 */
 	public static void main(final String[] args) {
-		Logger.getLogger("de.freiburg.uni.tablet.presenter.net2").setLevel(Level.ALL);
+		Logger.getLogger("de.freiburg.uni.tablet.presenter").setLevel(Level.ALL);
 		
 		String configFile = "config.ini";
 		if (args.length > 0) {
@@ -97,36 +96,53 @@ public class ClientApp {
 		_pageRenderer.getDocumentEditor().setDocument(new ServerDocument(1));
 		
 		if (_pageRenderer.getConfig().getBoolean("client.down.enabled", false)) {
-			final ClientDownSync clientDownSync = new ClientDownSync(_pageRenderer.getDocumentEditor(), _pageRenderer.getPageEditor());
-			clientDownSync.setAuthToken(_pageRenderer.getConfig().getString("client.down.authToken", ""));
-			clientDownSync.setClientName(_pageRenderer.getConfig().getString("client.down.name", "Client"));
+			String hostname = _pageRenderer.getConfig().getString("client.down.host", "");
+			int port = _pageRenderer.getConfig().getInt("client.down.port", 8024);
+			int timeout = _pageRenderer.getConfig().getInt("client.down.timeout", 5000);
+			String clientName = _pageRenderer.getConfig().getString("client.down.name", "Client");
+			String authToken = _pageRenderer.getConfig().getString("client.down.authToken", "");
 			
-			clientDownSync.addListener(new NetSyncListener() {
-				@Override
-				public void onError(final Exception e) {
-					JOptionPane.showMessageDialog(_pageRenderer, "Error: " + e.toString());
-				}
+			try {
+				final DownClient clientDownSync = new DownClient(hostname, port, _pageRenderer.getDocumentEditor());
+				clientDownSync.setAuthToken(authToken);
+				clientDownSync.setName(clientName);
 				
-				@Override
-				public void onDisconnected() {
-					int res = JOptionPane.showConfirmDialog(_pageRenderer, "Disconnected. Reconnect?");
-					if (res == JOptionPane.OK_OPTION) {
-						clientDownSync.start(_pageRenderer.getConfig().getString("client.down.host", ""),
-								_pageRenderer.getConfig().getInt("client.down.port", 8024),
-								_pageRenderer.getConfig().getInt("client.down.timeout", 5000));
+				clientDownSync.addListener(new ClientListener() {
+					@Override
+					public void onError(final Exception e) {
+						JOptionPane.showMessageDialog(_pageRenderer, "Error: " + e.toString());
 					}
-				}
+					
+					@Override
+					public void onDisconnected() {
+						int res = JOptionPane.showConfirmDialog(_pageRenderer, "Disconnected. Reconnect?");
+						if (res == JOptionPane.OK_OPTION) {
+							clientDownSync.stop();
+							try {
+								clientDownSync.start();
+							} catch (IOException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							}
+						}
+					}
+					
+					@Override
+					public void onConnected() {
+						System.out.println("Connected");
+					}
+				});
 				
-				@Override
-				public void onConnected() {
-					System.out.println("Connected");
+				System.out.println("Connect remote");
+				try {
+					clientDownSync.start();
+				} catch (IOException e1) {
+					e1.printStackTrace();
 				}
-			});
-			
-			System.out.println("Connect remote");
-			clientDownSync.start(_pageRenderer.getConfig().getString("client.down.host", ""),
-					_pageRenderer.getConfig().getInt("client.down.port", 8024),
-					_pageRenderer.getConfig().getInt("client.down.timeout", 5000));
+			} catch (IOException e2) {
+				// TODO Auto-generated catch block
+				e2.printStackTrace();
+			}
 		} else {
 			if (_pageRenderer.getConfig().getBoolean("autosave.loadStartup", false)) {
 				final File savedSession = new File("session.dat");
@@ -147,34 +163,46 @@ public class ClientApp {
 		_pageRenderer.getDocumentEditor().setCurrentPen(new SolidPen(_pageRenderer.getConfig().getFloat("editor.defaultPen.thickness", 1f), _pageRenderer.getConfig().getColor("editor.defaultPen.color", Color.black)));
 		
 		if (_pageRenderer.getConfig().getBoolean("client.up.enabled", false)) {
-			final ClientUpSync clientSync = new ClientUpSync(_pageRenderer.getDocumentEditor().getHistory());
-			clientSync.setAuthToken(_pageRenderer.getConfig().getString("client.up.authToken", ""));
-			clientSync.setClientName(_pageRenderer.getConfig().getString("client.up.name", "Client"));
-			clientSync.addListener(new NetSyncListener() {
-				@Override
-				public void onError(final Exception e) {
-					JOptionPane.showMessageDialog(_pageRenderer, "Error: " + e.toString());
-				}
-				
-				@Override
-				public void onDisconnected() {
-					int res = JOptionPane.showConfirmDialog(_pageRenderer, "Disconnected. Reconnect?");
-					if (res == JOptionPane.OK_OPTION) {
-						clientSync.start(_pageRenderer.getConfig().getString("client.down.host", ""),
-								_pageRenderer.getConfig().getInt("client.down.port", 8025),
-								_pageRenderer.getConfig().getInt("client.down.timeout", 5000));
+			String hostname = _pageRenderer.getConfig().getString("client.up.host", "");
+			int port = _pageRenderer.getConfig().getInt("client.up.port", 8024);
+			int timeout = _pageRenderer.getConfig().getInt("client.up.timeout", 5000);
+			String clientName = _pageRenderer.getConfig().getString("client.up.name", "Client");
+			String authToken = _pageRenderer.getConfig().getString("client.up.authToken", "");
+			
+			try {
+				final UpClient clientSync = new UpClient(hostname, port, _pageRenderer.getDocumentEditor());
+				clientSync.setAuthToken(authToken);
+				clientSync.setName(clientName);
+				clientSync.addListener(new ClientListener() {
+					@Override
+					public void onError(final Exception e) {
+						JOptionPane.showMessageDialog(_pageRenderer, "Error: " + e.toString());
 					}
-				}
-				
-				@Override
-				public void onConnected() {
-				}
-			});
-			System.out.println("Connect remote");
-			clientSync.start(_pageRenderer.getConfig().getString("client.up.host", ""),
-					_pageRenderer.getConfig().getInt("client.up.port", 8025),
-					_pageRenderer.getConfig().getInt("client.up.timeout", 5000));
-			clientSync.onActionPerformed(new SetServerDocumentAction(_pageRenderer.getDocumentEditor().getDocument(), _pageRenderer.getDocumentEditor().getCurrentPageIndex()));
+					
+					@Override
+					public void onDisconnected() {
+						int res = JOptionPane.showConfirmDialog(_pageRenderer, "Disconnected. Reconnect?");
+						if (res == JOptionPane.OK_OPTION) {
+							clientSync.stop();
+							try {
+								clientSync.start();
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+					}
+					
+					@Override
+					public void onConnected() {
+					}
+				});
+				System.out.println("Connect remote");
+				clientSync.start();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		}
 		
 		_pageRenderer.addWindowListener(new WindowAdapter() {

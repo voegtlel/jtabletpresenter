@@ -1,40 +1,26 @@
 package de.freiburg.uni.tablet.presenter;
 
 import java.io.IOException;
-import java.nio.channels.SocketChannel;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import de.freiburg.uni.tablet.presenter.actions.SetClientDocumentAction;
 import de.freiburg.uni.tablet.presenter.document.DocumentConfig;
 import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
 import de.freiburg.uni.tablet.presenter.document.ServerDocument;
-import de.freiburg.uni.tablet.presenter.net2.AcceptListener;
-import de.freiburg.uni.tablet.presenter.net2.AcceptThread;
-import de.freiburg.uni.tablet.presenter.net2.NetSyncListener;
-import de.freiburg.uni.tablet.presenter.net2.ServerDownSync;
-import de.freiburg.uni.tablet.presenter.net2.ServerUpSync;
+import de.freiburg.uni.tablet.presenter.xsocket.DownServer;
+import de.freiburg.uni.tablet.presenter.xsocket.UpServer;
 
 public class ServerApp {
-	private String _name;
-	private String _authTokenDown;
-	private String _authTokenUp;
-	
-	private AcceptThread _acceptDownThread;
-	private List<ServerDownSync> _downSyncs = new ArrayList<ServerDownSync>();
-	private List<ServerUpSync> _upSyncs = new ArrayList<ServerUpSync>();
 	private DocumentEditor _editor;
-	private AcceptThread _acceptUpThread;
 	
-	private int _nextClientId = 2;
+	private UpServer _upServer;
+	private DownServer _downServer;
 
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		Logger.getLogger("de.freiburg.uni.tablet.presenter.net2").setLevel(Level.ALL);
+		Logger.getLogger("de.freiburg.uni.tablet.presenter").setLevel(Level.ALL);
 		
 		String configFile = "config.ini";
 		if (args.length > 0) {
@@ -56,119 +42,63 @@ public class ServerApp {
 	}
 	
 	public ServerApp(final DocumentConfig config) {
-		_name = config.getString("server.name", "Server");
-		_authTokenDown = config.getString("server.down.authToken", "");
-		_authTokenUp = config.getString("server.up.authToken", "");
+		String name = config.getString("server.name", "Server");
+		String authTokenDown = config.getString("server.down.authToken", "");
+		String authTokenUp = config.getString("server.up.authToken", "");
+		int portDown = config.getInt("server.down.port", 8025);
+		int portUp = config.getInt("server.up.port", 8025);
 		
-		_acceptUpThread = new AcceptThread(config.getInt("server.up.port", 8024));
-		_acceptDownThread = new AcceptThread(config.getInt("server.down.port", 8025));
 		_editor = new DocumentEditor();
 		_editor.setDocument(new ServerDocument(1));
 		
-		_acceptDownThread.addListener(new AcceptListener() {
-			@Override
-			public void clientConnected(final SocketChannel socket) {
-				onDownConnected(socket);
-			}
-		});
-		
-		_acceptUpThread.addListener(new AcceptListener() {
-			@Override
-			public void clientConnected(final SocketChannel socket) {
-				onUpClientConnected(socket);
-			}
-		});
-	}
-	
-	private void onDownConnected(final SocketChannel socket) {
 		try {
-			System.out.println("Down client connected from " + socket.getRemoteAddress());
+			_upServer = new UpServer(portUp, _editor);
+			_upServer.setName(name);
+			_upServer.setAuthToken(authTokenUp);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		final ServerDownSync client = new ServerDownSync(_editor, socket, _authTokenDown);
-		client.setClientId(_nextClientId++);
-		client.addListener(new NetSyncListener() {
-			@Override
-			public void onError(Exception e) {
-			}
-			
-			@Override
-			public void onDisconnected() {
-				System.out.println("Remove client " + client.getClientId() + " -> " + client.getClientName());
-				synchronized (_downSyncs) {
-					client.dispose();
-					_downSyncs.remove(client);
-				}
-			}
-			
-			@Override
-			public void onConnected() {
-				System.out.println("Client " + client.getClientId() + " -> " + client.getClientName() + " connected");
-			}
-		});
-		client.start();
-		synchronized (_downSyncs) {
-			_downSyncs.add(client);
-		}
-	}
-	
-	private void onUpClientConnected(final SocketChannel socket) {
 		try {
-			System.out.println("Up client connected from " + socket.getRemoteAddress());
+			_downServer = new DownServer(portDown, _editor);
+			_downServer.setName(name);
+			_downServer.setAuthToken(authTokenDown);
 		} catch (IOException e) {
 			e.printStackTrace();
-		}
-		final ServerUpSync client = new ServerUpSync(_editor.getHistory(), socket, _authTokenUp);
-		client.setClientId(_nextClientId++);
-		client.addListener(new NetSyncListener() {
-			@Override
-			public void onError(Exception e) {
-			}
-			
-			@Override
-			public void onDisconnected() {
-				System.out.println("Remove client " + client.getClientId() + " -> " + client.getClientName());
-				synchronized (_upSyncs) {
-					client.dispose();
-					_upSyncs.remove(client);
-				}
-			}
-			
-			@Override
-			public void onConnected() {
-				System.out.println("Client " + client.getClientId() + " -> " + client.getClientName() + " connected");
-			}
-		});
-		client.start();
-		client.onActionPerformed(new SetClientDocumentAction(_editor.getDocument(), _editor.getCurrentPageIndex()));
-		synchronized (_upSyncs) {
-			_upSyncs.add(client);
 		}
 	}
 	
 	public void start() {
 		System.out.println("Start");
 		
-		_acceptDownThread.start();
-		_acceptUpThread.start();
+		try {
+			_upServer.start();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			_downServer.start();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public void stop() {
 		System.out.println("Stopping");
 		
-		for (ServerDownSync sync : _downSyncs) {
-			System.out.println("Stopping Thread");
-			sync.stop();
+		try {
+			_upServer.stop();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		
-		for (ServerUpSync sync : _upSyncs) {
-			System.out.println("Stopping Thread");
-			sync.stop();
+		try {
+			_downServer.stop();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		
-		_acceptDownThread.close();
-		_acceptUpThread.close();
 		
 		System.out.println("Finished");
 	}
