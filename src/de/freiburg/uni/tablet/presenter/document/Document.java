@@ -81,7 +81,7 @@ public class Document implements IDocumentNotify {
 
 	@Override
 	public long getId() {
-		return _docId << 32;
+		return (long)_docId << 32;
 	}
 
 	@Override

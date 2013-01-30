@@ -53,7 +53,7 @@ public class ClientApp {
 				Object o = new Object();
 				while (true) {
 					synchronized (o) {
-						o.wait();	
+						o.wait();
 					}
 				}
 			} catch (InterruptedException e) {

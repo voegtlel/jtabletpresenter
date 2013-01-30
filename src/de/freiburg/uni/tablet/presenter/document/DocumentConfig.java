@@ -35,9 +35,10 @@ public class DocumentConfig {
 			InputStreamReader inputStreamReader = new InputStreamReader(bufferedInputStream);
 			BufferedReader reader = new BufferedReader(inputStreamReader);
 			try {
-				String line = reader.readLine().trim();
+				String line = reader.readLine();
 				int iLine = 0;
 				while (line != null) {
+					line = line.trim();
 					iLine++;
 					if (line.startsWith("#") || line.startsWith("//") || line.isEmpty()) {
 						put(null, line);
