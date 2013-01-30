@@ -82,7 +82,12 @@ public class ServerDocument extends Document implements IEditableDocument {
 				final PDPageTree pageTree = document.getDocument().getPageTree();
 				// Clear and create new
 				clear();
+				final DocumentPage firstPage = this.getPageByIndex(0);
 				PDPage pdfPage = pageTree.getFirstPage();
+				if (pdfPage != null) {
+					firstPage.setPdfPage(new PdfPageSerializable(firstPage, document, pdfPage));
+					pdfPage = pdfPage.getNextPage();
+				}
 				while (pdfPage != null) {
 					final DocumentPage newPage = this.addPage();
 					newPage.setPdfPage(new PdfPageSerializable(newPage, document, pdfPage));
