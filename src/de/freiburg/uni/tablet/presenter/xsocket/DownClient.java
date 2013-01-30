@@ -8,6 +8,8 @@ import java.util.logging.Logger;
 import org.xsocket.connection.INonBlockingConnection;
 
 import de.freiburg.uni.tablet.presenter.actions.IAction;
+import de.freiburg.uni.tablet.presenter.actions.SetClientDocumentAction;
+import de.freiburg.uni.tablet.presenter.actions.SetServerDocumentAction;
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
@@ -62,7 +64,12 @@ public class DownClient extends ClientSync {
 				final IAction action = reader.readSerializableClass();
 				LOGGER.log(Level.INFO, "Read action " + action.getClass().getName());
 				try {
-					action.perform(_editor);
+					if (action instanceof SetServerDocumentAction) {
+						final SetClientDocumentAction clientAction = ((SetServerDocumentAction) action).getClientAction();
+						clientAction.perform(_editor);
+					} else {
+						action.perform(_editor);
+					}
 				} catch (Exception e) {
 					throw new IOException(e);
 				}
