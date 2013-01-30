@@ -192,8 +192,6 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 				new ButtonToggleFullscreen(this) });
 		
 		registerShortcuts();
-		
-		_config.write(false);
 	}
 
 	protected void onWindowClosing() {

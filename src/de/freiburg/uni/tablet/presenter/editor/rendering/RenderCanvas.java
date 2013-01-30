@@ -46,7 +46,6 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 	
 	public RenderCanvas() {
 		super();
-		setIgnoreRepaint(true);
 		
 		_renderThread = new Thread(new Runnable() {
 			@Override

@@ -68,7 +68,7 @@ public class DocumentPage implements IEntity, IPageRepaintListener {
 	 */
 	public void collideWith(final CollisionInfo collisionInfo, final CollisionListener listener) {
 		for (LinkedElement<IRenderable> r = _renderablesList.getFirst(); r != null; ) {
-			LinkedElement<IRenderable> next = r.getNext();
+			final LinkedElement<IRenderable> next = r.getNext();
 			if (r.getData().collides(collisionInfo)) {
 				listener.collides(r.getData());
 			}

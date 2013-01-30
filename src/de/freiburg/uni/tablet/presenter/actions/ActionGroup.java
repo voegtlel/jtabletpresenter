@@ -59,8 +59,8 @@ public class ActionGroup implements IAction {
 	@Override
 	public IAction getUndoAction() {
 		ActionGroup undoAction = new ActionGroup();
-		for (LinkedElement<IAction> e = _actions.getFirst(); e != null; e = e
-				.getNext()) {
+		for (LinkedElement<IAction> e = _actions.getLast(); e != null; e = e
+				.getPrevious()) {
 			if (e.getData().hasUndoAction()) {
 				undoAction.addAction(e.getData().getUndoAction());
 			}

@@ -159,7 +159,7 @@ public class ClientApp {
 						bs.close();
 						//is.close();
 						System.out.println("Session loaded");
-					} catch (IOException e) {
+					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				}

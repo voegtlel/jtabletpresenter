@@ -11,8 +11,10 @@ public class PageLayerBufferColor implements IPageLayerBuffer {
 	
 	@Override
 	public void resize(final int width, final int height) {
-		_width = width;
-		_height = height;
+		synchronized (this) {
+			_width = width;
+			_height = height;
+		}
 	}
 
 	public void setColor(final Color color) {
@@ -21,7 +23,15 @@ public class PageLayerBufferColor implements IPageLayerBuffer {
 
 	@Override
 	public void drawBuffer(final Graphics2D g, final ImageObserver obs) {
-		g.setBackground(_color);
-		g.clearRect(0, 0, _width, _height);
+		final int width;
+		final int height;
+		synchronized (this) {
+			width = _width;
+			height = _height;
+		}
+		//g.setBackground(_color);
+		//g.clearRect(0, 0, _width, _height);
+		g.setColor(_color);
+		g.fillRect(0, 0, width, height);
 	}
 }
