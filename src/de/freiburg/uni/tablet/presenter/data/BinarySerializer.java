@@ -11,6 +11,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author lukas
@@ -147,14 +148,14 @@ public class BinarySerializer {
 		}
 	}
 	
-	/*public void debugPrint() {
+	public void debugPrint() {
 		for (Map.Entry<String, Integer> entry : _stringTable.entrySet()) {
 			System.out.println("str[" + entry.getKey() + "] = " + entry.getValue());
 		}
 		for (Map.Entry<Long,IBinarySerializableId> entry : _objectTable.entrySet()) {
 			System.out.println("obj[" + String.format("%16x", entry.getKey()) + "] = " + entry.getValue().getClass().getName());
 		}
-	}*/
+	}
 	
 	/**
 	 * Resets the object table.

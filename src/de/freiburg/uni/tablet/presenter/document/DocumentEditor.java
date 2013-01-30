@@ -288,7 +288,9 @@ public class DocumentEditor implements IBinarySerializableId {
 	 */
 	public void deserialize(final BinaryDeserializer reader) throws IOException {
 		setDocument((IEditableDocument) reader.readObjectTable());
+		reader.resetState();
 		setBaseDocument((IEditableDocument) reader.readObjectTable());
+		reader.resetState();
 		setCurrentPen((IPen) reader.readSerializableClass());
 		int pageIndex = reader.readInt();
 		setCurrentPageByIndex(pageIndex, false);

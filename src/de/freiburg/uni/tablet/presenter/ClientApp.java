@@ -221,7 +221,8 @@ public class ClientApp {
 						//BufferedOutputStream bos = new BufferedOutputStream(os);
 						SeekableByteChannel bc = Files.newByteChannel(savedSession.toPath(), StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
 						BinarySerializer bs = new BinarySerializer(bc);
-						bs.writeSerializableClass(_pageRenderer.getDocumentEditor());
+						_pageRenderer.getDocumentEditor().serialize(bs);
+						bs.flush();
 						bc.close();
 						//bs.close();
 						//bos.close();

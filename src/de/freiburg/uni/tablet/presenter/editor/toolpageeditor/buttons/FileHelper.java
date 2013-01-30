@@ -95,6 +95,7 @@ public class FileHelper {
 		final BinarySerializer writer = new BinarySerializer(
 				fileChannel);
 		writer.writeObjectTable(document);
+		writer.flush();
 		fileChannel.close();
 	}
 	
@@ -104,6 +105,7 @@ public class FileHelper {
 		final BinarySerializer writer = new BinarySerializer(
 				fileChannel);
 		page.serializeDirect(writer);
+		writer.flush();
 		fileChannel.close();
 	}
 	

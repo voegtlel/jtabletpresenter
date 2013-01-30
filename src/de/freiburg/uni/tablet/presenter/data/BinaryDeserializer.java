@@ -14,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author lukas
@@ -178,14 +179,14 @@ public class BinaryDeserializer {
 		return readObjectTable(_defaultCtorArgTypes, _defaultCtorArgs);
 	}
 	
-	/*public void debugPrint() {
+	public void debugPrint() {
 		for (int i = 0; i < _stringTable.size(); i++) {
 			System.out.println("str[" + i + "] = " + _stringTable.get(i));
 		}
 		for (Map.Entry<Long,IBinarySerializableId> entry : _objectTable.entrySet()) {
 			System.out.println("obj[" + String.format("%16x", entry.getKey()) + "] = " + entry.getValue().getClass().getName());
 		}
-	}*/
+	}
 	
 	public void resetState() {
 		_objectTable.clear();
