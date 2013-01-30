@@ -166,6 +166,11 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 			public void windowClosing(WindowEvent e) {
 				onWindowClosing();
 			}
+			
+			@Override
+			public void windowGainedFocus(WindowEvent e) {
+				onWindowFocus();
+			}
 		});
 		
 		final RenderCanvas pageRenderer = new RenderCanvas();
@@ -200,6 +205,10 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 
 	protected void onWindowOpened() {
 		_pageRenderer.start();
+	}
+	
+	protected void onWindowFocus() {
+		_pageRenderer.requestFocusInWindow();
 	}
 
 	public void setToolButtons(final IButtonAction[] buttons) {
