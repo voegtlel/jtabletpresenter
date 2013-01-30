@@ -153,7 +153,6 @@ public class DocumentHistory {
 	 */
 	public void addAction(final IAction action) {
 		if (_currentActionGroup != null) {
-			System.out.println("Add action to group: " + action.getClass().getName());
 			_currentActionGroup.addAction(action);
 		} else if (action.hasUndoAction()) {
 			if (_top == null) {

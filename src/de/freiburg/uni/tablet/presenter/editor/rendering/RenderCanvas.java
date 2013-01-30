@@ -48,7 +48,6 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 	public RenderCanvas() {
 		super();
 		setBackground(Color.WHITE);
-		setFocusable(true);
 		
 		_renderThread = new Thread(new Runnable() {
 			@Override

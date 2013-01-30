@@ -90,7 +90,9 @@ public class ClientApp {
 	 */
 	private void initialize() {
 		_pageRenderer.setTitle("JTabletPresenter v1.02");
-		_pageRenderer.setBounds(100, 100, 640, 480);
+		_pageRenderer.setSize(800, 600);
+		_pageRenderer.setLocationByPlatform(true);
+		//_pageRenderer.setBounds(100, 100, 640, 480);
 		_pageRenderer.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		_pageRenderer.getDocumentEditor().setDocument(new ServerDocument(1));

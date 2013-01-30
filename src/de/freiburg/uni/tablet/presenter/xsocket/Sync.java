@@ -58,20 +58,39 @@ public abstract class Sync {
 		};
 	}
 	
+	/**
+	 * Set the name
+	 * @param name
+	 */
 	public void setName(final String name) {
 		_name = name;
 	}
 	
+	/**
+	 * Gets the name
+	 * @return
+	 */
 	public String getName() {
 		return _name;
 	}
 	
+	/**
+	 * Gets the remote name
+	 * @return
+	 */
 	public String getRemoteName() {
 		return _remoteName;
 	}
 	
+	/**
+	 * Starts networking
+	 * @throws IOException
+	 */
 	public abstract void start() throws IOException;
 	
+	/**
+	 * Stops networking
+	 */
 	public void stop() {
 		synchronized (_sync) {
 			if (_connection != null) {
@@ -87,6 +106,9 @@ public abstract class Sync {
 		}
 	}
 	
+	/**
+	 * Starts the internal thread
+	 */
 	protected void startThread() {
 		synchronized (_sync) {
 			if (_thread == null || !_thread.isAlive()) {
@@ -107,6 +129,10 @@ public abstract class Sync {
 		}
 	}
 	
+	/**
+	 * Stops the internal thread
+	 */
+	@SuppressWarnings("deprecation")
 	protected void stopThread() {
 		if (_thread != null) {
 			try {
@@ -170,6 +196,7 @@ public abstract class Sync {
 		} else {
 			LOGGER.log(Level.INFO, "Net " + connection.getRemoteAddress() + " connect");
 		}
+		fireConnected();
 		return true;
 	}
 	

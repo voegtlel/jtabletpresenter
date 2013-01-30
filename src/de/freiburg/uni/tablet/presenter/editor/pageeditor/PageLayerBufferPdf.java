@@ -82,6 +82,8 @@ public class PageLayerBufferPdf implements IPageLayerBuffer {
 			factorX = _renderFactorX;
 			factorY = _renderFactorY;
 			requiresRepaint = _requireRepaint;
+			_requireResize = false;
+			_requireRepaint = false;
 			page = ((_pdfPage == null)?null:_pdfPage.getPage());
 		}
 		if (page == null) {

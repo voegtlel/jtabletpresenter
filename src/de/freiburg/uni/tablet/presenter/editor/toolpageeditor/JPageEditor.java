@@ -17,6 +17,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.event.WindowFocusListener;
 import java.util.List;
 
 import javax.swing.AbstractAction;
@@ -166,6 +167,12 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 			public void windowClosing(WindowEvent e) {
 				onWindowClosing();
 			}
+		});
+		
+		addWindowFocusListener(new WindowFocusListener() {
+			@Override
+			public void windowLostFocus(WindowEvent e) {
+			}
 			
 			@Override
 			public void windowGainedFocus(WindowEvent e) {
@@ -205,10 +212,13 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 
 	protected void onWindowOpened() {
 		_pageRenderer.start();
+		//_pageRenderer.requestFocusInWindow();
+		System.out.println("onWindowOpened");
 	}
 	
 	protected void onWindowFocus() {
 		_pageRenderer.requestFocusInWindow();
+		System.out.println("onWindowFocus");
 	}
 
 	public void setToolButtons(final IButtonAction[] buttons) {

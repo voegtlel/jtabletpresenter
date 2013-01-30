@@ -29,6 +29,8 @@ public abstract class AbstractButtonAction extends AbstractAction implements IBu
 	protected final IToolPageEditor _editor;
 	private final String _text;
 	private final String _imageResource;
+	
+	private long _lastTimestamp = 0;
 
 	/**
 	 * Creates the action with an editor.
@@ -75,6 +77,11 @@ public abstract class AbstractButtonAction extends AbstractAction implements IBu
 	
 	@Override
 	public void actionPerformed(final ActionEvent e) {
+		if (_lastTimestamp + 50 < System.currentTimeMillis()) {
+			// Maximum of 20 per second
+			return;
+		}
+		_lastTimestamp = System.currentTimeMillis();
 		final Component c = (Component)e.getSource();
 		final Point loc = c.getLocation();
 		loc.x += c.getWidth();
