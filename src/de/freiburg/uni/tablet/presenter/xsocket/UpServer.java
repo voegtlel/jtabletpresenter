@@ -100,6 +100,7 @@ public class UpServer extends ServerSync {
 				// Send initial data
 				LOGGER.log(Level.INFO, "Serialize init doc");
 				writer.writeSerializableClass(new SetClientDocumentAction(_editor.getDocument(), _editor.getCurrentPageIndex()));
+				writer.flush();
 				LOGGER.log(Level.INFO, "Serialize init doc done");
 				while (true) {
 					final IAction action;
@@ -119,6 +120,7 @@ public class UpServer extends ServerSync {
 					// Write action
 					LOGGER.log(Level.INFO, "Serialize " + action.getClass().getName());
 					writer.writeSerializableClass(action);
+					writer.flush();
 					LOGGER.log(Level.INFO, "Serialize " + action.getClass().getName() + " done");
 				}
 			} finally {

@@ -71,6 +71,7 @@ public class DownServer extends ServerSync {
 		@Override
 		protected void onThread() throws IOException {
 			try {
+				LOGGER.log(Level.INFO, "Init client");
 				final BinaryDeserializer reader = new BinaryDeserializer(_readPipe.source());
 				final BinarySerializer writer = new BinarySerializer(_connection);
 				performInit(writer, reader, _connection);

@@ -156,11 +156,11 @@ public abstract class Sync {
 	}
 
 	protected boolean onData(final INonBlockingConnection connection) throws IOException {
-		if (_remoteName != null) {
+		/*if (_remoteName != null) {
 			LOGGER.log(Level.INFO, "Net " + connection.getRemoteAddress() + " (" + _remoteName + ") data: " + connection.available());
 		} else {
 			LOGGER.log(Level.INFO, "Net " + connection.getRemoteAddress() + " data" + connection.available());
-		}
+		}*/
 		return true;
 	}
 

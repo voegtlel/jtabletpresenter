@@ -17,10 +17,12 @@ import java.util.HashMap;
  * 
  */
 public class BinarySerializer {
-	private final ByteBuffer _buffer = ByteBuffer.allocateDirect(128);
+	private final ByteBuffer _buffer = ByteBuffer.allocateDirect(1024);
 	private final WritableByteChannel _channel;
 	private final HashMap<String, Integer> _stringTable = new HashMap<String, Integer>();
 	private final HashMap<Long, IBinarySerializableId> _objectTable = new HashMap<Long, IBinarySerializableId>();
+	
+	private boolean _autoFlush = false;
 
 	/**
 	 * 
@@ -29,69 +31,79 @@ public class BinarySerializer {
 		_channel = channel;
 	}
 	
-	public void write(final ByteBuffer buffer) throws IOException {
-		while (buffer.hasRemaining()) {
-			final int res = _channel.write(buffer);
+	public void flush() throws IOException {
+		_buffer.flip();
+		while (_buffer.hasRemaining()) {
+			final int res = _channel.write(_buffer);
 			if (res == -1) {
 				throw new EOFException();
 			}
 		}
+		_buffer.clear();
+		if (_channel instanceof Flushable) {
+			((Flushable) _channel).flush();
+		}
+	}
+	
+	private void checkFlush(final int requiredSize) throws IOException {
+		if (_buffer.remaining() < requiredSize) {
+			flush();
+		}
+	}
+	
+	private void write() throws IOException {
+		if (_autoFlush) {
+			flush();
+		}
 	}
 
 	public void writeBoolean(final boolean value) throws IOException {
-		_buffer.clear();
+		checkFlush(1);
 		_buffer.put(value?(byte)255:(byte)0);
-		_buffer.flip();
-		write(_buffer);
+		write();
 	}
 
 	public void writeInt(final int value) throws IOException {
-		_buffer.clear();
+		checkFlush(4);
 		_buffer.putInt(value);
-		_buffer.flip();
-		write(_buffer);
+		write();
 	}
 
 	public void writeFloat(final float value) throws IOException {
-		_buffer.clear();
+		checkFlush(4);
 		_buffer.putFloat(value);
-		_buffer.flip();
-		write(_buffer);
+		write();
 	}
 
 	public void writeDouble(final double value) throws IOException {
-		_buffer.clear();
+		checkFlush(8);
 		_buffer.putDouble(value);
-		_buffer.flip();
-		write(_buffer);
+		write();
 	}
 
 	public void writeString(final String value) throws IOException {
-		_buffer.clear();
 		final byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
 		writeByteArray(bytes, 0, bytes.length);
 	}
 
 	public void writeLong(final long value) throws IOException {
-		_buffer.clear();
+		checkFlush(8);
 		_buffer.putLong(value);
-		_buffer.flip();
-		write(_buffer);
+		write();
 	}
 	
 	public void writeByteArray(final byte[] data, final int offset, final int length) throws IOException {
-		_buffer.clear();
+		checkFlush(4);
 		_buffer.putInt(length);
 		int off = offset;
 		int len = length;
 		while (len > 0) {
 			final int write = Math.min(_buffer.remaining(), len);
+			checkFlush(write);
 			_buffer.put(data, off, write);
-			_buffer.flip();
-			write(_buffer);
+			write();
 			len -= write;
 			off += write;
-			_buffer.clear();
 		}
 	}
 
@@ -150,11 +162,5 @@ public class BinarySerializer {
 	public void resetState() {
 		_objectTable.clear();
 		_stringTable.clear();
-	}
-
-	public void flush() throws IOException {
-		if (_channel instanceof Flushable) {
-			((Flushable) _channel).flush();
-		}
 	}
 }
