@@ -4,10 +4,7 @@ import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.Files;
@@ -228,7 +225,7 @@ public class ClientApp {
 						//bos.close();
 						//os.close();
 						System.out.println("Session autosaved");
-					} catch (IOException e1) {
+					} catch (Exception e1) {
 						e1.printStackTrace();
 					}
 				}

@@ -105,6 +105,7 @@ public class BinarySerializer {
 			write();
 			len -= write;
 			off += write;
+			checkFlush(len);
 		}
 	}
 

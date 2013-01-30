@@ -24,9 +24,17 @@ public class DocumentEditor implements IBinarySerializableId {
 	private DocumentPage _currentBackPage = null;
 	
 	private final List<DocumentEditorListener> _listeners = new LinkedList<DocumentEditorListener>();
+	private DocumentListener _documentListener;
 
 	public DocumentEditor() {
 		_history = new DocumentHistory(this);
+		_documentListener = new DocumentAdapter() {
+			@Override
+			public void pageRemoved(final IEditableDocument document, final DocumentPage prevPage,
+					final DocumentPage page) {
+				onDocumentPageRemoved(document, prevPage, page);
+			}
+		};
 	}
 
 	/**
@@ -70,6 +78,24 @@ public class DocumentEditor implements IBinarySerializableId {
 			throw new IllegalArgumentException("Page not in document");
 		}
 		fireCurrentPageChanged(lastPage, lastBackPage);
+	}
+	
+	/**
+	 * Event
+	 * @param document
+	 * @param prevPage
+	 * @param page
+	 */
+	protected void onDocumentPageRemoved(final IEditableDocument document,
+			final DocumentPage prevPage, final DocumentPage page) {
+		if (_currentPage == page) {
+			if (prevPage != null) {
+				int pageIndex = document.getPageIndex(prevPage);
+				setCurrentPageByIndex(pageIndex,false);
+			} else {
+				setCurrentPageByIndex(0, false);
+			}
+		}
 	}
 
 	/**
@@ -200,14 +226,23 @@ public class DocumentEditor implements IBinarySerializableId {
 	 */
 	public void setDocument(final IEditableDocument document) {
 		fireChanging();
+		if (_document != null) {
+			_document.removeListener(_documentListener);
+		}
 		final IEditableDocument lastDocument = _document;
 		_document = document;
 		
 		final DocumentPage lastPage = _currentPage;
 		final DocumentPage lastBackPage = _currentBackPage;
-		_currentPage = document.getPageByIndex(0, true);
-		if (_baseDocument != null) {
-			_currentBackPage = _baseDocument.getPageByIndex(0);
+		if (_document != null) {
+			_currentPage = document.getPageByIndex(0, true);
+			if (_baseDocument != null) {
+				_currentBackPage = _baseDocument.getPageByIndex(0);
+			}
+			_document.addListener(_documentListener);
+		} else {
+			_currentPage = null;
+			_currentBackPage = null;
 		}
 		fireDocumentChanged(lastDocument);
 		fireCurrentPageChanged(lastPage, lastBackPage);

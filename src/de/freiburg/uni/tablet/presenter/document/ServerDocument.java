@@ -141,11 +141,6 @@ public class ServerDocument extends Document implements IEditableDocument {
 	}
 	
 	@Override
-	public DocumentPage addPage(final BinaryDeserializer reader) throws IOException {
-		return addPage(new DocumentPage(reader, this));
-	}
-	
-	@Override
 	public DocumentPage addPage() {
 		return addPage(new DocumentPage(this));
 	}

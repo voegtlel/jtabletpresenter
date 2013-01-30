@@ -1,8 +1,5 @@
 package de.freiburg.uni.tablet.presenter.document;
 
-import java.io.IOException;
-
-import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 
 public interface IEditableDocument extends IDocument {
 	/**
@@ -37,15 +34,6 @@ public interface IEditableDocument extends IDocument {
 	 */
 	DocumentPage getPageByIndex(int index,
 			boolean createIfNotExisting);
-
-	/**
-	 * Adds a document page
-	 * 
-	 * @return
-	 * @throws IOException 
-	 */
-	DocumentPage addPage(BinaryDeserializer reader)
-			throws IOException;
 
 	/**
 	 * Adds a document page

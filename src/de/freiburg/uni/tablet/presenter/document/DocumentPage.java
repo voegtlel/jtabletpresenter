@@ -197,21 +197,19 @@ public class DocumentPage implements IEntity, IPageRepaintListener {
 	}
 	
 	/**
-	 * Deserialize only this page without its document.
+	 * Overwrites the contents of this page with a previously direct serialized page
 	 * @param reader
-	 * @param dummy null
 	 * @throws IOException
 	 */
-	public DocumentPage(final BinaryDeserializer reader, final IDocument dummy)
-			throws IOException {
-		_document = null;
-		_id = reader.readLong();
+	public void deserializeDirect(final BinaryDeserializer reader) throws IOException {
+		clear();
 		reader.putObjectTable(_id, this);
-		_pdfPage = reader.readObjectTable();
 		final int count = reader.readInt();
 		for (int i = 0; i < count; i++) {
 			final IRenderable renderable = reader.readObjectTable();
+			LinkedElement<IRenderable> prevRenderable = _renderablesList.getLast();
 			_renderablesList.addLast(renderable);
+			_document.fireRenderableAdded((prevRenderable == null?null:prevRenderable.getData()), renderable, this);
 		}
 	}
 	
@@ -222,7 +220,6 @@ public class DocumentPage implements IEntity, IPageRepaintListener {
 	 */
 	public void serializeDirect(final BinarySerializer writer) throws IOException {
 		writer.writeLong(_id);
-		writer.writeObjectTable(_pdfPage);
 		writer.writeInt(_renderablesList.getCount());
 		for (LinkedElement<IRenderable> r = _renderablesList.getFirst(); r != null; r = r
 				.getNext()) {

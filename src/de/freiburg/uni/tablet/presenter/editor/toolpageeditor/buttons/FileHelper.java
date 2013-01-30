@@ -202,16 +202,15 @@ public class FileHelper {
 	 * Opens a document file
 	 * 
 	 * @param file
-	 * @return
+	 * @param dstPage
 	 * @throws IOException
 	 */
-	public static DocumentPage openPage(File file) throws IOException {
+	public static void openPage(final File file, final DocumentPage dstPage) throws IOException {
 		final SeekableByteChannel fileChannel = Files.newByteChannel(file.toPath(), StandardOpenOption.READ);
 		
 		final BinaryDeserializer reader = new BinaryDeserializer(fileChannel);
-		final DocumentPage page = new DocumentPage(reader, null);
+		dstPage.deserializeDirect(reader);
 		fileChannel.close();
-		return page;
 	}
 	
 	public static boolean showOpenDialog(final Component component, IToolPageEditor editor, FileFilter defaultFilter) {
@@ -227,10 +226,8 @@ public class FileHelper {
 					editor.getDocumentEditor().setDocument(openDocument(f));
 					return true;
 				} else if (f.getPath().toLowerCase().endsWith(".jpp")) {
-					final DocumentPage page = editor.getDocumentEditor().getDocument().clonePage(openPage(f));
-					editor.getDocumentEditor().getDocument().insertPage(
-							editor.getDocumentEditor().getCurrentPage(), page);
-					editor.getDocumentEditor().setCurrentPage(page);
+					DocumentPage currentPage = editor.getDocumentEditor().getCurrentPage();
+					openPage(f, currentPage);
 					return true;
 				} else if (f.getPath().toLowerCase().endsWith(".pdf")) {
 					final PdfModeOption defOpt = new PdfModeOption(IEditableDocument.PDF_MODE_CLEAR, "Clear all");
