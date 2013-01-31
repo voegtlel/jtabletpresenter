@@ -139,7 +139,7 @@ public class BinarySerializer {
 		final Object data = _objectTable.get(obj.getId());
 		if (data != null) {
 			if (data != obj) {
-				throw new IllegalStateException("Object table out of sync");
+				throw new IllegalStateException("Object table out of sync: Id " + String.format("%16X", obj.getId()) + " -> " + data.getClass().getName() + " <-> " + obj.getClass().getName());
 			}
 			writeLong(obj.getId());
 		} else {

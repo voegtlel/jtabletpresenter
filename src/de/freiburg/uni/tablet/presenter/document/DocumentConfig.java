@@ -134,6 +134,17 @@ public class DocumentConfig {
 		throw new IllegalStateException("Invalid config type for (int)" + key + ": " + keyValue.value.getClass().getName());
 	}
 	
+	public long getLong(String key, long defaultValue) {
+		KeyValue keyValue = getDefault(key, defaultValue);
+		if (keyValue.value instanceof String) {
+			keyValue.value = Long.parseLong(keyValue.value.toString());
+		}
+		if (keyValue.value instanceof Long) {
+			return (Long)keyValue.value;
+		}
+		throw new IllegalStateException("Invalid config type for (long)" + key + ": " + keyValue.value.getClass().getName());
+	}
+	
 	public float getFloat(String key, float defaultValue) {
 		KeyValue keyValue = getDefault(key, defaultValue);
 		if (keyValue.value instanceof String) {

@@ -38,6 +38,7 @@ public class PdfSerializable implements IEntity {
 	public PdfSerializable(final BinaryDeserializer reader) throws IOException {
 		_id = reader.readLong();
 		_parent = reader.readObjectTable();
+		_parent.deserializeId(_id);
 		final int pdfNullCheck = reader.readInt();
 		if (pdfNullCheck == 0) {
 			_document = null;

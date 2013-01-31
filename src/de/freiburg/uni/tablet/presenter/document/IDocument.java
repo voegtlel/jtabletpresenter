@@ -36,6 +36,12 @@ public interface IDocument extends IEntity {
 	 * @return
 	 */
 	long nextId();
+	
+	/**
+	 * Verifies the given id
+	 * @return
+	 */
+	void deserializeId(long id);
 
 	/**
 	 * Add a document listener

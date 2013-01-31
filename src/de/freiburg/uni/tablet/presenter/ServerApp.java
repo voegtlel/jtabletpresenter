@@ -47,6 +47,8 @@ public class ServerApp {
 		String authTokenUp = config.getString("server.up.authToken", "");
 		int portDown = config.getInt("server.down.port", 8025);
 		int portUp = config.getInt("server.up.port", 8025);
+		long timeoutDown = config.getLong("server.down.timeout", -1);
+		long timeoutUp = config.getLong("server.up.timeout", -1);
 		
 		_editor = new DocumentEditor();
 		_editor.setDocument(new ServerDocument(1));
@@ -55,6 +57,9 @@ public class ServerApp {
 			_upServer = new UpServer(portUp, _editor);
 			_upServer.setName(name);
 			_upServer.setAuthToken(authTokenUp);
+			if (timeoutUp != -1) {
+				_upServer.setIdleTimeout(timeoutUp);
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -62,6 +67,9 @@ public class ServerApp {
 			_downServer = new DownServer(portDown, _editor);
 			_downServer.setName(name);
 			_downServer.setAuthToken(authTokenDown);
+			if (timeoutDown != -1) {
+				_downServer.setIdleTimeout(timeoutDown);
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

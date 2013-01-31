@@ -44,6 +44,7 @@ public abstract class AbstractRenderable implements IBinarySerializableId,
 			throws IOException {
 		_id = reader.readLong();
 		_parent = reader.readObjectTable();
+		_parent.getParent().deserializeId(_id);
 	}
 
 	@Override

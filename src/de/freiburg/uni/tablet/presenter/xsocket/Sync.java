@@ -159,7 +159,7 @@ public abstract class Sync {
 		} else {
 			LOGGER.log(Level.INFO, "Net " + connection.getRemoteAddress() + " timeout");
 		}
-		return true;
+		return false;
 	}
 
 	protected boolean onConnectionTimeout(final INonBlockingConnection connection) throws IOException {
@@ -168,7 +168,7 @@ public abstract class Sync {
 		} else {
 			LOGGER.log(Level.INFO, "Net " + connection.getRemoteAddress() + " connect timeout");
 		}
-		return true;
+		return false;
 	}
 
 	protected boolean onDisconnect(final INonBlockingConnection connection) throws IOException {
@@ -196,7 +196,6 @@ public abstract class Sync {
 		} else {
 			LOGGER.log(Level.INFO, "Net " + connection.getRemoteAddress() + " connect");
 		}
-		fireConnected();
 		return true;
 	}
 	

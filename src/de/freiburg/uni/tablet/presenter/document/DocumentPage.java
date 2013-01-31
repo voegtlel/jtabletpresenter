@@ -188,6 +188,7 @@ public class DocumentPage implements IEntity, IPageRepaintListener {
 		_id = reader.readLong();
 		reader.putObjectTable(this.getId(), this);
 		_document = reader.readObjectTable();
+		_document.deserializeId(_id);
 		_pdfPage = reader.readObjectTable();
 		final int count = reader.readInt();
 		for (int i = 0; i < count; i++) {

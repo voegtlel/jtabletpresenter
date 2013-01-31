@@ -138,10 +138,9 @@ public class ServerDocument extends Document implements IEditableDocument {
 		if (page.getParent() != this) {
 			return addPage(page.clone(this));
 		}
-		final DocumentPage prevData = _pages.getLast() != null ? _pages
-				.getLast().getData() : null;
+		final LinkedElement<DocumentPage> lastPage = _pages.getLast();
 		_pages.addLast(page);
-		firePageInserted(this, prevData, page);
+		firePageInserted(this, (lastPage == null?null:lastPage.getData()), page);
 		return page;
 	}
 	
@@ -194,7 +193,7 @@ public class ServerDocument extends Document implements IEditableDocument {
 		}
 		final LinkedElement<DocumentPage> prevPage = element.getPrevious();
 		_pages.remove(element);
-		firePageRemoved(this, prevPage.getData(), element.getData());
+		firePageRemoved(this, (prevPage == null?null:prevPage.getData()), element.getData());
 	}
 	
 	@Override

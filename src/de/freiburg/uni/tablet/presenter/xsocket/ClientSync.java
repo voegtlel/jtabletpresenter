@@ -25,6 +25,8 @@ public abstract class ClientSync extends Sync {
 	private int _port;
 	
 	private List<ClientListener> _listeners = new ArrayList<ClientListener>();
+
+	private long _idleTimeout = IConnection.MAX_TIMEOUT_MILLIS;
 	
 	public ClientSync(final String hostname, final int port, final int serverMagic, final int clientMagic) {
 		_hostname = hostname;
@@ -45,10 +47,22 @@ public abstract class ClientSync extends Sync {
 		return _clientId;
 	}
 	
+	/**
+	 * Sets the idle timeout
+	 * @param idleTimeout
+	 */
+	public void setIdleTimeout(final long idleTimeout) {
+		_idleTimeout = idleTimeout;
+		if (_connection != null) {
+			_connection.setIdleTimeoutMillis(idleTimeout);
+		}
+	}
+	
 	@Override
 	public void start() throws IOException {
 		stop();
 		_connection = new NonBlockingConnection(_hostname, _port, _defaultHandler);
+		_connection.setIdleTimeoutMillis(_idleTimeout);
 	}
 	
 	/**

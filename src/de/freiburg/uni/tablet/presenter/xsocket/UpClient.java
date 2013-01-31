@@ -29,6 +29,8 @@ public class UpClient extends ClientSync {
 	
 	private IBlockingConnection _blockingConnection;
 	
+	private boolean _syncDownInit = false;
+	
 	public UpClient(final String hostname, final int port, final DocumentEditor editor) throws IOException {
 		super(hostname, port, DownServer.SERVER_MAGIC, DownServer.CLIENT_MAGIC);
 		_editor = editor;
@@ -44,6 +46,14 @@ public class UpClient extends ClientSync {
 				onActionPerformed(action);
 			}
 		};
+	}
+	
+	/**
+	 * If enabled, on connect the page is synched down before sending
+	 * @param syncDownInit
+	 */
+	public void setSyncDownInit(final boolean syncDownInit) {
+		_syncDownInit = syncDownInit;
 	}
 	
 	protected void onActionPerformed(final IAction action) {
@@ -78,6 +88,20 @@ public class UpClient extends ClientSync {
 			final BinaryDeserializer reader = new BinaryDeserializer(_blockingConnection);
 			// Exchange init
 			performInit(writer, reader, _blockingConnection);
+			writer.writeBoolean(_syncDownInit);
+			writer.flush();
+			if (_syncDownInit) {
+				LOGGER.log(Level.INFO, "Deserialize init doc");
+				try {
+					final SetServerDocumentAction initAction = reader.readSerializableClass();
+					initAction.perform(_editor);
+				} catch (Exception e) {
+					e.printStackTrace();
+					throw new IOException(e);
+				}
+				LOGGER.log(Level.INFO, "Deserialize init doc done");
+			}
+			fireConnected();
 			// Send initial data
 			LOGGER.log(Level.INFO, "Serialize init doc");
 			writer.writeSerializableClass(new SetServerDocumentAction(_editor.getDocument(), _editor.getCurrentPageIndex()));
@@ -100,8 +124,13 @@ public class UpClient extends ClientSync {
 				}
 				// Write action
 				LOGGER.log(Level.INFO, "Serialize " + action.getClass().getName());
-				writer.writeSerializableClass(action);
-				writer.flush();
+				try {
+					writer.writeSerializableClass(action);
+					writer.flush();
+				} catch (Exception e) {
+					e.printStackTrace();
+					throw e;
+				}
 				LOGGER.log(Level.INFO, "Serialize " + action.getClass().getName() + " done");
 			}
 		} finally {

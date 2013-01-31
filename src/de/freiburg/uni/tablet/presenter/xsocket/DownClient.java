@@ -60,20 +60,26 @@ public class DownClient extends ClientSync {
 			final BinaryDeserializer reader = new BinaryDeserializer(_readPipe.source());
 			final BinarySerializer writer = new BinarySerializer(_connection);
 			performInit(writer, reader, _connection);
+			fireConnected();
 			while (true) {
-				final IAction action = reader.readSerializableClass();
-				LOGGER.log(Level.INFO, "Read action " + action.getClass().getName());
 				try {
+					final IAction action = reader.readSerializableClass();
+					LOGGER.log(Level.INFO, "Read action " + action.getClass().getName());
 					if (action instanceof SetServerDocumentAction) {
 						final SetClientDocumentAction clientAction = ((SetServerDocumentAction) action).getClientAction();
 						clientAction.perform(_editor);
 					} else {
 						action.perform(_editor);
 					}
-				} catch (Exception e) {
+					LOGGER.log(Level.INFO, "Action " + action.getClass().getName() + " performed");
+				} catch (IOException e) {
+					e.printStackTrace();
+					throw e;
+				}
+				catch (Exception e) {
+					e.printStackTrace();
 					throw new IOException(e);
 				}
-				LOGGER.log(Level.INFO, "Action " + action.getClass().getName() + " performed");
 			}
 		} finally {
 			_connection.close();

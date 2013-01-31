@@ -102,6 +102,7 @@ public class UpServer extends ServerSync {
 				writer.writeSerializableClass(new SetClientDocumentAction(_editor.getDocument(), _editor.getCurrentPageIndex()));
 				writer.flush();
 				LOGGER.log(Level.INFO, "Serialize init doc done");
+				fireConnected();
 				while (true) {
 					final IAction action;
 					// Get next action

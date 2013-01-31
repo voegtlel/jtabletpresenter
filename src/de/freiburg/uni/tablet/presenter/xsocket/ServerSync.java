@@ -62,6 +62,10 @@ public abstract class ServerSync {
 	public void stop() throws IOException {
 		_server.close();
 	}
+	
+	public void setIdleTimeout(final long idleTimeout) {
+		_server.setIdleTimeoutMillis(idleTimeout);
+	}
 
 	protected abstract boolean onConnect(final INonBlockingConnection connection) throws IOException;
 	

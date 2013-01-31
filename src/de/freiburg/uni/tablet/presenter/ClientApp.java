@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 
 import com.sun.jna.NativeLibrary;
 
@@ -30,6 +31,8 @@ import de.freiburg.uni.tablet.presenter.xsocket.UpClient;
 public class ClientApp {
 
 	private JPageEditor _pageRenderer;
+	private DownClient _clientDownSync;
+	private UpClient _clientUpSync;
 
 	/**
 	 * Launch the application.
@@ -63,8 +66,7 @@ public class ClientApp {
 				@Override
 				public void run() {
 					try {
-						final ClientApp window = new ClientApp(config);
-						window._pageRenderer.setVisible(true);
+						new ClientApp(config);
 					} catch (final Exception e) {
 						e.printStackTrace();
 					}
@@ -100,16 +102,19 @@ public class ClientApp {
 		if (_pageRenderer.getConfig().getBoolean("client.down.enabled", false)) {
 			String hostname = _pageRenderer.getConfig().getString("client.down.host", "");
 			int port = _pageRenderer.getConfig().getInt("client.down.port", 8024);
-			int timeout = _pageRenderer.getConfig().getInt("client.down.timeout", 5000);
+			long timeout = _pageRenderer.getConfig().getInt("client.down.timeout", -1);
 			String clientName = _pageRenderer.getConfig().getString("client.down.name", "Client");
 			String authToken = _pageRenderer.getConfig().getString("client.down.authToken", "");
 			
 			try {
-				final DownClient clientDownSync = new DownClient(hostname, port, _pageRenderer.getDocumentEditor());
-				clientDownSync.setAuthToken(authToken);
-				clientDownSync.setName(clientName);
+				_clientDownSync = new DownClient(hostname, port, _pageRenderer.getDocumentEditor());
+				_clientDownSync.setAuthToken(authToken);
+				_clientDownSync.setName(clientName);
+				if (timeout >= 0) {
+					_clientDownSync.setIdleTimeout(timeout);
+				}
 				
-				clientDownSync.addListener(new ClientListener() {
+				_clientDownSync.addListener(new ClientListener() {
 					@Override
 					public void onError(final Exception e) {
 						JOptionPane.showMessageDialog(_pageRenderer, "Error: " + e.toString());
@@ -119,9 +124,9 @@ public class ClientApp {
 					public void onDisconnected() {
 						int res = JOptionPane.showConfirmDialog(_pageRenderer, "Disconnected. Reconnect?");
 						if (res == JOptionPane.OK_OPTION) {
-							clientDownSync.stop();
+							_clientDownSync.stop();
 							try {
-								clientDownSync.start();
+								_clientDownSync.start();
 							} catch (IOException e1) {
 								// TODO Auto-generated catch block
 								e1.printStackTrace();
@@ -132,12 +137,18 @@ public class ClientApp {
 					@Override
 					public void onConnected() {
 						System.out.println("Connected");
+						SwingUtilities.invokeLater(new Runnable() {
+							@Override
+							public void run() {
+								_pageRenderer.setVisible(true);
+							}
+						});
 					}
 				});
 				
 				System.out.println("Connect remote");
 				try {
-					clientDownSync.start();
+					_clientDownSync.start();
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
@@ -169,15 +180,20 @@ public class ClientApp {
 		if (_pageRenderer.getConfig().getBoolean("client.up.enabled", false)) {
 			String hostname = _pageRenderer.getConfig().getString("client.up.host", "");
 			int port = _pageRenderer.getConfig().getInt("client.up.port", 8024);
-			int timeout = _pageRenderer.getConfig().getInt("client.up.timeout", 5000);
+			long timeout = _pageRenderer.getConfig().getLong("client.up.timeout", -1);
 			String clientName = _pageRenderer.getConfig().getString("client.up.name", "Client");
 			String authToken = _pageRenderer.getConfig().getString("client.up.authToken", "");
+			boolean readInitial = _pageRenderer.getConfig().getBoolean("client.up.readInitial", false);
 			
 			try {
-				final UpClient clientSync = new UpClient(hostname, port, _pageRenderer.getDocumentEditor());
-				clientSync.setAuthToken(authToken);
-				clientSync.setName(clientName);
-				clientSync.addListener(new ClientListener() {
+				_clientUpSync = new UpClient(hostname, port, _pageRenderer.getDocumentEditor());
+				_clientUpSync.setAuthToken(authToken);
+				_clientUpSync.setName(clientName);
+				_clientUpSync.setSyncDownInit(readInitial);
+				if (timeout >= 0) {
+					_clientUpSync.setIdleTimeout(timeout);
+				}
+				_clientUpSync.addListener(new ClientListener() {
 					@Override
 					public void onError(final Exception e) {
 						JOptionPane.showMessageDialog(_pageRenderer, "Error: " + e.toString());
@@ -187,9 +203,9 @@ public class ClientApp {
 					public void onDisconnected() {
 						int res = JOptionPane.showConfirmDialog(_pageRenderer, "Disconnected. Reconnect?");
 						if (res == JOptionPane.OK_OPTION) {
-							clientSync.stop();
+							_clientUpSync.stop();
 							try {
-								clientSync.start();
+								_clientUpSync.start();
 							} catch (IOException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
@@ -199,10 +215,16 @@ public class ClientApp {
 					
 					@Override
 					public void onConnected() {
+						SwingUtilities.invokeLater(new Runnable() {
+							@Override
+							public void run() {
+								_pageRenderer.setVisible(true);
+							}
+						});
 					}
 				});
 				System.out.println("Connect remote");
-				clientSync.start();
+				_clientUpSync.start();
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -240,5 +262,16 @@ public class ClientApp {
 		 * _pageRenderer)); _pageRenderer.setInvertedTool(new
 		 * ToolEraser(_pageRenderer, _pageRenderer, _pageRenderer));
 		 */
+		
+		// TODO
+		//if (_clientDownSync == null && _clientUpSync == null) {
+		if (_clientDownSync == null) {
+			SwingUtilities.invokeLater(new Runnable() {
+				@Override
+				public void run() {
+					_pageRenderer.setVisible(true);
+				}
+			});
+		}
 	}
 }

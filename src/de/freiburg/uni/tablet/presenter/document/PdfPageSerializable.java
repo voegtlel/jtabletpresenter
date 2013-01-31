@@ -34,6 +34,7 @@ public class PdfPageSerializable implements IEntity {
 	public PdfPageSerializable(final BinaryDeserializer reader) throws IOException {
 		_id = reader.readLong();
 		_parent = reader.readObjectTable();
+		_parent.getParent().deserializeId(_id);
 		_basePdf = reader.readObjectTable();
 		final int pageIndex = reader.readInt();
 		_page = _basePdf.getDocument().getPageTree().getPageAt(pageIndex);
