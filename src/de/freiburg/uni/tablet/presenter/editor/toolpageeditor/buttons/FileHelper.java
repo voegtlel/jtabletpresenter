@@ -78,6 +78,17 @@ public class FileHelper {
 			return f.getPath().toLowerCase().endsWith(".pdf") || f.isDirectory();
 		}
 	};
+	public static final FileFilter FILTER_session = new FileFilter() {
+		@Override
+		public String getDescription() {
+			return "Session Data (session.dat)";
+		}
+
+		@Override
+		public boolean accept(final File f) {
+			return f.getPath().toLowerCase().endsWith("session.dat") || f.isDirectory();
+		}
+	};
 	
 	public static FileFilter stringToFilter(final String str) {
 		if ("pdf".equalsIgnoreCase(str)) {
@@ -135,6 +146,14 @@ public class FileHelper {
 		} catch (Exception e) {
 			throw new IOException(e);
 		}
+	}
+	
+	public static void saveSession(final DocumentEditor editor, final File file) throws IOException {
+		SeekableByteChannel bc = Files.newByteChannel(file.toPath(), StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
+		BinarySerializer bs = new BinarySerializer(bc);
+		editor.serialize(bs);
+		bs.flush();
+		bc.close();
 	}
 	
 	public static boolean showSaveDialog(final Component component, final IToolPageEditor editor, final FileFilter defaultType) {
@@ -213,11 +232,27 @@ public class FileHelper {
 		fileChannel.close();
 	}
 	
+	/**
+	 * Opens a session.dat file
+	 * @param file
+	 * @param editor
+	 * @throws IOException
+	 */
+	public static void openSession(final File file, final DocumentEditor editor) throws IOException {
+		System.out.println("Loading session");
+		SeekableByteChannel bs = Files.newByteChannel(file.toPath(), StandardOpenOption.READ);
+		BinaryDeserializer bd = new BinaryDeserializer(bs);
+		editor.deserialize(bd);
+		bs.close();
+		System.out.println("Session loaded");
+	}
+	
 	public static boolean showOpenDialog(final Component component, IToolPageEditor editor, FileFilter defaultFilter) {
 		final JFileChooser fileChooser = new JFileChooser();
 		fileChooser.addChoosableFileFilter(FILTER_presenterDocumentFile);
 		fileChooser.addChoosableFileFilter(FILTER_presenterPageFile);
 		fileChooser.addChoosableFileFilter(FILTER_pdf);
+		fileChooser.addChoosableFileFilter(FILTER_session);
 		fileChooser.setFileFilter(defaultFilter);
 		if (fileChooser.showOpenDialog(component) == JFileChooser.APPROVE_OPTION) {
 			try {
@@ -244,6 +279,9 @@ public class FileHelper {
 						editor.getDocumentEditor().getDocument().setPdfPages(pdf, res.getKey());
 						return true;
 					}
+				} else if (f.getPath().toLowerCase().endsWith("session.dat")) {
+					openSession(f, editor.getDocumentEditor());
+					return true;
 				}
 			} catch (final FileNotFoundException e) {
 				JOptionPane.showMessageDialog(component, "Couldn't open file",

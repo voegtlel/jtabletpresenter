@@ -23,6 +23,7 @@ import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.document.DocumentConfig;
 import de.freiburg.uni.tablet.presenter.document.ServerDocument;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.JPageEditor;
+import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.FileHelper;
 import de.freiburg.uni.tablet.presenter.page.SolidPen;
 import de.freiburg.uni.tablet.presenter.xsocket.ClientListener;
 import de.freiburg.uni.tablet.presenter.xsocket.DownClient;
@@ -162,12 +163,7 @@ public class ClientApp {
 				if (savedSession.exists())  {
 					try {
 						System.out.println("Loading session");
-						//FileInputStream is = new FileInputStream(savedSession);
-						SeekableByteChannel bs = Files.newByteChannel(savedSession.toPath(), StandardOpenOption.READ);
-						BinaryDeserializer bd = new BinaryDeserializer(bs);
-						_pageRenderer.getDocumentEditor().deserialize(bd);
-						bs.close();
-						//is.close();
+						FileHelper.openSession(savedSession, _pageRenderer.getDocumentEditor());
 						System.out.println("Session loaded");
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -238,16 +234,7 @@ public class ClientApp {
 					final File savedSession = new File("session.dat");
 					try {
 						System.out.println("Saving session");
-						//FileOutputStream os = new FileOutputStream(savedSession);
-						//BufferedOutputStream bos = new BufferedOutputStream(os);
-						SeekableByteChannel bc = Files.newByteChannel(savedSession.toPath(), StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
-						BinarySerializer bs = new BinarySerializer(bc);
-						_pageRenderer.getDocumentEditor().serialize(bs);
-						bs.flush();
-						bc.close();
-						//bs.close();
-						//bos.close();
-						//os.close();
+						FileHelper.saveSession(_pageRenderer.getDocumentEditor(), savedSession);
 						System.out.println("Session autosaved");
 					} catch (Exception e1) {
 						e1.printStackTrace();
