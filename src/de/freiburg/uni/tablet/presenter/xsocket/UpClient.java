@@ -100,13 +100,14 @@ public class UpClient extends ClientSync {
 					throw new IOException(e);
 				}
 				LOGGER.log(Level.INFO, "Deserialize init doc done");
+			} else {
+				// Send initial data
+				LOGGER.log(Level.INFO, "Serialize init doc");
+				writer.writeSerializableClass(new SetServerDocumentAction(_editor.getDocument(), _editor.getCurrentPageIndex()));
+				writer.flush();
+				LOGGER.log(Level.INFO, "Serialize init doc done");
 			}
 			fireConnected();
-			// Send initial data
-			LOGGER.log(Level.INFO, "Serialize init doc");
-			writer.writeSerializableClass(new SetServerDocumentAction(_editor.getDocument(), _editor.getCurrentPageIndex()));
-			writer.flush();
-			LOGGER.log(Level.INFO, "Serialize init doc done");
 			while (true) {
 				final IAction action;
 				// Get next action
@@ -137,6 +138,7 @@ public class UpClient extends ClientSync {
 			synchronized (_editor.getHistory()) {
 				_editor.getHistory().removeListener(_documentHistoryListener);
 			}
+			LOGGER.log(Level.INFO, "Close connection");
 			_blockingConnection.close();
 		}
 	}

@@ -162,7 +162,6 @@ public class Document implements IDocumentNotify {
 		// Read Ids
 		_uniqueId = reader.readInt();
 		_docId = reader.readInt();
-		System.out.println("read: uniqueId: " + _uniqueId + ", docId: " + _docId + " (" + this.hashCode() + ")");
 		// Put this to object table
 		reader.putObjectTable(this.getId(), this);
 		// Read pages
@@ -177,7 +176,6 @@ public class Document implements IDocumentNotify {
 	public void serialize(final BinarySerializer writer) throws IOException {
 		writer.writeInt(_uniqueId);
 		writer.writeInt(_docId);
-		System.out.println("write: uniqueId: " + _uniqueId + ", docId: " + _docId + " (" + this.hashCode() + ")");
 		// Always has first
 		writer.writeInt(_pages.getCount());
 		for (LinkedElement<DocumentPage> dp = _pages.getFirst(); dp != null; dp = dp
