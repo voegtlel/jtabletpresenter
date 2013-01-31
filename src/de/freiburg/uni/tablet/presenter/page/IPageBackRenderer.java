@@ -4,6 +4,7 @@ import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 
 import de.freiburg.uni.tablet.presenter.editor.IPageRepaintListener;
+import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 
 public interface IPageBackRenderer {
 	/**
@@ -47,4 +48,13 @@ public interface IPageBackRenderer {
 	 * Requires full repainting on next render. Notifies display.
 	 */
 	void requireRepaint();
+	
+	/**
+	 * Requires repainting the given renderable.
+	 * 
+	 * @param renderable the renderable to (re)draw
+	 * @param clear if true, the rectangle below the renderable is cleared and also redrawn,
+	 * otherwise only the renderable is added
+	 */
+	void requireRepaint(IRenderable renderable, boolean clear);
 }

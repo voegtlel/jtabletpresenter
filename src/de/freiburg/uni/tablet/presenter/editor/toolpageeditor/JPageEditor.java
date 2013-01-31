@@ -349,11 +349,11 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 
 	protected void onRenderableChanged(final IRenderable renderable,
 			final DocumentPage page) {
-		// Redraw all objects on page
+		// Redraw the object on page
 		if (page == _documentEditor.getCurrentPage()) {
-			_clientOnlyLayer.requireRepaint();
+			_clientOnlyLayer.requireRepaint(renderable, true);
 		} else if (page == _documentEditor.getCurrentBackPage()) {
-			_serverSyncLayer.requireRepaint();
+			_serverSyncLayer.requireRepaint(renderable, true);
 		}
 		// Else the object was not on a visible layer
 	}
@@ -362,11 +362,13 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 			final DocumentPage page) {
 		// Draw new object
 		if (page == _documentEditor.getCurrentPage()) {
-			renderable.render(_clientOnlyLayer);
-			_pageRenderer.requireRepaint();
+			// renderable.render(_clientOnlyLayer);
+			_clientOnlyLayer.requireRepaint(renderable, false);
+			// _pageRenderer.requireRepaint();
 		} else if (page == _documentEditor.getCurrentBackPage()) {
-			renderable.render(_serverSyncLayer);
-			_pageRenderer.requireRepaint();
+			// renderable.render(_serverSyncLayer);
+			_clientOnlyLayer.requireRepaint(renderable, false);
+			// _pageRenderer.requireRepaint();
 		}
 		// Else the object is not on a visible layer
 	}

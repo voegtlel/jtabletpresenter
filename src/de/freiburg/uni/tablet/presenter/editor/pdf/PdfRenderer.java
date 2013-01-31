@@ -14,6 +14,7 @@ import java.util.Map;
 
 import de.freiburg.uni.tablet.presenter.document.PdfPageSerializable;
 import de.freiburg.uni.tablet.presenter.editor.IPageRepaintListener;
+import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
 import de.freiburg.uni.tablet.presenter.page.IPen;
 import de.intarsys.pdf.cds.CDSRectangle;
@@ -228,6 +229,11 @@ public class PdfRenderer implements IPageBackRenderer {
 	
 	@Override
 	public void requireRepaint() {
+		throw new IllegalStateException("Can't repaint pdf");
+	}
+	
+	@Override
+	public void requireRepaint(final IRenderable renderable, final boolean clear) {
 		throw new IllegalStateException("Can't repaint pdf");
 	}
 

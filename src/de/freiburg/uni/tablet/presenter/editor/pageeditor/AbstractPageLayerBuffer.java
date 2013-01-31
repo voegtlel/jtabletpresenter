@@ -3,6 +3,7 @@ package de.freiburg.uni.tablet.presenter.editor.pageeditor;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.Transparency;
 import java.awt.geom.AffineTransform;
@@ -11,7 +12,10 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
+import java.util.ArrayList;
+import java.util.List;
 
+import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 import de.freiburg.uni.tablet.presenter.page.IPen;
 
 public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer {
@@ -36,6 +40,10 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer {
 
 	private final Ellipse2D.Float _ellipseRenderer = new Ellipse2D.Float();
 	private final Line2D.Float _lineRenderer = new Line2D.Float();
+	
+	private boolean _repaintAddOnly = false;
+	private List<IRenderable> _repaintObjects = new ArrayList<IRenderable>();
+	private RectangleF _repaintRect = new RectangleF();
 
 	public AbstractPageLayerBuffer(final IDisplayRenderer displayRenderer) {
 		_displayRenderer = displayRenderer;
@@ -49,6 +57,18 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer {
 			_requireRepaint = true;
 			_displayRenderer.requireRepaint();
 		}
+	}
+	
+	/**
+	 * Requires repainting the given renderable.
+	 * 
+	 * @param renderable the renderable to (re)draw
+	 * @param clear if true, the rectangle below the renderable is cleared and also redrawn,
+	 * otherwise only the renderable is added
+	 */
+	public void requireRepaint(final IRenderable renderable, final boolean clear) {
+		// TODO: implement
+		requireRepaint();
 	}
 
 	/**
