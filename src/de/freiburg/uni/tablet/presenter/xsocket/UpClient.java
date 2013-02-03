@@ -123,16 +123,16 @@ public class UpClient extends ClientSync {
 				final IAction action;
 				// Get next action
 				synchronized (_threadSync) {
-					while (_actions.isEmpty()) {
+					while (_running && _actions.isEmpty()) {
 						try {
 							_threadSync.wait();
 						} catch (InterruptedException e) {
 						}
 						_threadSync.notifyAll();
-						if (!_running) {
-							LOGGER.log(Level.INFO, "not running any more");
-							break;
-						}
+					}
+					if (!_running) {
+						LOGGER.log(Level.INFO, "not running any more");
+						break;
 					}
 					// Pop action
 					action = _actions.getFirst().getData();
