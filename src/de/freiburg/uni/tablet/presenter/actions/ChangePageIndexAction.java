@@ -40,7 +40,8 @@ public class ChangePageIndexAction implements IAction {
 
 	@Override
 	public boolean hasUndoAction() {
-		return _lastPage != null;
+		// Disable undo
+		return false;
 	}
 
 	@Override
@@ -50,7 +51,11 @@ public class ChangePageIndexAction implements IAction {
 
 	@Override
 	public void perform(final DocumentEditor editor) {
-		editor.setCurrentPage(_page);
+		if ((editor.getCurrentPage() == _lastPage)
+				|| (editor.getCurrentBackPage() == _lastPage)) {
+			// Only change if we are at the last page
+			editor.setCurrentPage(_page);
+		}
 	}
 
 	@Override
