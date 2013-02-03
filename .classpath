@@ -33,10 +33,5 @@
 			<attribute name="javadoc_location" value="file:/C:/Users/Luke/workspace-lejos/JTabletPresenter/javadoc/jPodRenderer/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/xSocket-2.8.14.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/JTabletPresenter/javadoc/xsocket-javadoc.zip!/doc"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
