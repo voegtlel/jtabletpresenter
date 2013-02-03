@@ -88,12 +88,16 @@ public class DocumentEditor implements IBinarySerializableId {
 	 */
 	protected void onDocumentPageRemoved(final IEditableDocument document,
 			final DocumentPage prevPage, final DocumentPage page) {
-		if (_currentPage == page) {
+		if (_currentPage == page || _currentBackPage == page) {
 			if (prevPage != null) {
-				int pageIndex = document.getPageIndex(prevPage);
-				setCurrentPageByIndex(pageIndex,false);
+				final DocumentPage nextPage = document.getNextPage(prevPage);
+				if (nextPage != null) {
+					setCurrentPage(nextPage);
+				} else {
+					setCurrentPage(prevPage);
+				}
 			} else {
-				setCurrentPageByIndex(0, false);
+				setCurrentPage(_document.getPageByIndex(0));
 			}
 		}
 	}

@@ -75,6 +75,30 @@ public class Document implements IDocumentNotify {
 	}
 	
 	@Override
+	public DocumentPage getNextPage(final DocumentPage page) {
+		final LinkedElement<DocumentPage> pageElement = _pages.getElement(page);
+		if (pageElement == null) {
+			throw new IllegalArgumentException("Page not in document");
+		}
+		if (pageElement.getNext() == null) {
+			return null;
+		}
+		return pageElement.getNext().getData();
+	}
+	
+	@Override
+	public DocumentPage getPreviousPage(final DocumentPage page) {
+		final LinkedElement<DocumentPage> pageElement = _pages.getElement(page);
+		if (pageElement == null) {
+			throw new IllegalArgumentException("Page not in document");
+		}
+		if (pageElement.getPrevious() == null) {
+			return null;
+		}
+		return pageElement.getPrevious().getData();
+	}
+	
+	@Override
 	public long nextId() {
 		return (long) _docId << 32 | _uniqueId++;
 	}

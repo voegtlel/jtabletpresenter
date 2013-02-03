@@ -55,4 +55,17 @@ public interface IDocument extends IEntity {
 	 */
 	void removeListener(DocumentListener listener);
 
+	/**
+	 * Gets the next page or null
+	 * @param page
+	 * @return
+	 */
+	DocumentPage getNextPage(DocumentPage page);
+
+	/**
+	 * Gets the previous page or null
+	 * @param page
+	 * @return
+	 */
+	DocumentPage getPreviousPage(DocumentPage page);
 }

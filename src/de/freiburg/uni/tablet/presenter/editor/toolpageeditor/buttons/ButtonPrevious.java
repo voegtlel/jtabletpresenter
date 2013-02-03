@@ -6,6 +6,7 @@ package de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons;
 
 import android.content.Context;
 import de.freiburg.uni.tablet.presenter.R;
+import de.freiburg.uni.tablet.presenter.document.DocumentPage;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 
 /**
@@ -28,11 +29,10 @@ public class ButtonPrevious extends AbstractButtonAction {
 			} catch (Exception e) {
 			}
 		}
-		final int currentPageIndex = _editor.getDocumentEditor()
-				.getCurrentPageIndex();
-		if (currentPageIndex > 0) {
-			_editor.getDocumentEditor().setCurrentPageByIndex(
-					currentPageIndex - 1, true);
+		final DocumentPage currentPage = _editor.getDocumentEditor().getCurrentPage();
+		final DocumentPage previousPage = _editor.getDocumentEditor().getDocument().getPreviousPage(currentPage);
+		if (previousPage != null) {
+			_editor.getDocumentEditor().setCurrentPage(previousPage);
 		}
 	}
 }

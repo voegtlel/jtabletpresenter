@@ -176,6 +176,19 @@ public class ServerDocument extends Document implements IEditableDocument {
 	public DocumentPage insertPage(final DocumentPage afterPage) {
 		return insertPage(afterPage, new DocumentPage(this));
 	}
+	
+	@Override
+	public DocumentPage getNextPage(final DocumentPage page, final boolean createIfNotExists) {
+		DocumentPage nextPage = getNextPage(page);
+		if (nextPage == null) {
+			if (createIfNotExists) {
+				return addPage();
+			} else {
+				throw new IllegalStateException("Page has no next page");
+			}
+		}
+		return nextPage;
+	}
 
 	@Override
 	public void removePage(final DocumentPage page) {

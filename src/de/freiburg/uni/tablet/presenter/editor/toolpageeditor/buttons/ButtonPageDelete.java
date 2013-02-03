@@ -24,8 +24,11 @@ public class ButtonPageDelete extends AbstractButtonAction {
 	@Override
 	public void perform(final Context component) {
 		final DocumentPage page = _editor.getDocumentEditor().getCurrentPage();
-		int index = _editor.getDocumentEditor().getCurrentPageIndex() + 1;
-		_editor.getDocumentEditor().setCurrentPageByIndex(index, true);
+		DocumentPage nextPage = _editor.getDocumentEditor().getDocument().getNextPage(page);
+		if (nextPage == null) {
+			nextPage = _editor.getDocumentEditor().getDocument().getPreviousPage(page);
+		}
+		_editor.getDocumentEditor().setCurrentPage(nextPage);
 		_editor.getDocumentEditor().getDocument().removePage(page);
 	}
 }
