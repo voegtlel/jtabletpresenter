@@ -1,42 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="src" path="res"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7">
-		<accessrules>
-			<accessrule kind="accessible" pattern="**"/>
-		</accessrules>
-	</classpathentry>
-	<classpathentry kind="lib" path="lib/jpen-2.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/JTabletPresenter2/javadoc/jpen-2-111002-javadoc.zip!/jpen-2-111002"/>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="JTabletPresenter/lib"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="lib/iscwt.jar"/>
-	<classpathentry kind="lib" path="lib/isfreetype.jar"/>
-	<classpathentry kind="lib" path="lib/isnativec.jar"/>
-	<classpathentry kind="lib" path="lib/isrt.jar"/>
-	<classpathentry kind="lib" path="lib/jai_codec.jar"/>
-	<classpathentry kind="lib" path="lib/jai_core.jar"/>
-	<classpathentry kind="lib" path="lib/jai_imageio.jar"/>
-	<classpathentry kind="lib" path="lib/jbig2.jar"/>
-	<classpathentry kind="lib" path="lib/jna.jar"/>
-	<classpathentry kind="lib" path="lib/jPod.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="file:/C:/Users/Luke/workspace-lejos/JTabletPresenter/javadoc/jPod/"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="lib/jPodFonts.jar"/>
-	<classpathentry kind="lib" path="lib/jPodRenderer.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="file:/C:/Users/Luke/workspace-lejos/JTabletPresenter/javadoc/jPodRenderer/"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="lib/xSocket-2.8.14.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/JTabletPresenter/javadoc/xsocket-javadoc.zip!/doc"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="output" path="bin"/>
+	<classpathentry kind="src" path="gen"/>
+	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
+	<classpathentry kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
+	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

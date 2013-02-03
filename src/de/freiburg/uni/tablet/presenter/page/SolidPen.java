@@ -1,56 +1,73 @@
 package de.freiburg.uni.tablet.presenter.page;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Stroke;
 import java.io.IOException;
 
+import android.graphics.Color;
+import android.graphics.Paint.Cap;
+import android.graphics.Paint.Join;
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 
 public class SolidPen implements IPen {
-	private final BasicStroke _stroke;
-	private final Color _paint;
-	private final float _thickness;
+	private final int _paint;
+	private final Cap _strokeCap;
+	private final Join _strokeJoin;
+	private final float _strokeMiter;
+	private final float _strokeWidth;
 
 	public SolidPen() {
 		this(1.0f, Color.BLACK);
 	}
 
-	public SolidPen(final float thickness, final Color color) {
-		_thickness = thickness;
-		_stroke = new BasicStroke(thickness, BasicStroke.CAP_ROUND,
-				BasicStroke.JOIN_ROUND);
+	public SolidPen(final float thickness, final int color) {
+		_strokeCap = Cap.ROUND;
+		_strokeJoin = Join.ROUND;
+		_strokeWidth = thickness;
+		_strokeMiter = 0;
 		_paint = color;
 	}
 
 	public SolidPen(final BinaryDeserializer reader) throws IOException {
-		_thickness = reader.readFloat();
-		final int color = reader.readInt();
-		_paint = new Color(color & 0xff, color >> 8 & 0xff, color >> 16 & 0xff,
-				color >> 24 & 0xff);
-		_stroke = new BasicStroke(_thickness, BasicStroke.CAP_ROUND,
-				BasicStroke.JOIN_ROUND);
+		_strokeWidth = reader.readFloat();
+		_paint = reader.readInt();
+		_strokeCap = Cap.ROUND;
+		_strokeJoin = Join.ROUND;
+		_strokeMiter = 0;
 	}
 
 	@Override
 	public void serialize(final BinarySerializer writer) throws IOException {
 		writer.writeFloat(getThickness());
-		writer.writeInt(getColor().getAlpha() << 24 | getColor().getRGB());
+		writer.writeInt(getColor());
 	}
 
 	@Override
 	public float getThickness() {
-		return _thickness;
+		return _strokeWidth;
 	}
 
 	@Override
-	public Stroke getStroke() {
-		return _stroke;
+	public Cap getStrokeCap() {
+		return _strokeCap;
+	}
+	
+	@Override
+	public Join getStrokeJoin() {
+		return _strokeJoin;
+	}
+	
+	@Override
+	public float getStrokeMiter() {
+		return _strokeMiter;
+	}
+	
+	@Override
+	public float getStrokeWidth() {
+		return _strokeWidth;
 	}
 
 	@Override
-	public Color getColor() {
+	public int getColor() {
 		return _paint;
 	}
 }

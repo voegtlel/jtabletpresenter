@@ -4,8 +4,6 @@ import java.io.IOException;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.list.LinkedElement;
-import de.intarsys.pdf.pd.PDPage;
-import de.intarsys.pdf.pd.PDPageTree;
 
 public class ServerDocument extends Document implements IEditableDocument {
 	/**
@@ -27,88 +25,89 @@ public class ServerDocument extends Document implements IEditableDocument {
 	
 	@Override
 	public void setPdfPages(final PdfSerializable document, int pdfMode) {
-		if (document != null) {
-			if (pdfMode == PDF_MODE_REINDEX) {
-				final PDPageTree pageTree = document.getDocument().getPageTree();
-				// Ensure the pages exist (enough space)
-				getPageByIndex(pageTree.getCount() - 1, true);
-				// Iterate through pdf pages
-				PDPage pdfPage = pageTree.getFirstPage();
-				LinkedElement<DocumentPage> docPage = _pages.getFirst();
-				while (pdfPage != null) {
-					// Set indices
-					docPage.getData().setPdfPage(new PdfPageSerializable(docPage.getData(), document, pdfPage));
-					pdfPage = pdfPage.getNextPage();
-					docPage = docPage.getNext();
-				}
-				while (docPage != null) {
-					docPage.getData().setPdfPage(null);
-					docPage = docPage.getNext();
-				}
-			} else if (pdfMode == PDF_MODE_KEEP_INDEX) {
-				final PDPageTree pageTree = document.getDocument().getPageTree();
-				// Iterate through doc pages and find highest
-				LinkedElement<DocumentPage> docPage = _pages.getFirst();
-				int lastPdfIndex = 0;
-				while (docPage.getNext() != null) {
-					if (docPage.getData().getPdfPage().getPage().getNodeIndex() > lastPdfIndex) {
-						lastPdfIndex = docPage.getData().getPdfPage().getPage().getNodeIndex();
-					}
-					docPage = docPage.getNext();
-				}
-				if (lastPdfIndex < pageTree.getCount() - 1) {
-					PDPage pdfPage = pageTree.getPageAt(lastPdfIndex);
-					while (pdfPage != null) {
-						final DocumentPage newPage = this.addPage();
-						newPage.setPdfPage(new PdfPageSerializable(newPage, document, pdfPage));
-						pdfPage = pdfPage.getNextPage();
-					}
-				}
-			} else if (pdfMode == PDF_MODE_APPEND) {
-				final PDPageTree pageTree = document.getDocument().getPageTree();
-				// Iterate through doc pages and find highest
-				LinkedElement<DocumentPage> docPage = _pages.getFirst();
-				while (docPage != null) {
-					docPage.getData().setPdfPage(null);
-					docPage = docPage.getNext();
-				}
-				PDPage pdfPage = pageTree.getFirstPage();
-				while (pdfPage != null) {
-					final DocumentPage newPage = this.addPage();
-					newPage.setPdfPage(new PdfPageSerializable(newPage, document, pdfPage));
-					pdfPage = pdfPage.getNextPage();
-				}
-			} else if (pdfMode == PDF_MODE_CLEAR) {
-				final PDPageTree pageTree = document.getDocument().getPageTree();
-				// Clear and create new
-				clear();
-				final DocumentPage firstPage = this.getPageByIndex(0);
-				PDPage pdfPage = pageTree.getFirstPage();
-				if (pdfPage != null) {
-					firstPage.setPdfPage(new PdfPageSerializable(firstPage, document, pdfPage));
-					pdfPage = pdfPage.getNextPage();
-				}
-				while (pdfPage != null) {
-					final DocumentPage newPage = this.addPage();
-					newPage.setPdfPage(new PdfPageSerializable(newPage, document, pdfPage));
-					pdfPage = pdfPage.getNextPage();
-				}
-			}
-		} else {
-			if (pdfMode == PDF_MODE_CLEAR) {
-				// Clear and reset whole document
-				clear();
-			} else if (pdfMode == PDF_MODE_REINDEX) {
-				// Iterate through pdf pages and clear pdf index
-				LinkedElement<DocumentPage> docPage = _pages.getFirst();
-				while (docPage != null) {
-					docPage.getData().setPdfPage(null);
-					docPage = docPage.getNext();
-				}
-			} else {
-				throw new IllegalStateException("Invalid pdfMode for null document");
-			}
-		}
+		// TODO PDF
+//		if (document != null) {
+//			if (pdfMode == PDF_MODE_REINDEX) {
+//				final PDPageTree pageTree = document.getDocument().getPageTree();
+//				// Ensure the pages exist (enough space)
+//				getPageByIndex(pageTree.getCount() - 1, true);
+//				// Iterate through pdf pages
+//				PDPage pdfPage = pageTree.getFirstPage();
+//				LinkedElement<DocumentPage> docPage = _pages.getFirst();
+//				while (pdfPage != null) {
+//					// Set indices
+//					docPage.getData().setPdfPage(new PdfPageSerializable(docPage.getData(), document, pdfPage));
+//					pdfPage = pdfPage.getNextPage();
+//					docPage = docPage.getNext();
+//				}
+//				while (docPage != null) {
+//					docPage.getData().setPdfPage(null);
+//					docPage = docPage.getNext();
+//				}
+//			} else if (pdfMode == PDF_MODE_KEEP_INDEX) {
+//				final PDPageTree pageTree = document.getDocument().getPageTree();
+//				// Iterate through doc pages and find highest
+//				LinkedElement<DocumentPage> docPage = _pages.getFirst();
+//				int lastPdfIndex = 0;
+//				while (docPage.getNext() != null) {
+//					if (docPage.getData().getPdfPage().getPage().getNodeIndex() > lastPdfIndex) {
+//						lastPdfIndex = docPage.getData().getPdfPage().getPage().getNodeIndex();
+//					}
+//					docPage = docPage.getNext();
+//				}
+//				if (lastPdfIndex < pageTree.getCount() - 1) {
+//					PDPage pdfPage = pageTree.getPageAt(lastPdfIndex);
+//					while (pdfPage != null) {
+//						final DocumentPage newPage = this.addPage();
+//						newPage.setPdfPage(new PdfPageSerializable(newPage, document, pdfPage));
+//						pdfPage = pdfPage.getNextPage();
+//					}
+//				}
+//			} else if (pdfMode == PDF_MODE_APPEND) {
+//				final PDPageTree pageTree = document.getDocument().getPageTree();
+//				// Iterate through doc pages and find highest
+//				LinkedElement<DocumentPage> docPage = _pages.getFirst();
+//				while (docPage != null) {
+//					docPage.getData().setPdfPage(null);
+//					docPage = docPage.getNext();
+//				}
+//				PDPage pdfPage = pageTree.getFirstPage();
+//				while (pdfPage != null) {
+//					final DocumentPage newPage = this.addPage();
+//					newPage.setPdfPage(new PdfPageSerializable(newPage, document, pdfPage));
+//					pdfPage = pdfPage.getNextPage();
+//				}
+//			} else if (pdfMode == PDF_MODE_CLEAR) {
+//				final PDPageTree pageTree = document.getDocument().getPageTree();
+//				// Clear and create new
+//				clear();
+//				final DocumentPage firstPage = this.getPageByIndex(0);
+//				PDPage pdfPage = pageTree.getFirstPage();
+//				if (pdfPage != null) {
+//					firstPage.setPdfPage(new PdfPageSerializable(firstPage, document, pdfPage));
+//					pdfPage = pdfPage.getNextPage();
+//				}
+//				while (pdfPage != null) {
+//					final DocumentPage newPage = this.addPage();
+//					newPage.setPdfPage(new PdfPageSerializable(newPage, document, pdfPage));
+//					pdfPage = pdfPage.getNextPage();
+//				}
+//			}
+//		} else {
+//			if (pdfMode == PDF_MODE_CLEAR) {
+//				// Clear and reset whole document
+//				clear();
+//			} else if (pdfMode == PDF_MODE_REINDEX) {
+//				// Iterate through pdf pages and clear pdf index
+//				LinkedElement<DocumentPage> docPage = _pages.getFirst();
+//				while (docPage != null) {
+//					docPage.getData().setPdfPage(null);
+//					docPage = docPage.getNext();
+//				}
+//			} else {
+//				throw new IllegalStateException("Invalid pdfMode for null document");
+//			}
+//		}
 	}
 
 	@Override

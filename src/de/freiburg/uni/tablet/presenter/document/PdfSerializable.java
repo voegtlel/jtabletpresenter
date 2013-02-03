@@ -3,17 +3,17 @@ package de.freiburg.uni.tablet.presenter.document;
 import java.io.File;
 import java.io.IOException;
 
+import de.freiburg.uni.tablet.presenter.PDDocument;
+import de.freiburg.uni.tablet.presenter.PDPage;
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
-import de.intarsys.pdf.parser.COSLoadException;
-import de.intarsys.pdf.pd.PDDocument;
-import de.intarsys.tools.locator.ByteArrayLocator;
-import de.intarsys.tools.locator.FileLocator;
 
 public class PdfSerializable implements IEntity {
 	private final long _id;
 	private final IDocument _parent;
 	private final PDDocument _document;
+	
+	private byte[] _data;
 	
 	public PdfSerializable(final IDocument parent, final PDDocument document) {
 		_id = parent.nextId();
@@ -24,15 +24,20 @@ public class PdfSerializable implements IEntity {
 	public PdfSerializable(final IDocument parent, final File srcFile) throws IOException {
 		_id = parent.nextId();
 		_parent = parent;
-		try {
+		_document = null;
+		/*try {
 			_document = PDDocument.createFromLocator(new FileLocator(srcFile));
 		} catch (COSLoadException e) {
 			throw new IOException(e);
-		}
+		}*/
 	}
 	
 	public PDDocument getDocument() {
 		return _document;
+	}
+	
+	public PDPage getPageAt(final int index) {
+		return new PDPage(index);
 	}
 	
 	public PdfSerializable(final BinaryDeserializer reader) throws IOException {
@@ -43,14 +48,17 @@ public class PdfSerializable implements IEntity {
 		if (pdfNullCheck == 0) {
 			_document = null;
 		} else {
-			final byte[] data = reader.readByteArray();
+			_document = new PDDocument();
+			_data = reader.readByteArray();
+			// TODO: We should never get here
+			/*final byte[] data = reader.readByteArray();
 			final ByteArrayLocator loc = new ByteArrayLocator(data, "virtual", "pdf");
 			try {
 				_document = PDDocument.createFromLocator(loc);
 			} catch (COSLoadException e) {
 				throw new IOException(e);
 			}
-			loc.delete();
+			loc.delete();*/
 		}
 	}
 
@@ -59,14 +67,16 @@ public class PdfSerializable implements IEntity {
 		writer.writeLong(_id);
 		writer.writeObjectTable(_parent);
 		
-		if (_document == null) {
+		if (_data == null) {
 			writer.writeInt(0);
 		} else {
 			writer.writeInt(1);
-			final ByteArrayLocator loc = new ByteArrayLocator(null, "virtual", "pdf");
+			writer.writeByteArray(_data, 0, _data.length);
+			// TODO: We should never get here
+			/*final ByteArrayLocator loc = new ByteArrayLocator(null, "virtual", "pdf");
 			_document.save(loc);
 			writer.writeByteArray(loc.getContent(), 0, (int)loc.getLength());
-			loc.delete();
+			loc.delete();*/
 		}
 	}
 

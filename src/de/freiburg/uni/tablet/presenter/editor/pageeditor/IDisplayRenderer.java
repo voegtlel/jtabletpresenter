@@ -1,7 +1,6 @@
 package de.freiburg.uni.tablet.presenter.editor.pageeditor;
 
-import java.awt.Image;
-import java.awt.image.ImageObserver;
+import android.graphics.Bitmap;
 
 public interface IDisplayRenderer {
 	/**
@@ -9,7 +8,7 @@ public interface IDisplayRenderer {
 	 * 
 	 * @return new image
 	 */
-	public Image createImageBuffer(int width, int height, int transparency);
+	public Bitmap createImageBuffer(int width, int height);
 
 	/**
 	 * Returns, if we can work with this
@@ -32,10 +31,4 @@ public interface IDisplayRenderer {
 	 * Resume repainting
 	 */
 	void resumeRepaint();
-
-	/**
-	 * Gets an image observer
-	 * @return
-	 */
-	public ImageObserver getObserver();
 }

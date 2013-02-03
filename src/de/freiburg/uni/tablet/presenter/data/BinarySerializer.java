@@ -9,9 +9,10 @@ import java.io.Flushable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+
+import de.freiburg.uni.tablet.presenter.Helper;
 
 /**
  * @author lukas
@@ -83,7 +84,7 @@ public class BinarySerializer {
 	}
 
 	public void writeString(final String value) throws IOException {
-		final byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
+		final byte[] bytes = value.getBytes(Helper.UTF_8);
 		writeByteArray(bytes, 0, bytes.length);
 	}
 

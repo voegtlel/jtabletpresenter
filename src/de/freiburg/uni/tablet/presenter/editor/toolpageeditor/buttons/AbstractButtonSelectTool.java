@@ -4,17 +4,9 @@
  */
 package de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons;
 
-import java.awt.Component;
-import java.awt.Point;
-import java.io.File;
-import java.io.IOException;
-
-import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileFilter;
-
+import android.content.Context;
+import de.freiburg.uni.tablet.presenter.R;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
-import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.JPageToolButton;
-import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.JPageToolMenuSelectFrame;
 import de.freiburg.uni.tablet.presenter.tools.ITool;
 import de.freiburg.uni.tablet.presenter.tools.ToolEraser;
 import de.freiburg.uni.tablet.presenter.tools.ToolImage;
@@ -24,14 +16,10 @@ import de.freiburg.uni.tablet.presenter.tools.ToolScribble;
  * @author lukas
  * 
  */
-public abstract class AbstractButtonSelectTool extends AbstractButtonAction {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-
-	private final JPageToolMenuSelectFrame<ITool> _tool;
-
+public abstract class AbstractButtonSelectTool implements IButton {
+	private final int _groupId;
+	protected final IToolPageEditor _editor;
+	
 	protected final ToolScribble _toolScribble;
 
 	protected final ToolEraser _toolEraser;
@@ -45,35 +33,38 @@ public abstract class AbstractButtonSelectTool extends AbstractButtonAction {
 	 * @param text
 	 * @param imageResource
 	 */
-	public AbstractButtonSelectTool(final String name, final IToolPageEditor editor,
-			final String text, final String imageResource) {
-		super(name, editor, text, imageResource);
-		_tool = new JPageToolMenuSelectFrame<ITool>();
-		_tool.setSize(JPageToolButton.WIDTH_WIDE * 1,
-				JPageToolButton.HEIGHT_NORMAL * 4);
+	public AbstractButtonSelectTool(final int groupId, final IToolPageEditor editor) {
+		_groupId = groupId;
+		_editor = editor;
 		_toolScribble = new ToolScribble(_editor);
 		_toolEraser = new ToolEraser(_editor, false);
 		_toolDeleter = new ToolEraser(_editor, true);
 		_toolImage = new ToolImage(_editor);
-		_tool.addValue("Pen", "/buttons/edit-scribble.png", _toolScribble);
-		_tool.addValue("Eraser", "/buttons/edit-erase.png", _toolEraser);
-		_tool.addValue("Deleter", "/buttons/edit-delete.png", _toolDeleter);
-		_tool.addValue("Image", "/buttons/edit-image.png", _toolImage);
 	}
 
 	@Override
-	public void perform(final Point desiredLocation) {
-		final ITool currentSelectedTool = getSelectedTool();
-		_tool.setSelectedValue(currentSelectedTool);
-		_tool.showAt(desiredLocation);
-		final ITool selectedTool = _tool.getSelectedValue();
-		if (!selectedTool.equals(currentSelectedTool)) {
+	public boolean perform(final Context context, final int actionId, final int groupActionId) {
+		if (_groupId == groupActionId) {
+			ITool selectedTool;
+			if (actionId == R.id.tool_scribble) {
+				selectedTool = _toolScribble;
+			} else if (actionId == R.id.tool_eraser) {
+				selectedTool = _toolEraser;
+			} else if (actionId == R.id.tool_deleter) {
+				selectedTool = _toolDeleter;
+			} else if (actionId == R.id.tool_image) {
+				selectedTool = _toolImage;
+				// TODO: Show open file dialog
+			} else {
+				throw new IllegalStateException();
+			}
 			setSelectedTool(selectedTool);
+			return true;
 		}
-		super.perform(desiredLocation);
+		return false;
 	}
 	
-	@Override
+	/*@Override
 	public void performLater(Component component) {
 		final ITool selectedTool = _tool.getSelectedValue();
 		if (selectedTool == _toolImage) {
@@ -111,7 +102,7 @@ public abstract class AbstractButtonSelectTool extends AbstractButtonAction {
 				}
 			}
 		}
-	}
+	}*/
 	
 	public ITool getTool(final String name) {
 		if (name.equals("scribble")) {
@@ -127,6 +118,6 @@ public abstract class AbstractButtonSelectTool extends AbstractButtonAction {
 	}
 
 	public abstract void setSelectedTool(final ITool tool);
-
+	
 	public abstract ITool getSelectedTool();
 }

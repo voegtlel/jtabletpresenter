@@ -1,14 +1,5 @@
 package de.freiburg.uni.tablet.presenter.tools;
 
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.Toolkit;
-import java.awt.image.BufferedImage;
-
-import javax.swing.JOptionPane;
-
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 import de.freiburg.uni.tablet.presenter.geometry.BitmapImage;
 import de.freiburg.uni.tablet.presenter.geometry.DataPoint;
@@ -25,7 +16,6 @@ public class ToolImage extends AbstractTool {
 	 */
 	public ToolImage(final IToolPageEditor editor) {
 		super(editor);
-		updateCursor();
 	}
 	
 	@Override
@@ -39,8 +29,9 @@ public class ToolImage extends AbstractTool {
 	synchronized public void begin() {
 		final BitmapImage currentImage = _editor.getDocumentEditor().getCurrentImage();
 		if (currentImage == null) {
-			JOptionPane.showMessageDialog(_editor.getPageEditor().getContainerComponent(),
-					"No image selected for image tool");
+			// TODO: Message box
+			/*JOptionPane.showMessageDialog(_editor.getPageEditor().getContainerComponent(),
+					"No image selected for image tool");*/
 		} else {
 			_image = currentImage.cloneRenderable(_editor.getDocumentEditor().getCurrentPage());
 		}
@@ -60,7 +51,7 @@ public class ToolImage extends AbstractTool {
 				final float y2 = Math.max(data.getY(), _startData.getY());
 				_image.setLocation(x1, y1);
 				_image.setSize(x2-x1, y2-y1);
-				_editor.getFrontRenderer().requireRepaint();
+				_editor.getFrontRenderer().requireRepaint(_image, true);
 			}
 		}
 	}
@@ -79,28 +70,6 @@ public class ToolImage extends AbstractTool {
 		
 		_editor.getFrontRenderer().setRepaintListener(null);
 		
-		_editor.getFrontRenderer().requireRepaint();
 		_editor.getPageEditor().resumeRepaint();
-	}
-
-	@Override
-	protected Cursor generateCursor() {
-		if (_editor.getDocumentEditor().getCurrentPen() == null) {
-			return null;
-		}
-		final int extraline = 3;
-		final BufferedImage img = createBitmap(2 * extraline + 1,
-				2 * extraline + 1);
-		final Graphics2D g = (Graphics2D) img.getGraphics();
-		g.setColor(Color.BLACK);
-		g.drawLine(0, extraline, extraline * 2, extraline);
-		g.drawLine(extraline, 0, extraline, extraline * 2);
-		img.flush();
-		g.dispose();
-		final Cursor newCursor = Toolkit.getDefaultToolkit()
-				.createCustomCursor(
-						img,
-						new Point(extraline, extraline), "ImageCursor");
-		return newCursor;
 	}
 }

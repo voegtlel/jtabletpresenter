@@ -4,95 +4,39 @@
  */
 package de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons;
 
-import java.awt.Component;
-import java.awt.Point;
-import java.awt.event.ActionEvent;
-
-import javax.swing.AbstractAction;
-import javax.swing.SwingUtilities;
-
+import android.content.Context;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
-import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.IButtonAction;
 
 /**
  * @author lukas
  * 
  */
-public abstract class AbstractButtonAction extends AbstractAction implements IButtonAction {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	
-	private final String _name;
-	
+public abstract class AbstractButtonAction implements IButton {
 	protected final IToolPageEditor _editor;
-	private final String _text;
-	private final String _imageResource;
-	
-	private long _lastTimestamp = 0;
+
+	private final int _actionId;
 
 	/**
 	 * Creates the action with an editor.
+	 * @param undo 
 	 */
-	public AbstractButtonAction(final String name, final IToolPageEditor editor,
-			final String text, final String imageResource) {
-		_name = name;
+	public AbstractButtonAction(final IToolPageEditor editor, final int actionId) {
 		_editor = editor;
-		_text = text;
-		_imageResource = imageResource;
-	}
-	
-	public String getName() {
-		return _name;
-	}
-
-	@Override
-	public String getText() {
-		return _text;
-	}
-
-	@Override
-	public String getImageResource() {
-		return _imageResource;
-	}
-
-	@Override
-	public Component getControl() {
-		return null;
-	}
-
-	@Override
-	public void perform(final Point desiredLocation) {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				performLater(_editor.getPageEditor().getContainerComponent());
-			}
-		});
-	}
-	
-	public void performLater(final Component component) {
+		_actionId = actionId;
 	}
 	
 	@Override
-	public void actionPerformed(final ActionEvent e) {
-		if (_lastTimestamp + 50 < System.currentTimeMillis()) {
-			// Maximum of 20 per second
-			return;
+	public boolean perform(final Context context, final int actionId, final int groupActionId) {
+		if (_actionId == actionId) {
+			perform(context);
+			return true;
 		}
-		_lastTimestamp = System.currentTimeMillis();
-		final Component c = (Component)e.getSource();
-		final Point loc = c.getLocation();
-		loc.x += c.getWidth();
-		perform(loc);
+		return false;
 	}
 	
-	@Override
-	public IButtonAction getButton(final String name) {
-		if (name.equals(this._name)) {
-			return this;
-		}
-		return null;
-	}
+	/**
+	 * Called if the actionId is correct
+	 * @param context
+	 */
+	public abstract void perform(final Context context);
 }

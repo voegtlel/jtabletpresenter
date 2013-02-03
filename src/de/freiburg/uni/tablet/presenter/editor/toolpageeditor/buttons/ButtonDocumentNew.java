@@ -4,10 +4,10 @@
  */
 package de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons;
 
-import java.awt.Component;
-
-import javax.swing.JOptionPane;
-
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import de.freiburg.uni.tablet.presenter.R;
 import de.freiburg.uni.tablet.presenter.document.ServerDocument;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 
@@ -17,27 +17,35 @@ import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
  */
 public class ButtonDocumentNew extends AbstractButtonAction {
 	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-
-	/**
 	 * Creates the action with an editor.
 	 */
 	public ButtonDocumentNew(final IToolPageEditor editor) {
-		super("new", editor, "New", "/buttons/document-new.png");
+		super(editor, R.id.document_new);
 	}
 
 	@Override
-	public void performLater(final Component component) {
-		int result = JOptionPane.showConfirmDialog(component, "Save current document before creating a new document?", "New Document...", JOptionPane.YES_NO_CANCEL_OPTION);
-		if (result == JOptionPane.YES_OPTION) {
-			if (!FileHelper.showSaveDialog(component, _editor, FileHelper.stringToFilter(_editor.getConfig().getString("save.defaultExt", "jpd")))) {
-				return;
-			}
-		} else if (result == JOptionPane.CANCEL_OPTION) {
-			return;
-		}
-		_editor.getDocumentEditor().setDocument(new ServerDocument(1));
+	public void perform(final Context context) {
+		AlertDialog alertDialog = new AlertDialog.Builder(context).setTitle(R.string.msg_title_info)
+				.setMessage(R.string.msg_new_save)
+				.setNegativeButton(R.string.msg_button_cancel, null)
+				.setPositiveButton(R.string.msg_button_yes, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						FileHelper.showSaveDialog(context, _editor, FileHelper.stringToFilter(_editor.getConfig().getString("save.defaultExt", "jpd")), new FileHelper.OnSuccessListener() {
+							@Override
+							public void onSuccess() {
+								_editor.getDocumentEditor().setDocument(new ServerDocument(1));
+							}
+						});
+					}
+				})
+				.setPositiveButton(R.string.msg_button_no, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						_editor.getDocumentEditor().setDocument(new ServerDocument(1));
+					}
+				})
+				.create();
+		alertDialog.show();
 	}
 }

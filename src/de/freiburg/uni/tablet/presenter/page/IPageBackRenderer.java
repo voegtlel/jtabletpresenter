@@ -1,10 +1,10 @@
 package de.freiburg.uni.tablet.presenter.page;
 
-import java.awt.geom.Path2D;
-import java.awt.image.BufferedImage;
-
+import android.graphics.Bitmap;
 import de.freiburg.uni.tablet.presenter.editor.IPageRepaintListener;
+import de.freiburg.uni.tablet.presenter.geometry.DataPoint;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
+import de.freiburg.uni.tablet.presenter.list.LinkedElementList;
 
 public interface IPageBackRenderer {
 	/**
@@ -15,7 +15,7 @@ public interface IPageBackRenderer {
 	 * @param path
 	 *            path
 	 */
-	void draw(IPen pen, Path2D path);
+	//void draw(IPen pen, Path path);
 
 	/**
 	 * Renders a dot using the pen.
@@ -27,6 +27,13 @@ public interface IPageBackRenderer {
 	void draw(IPen pen, float x, float y);
 	
 	/**
+	 * 
+	 * @param pen
+	 * @param path
+	 */
+	void draw(IPen pen, LinkedElementList<DataPoint> path);
+	
+	/**
 	 * Renders an image.
 	 * 
 	 * @param image
@@ -35,7 +42,16 @@ public interface IPageBackRenderer {
 	 * @param width
 	 * @param height
 	 */
-	void draw(BufferedImage image, float x, float y, float width, float height);
+	void draw(Bitmap image, float x, float y, float width, float height);
+	
+	/**
+	 * Renders the eraser
+	 * 
+	 * @param pen
+	 * @param x
+	 * @param y
+	 */
+	void drawEraser(IPen pen, float x, float y);
 
 	/**
 	 * Sets the repaint listener

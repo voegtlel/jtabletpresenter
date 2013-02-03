@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <ListView
+        android:id="@+id/filedialog_file_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/filedialog_filename"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/filedialog_location_static" >
+
+    </ListView>
+
+    <Button
+        android:id="@+id/filedialog_button_cancel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:text="@string/filedialog_cancel" />
+
+    <Button
+        android:id="@+id/filedialog_button_new_directory"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_toRightOf="@+id/filedialog_button_cancel"
+        android:text="@string/filedialog_new_directory" />
+
+    <Button
+        android:id="@+id/filedialog_button_ok"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_toRightOf="@+id/filedialog_button_new_directory"
+        android:text="@string/filedialog_ok" />
+
+    <EditText
+        android:id="@+id/filedialog_filename"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/filedialog_button_cancel"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:ems="10"
+        android:hint="@string/filedialog_filename_hint" />
+
+    <TextView
+        android:id="@+id/filedialog_location_static"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:text="@string/filedialog_location_text" />
+
+    <TextView
+        android:id="@+id/filedialog_location"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/filedialog_location_static" />
+
+</RelativeLayout>

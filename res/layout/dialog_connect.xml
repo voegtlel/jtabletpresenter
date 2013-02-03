@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal" >
+
+    <EditText
+        android:id="@+id/connect_host"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@+id/connect_port"
+        android:ems="10"
+        android:hint="@string/connect_host"
+        android:text="192.168.21.22" >
+
+        <requestFocus />
+    </EditText>
+
+    <EditText
+        android:id="@+id/connect_port"
+        android:layout_width="75dp"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/connect_host"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:ems="10"
+        android:hint="@string/connect_port"
+        android:text="8024" />
+
+    <CheckBox
+        android:id="@+id/connect_up"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/connect_host"
+        android:text="@string/connect_up" />
+
+    <EditText
+        android:id="@+id/connect_auth"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/connect_up"
+        android:ems="10"
+        android:hint="@string/connect_auth"
+        android:text="Bla" />
+
+    <CheckBox
+        android:id="@+id/connect_init_down"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/connect_auth"
+        android:text="@string/connect_init_down" />
+
+</RelativeLayout>

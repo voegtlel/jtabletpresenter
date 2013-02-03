@@ -1,23 +1,12 @@
 package de.freiburg.uni.tablet.presenter.editor.pageeditor;
 
-import java.awt.AlphaComposite;
-import java.awt.Color;
-import java.awt.Composite;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Transparency;
-import java.awt.geom.AffineTransform;
-import java.awt.image.ImageObserver;
-
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import de.freiburg.uni.tablet.presenter.PDPage;
 import de.freiburg.uni.tablet.presenter.document.PdfPageSerializable;
-import de.intarsys.cwt.awt.environment.CwtAwtGraphicsContext;
-import de.intarsys.cwt.environment.IGraphicsContext;
-import de.intarsys.pdf.content.CSContent;
-import de.intarsys.pdf.pd.PDPage;
-import de.intarsys.pdf.platform.cwt.rendering.CSPlatformRenderer;
 
 public class PageLayerBufferPdf implements IPageLayerBuffer {
-	protected Image _imageBuffer = null;
+	protected Bitmap _imageBuffer = null;
 
 	protected int _sizeX = 1;
 	protected int _sizeY = 1;
@@ -28,7 +17,7 @@ public class PageLayerBufferPdf implements IPageLayerBuffer {
 	private PdfPageSerializable _pdfPage;
 	private IDisplayRenderer _displayRenderer;
 
-	private Graphics2D _graphics;
+	private Canvas _graphics = new Canvas();
 	
 	private Object _repaintSync = new Object();
 	
@@ -67,7 +56,7 @@ public class PageLayerBufferPdf implements IPageLayerBuffer {
 	}
 	
 	@Override
-	public void drawBuffer(final Graphics2D g, final ImageObserver obs) {
+	public void drawBuffer(final Canvas g) {
 		boolean requiresResize;
 		int width;
 		int height;
@@ -96,7 +85,8 @@ public class PageLayerBufferPdf implements IPageLayerBuffer {
 			if (requiresRepaint) {
 				renderPdf(page, width, height, factorX, factorY);
 			}
-			g.drawImage(_imageBuffer, 0, 0, obs);
+			System.out.println("Draw pdf buffer");
+			g.drawBitmap(_imageBuffer, 0, 0, null);
 		}
 	}
 	
@@ -105,14 +95,11 @@ public class PageLayerBufferPdf implements IPageLayerBuffer {
 	 * Synchronized to drawBuffer.
 	 */
 	private void createImage(final int width, final int height) {
-		if (_graphics != null) {
-			_graphics.dispose();
-		}
 		final int imgWidth = Math.max(width, 1);
 		final int imgHeight = Math.max(height, 1);
-		_imageBuffer = _displayRenderer.createImageBuffer(imgWidth, imgHeight,
-				Transparency.TRANSLUCENT);
-		_graphics = (Graphics2D) _imageBuffer.getGraphics();
+		_imageBuffer = _displayRenderer.createImageBuffer(imgWidth, imgHeight);
+		_graphics.setBitmap(_imageBuffer);
+		_graphics.setDensity(Bitmap.DENSITY_NONE);
 		System.out.println("Create Pdf Image: " + width + "x" + height);
 	}
 	
@@ -122,10 +109,6 @@ public class PageLayerBufferPdf implements IPageLayerBuffer {
 	 */
 	private void destroyBuffer() {
 		if (_imageBuffer != null) {
-			if (_graphics != null) {
-				_graphics.dispose();
-				_graphics = null;
-			}
 			_imageBuffer = null;
 		}
 	}
@@ -134,7 +117,7 @@ public class PageLayerBufferPdf implements IPageLayerBuffer {
 	 * Renders the active pdf page
 	 */
 	private void renderPdf(final PDPage page, final int width, final int height, final float renderFactorX, final float renderFactorY) {
-		final Composite defaultComp = _graphics.getComposite();
+		/*final Composite defaultComp = _graphics.getComposite();
 		final AffineTransform defaultTransform = new AffineTransform();
 		_graphics.setTransform(defaultTransform);
 		_graphics.setComposite(AlphaComposite.Clear); 
@@ -164,6 +147,6 @@ public class PageLayerBufferPdf implements IPageLayerBuffer {
 			}
 		} else {
 			System.out.println("Don't Render Pdf");
-		}
+		}*/
 	}
 }

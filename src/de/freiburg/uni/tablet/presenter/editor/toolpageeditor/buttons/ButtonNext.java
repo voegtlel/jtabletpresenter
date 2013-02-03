@@ -4,8 +4,8 @@
  */
 package de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons;
 
-import java.awt.Component;
-
+import android.content.Context;
+import de.freiburg.uni.tablet.presenter.R;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 
 /**
@@ -14,21 +14,19 @@ import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
  */
 public class ButtonNext extends AbstractButtonAction {
 	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-
-	/**
 	 * Creates the action with an editor.
 	 */
 	public ButtonNext(final IToolPageEditor editor) {
-		super("next", editor, "Next", "/buttons/go-next.png");
+		super(editor, R.id.next);
 	}
 
 	@Override
-	public void performLater(final Component component) {
+	public void perform(final Context context) {
 		if (_editor.getConfig().getBoolean("autosave.next", true)) {
-			FileHelper.autosave(_editor.getDocumentEditor());
+			try {
+				FileHelper.autosave(_editor.getDocumentEditor());
+			} catch (Exception e) {
+			}
 		}
 		int currentPageIndex = _editor.getDocumentEditor().getCurrentPageIndex();
 		if (currentPageIndex < _editor.getDocumentEditor().getMaxPageCount() - 1) {

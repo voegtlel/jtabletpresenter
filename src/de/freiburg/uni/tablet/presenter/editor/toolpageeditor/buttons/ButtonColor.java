@@ -4,51 +4,51 @@
  */
 package de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons;
 
-import java.awt.Color;
-import java.awt.Point;
-
+import android.content.Context;
+import de.freiburg.uni.tablet.presenter.R;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
-import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.JPageToolButton;
-import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.JPageToolMenuSelectFrame;
 import de.freiburg.uni.tablet.presenter.page.SolidPen;
 
 /**
  * @author lukas
  * 
  */
-public class ButtonColor extends AbstractButtonAction {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	
-	private final JPageToolMenuSelectFrame<Color> _tool;
+public class ButtonColor implements IButton {
+	private final IToolPageEditor _editor;
 
 	/**
 	 * Creates the action with an editor.
 	 */
 	public ButtonColor(final IToolPageEditor editor) {
-		super("color", editor, "Color", "/buttons/color-select.png");
-		_tool = new JPageToolMenuSelectFrame<Color>();
-		_tool.setSize(JPageToolButton.WIDTH_NORMAL * 2,
-				JPageToolButton.HEIGHT_NORMAL * 2);
-		_tool.addValue("/buttons/color-red.png", editor.getConfig().getColor("color.red", new Color(0xbb0000)));
-		_tool.addValue("/buttons/color-green.png", editor.getConfig().getColor("color.green", new Color(0x00bb00)));
-		_tool.addValue("/buttons/color-blue.png", editor.getConfig().getColor("color.blue", new Color(0x0000bb)));
-		_tool.addValue("/buttons/color-black.png", editor.getConfig().getColor("color.black", new Color(0x000000)));
+		_editor = editor;
 	}
-
+	
 	@Override
-	public void perform(final Point desiredLocation) {
-		_tool.setSelectedValue(_editor.getDocumentEditor().getCurrentPen()
-				.getColor());
-		_tool.showAt(desiredLocation);
-		final Color selectedColor = _tool.getSelectedValue();
-		if (!selectedColor.equals(_editor.getDocumentEditor().getCurrentPen()
-				.getColor())) {
-			_editor.getDocumentEditor().setCurrentPen(
-					new SolidPen(_editor.getDocumentEditor().getCurrentPen()
-							.getThickness(), selectedColor));
+	public boolean perform(Context context, int actionId, int groupActionId) {
+		if (actionId == R.id.color_red
+				|| actionId == R.id.color_green
+				|| actionId == R.id.color_blue
+				|| actionId == R.id.color_black) {
+			int newColor;
+			if (actionId == R.id.color_red) {
+				newColor = _editor.getConfig().getColor("color.red", 0xffbb0000);
+			} else if (actionId == R.id.color_green) {
+				newColor = _editor.getConfig().getColor("color.green", 0xff00bb00);
+			} else if (actionId == R.id.color_blue) {
+				newColor = _editor.getConfig().getColor("color.blue", 0xff0000bb);
+			} else if (actionId == R.id.color_black) {
+				newColor = _editor.getConfig().getColor("color.black", 0xff000000);
+			} else {
+				throw new IllegalStateException("Invalid code");
+			}
+			if (newColor != _editor.getDocumentEditor().getCurrentPen()
+					.getColor()) {
+				_editor.getDocumentEditor().setCurrentPen(
+						new SolidPen(_editor.getDocumentEditor().getCurrentPen()
+								.getThickness(), newColor));
+			}
+			return true;
 		}
+		return false;
 	}
 }

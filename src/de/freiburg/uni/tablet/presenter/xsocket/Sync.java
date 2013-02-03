@@ -1,61 +1,21 @@
 package de.freiburg.uni.tablet.presenter.xsocket;
 
 import java.io.IOException;
-import java.nio.BufferUnderflowException;
-import java.nio.channels.ClosedChannelException;
+import java.nio.channels.SocketChannel;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.xsocket.MaxReadSizeExceededException;
-import org.xsocket.connection.IHandler;
-import org.xsocket.connection.INonBlockingConnection;
 
 public abstract class Sync {
 	private final static Logger LOGGER = Logger.getLogger(Sync.class.getName());
 	
-	protected INonBlockingConnection _connection;
+	protected SocketChannel _connection;
 	private Object _sync = new Object();
 	protected String _name = "Client";
 	protected String _remoteName = null;
 	
 	private Thread _thread;
 	
-	protected IHandler _defaultHandler;
-	
 	public Sync() {
-		_defaultHandler = new ISystemHandler() {
-			@Override
-			public boolean onIdleTimeout(final INonBlockingConnection connection)
-					throws IOException {
-				return Sync.this.onIdleTimeout(connection);
-			}
-			
-			@Override
-			public boolean onConnectionTimeout(final INonBlockingConnection connection)
-					throws IOException {
-				return Sync.this.onConnectionTimeout(connection);
-			}
-			
-			@Override
-			public boolean onDisconnect(final INonBlockingConnection connection)
-					throws IOException {
-				return Sync.this.onDisconnect(connection);
-			}
-			
-			@Override
-			public boolean onData(final INonBlockingConnection connection)
-					throws IOException, BufferUnderflowException,
-					ClosedChannelException, MaxReadSizeExceededException {
-				return Sync.this.onData(connection);
-			}
-			
-			@Override
-			public boolean onConnect(final INonBlockingConnection connection)
-					throws IOException, BufferUnderflowException,
-					MaxReadSizeExceededException {
-				return Sync.this.onConnect(connection);
-			}
-		};
 	}
 	
 	/**
@@ -111,21 +71,19 @@ public abstract class Sync {
 	 */
 	protected void startThread() {
 		synchronized (_sync) {
-			if (_thread == null || !_thread.isAlive()) {
-				stopThread();
-				_thread = new Thread() {
-					@Override
-					public void run() {
-						try {
-							Sync.this.onThread();
-						} catch (IOException e) {
-							e.printStackTrace();
-							// TODO: Application response
-						}
+			stopThread();
+			_thread = new Thread() {
+				@Override
+				public void run() {
+					try {
+						Sync.this.onThread();
+					} catch (IOException e) {
+						e.printStackTrace();
+						// TODO: Application response
 					}
-				};
-				_thread.start();
-			}
+				}
+			};
+			_thread.start();
 		}
 	}
 	
@@ -140,9 +98,6 @@ public abstract class Sync {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			if (_thread.isAlive()) {
-				_thread.stop();
-			}
 			_thread = null;
 		}
 	}
@@ -153,48 +108,29 @@ public abstract class Sync {
 	protected void onThread() throws IOException {
 	}
 
-	protected boolean onIdleTimeout(final INonBlockingConnection connection) throws IOException {
-		if (_remoteName != null) {
-			LOGGER.log(Level.INFO, "Net " + connection.getRemoteAddress() + " (" + _remoteName + ") timeout");
+	protected boolean onDisconnect(final SocketChannel connection) throws IOException {
+		if (connection != null) {
+			if (_remoteName != null) {
+				LOGGER.log(Level.INFO, "Net " + connection.socket().getRemoteSocketAddress() + " (" + _remoteName + ") disconnected");
+			} else {
+				LOGGER.log(Level.INFO, "Net " + connection.socket().getRemoteSocketAddress() + " disconnected");
+			}
 		} else {
-			LOGGER.log(Level.INFO, "Net " + connection.getRemoteAddress() + " timeout");
-		}
-		return false;
-	}
-
-	protected boolean onConnectionTimeout(final INonBlockingConnection connection) throws IOException {
-		if (_remoteName != null) {
-			LOGGER.log(Level.INFO, "Net " + connection.getRemoteAddress() + " (" + _remoteName + ") connect timeout");
-		} else {
-			LOGGER.log(Level.INFO, "Net " + connection.getRemoteAddress() + " connect timeout");
-		}
-		return false;
-	}
-
-	protected boolean onDisconnect(final INonBlockingConnection connection) throws IOException {
-		if (_remoteName != null) {
-			LOGGER.log(Level.INFO, "Net " + connection.getRemoteAddress() + " (" + _remoteName + ") disconnected");
-		} else {
-			LOGGER.log(Level.INFO, "Net " + connection.getRemoteAddress() + " disconnected");
+			if (_remoteName != null) {
+				LOGGER.log(Level.INFO, "Net (" + _remoteName + ") disconnected");
+			} else {
+				LOGGER.log(Level.INFO, "Net disconnected");
+			}
 		}
 		fireDisconnected();
 		return true;
 	}
 
-	protected boolean onData(final INonBlockingConnection connection) throws IOException {
-		/*if (_remoteName != null) {
-			LOGGER.log(Level.INFO, "Net " + connection.getRemoteAddress() + " (" + _remoteName + ") data: " + connection.available());
-		} else {
-			LOGGER.log(Level.INFO, "Net " + connection.getRemoteAddress() + " data" + connection.available());
-		}*/
-		return true;
-	}
-
-	protected boolean onConnect(final INonBlockingConnection connection) throws IOException {
+	protected boolean onConnect(final SocketChannel connection) throws IOException {
 		if (_remoteName != null) {
-			LOGGER.log(Level.INFO, "Net " + connection.getRemoteAddress() + " (" + _remoteName + ") connect");
+			LOGGER.log(Level.INFO, "Net " + connection.socket().getRemoteSocketAddress() + " (" + _remoteName + ") connect");
 		} else {
-			LOGGER.log(Level.INFO, "Net " + connection.getRemoteAddress() + " connect");
+			LOGGER.log(Level.INFO, "Net " + connection.socket().getRemoteSocketAddress() + " connect");
 		}
 		return true;
 	}

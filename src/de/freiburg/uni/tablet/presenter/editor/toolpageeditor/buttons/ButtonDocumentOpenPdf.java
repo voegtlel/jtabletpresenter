@@ -4,8 +4,8 @@
  */
 package de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons;
 
-import java.awt.Component;
-
+import android.content.Context;
+import de.freiburg.uni.tablet.presenter.R;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 
 /**
@@ -14,19 +14,14 @@ import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
  */
 public class ButtonDocumentOpenPdf extends AbstractButtonAction {
 	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-
-	/**
 	 * Creates the action with an editor.
 	 */
 	public ButtonDocumentOpenPdf(final IToolPageEditor editor) {
-		super("openPdf", editor, "Open PDF", "/buttons/document-open-pdf.png");
+		super(editor, R.id.open_from);
 	}
 
 	@Override
-	public void performLater(final Component component) {
-		FileHelper.showOpenDialog(component, _editor, FileHelper.FILTER_pdf);
+	public void perform(final Context component) {
+		FileHelper.showOpenDialog(component, _editor, FileHelper.FILTER_pdf, null);
 	}
 }

@@ -4,6 +4,7 @@
  */
 package de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons;
 
+import de.freiburg.uni.tablet.presenter.R;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 import de.freiburg.uni.tablet.presenter.tools.ITool;
 
@@ -13,16 +14,10 @@ import de.freiburg.uni.tablet.presenter.tools.ITool;
  */
 public class ButtonSecondary extends AbstractButtonSelectTool {
 	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	
-
-	/**
 	 * Creates the action with an editor.
 	 */
 	public ButtonSecondary(final IToolPageEditor editor) {
-		super("secondary", editor, "Secondary", "/buttons/edit-erase.png");
+		super(R.id.tool_secondary_group, editor);
 		setSelectedTool(_toolEraser);
 	}
 

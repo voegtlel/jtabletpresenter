@@ -2,9 +2,9 @@ package de.freiburg.uni.tablet.presenter.document;
 
 import java.io.IOException;
 
+import de.freiburg.uni.tablet.presenter.PDPage;
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
-import de.intarsys.pdf.pd.PDPage;
 
 public class PdfPageSerializable implements IEntity {
 	private final long _id;
@@ -20,7 +20,8 @@ public class PdfPageSerializable implements IEntity {
 	}
 	
 	public PdfPageSerializable(final DocumentPage parent, final PdfSerializable basePdf, final int pageIndex) throws IOException {
-		this(parent, basePdf, basePdf.getDocument().getPageTree().getPageAt(pageIndex));
+		//this(parent, basePdf, basePdf.getDocument().getPageTree().getPageAt(pageIndex));
+		this(parent, basePdf, basePdf.getPageAt(pageIndex));
 	}
 	
 	protected PdfPageSerializable(final DocumentPage parent, final PdfPageSerializable base) {
@@ -37,7 +38,7 @@ public class PdfPageSerializable implements IEntity {
 		_parent.getParent().deserializeId(_id);
 		_basePdf = reader.readObjectTable();
 		final int pageIndex = reader.readInt();
-		_page = _basePdf.getDocument().getPageTree().getPageAt(pageIndex);
+		_page = _basePdf.getPageAt(pageIndex);
 	}
 
 	@Override

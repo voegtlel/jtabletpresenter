@@ -1,6 +1,5 @@
 package de.freiburg.uni.tablet.presenter.document;
 
-import java.awt.Color;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -167,14 +166,14 @@ public class DocumentConfig {
 		throw new IllegalStateException("Invalid config type for (boolean)" + key + ": " + keyValue.value.getClass().getName());
 	}
 	
-	public Color getColor(String key, Color defaultValue) {
-		KeyValue keyValue = getDefault(key, defaultValue);
+	public int getColor(String key, int defaultValue) {
+		KeyValue keyValue = getDefault(key, new Color(defaultValue));
 		if (keyValue.value instanceof String) {
 			long intVal = Long.parseLong(keyValue.value.toString(), 16);
-			keyValue.value = new Color((int)((intVal >> 16) & 0xff), (int)((intVal >> 8) & 0xff), (int)((intVal >> 0) & 0xff), (int)((intVal >> 24) & 0xff));
+			keyValue.value = new Color((int)intVal);
 		}
 		if (keyValue.value instanceof Color) {
-			return (Color)keyValue.value;
+			return ((Color)keyValue.value).argb;
 		}
 		throw new IllegalStateException("Invalid config type for (color)" + key + ": " + keyValue.value.getClass().getName());
 	}
@@ -192,7 +191,7 @@ public class DocumentConfig {
 							writer.write(data.value + "\r\n");
 						} else if (data.value instanceof Color) {
 							Color c = (Color) data.value;
-							writer.write(data.key + " = " + String.format("%08X", c.getRGB() | (c.getAlpha() << 24)) + "\r\n");
+							writer.write(data.key + " = " + String.format("%08X", c.argb) + "\r\n");
 						} else {
 							writer.write(data.key + " = " + data.value + "\r\n");
 						}
@@ -207,6 +206,14 @@ public class DocumentConfig {
 			} catch(IOException e) {
 				e.printStackTrace();
 			}
+		}
+	}
+	
+	private static class Color {
+		public final int argb;
+		
+		public Color(final int argb) {
+			this.argb = argb;
 		}
 	}
 }

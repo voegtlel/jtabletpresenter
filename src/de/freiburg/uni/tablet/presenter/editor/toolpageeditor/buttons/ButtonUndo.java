@@ -4,8 +4,8 @@
  */
 package de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons;
 
-import java.awt.Component;
-
+import android.content.Context;
+import de.freiburg.uni.tablet.presenter.R;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 
 /**
@@ -14,19 +14,14 @@ import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
  */
 public class ButtonUndo extends AbstractButtonAction {
 	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-
-	/**
 	 * Creates the action with an editor.
 	 */
 	public ButtonUndo(final IToolPageEditor editor) {
-		super("undo", editor, "Undo", "/buttons/edit-undo.png");
+		super(editor, R.id.undo);
 	}
 
 	@Override
-	public void performLater(final Component component) {
+	public void perform(final Context context) {
 		if (_editor.getDocumentEditor().getHistory().hasUndoAction()) {
 			_editor.getDocumentEditor().getHistory().undo();
 		}

@@ -4,6 +4,7 @@
  */
 package de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons;
 
+import de.freiburg.uni.tablet.presenter.R;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 import de.freiburg.uni.tablet.presenter.tools.ITool;
 
@@ -13,15 +14,10 @@ import de.freiburg.uni.tablet.presenter.tools.ITool;
  */
 public class ButtonPrimary extends AbstractButtonSelectTool {
 	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-
-	/**
 	 * Creates the action with an editor.
 	 */
 	public ButtonPrimary(final IToolPageEditor editor) {
-		super("primary", editor, "Primary", "/buttons/edit-scribble.png");
+		super(R.id.tool_primary_group, editor);
 		setSelectedTool(_toolScribble);
 	}
 

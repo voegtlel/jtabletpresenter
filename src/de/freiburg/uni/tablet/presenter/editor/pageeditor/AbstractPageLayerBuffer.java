@@ -1,33 +1,50 @@
 package de.freiburg.uni.tablet.presenter.editor.pageeditor;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Rectangle;
-import java.awt.Shape;
-import java.awt.Transparency;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Line2D;
-import java.awt.geom.Path2D;
-import java.awt.image.BufferedImage;
-import java.awt.image.ImageObserver;
-import java.util.ArrayList;
-import java.util.List;
-
+import android.annotation.TargetApi;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.Rect;
+import android.graphics.RectF;
+import android.graphics.Region;
+import android.os.Build;
+import de.freiburg.uni.tablet.presenter.geometry.DataPoint;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
+import de.freiburg.uni.tablet.presenter.list.LinkedElement;
+import de.freiburg.uni.tablet.presenter.list.LinkedElementList;
 import de.freiburg.uni.tablet.presenter.page.IPen;
 
 public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer {
-	private Graphics2D _graphics = null;
-	private Image _imageBuffer = null;
+	// Repaint nothing
+	private final static int REPAINT_NONE = 0;
+	// Only add a renderable on top
+	private final static int REPAINT_ADD_PAINT = 1;
+	// Repaint only rect
+	private final static int REPAINT_CLEAR_RECT = 2;
+	// Repaint whole image
+	private final static int REPAINT_ALL = 3;
+	// Recreate whole image
+	private final static int REPAINT_RESIZE = 4;
+	
+	
+	private Canvas _graphics = null;
+	private Bitmap _graphicsBitmap = null;
+	private Paint _paint = new Paint();
 	
 	private Object _repaintSync = new Object();
 
-	private boolean _requireResize = true;
 	private int _newWidth = 1;
 	private int _newHeight = 1;
-	private boolean _requireRepaint = true;
+	private int _requireRepaint = REPAINT_ALL;
+	
+	private LinkedElementList<IRenderable> _repaintAddObjects = null;
+	private float _repaintMinX = 1;
+	private float _repaintMinY = 1;
+	private float _repaintMaxX = 0;
+	private float _repaintMaxY = 0;
+	private float _repaintRadius = 0;
 	
 	private boolean _isEmpty = true;
 
@@ -37,13 +54,10 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer {
 	protected float _renderFactorX = 1;
 	protected float _renderFactorY = 1;
 	protected final IDisplayRenderer _displayRenderer;
-
-	private final Ellipse2D.Float _ellipseRenderer = new Ellipse2D.Float();
-	private final Line2D.Float _lineRenderer = new Line2D.Float();
 	
-	private boolean _repaintAddOnly = false;
-	private List<IRenderable> _repaintObjects = new ArrayList<IRenderable>();
-	private RectangleF _repaintRect = new RectangleF();
+	protected RectF _tempRect = new RectF();
+	
+	private float[] _ptsBuffer = new float[]{};
 
 	public AbstractPageLayerBuffer(final IDisplayRenderer displayRenderer) {
 		_displayRenderer = displayRenderer;
@@ -54,8 +68,10 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer {
 	 */
 	public void requireRepaint() {
 		synchronized (_repaintSync) {
-			_requireRepaint = true;
-			_displayRenderer.requireRepaint();
+			if (_requireRepaint < REPAINT_ALL) {
+				_requireRepaint = REPAINT_ALL;
+				_displayRenderer.requireRepaint();
+			}
 		}
 	}
 	
@@ -67,68 +83,130 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer {
 	 * otherwise only the renderable is added
 	 */
 	public void requireRepaint(final IRenderable renderable, final boolean clear) {
-		// TODO: implement
-		requireRepaint();
+		synchronized (_repaintSync) {
+			if (_requireRepaint <= REPAINT_CLEAR_RECT) {
+				_repaintMinX = Math.min(_repaintMinX, renderable.getMinX());
+				_repaintMinY = Math.min(_repaintMinY, renderable.getMinY());
+				_repaintMaxX = Math.max(_repaintMaxX, renderable.getMaxX());
+				_repaintMaxY = Math.max(_repaintMaxY, renderable.getMaxY());
+				_repaintRadius = Math.max(_repaintRadius, renderable.getRadius());
+				if (_requireRepaint <= REPAINT_ADD_PAINT && !clear) {
+					if (_repaintAddObjects == null) {
+						_repaintAddObjects = new LinkedElementList<IRenderable>();
+					}
+					_repaintAddObjects.addLast(renderable);
+					_requireRepaint = REPAINT_ADD_PAINT;
+				} else {
+					_requireRepaint = REPAINT_CLEAR_RECT;
+				}
+			}
+			_displayRenderer.requireRepaint();
+		}
 	}
-
+	
 	/**
 	 * Sets the rendering hints for the given graphics object
 	 * 
 	 * @param g
 	 */
-	protected abstract void setRenderingHints(Graphics2D g);
+	protected abstract void setRenderingHints(Paint g);
 	
 	/**
 	 * Repaints all objects to graphics
 	 */
 	protected abstract void repaint();
+	
+	/**
+	 * Paints one object to graphics
+	 */
+	protected abstract void paint(IRenderable renderable);
 
 	@Override
 	public void resize(final int width, final int height) {
 		synchronized (_repaintSync) {
 			_newWidth = width;
 			_newHeight = height;
-			_requireResize = true;
+			if (_requireRepaint < REPAINT_RESIZE) {
+				_requireRepaint = REPAINT_RESIZE;
+			}
 		}
 	}
 
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
 	@Override
-	public void drawBuffer(final Graphics2D g, final ImageObserver obs) {
-		boolean requireResize;
-		boolean requireRepaint;
+	public void drawBuffer(final Canvas g) {
+		int requireRepaint;
+		LinkedElementList<IRenderable> repaintAddObjects;
+		float repaintMinX;
+		float repaintMinY;
+		float repaintMaxX;
+		float repaintMaxY;
+		float repaintRadius;
 		synchronized (_repaintSync) {
-			requireResize = _requireResize;
-			_requireResize = false;
 			_renderWidth = _newWidth;
 			_renderHeight = _newHeight;
 			_renderFactorX = _renderWidth;
 			_renderFactorY = _renderHeight;
 			requireRepaint = _requireRepaint;
-			_requireRepaint = false;
+			_requireRepaint = REPAINT_NONE;
+			
+			repaintAddObjects = _repaintAddObjects;
+			repaintMinX = _repaintMinX;
+			repaintMinY = _repaintMinY;
+			repaintMaxX = _repaintMaxX;
+			repaintMaxY = _repaintMaxY;
+			repaintRadius = _repaintRadius;
+			_repaintAddObjects = null;
+			_repaintMinX = 1;
+			_repaintMinY = 1;
+			_repaintMaxX = 0;
+			_repaintMaxY = 0;
+			_repaintRadius = 0;
 		}
-		if (requireResize) {
-			if (_graphics != null) {
-				_graphics.dispose();
-			}
-
+		if (requireRepaint >= REPAINT_RESIZE) {
 			final int imgWidth = Math.max(_renderWidth, 1);
 			final int imgHeight = Math.max(_renderHeight, 1);
-			_imageBuffer = _displayRenderer.createImageBuffer(imgWidth, imgHeight,
-					Transparency.TRANSLUCENT);
-			_graphics = (Graphics2D) _imageBuffer.getGraphics();
-			setRenderingHints(_graphics);
-			_graphics.setBackground(new Color(0, true));
+			if (_graphicsBitmap != null) {
+				_graphicsBitmap.recycle();
+			}
+			_graphicsBitmap = _displayRenderer.createImageBuffer(imgWidth, imgHeight);
+			_graphicsBitmap.eraseColor(0x00000000);
+			_graphicsBitmap.setHasAlpha(true);
+			_graphicsBitmap.setDensity(Bitmap.DENSITY_NONE);
+			_graphics = new Canvas(_graphicsBitmap);
+			_graphics.setDensity(Bitmap.DENSITY_NONE);
+			clear();
+			setRenderingHints(_paint);
 			_isEmpty = true;
-			requireRepaint = true;
 			System.out.println("Resized: " + _renderWidth + "x" + _renderHeight);
 		}
-		if (requireRepaint) {
-			if (_graphics != null) {
-				repaint();
+		if (requireRepaint > REPAINT_NONE) {
+			if (requireRepaint <= REPAINT_CLEAR_RECT) {
+				repaintMinX = repaintMinX * _renderFactorX - repaintRadius - 1;
+				repaintMinY = repaintMinY * _renderFactorY - repaintRadius - 1;
+				repaintMaxX = repaintMaxX * _renderFactorX + repaintRadius + 1;
+				repaintMaxY = repaintMaxY * _renderFactorY + repaintRadius + 1;
+				//System.out.println("repaint clip: " + repaintMinX + ", " + repaintMinY + "; " + repaintMaxX + ", " + repaintMaxY);
+				_graphics.clipRect(repaintMinX, repaintMinY, repaintMaxX, repaintMaxY, Region.Op.REPLACE);
+			} else {
+				_graphics.clipRect(0, 0, _renderWidth, _renderHeight, Region.Op.REPLACE);
+			}
+			if (requireRepaint >= REPAINT_CLEAR_RECT) {
+				if (_graphics != null) {
+					repaint();
+				}
+			} else if (requireRepaint == REPAINT_ADD_PAINT) {
+				_isEmpty = false;
+				for (LinkedElement<IRenderable> element = repaintAddObjects.getFirst(); element != null; element = element.getNext()) {
+					paint(element.getData());
+				}
 			}
 		}
 		if (!_isEmpty) {
-			g.drawImage(_imageBuffer, 0, 0, obs);
+			_graphicsBitmap.prepareToDraw();
+			
+			Rect srcDst = new Rect(0, 0, _renderWidth, _renderHeight);
+			g.drawBitmap(_graphicsBitmap, srcDst, srcDst, null);
 		}
 	}
 	
@@ -137,7 +215,7 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer {
 	 */
 	public void clear() {
 		if (_graphics != null) {
-			_graphics.clearRect(0, 0, _renderWidth, _renderHeight);
+			_graphics.drawColor(0x00000000, PorterDuff.Mode.CLEAR);
 			_isEmpty = true;
 		}
 	}
@@ -154,13 +232,13 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer {
 	public void draw(final IPen pen, final float x1,
 			final float y1, final float x2, final float y2) {
 		if (_graphics != null) {
-			_lineRenderer.x1 = x1 * _renderFactorX;
-			_lineRenderer.y1 = y1 * _renderFactorY;
-			_lineRenderer.x2 = x2 * _renderFactorX;
-			_lineRenderer.y2 = y2 * _renderFactorY;
-			_graphics.setStroke(pen.getStroke());
-			_graphics.setPaint(pen.getColor());
-			_graphics.draw(_lineRenderer);
+			_paint.setStrokeCap(pen.getStrokeCap());
+			_paint.setStrokeJoin(pen.getStrokeJoin());
+			_paint.setStrokeMiter(pen.getStrokeMiter());
+			_paint.setStrokeWidth(pen.getStrokeWidth());
+			_paint.setColor(pen.getColor());
+			_paint.setStyle(Paint.Style.STROKE);
+			_graphics.drawLine(x1 * _renderFactorX, y1 * _renderFactorY, x2 * _renderFactorX, y2 * _renderFactorY, _paint);
 			_isEmpty = false;
 		}
 	}
@@ -175,31 +253,75 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer {
 	public void draw(final IPen pen, final float x,
 			final float y) {
 		if (_graphics != null) {
-			_ellipseRenderer.x = x * _renderFactorX - pen.getThickness() / 2.0f;
-			_ellipseRenderer.y = y * _renderFactorY - pen.getThickness() / 2.0f;
-			_ellipseRenderer.width = pen.getThickness();
-			_ellipseRenderer.height = pen.getThickness();
-			_graphics.setPaint(pen.getColor());
-			_graphics.fill(_ellipseRenderer);
+			_paint.setColor(pen.getColor());
+			_paint.setStyle(Paint.Style.FILL);
+			_tempRect.left = x * _renderFactorX - pen.getThickness() / 2.0f;
+			_tempRect.top = y * _renderFactorY - pen.getThickness() / 2.0f;
+			_tempRect.right = _tempRect.left + pen.getThickness();
+			_tempRect.bottom = _tempRect.top + pen.getThickness();
+			_graphics.drawOval(_tempRect, _paint);
 			_isEmpty = false;
 		}
 	}
-
+	
+	/**
+	 * Draws a dot
+	 * 
+	 * @param pen
+	 * @param x
+	 * @param y
+	 */
+	public void drawEraser(final IPen pen, final float x, final float y) {
+		if (_graphics != null) {
+			_paint.setColor(pen.getColor());
+			_paint.setStyle(Paint.Style.FILL);
+			_tempRect.left = x * _renderFactorX - pen.getThickness() / 2.0f;
+			_tempRect.top = y * _renderFactorY - pen.getThickness() / 2.0f;
+			_tempRect.right = _tempRect.left + pen.getThickness();
+			_tempRect.bottom = _tempRect.top + pen.getThickness();
+			_graphics.drawOval(_tempRect, _paint);
+			_paint.setColor(0xffffffff - (pen.getColor() & 0x00ffffff));
+			_paint.setStyle(Paint.Style.STROKE);
+			_graphics.drawOval(_tempRect, _paint);
+			_isEmpty = false;
+		}
+	}
+	
 	/**
 	 * Draws a path
 	 * 
 	 * @param pen
 	 * @param path
 	 */
-	public void draw(final IPen pen, final Path2D path) {
+	public void draw(final IPen pen, final LinkedElementList<DataPoint> path) {
 		if (_graphics != null) {
-			_graphics.setPaint(pen.getColor());
-			_graphics.setStroke(pen.getStroke());
-			final Shape transformedPath = path
-					.createTransformedShape(AffineTransform.getScaleInstance(
-							_renderFactorX, _renderFactorY));
-			_graphics.draw(transformedPath);
-			_isEmpty = false;
+			_paint.setStrokeCap(pen.getStrokeCap());
+			_paint.setStrokeJoin(pen.getStrokeJoin());
+			_paint.setStrokeMiter(pen.getStrokeMiter());
+			_paint.setStrokeWidth(pen.getStrokeWidth());
+			_paint.setColor(pen.getColor());
+			_paint.setStyle(Paint.Style.STROKE);
+			LinkedElement<DataPoint> point = path.getFirst();
+			int count = path.getCount();
+			if (_ptsBuffer.length < count << 2) {
+				_ptsBuffer = new float[count << 2];
+			}
+			if (point != null) {
+				int i = 0;
+				float lastX = point.getData().getX() * _renderFactorX;
+				float lastY = point.getData().getY() * _renderFactorY;
+				point = point.getNext();
+				while (point != null) {
+					_ptsBuffer[i++] = lastX;
+					_ptsBuffer[i++] = lastY;
+					_ptsBuffer[i++] = lastX = point.getData().getX() * _renderFactorX;
+					_ptsBuffer[i++] = lastY = point.getData().getY() * _renderFactorY;
+					point = point.getNext();
+				}
+				
+				_graphics.drawLines(_ptsBuffer, 0, i, _paint);
+				_isEmpty = false;
+			}
 		}
 	}
 	
@@ -212,12 +334,13 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer {
 	 * @param height
 	 * @param obs (optional)
 	 */
-	public void draw(final BufferedImage image, final float x, final float y, final float width, final float height) {
+	public void draw(final Bitmap image, final float x, final float y, final float width, final float height) {
 		if (_graphics != null) {
-			final AffineTransform t = AffineTransform.getScaleInstance(_renderFactorX, _renderFactorY);
-			t.translate(x, y);
-			t.scale(width/(float)image.getWidth(_displayRenderer.getObserver()), height/(float)image.getHeight(_displayRenderer.getObserver()));
-			_graphics.drawImage(image, t, _displayRenderer.getObserver());
+			final Matrix t = new Matrix();
+			t.postScale(_renderFactorX, _renderFactorY);
+			t.postTranslate(x, y);
+			t.postScale(width/(float)image.getWidth(), height/(float)image.getHeight());
+			_graphics.drawBitmap(image, t, _paint);
 			_isEmpty = false;
 		}
 	}

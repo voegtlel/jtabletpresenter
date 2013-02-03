@@ -1,8 +1,8 @@
 package de.freiburg.uni.tablet.presenter.editor.pageeditor;
 
-import java.awt.Graphics2D;
-import java.awt.image.ImageObserver;
 import java.util.LinkedList;
+
+import android.graphics.Canvas;
 
 public class PageLayerBufferComposite implements IPageLayerBuffer {
 	private final IDisplayRenderer _displayRenderer;
@@ -59,9 +59,9 @@ public class PageLayerBufferComposite implements IPageLayerBuffer {
 	}
 
 	@Override
-	public void drawBuffer(final Graphics2D g, final ImageObserver obs) {
+	public void drawBuffer(final Canvas g) {
 		for (final IPageLayerBuffer pageLayerBuffer : _pageLayerBuffers) {
-			pageLayerBuffer.drawBuffer(g, obs);
+			pageLayerBuffer.drawBuffer(g);
 		}
 	}
 }

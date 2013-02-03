@@ -1,16 +1,17 @@
 package de.freiburg.uni.tablet.presenter.geometry;
 
-import java.awt.Graphics;
-import java.awt.Rectangle;
-import java.awt.image.BufferedImage;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Rect;
 
 public class BitmapHelper {
 
-	public static BufferedImage reduceImage(BufferedImage image, Rectangle newRect) {
+	public static Bitmap reduceImage(Bitmap image, Rect newRect) {
 		int width = image.getWidth();
 		int height = image.getHeight();
-		newRect.setBounds(0, 0, width, height);
-		int[] pixelData = image.getRGB(0, 0, width, height, null, 0, width);
+		newRect.set(0, 0, width, height);
+		final int[] pixelData = new int[image.getWidth() * image.getHeight()];
+		image.getPixels(pixelData, 0, width, 0, 0, width, height);
 		// Check left empty columns
 		for (int iX = 0; iX < width; iX++) {
 			boolean allEmpty = true;
@@ -21,16 +22,15 @@ public class BitmapHelper {
 				}
 			}
 			if (allEmpty) {
-				newRect.x++;
-				newRect.width--;
+				newRect.left++;
 			} else {
 				break;
 			}
 		}
-		if (newRect.x >= newRect.width) {
+		if (newRect.left >= newRect.right) {
 			return null;
 		}
-		for (int iX = newRect.width - 1; iX >= newRect.x; iX--) {
+		for (int iX = newRect.right - 1; iX >= newRect.left; iX--) {
 			boolean allEmpty = true;
 			for (int iY = 0; iY < height; iY++) { 
 				if ((pixelData[iY * width + iX] < 0) || (pixelData[iY * width + iX] > 0x05000000)) {
@@ -39,48 +39,46 @@ public class BitmapHelper {
 				}
 			}
 			if (allEmpty) {
-				newRect.width--;
+				newRect.right--;
 			} else {
 				break;
 			}
 		}
 		for (int iY = 0; iY < height; iY++) {
 			boolean allEmpty = true;
-			for (int iX = newRect.x; iX < newRect.width; iX++) {
+			for (int iX = newRect.left; iX < newRect.right; iX++) {
 				if ((pixelData[iY * width + iX] < 0) || (pixelData[iY * width + iX] > 0x05000000)) {
 					allEmpty = false;
 					break;
 				}
 			}
 			if (allEmpty) {
-				newRect.y++;
-				newRect.height--;
+				newRect.top++;
 			} else {
 				break;
 			}
 		}
-		for (int iY = newRect.height - 1; iY >= newRect.y; iY--) {
+		for (int iY = newRect.bottom - 1; iY >= newRect.top; iY--) {
 			boolean allEmpty = true;
-			for (int iX = newRect.x; iX < newRect.width; iX++) {
+			for (int iX = newRect.left; iX < newRect.right; iX++) {
 				if ((pixelData[iY * width + iX] < 0) || (pixelData[iY * width + iX] > 0x05000000)) {
 					allEmpty = false;
 					break;
 				}
 			}
 			if (allEmpty) {
-				newRect.height--;
+				newRect.bottom--;
 			} else {
 				break;
 			}
 		}
-		if (newRect.x == 0 && newRect.y == 0 && newRect.width == width && newRect.height == height) {
+		if (newRect.left == 0 && newRect.top == 0 && newRect.right == width && newRect.bottom == height) {
 			System.out.println("no reduction");
 			return image;
 		}
-		BufferedImage result = new BufferedImage(newRect.width, newRect.height, BufferedImage.TYPE_INT_ARGB);
-		Graphics graphics = result.getGraphics();
-		graphics.drawImage(image, 0, 0, newRect.width, newRect.height, newRect.x, newRect.y, newRect.x + newRect.width, newRect.y + newRect.height, null);
-		graphics.dispose();
+		Bitmap result = Bitmap.createBitmap(newRect.right - newRect.left, newRect.bottom - newRect.top, Bitmap.Config.ARGB_8888);
+		Canvas c = new Canvas(result);
+		c.drawBitmap(image, newRect, new Rect(0, 0, newRect.right - newRect.left, newRect.bottom - newRect.top), null);
 		System.out.println("Reduced image from " + image.getWidth() + "x" + image.getHeight() + " to " + newRect);
 		return result;
 	}

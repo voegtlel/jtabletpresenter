@@ -4,8 +4,8 @@
  */
 package de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons;
 
-import java.awt.Component;
-
+import android.content.Context;
+import de.freiburg.uni.tablet.presenter.R;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 
 /**
@@ -14,19 +14,14 @@ import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
  */
 public class ButtonRedo extends AbstractButtonAction {
 	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-
-	/**
 	 * Creates the action with an editor.
 	 */
 	public ButtonRedo(final IToolPageEditor editor) {
-		super("redo", editor, "Redo", "/buttons/edit-redo.png");
+		super(editor, R.id.redo);
 	}
 
 	@Override
-	public void performLater(final Component component) {
+	public void perform(final Context context) {
 		if (_editor.getDocumentEditor().getHistory().hasRedoAction()) {
 			_editor.getDocumentEditor().getHistory().redo();
 		}

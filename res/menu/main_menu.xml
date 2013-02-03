@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
+    <item android:id="@+id/next" android:title="@string/menu_next" android:icon="@drawable/icon_next"></item>
+    <item android:id="@+id/previous" android:title="@string/menu_previous" android:icon="@drawable/icon_previous"></item>
+    <item android:id="@+id/undo" android:title="@string/menu_undo" android:icon="@drawable/icon_undo"></item>
+    <item android:id="@+id/redo" android:title="@string/menu_redo" android:icon="@drawable/icon_redo"></item>
+    <item android:id="@+id/document_new" android:title="@string/menu_document_new" android:icon="@drawable/icon_new"></item>
+    <item android:id="@+id/open_from" android:title="@string/menu_open_from" android:icon="@drawable/icon_open"></item>
+    <item android:id="@+id/save_as" android:title="@string/menu_save_as" android:icon="@drawable/icon_save"></item>
+    <item android:id="@+id/color_select_menu" android:title="@string/menu_color_select" android:icon="@drawable/icon_color">
+        <menu>
+            <group android:id="@+id/color_select_group">
+                <item android:id="@+id/color_red" android:title="@string/menu_color_red" android:icon="@drawable/icon_color_red"/>
+	            <item android:id="@+id/color_green" android:title="@string/menu_color_green" android:icon="@drawable/icon_color_green"/>
+	            <item android:id="@+id/color_blue" android:title="@string/menu_color_blue" android:icon="@drawable/icon_color_blue"/>
+	            <item android:id="@+id/color_black" android:title="@string/menu_color_black" android:icon="@drawable/icon_color_black"/>
+            </group>
+        </menu>
+    </item>
+    <item android:id="@+id/tool_primary_menu" android:title="@string/menu_tool_primary" android:icon="@drawable/icon_tool">
+        <menu>
+            <group android:id="@+id/tool_primary_group">
+                <item android:id="@+id/tool_scribble" android:title="@string/menu_tool_scribble" android:icon="@drawable/icon_tool_scribble"/>
+                <item android:id="@+id/tool_eraser" android:title="@string/menu_tool_eraser" android:icon="@drawable/icon_tool_eraser"/>
+                <item android:id="@+id/tool_deleter" android:title="@string/menu_tool_deleter" android:icon="@drawable/icon_tool_eraser"/>
+                <item android:id="@+id/tool_image" android:title="@string/menu_tool_image" android:icon="@drawable/icon_tool_image"/>
+            </group>
+        </menu>
+    </item>
+    <item android:id="@+id/tool_secondary_menu" android:title="@string/menu_tool_secondary" android:icon="@drawable/icon_tool">
+        <menu>
+            <group android:id="@+id/tool_secondary_group">
+                <item android:id="@+id/tool_scribble" android:title="@string/menu_tool_scribble" android:icon="@drawable/icon_tool_scribble" tools:ignore="DuplicateIds"/>
+                <item android:id="@+id/tool_eraser" android:title="@string/menu_tool_eraser" android:icon="@drawable/icon_tool_eraser" tools:ignore="DuplicateIds"/>
+                <item android:id="@+id/tool_deleter" android:title="@string/menu_tool_deleter" android:icon="@drawable/icon_tool_eraser" tools:ignore="DuplicateIds"/>
+                <item android:id="@+id/tool_image" android:title="@string/menu_tool_image" android:icon="@drawable/icon_tool_image" tools:ignore="DuplicateIds"/>
+            </group>
+        </menu>
+    </item>
+    <item android:id="@+id/tool_page" android:title="@string/menu_tool_page" android:icon="@drawable/icon_tool_page">
+        <menu>
+            <item android:id="@+id/page_new" android:title="@string/menu_page_new" android:icon="@drawable/icon_new"/>
+            <item android:id="@+id/page_clone" android:title="@string/menu_page_clone" android:icon="@drawable/icon_clone"/>
+            <item android:id="@+id/page_delete" android:title="@string/menu_page_delete" android:icon="@drawable/icon_delete"/>
+            <item android:id="@+id/page_clear" android:title="@string/menu_page_clear" android:icon="@drawable/icon_clear"/>
+        </menu>
+    </item>
+    <item android:id="@+id/connect" android:title="@string/menu_connect"></item>
+    
+</menu>

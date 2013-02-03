@@ -1,7 +1,6 @@
 package de.freiburg.uni.tablet.presenter.editor.pageeditor;
 
-import java.awt.Graphics2D;
-import java.awt.image.ImageObserver;
+import android.graphics.Canvas;
 
 public class PageLayerBufferNull implements IPageLayerBuffer {
 	@Override
@@ -9,6 +8,6 @@ public class PageLayerBufferNull implements IPageLayerBuffer {
 	}
 
 	@Override
-	public void drawBuffer(final Graphics2D g, final ImageObserver obs) {
+	public void drawBuffer(final Canvas g) {
 	}
 }

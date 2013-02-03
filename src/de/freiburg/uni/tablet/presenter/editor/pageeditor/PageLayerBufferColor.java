@@ -1,37 +1,26 @@
 package de.freiburg.uni.tablet.presenter.editor.pageeditor;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.image.ImageObserver;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.PorterDuff.Mode;
 
 public class PageLayerBufferColor implements IPageLayerBuffer {
-	private int _width = 0;
-	private int _height = 0;
-	private Color _color = Color.WHITE;
+	private int _color;
+	
+	public PageLayerBufferColor() {
+		_color = Color.WHITE;
+	}
 	
 	@Override
 	public void resize(final int width, final int height) {
-		synchronized (this) {
-			_width = width;
-			_height = height;
-		}
 	}
 
-	public void setColor(final Color color) {
+	public void setColor(final int color) {
 		_color = color;
 	}
 
 	@Override
-	public void drawBuffer(final Graphics2D g, final ImageObserver obs) {
-		final int width;
-		final int height;
-		synchronized (this) {
-			width = _width;
-			height = _height;
-		}
-		//g.setBackground(_color);
-		//g.clearRect(0, 0, _width, _height);
-		g.setColor(_color);
-		g.fillRect(0, 0, width, height);
+	public void drawBuffer(final Canvas g) {
+		g.drawColor(_color, Mode.SRC);
 	}
 }

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">JTabletPresenter</string>
+    <string name="menu_next">Next</string>
+    <string name="menu_previous">Previous</string>
+    <string name="menu_undo">Undo</string>
+    <string name="menu_redo">Redo</string>
+    <string name="menu_document_new">New Document</string>
+    <string name="menu_open_from">Open</string>
+    <string name="menu_save_as">Save</string>
+    <string name="menu_tool_primary">Primary</string>
+    <string name="menu_tool_secondary">Secondary</string>
+    <string name="menu_tool_page">Page</string>
+    <string name="menu_page_new">New</string>
+    <string name="menu_page_clone">Clone</string>
+    <string name="menu_page_delete">Delete</string>
+    <string name="menu_page_clear">Clear</string>
+    <string name="menu_color_select">Color</string>
+    <string name="menu_color_red">Red</string>
+    <string name="menu_color_green">Green</string>
+    <string name="menu_color_blue">Blue</string>
+    <string name="menu_color_black">Black</string>
+
+    <string name="filedialog_location">Location</string>
+    <string name="filedialog_filename">Filename:</string>
+    <string name="filedialog_cancel">Cancel</string>
+    <string name="filedialog_ok">OK</string>
+    <string name="filedialog_go_into">Go Into</string>
+    <string name="filedialog_cant_read_folder">Folder can\'t be read!</string>
+    <string name="filedialog_new_folder">New</string>
+    <string name="filedialog_new_directory">New</string>
+    <string name="filedialog_file_description">File/Folder</string>
+    
+    <string name="msg_save_unrecognized_type">Can\'t save. Unrecognized file type.</string>
+    <string name="msg_title_error">Error</string>
+    <string name="msg_title_info">Information</string>
+    <string name="msg_button_ok">OK</string>
+    <string name="msg_button_yes">Yes</string>
+    <string name="msg_button_no">No</string>
+    <string name="msg_button_cancel">Cancel</string>
+    <string name="msg_button_disconnect">Disconnect</string>
+    <string name="msg_save_cant_open">Can\'t open file.</string>
+    <string name="msg_save_cant_write">Can\'t write to file.</string>
+    <string name="msg_save_cant_read">Can\'t read from file.</string>
+    <string name="msg_new_save">Save current document before creating a new document?</string>
+    <string-array name="msg_pdf_options">
+        <item name="msg_pdf_clear">Clear</item>
+        <item name="msg_pdv_etc">Other</item>
+    </string-array>
+        <string name="filedialog_filename_hint">Filename</string>
+        <string name="filedialog_location_text">"Location: "</string>
+        <string name="menu_tool_scribble">Scribble</string>
+        <string name="menu_tool_erase">Erase</string>
+        <string name="menu_tool_eraser">Eraser</string>
+        <string name="menu_tool_deleter">Deleter</string>
+        <string name="menu_tool_image">Image</string>
+        <string name="menu_connect">Connect</string>
+        <string name="menu_disconnect">Disconnect</string>
+        <string name="connect_host">Hostname</string>
+        <string name="connect_port">Port</string>
+        <string name="connect_up">Direction Up</string>
+        <string name="connect_auth">Authentication Code</string>
+        <string name="connect_init_down">Initial Download</string>
+</resources>

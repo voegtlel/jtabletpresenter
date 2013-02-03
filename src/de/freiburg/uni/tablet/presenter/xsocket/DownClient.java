@@ -5,8 +5,6 @@ import java.nio.channels.Pipe;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.xsocket.connection.INonBlockingConnection;
-
 import de.freiburg.uni.tablet.presenter.actions.IAction;
 import de.freiburg.uni.tablet.presenter.actions.SetClientDocumentAction;
 import de.freiburg.uni.tablet.presenter.actions.SetServerDocumentAction;
@@ -30,37 +28,17 @@ public class DownClient extends ClientSync {
 	}
 	
 	@Override
-	protected boolean onConnect(final INonBlockingConnection connection)
-			throws IOException {
-		if (!super.onConnect(connection)) {
-			return false;
-		}
-		startThread();
-		return true;
-	}
-	
-	@Override
-	protected boolean onData(final INonBlockingConnection connection)
-			throws IOException {
-		if (!super.onData(connection)) {
-			return false;
-		}
-		try {
-			connection.transferTo(_readPipe.sink(), connection.available());
-		} catch (IOException e) {
-			e.printStackTrace();
-			throw e;
-		}
-		return true;
-	}
-	
-	@Override
 	protected void onThread() throws IOException {
 		try {
-			final BinaryDeserializer reader = new BinaryDeserializer(_readPipe.source());
+			LOGGER.log(Level.INFO, "Init socket");
+			openSocket();
+			LOGGER.log(Level.INFO, "Init data");
+			final BinaryDeserializer reader = new BinaryDeserializer(_connection);
 			final BinarySerializer writer = new BinarySerializer(_connection);
+			LOGGER.log(Level.INFO, "Initial data");
 			performInit(writer, reader, _connection);
 			fireConnected();
+			LOGGER.log(Level.INFO, "Init done");
 			while (true) {
 				try {
 					final IAction action = reader.readSerializableClass();
@@ -82,7 +60,10 @@ public class DownClient extends ClientSync {
 				}
 			}
 		} finally {
-			_connection.close();
+			if (_connection != null) {
+				_connection.close();
+				onDisconnect(_connection);
+			}
 		}
 	}
 }

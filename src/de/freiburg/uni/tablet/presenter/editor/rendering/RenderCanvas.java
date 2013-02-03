@@ -1,29 +1,18 @@
 package de.freiburg.uni.tablet.presenter.editor.rendering;
 
-import java.awt.Canvas;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Toolkit;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.image.BufferStrategy;
-import java.awt.image.ImageObserver;
-
-import javax.swing.SwingUtilities;
-
-import jpen.owner.multiAwt.AwtPenToolkit;
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.util.AttributeSet;
+import android.view.MotionEvent;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import de.freiburg.uni.tablet.presenter.editor.pageeditor.IPageLayerBuffer;
 import de.freiburg.uni.tablet.presenter.editor.pageeditor.IPageRenderer;
 import de.freiburg.uni.tablet.presenter.editor.pageeditor.PagePenDispatcher;
 import de.freiburg.uni.tablet.presenter.tools.ITool;
 
-public class RenderCanvas extends Canvas implements IPageRenderer {
-	private static final long serialVersionUID = 1L;
-	
+public class RenderCanvas extends SurfaceView implements IPageRenderer {
 	private boolean _requiresRepaint = true;
 	private int _suspendRepaintCounter = 0;
 	
@@ -40,14 +29,50 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 	private int _lastRenderWidth = 0;
 	private int _lastRenderHeight = 0;
 	
+	private SurfaceHolder _surfaceHolder;
+	
 	/**
 	 * Dispatcher
 	 */
-	private final PagePenDispatcher _pagePenDispatcher;
+	private PagePenDispatcher _pagePenDispatcher;
 	
-	public RenderCanvas() {
-		super();
-		setBackground(Color.WHITE);
+	public RenderCanvas(final Context context) {
+		super(context);
+		initialize(context);
+	}
+	
+	public RenderCanvas(final Context context, final AttributeSet attrs) {
+		super(context, attrs);
+		initialize(context);
+	}
+	
+	public RenderCanvas(final Context context, final AttributeSet attrs, final int defStyle) {
+		super(context, attrs, defStyle);
+		initialize(context);
+	}
+	
+	
+	private final void initialize(Context context) {
+		System.out.println("Init render canvas");
+		
+		_surfaceHolder = getHolder();
+		_surfaceHolder.addCallback(new SurfaceHolder.Callback() {
+			@Override
+			public void surfaceDestroyed(final SurfaceHolder holder) {
+				stop();
+			}
+			
+			@Override
+			public void surfaceCreated(final SurfaceHolder holder) {
+				start();
+			}
+			
+			@Override
+			public void surfaceChanged(final SurfaceHolder holder, final int format, final int width,
+					final int height) {
+				requireRepaint();
+			}
+		});
 		
 		_renderThread = new Thread(new Runnable() {
 			@Override
@@ -60,39 +85,38 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 			}
 		});
 		
-		addComponentListener(new ComponentAdapter() {
-			@Override
-			public void componentResized(ComponentEvent e) {
-				requireRepaint();
-			}
-		});
-		
 		_pagePenDispatcher = new PagePenDispatcher();
-		AwtPenToolkit.addPenListener(this, _pagePenDispatcher);
-		AwtPenToolkit.getPenManager().pen.levelEmulator
-				.setPressureTriggerForLeftCursorButton(0.5f);
+		_pagePenDispatcher.setDrawSize(this.getWidth(), this.getHeight());
+		System.out.println("Init render canvas done");
+	}
+	
+	@Override
+	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+		super.onSizeChanged(w, h, oldw, oldh);
+		requireRepaint();
+	}
+	
+	@Override
+	public boolean onTouchEvent(final MotionEvent event) {
+		//super.onTouchEvent(event);
+		_pagePenDispatcher.onTouchEvent(event);
+		return true;
 	}
 	
 	/**
 	 * Start the rendering thread
 	 */
-	public void start() {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				_running = true;
-				createBufferStrategy(2);
-				_renderThread.start();
-				System.out.println("Start render thread");
-			}
-		});
+	private void start() {
+		_running = true;
+		_renderThread.start();
+		System.out.println("Start render thread");
 	}
 	
 	/**
 	 * Stop the rendering thread
 	 */
 	@SuppressWarnings("deprecation")
-	public void stop() {
+	private void stop() {
 		if (_renderThread.isAlive()) {
 			synchronized (_repaintMonitor) {
 				_running = false;
@@ -133,44 +157,52 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 			}
 			if (_running) {
 				// Perform actual repaint
-				paint(null);
+				paint();
 			}
 		}
 		System.out.println("Repaint thread exit");
 	}
 	
 	@Override
-	public void paint(final Graphics g) {
+	protected void onDraw(final Canvas canvas) {
+		synchronized (_paintSync) {
+			if (_renderBuffer != null) {
+				try {
+					_renderBuffer.drawBuffer(canvas);
+				} catch(Exception e) {
+					e.printStackTrace();
+					requireRepaint();
+				}
+			}
+		}
+	}
+	
+	private void paint() {
 		synchronized (_paintSync) {
 			int width = this.getWidth();
 			int height = this.getHeight();
 			if ((width != _lastRenderWidth) || (height != _lastRenderHeight)) {
 				_lastRenderWidth = width;
 				_lastRenderHeight = height;
-				_pagePenDispatcher.setDrawSize(new Dimension(width, height));
+				_pagePenDispatcher.setDrawSize(width, height);
 				if (_renderBuffer != null) {
 					_renderBuffer.resize(width, height);
 				}
 			}
-			
-			if (this.isVisible()) {
-				final BufferStrategy strategy = this.getBufferStrategy();
-				final Graphics2D graphics = (Graphics2D) strategy.getDrawGraphics();
-				
-				if (_renderBuffer != null) {
-					try {
-						_renderBuffer.drawBuffer(graphics, this);
-					} catch(Exception e) {
-						e.printStackTrace();
-						requireRepaint();
+			if (_surfaceHolder.getSurface().isValid()) {
+				Canvas lockCanvas = null;
+				try {
+					lockCanvas = _surfaceHolder.lockCanvas();
+					synchronized (_surfaceHolder) {
+						onDraw(lockCanvas);
+					}
+				} finally {
+					if (lockCanvas != null) {
+						_surfaceHolder.unlockCanvasAndPost(lockCanvas);
 					}
 				}
-				
-				if (graphics != null) {
-					graphics.dispose();
-				}
-				strategy.show();
-				Toolkit.getDefaultToolkit().sync();
+			} else {
+				requireRepaint();
 			}
 		}
 	}
@@ -189,11 +221,6 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 	@Override
 	public IPageLayerBuffer getPageLayer() {
 		return _renderBuffer;
-	}
-	
-	@Override
-	public void update(final Graphics g) {
-		this.paint(g);
 	}
 	
 	@Override
@@ -224,23 +251,13 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 	}
 	
 	@Override
-	public Image createImageBuffer(int width, int height, int transparency) {
-		return getGraphicsConfiguration().createCompatibleImage(width, height, transparency);
+	public Bitmap createImageBuffer(int width, int height) {
+		return Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
 	}
 	
 	@Override
 	public boolean isWorking() {
-		return isVisible();
-	}
-	
-	@Override
-	public ImageObserver getObserver() {
-		return this;
-	}
-	
-	@Override
-	public Component getContainerComponent() {
-		return this;
+		return _surfaceHolder.getSurface().isValid();
 	}
 	
 	@Override

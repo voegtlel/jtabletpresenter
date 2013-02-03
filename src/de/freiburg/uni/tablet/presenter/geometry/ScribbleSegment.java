@@ -1,6 +1,5 @@
 package de.freiburg.uni.tablet.presenter.geometry;
 
-import java.awt.geom.Path2D;
 import java.io.IOException;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
@@ -12,8 +11,6 @@ import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
 import de.freiburg.uni.tablet.presenter.page.IPen;
 
 public class ScribbleSegment implements IBinarySerializable {
-	private Path2D _path;
-
 	private boolean _hasBoundary;
 	private float _minX;
 	private float _minY;
@@ -27,7 +24,6 @@ public class ScribbleSegment implements IBinarySerializable {
 	 */
 	public ScribbleSegment() {
 		_points = new LinkedElementList<DataPoint>();
-		_path = new Path2D.Float();
 		_hasBoundary = true;
 		_minX = Float.MAX_VALUE;
 		_minY = Float.MAX_VALUE;
@@ -49,15 +45,6 @@ public class ScribbleSegment implements IBinarySerializable {
 	public void addPoint(final DataPoint data) {
 		// Add
 		_points.addFirst(data);
-		// Check for baking object
-		if (_path != null) {
-			if (_points.hasOne()) {
-				// First point
-				_path.moveTo(data.getX(), data.getY());
-			} else {
-				_path.lineTo(data.getX(), data.getY());
-			}
-		}
 		// fix boundary
 		if (_hasBoundary) {
 			_minX = Math.min(_minX, data.getX());
@@ -114,13 +101,10 @@ public class ScribbleSegment implements IBinarySerializable {
 					if (e == _points.getFirst()) {
 						// Simply remove the point.
 						_points.removeFirst();
-						_path = null;
 					} else if (e == _points.getLast()) {
 						// Simply remove the point. Do not return.
 						_points.removeLast();
-						_path = null;
 					} else {
-						_path = null;
 						_hasBoundary = true;
 						return new ScribbleSegment(_points.splitAtRemove(e));
 					}
@@ -163,20 +147,6 @@ public class ScribbleSegment implements IBinarySerializable {
 		return false;
 	}
 
-	/**
-	 * Creates the graphics object.
-	 */
-	public void bake() {
-		if (!_points.isEmpty() && !_points.hasOne()) {
-			_path = new Path2D.Float(Path2D.WIND_NON_ZERO, _points.getCount());
-			LinkedElement<DataPoint> e = _points.getFirst();
-			_path.moveTo(e.getData().getX(), e.getData().getY());
-			for (e = e.getNext(); e != null; e = e.getNext()) {
-				_path.lineTo(e.getData().getX(), e.getData().getY());
-			}
-		}
-	}
-
 	public float getMinX() {
 		if (!_hasBoundary) {
 			calcBoundary();
@@ -217,10 +187,7 @@ public class ScribbleSegment implements IBinarySerializable {
 				renderer.draw(pen, _points.getFirst().getData().getX(), _points
 						.getFirst().getData().getY());
 			} else {
-				if (_path == null) {
-					bake();
-				}
-				renderer.draw(pen, _path);
+				renderer.draw(pen, _points);
 			}
 		}
 	}
@@ -275,10 +242,6 @@ public class ScribbleSegment implements IBinarySerializable {
 		result._minY = _minY;
 		result._maxX = _maxX;
 		result._maxY = _maxY;
-		result._path = null;
-		/*if (_path != null) {
-			result._path = (Path2D) _path.clone();
-		}*/
 		for (LinkedElement<DataPoint> element = _points.getFirst(); element != null; element = element
 				.getNext()) {
 			result._points.addLast(element.getData());

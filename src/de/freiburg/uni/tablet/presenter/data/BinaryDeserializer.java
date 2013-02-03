@@ -10,11 +10,12 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import de.freiburg.uni.tablet.presenter.Helper;
 
 /**
  * @author lukas
@@ -79,7 +80,7 @@ public class BinaryDeserializer {
 
 	public String readString() throws IOException {
 		final byte[] strData = readByteArray();
-		return new String(strData, StandardCharsets.UTF_8);
+		return new String(strData, Helper.UTF_8);
 	}
 
 	public long readLong() throws IOException {

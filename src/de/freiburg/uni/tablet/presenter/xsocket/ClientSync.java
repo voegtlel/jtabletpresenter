@@ -1,13 +1,16 @@
 package de.freiburg.uni.tablet.presenter.xsocket;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.nio.channels.SocketChannel;
+import java.nio.channels.spi.SelectorProvider;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.xsocket.connection.IConnection;
-import org.xsocket.connection.NonBlockingConnection;
+import javax.net.SocketFactory;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
@@ -24,10 +27,10 @@ public abstract class ClientSync extends Sync {
 	private String _hostname;
 	private int _port;
 	
+	private int _timeout = 5000;
+	
 	private List<ClientListener> _listeners = new ArrayList<ClientListener>();
 
-	private long _idleTimeout = IConnection.MAX_TIMEOUT_MILLIS;
-	
 	public ClientSync(final String hostname, final int port, final int serverMagic, final int clientMagic) {
 		_hostname = hostname;
 		_port = port;
@@ -47,22 +50,16 @@ public abstract class ClientSync extends Sync {
 		return _clientId;
 	}
 	
-	/**
-	 * Sets the idle timeout
-	 * @param idleTimeout
-	 */
-	public void setIdleTimeout(final long idleTimeout) {
-		_idleTimeout = idleTimeout;
-		if (_connection != null) {
-			_connection.setIdleTimeoutMillis(idleTimeout);
-		}
+	protected void openSocket() throws IOException {
+		_connection = SocketChannel.open();
+		_connection.connect(new InetSocketAddress(_hostname, _port));
+		onConnect(_connection);
 	}
 	
 	@Override
 	public void start() throws IOException {
 		stop();
-		_connection = new NonBlockingConnection(_hostname, _port, _defaultHandler);
-		_connection.setIdleTimeoutMillis(_idleTimeout);
+		startThread();
 	}
 	
 	/**
@@ -71,14 +68,14 @@ public abstract class ClientSync extends Sync {
 	protected void onThread() throws IOException {
 	}
 	
-	protected void performInit(final BinarySerializer writer, final BinaryDeserializer reader, final IConnection connection) throws IOException {
+	protected void performInit(final BinarySerializer writer, final BinaryDeserializer reader, final SocketChannel connection) throws IOException {
 		// Write server magic
 		writer.writeInt(_serverMagic);
 		writer.flush();
 		// Check magic
 		final int magic = reader.readInt();
 		if (magic != _clientMagic) {
-			LOGGER.log(Level.WARNING, "Server " + connection.getRemoteAddress() + " has invalid magic: " + String.format("%08X", magic));
+			LOGGER.log(Level.WARNING, "Server " + connection.socket().getRemoteSocketAddress() + " has invalid magic: " + String.format("%08X", magic));
 			connection.close();
 			throw new IOException("Invalid server magic");
 		}
@@ -91,7 +88,7 @@ public abstract class ClientSync extends Sync {
 		_clientId = reader.readInt();
 		// Get name
 		_remoteName = reader.readString();
-		LOGGER.log(Level.INFO, "Server " + connection.getRemoteAddress() + " (" + _clientId + ": " + _remoteName + ") connected");
+		LOGGER.log(Level.INFO, "Server " + connection.socket().getRemoteSocketAddress() + " (" + _clientId + ": " + _remoteName + ") connected");
 	}
 	
 	protected void fireDisconnected() {

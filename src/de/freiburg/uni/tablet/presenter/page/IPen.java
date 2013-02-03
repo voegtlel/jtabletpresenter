@@ -1,24 +1,16 @@
 package de.freiburg.uni.tablet.presenter.page;
 
-import java.awt.Color;
-import java.awt.Stroke;
-
+import android.graphics.Paint.Cap;
+import android.graphics.Paint.Join;
 import de.freiburg.uni.tablet.presenter.data.IBinarySerializable;
 
 public interface IPen extends IBinarySerializable {
-	/**
-	 * Get system stroke.
-	 * 
-	 * @return stroke
-	 */
-	Stroke getStroke();
-
 	/**
 	 * Get system paint.
 	 * 
 	 * @return paint
 	 */
-	Color getColor();
+	int getColor();
 
 	/**
 	 * Gets the thickness.
@@ -26,4 +18,12 @@ public interface IPen extends IBinarySerializable {
 	 * @return thickness
 	 */
 	float getThickness();
+
+	Cap getStrokeCap();
+
+	Join getStrokeJoin();
+
+	float getStrokeMiter();
+
+	float getStrokeWidth();
 }
