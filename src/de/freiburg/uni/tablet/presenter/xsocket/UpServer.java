@@ -1,13 +1,9 @@
 package de.freiburg.uni.tablet.presenter.xsocket;
 
 import java.io.IOException;
+import java.nio.channels.SocketChannel;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.xsocket.connection.BlockingConnection;
-import org.xsocket.connection.ConnectionUtils;
-import org.xsocket.connection.IBlockingConnection;
-import org.xsocket.connection.INonBlockingConnection;
 
 import de.freiburg.uni.tablet.presenter.actions.IAction;
 import de.freiburg.uni.tablet.presenter.actions.SetClientDocumentAction;
@@ -31,11 +27,10 @@ public class UpServer extends ServerSync {
 	}
 	
 	@Override
-	protected boolean onConnect(final INonBlockingConnection connection)
+	protected void onConnect(final SocketChannel connection)
 			throws IOException {
 		final UpClientSync clientSync = new UpClientSync(connection);
 		clientSync.start();
-		return true;
 	}
 	
 	private class UpClientSync extends ClientSync {
@@ -44,9 +39,7 @@ public class UpServer extends ServerSync {
 		
 		private Object _threadSync = new Object();
 		
-		private IBlockingConnection _blockingConnection;
-		
-		public UpClientSync(final INonBlockingConnection connection) throws IOException {
+		public UpClientSync(final SocketChannel connection) throws IOException {
 			super(connection, _clientId++);
 			
 			_documentHistoryListener = new DocumentHistoryListener() {
@@ -71,19 +64,7 @@ public class UpServer extends ServerSync {
 		
 		@Override
 		public void start() throws IOException {
-			onConnect(_connection);
-		}
-		
-		@Override
-		protected boolean onConnect(final INonBlockingConnection connection) throws IOException {
-			if (!super.onConnect(connection)) {
-				return false;
-			}
-			// Register blocking connection
-			final INonBlockingConnection nbc = ConnectionUtils.synchronizedConnection(connection);
-			_blockingConnection = new BlockingConnection(nbc);
 			startThread();
-			return true;
 		}
 		
 		@Override
@@ -92,18 +73,35 @@ public class UpServer extends ServerSync {
 				_editor.getHistory().addListener(_documentHistoryListener);
 			}
 			
+			DummyReadThread readThread = null;
 			try {
-				final BinarySerializer writer = new BinarySerializer(_blockingConnection);
-				final BinaryDeserializer reader = new BinaryDeserializer(_blockingConnection);
+				LOGGER.log(Level.INFO, "Init client");
+				final BinarySerializer writer = new BinarySerializer(_connection);
+				final BinaryDeserializer reader = new BinaryDeserializer(_connection);
 				// Exchange init
-				performInit(writer, reader, _blockingConnection);
+				performInit(writer, reader, _connection);
 				// Send initial data
 				LOGGER.log(Level.INFO, "Serialize init doc");
 				writer.writeSerializableClass(new SetClientDocumentAction(_editor.getDocument(), _editor.getCurrentPageIndex()));
 				writer.flush();
 				LOGGER.log(Level.INFO, "Serialize init doc done");
 				fireConnected();
-				while (true) {
+				readThread = new DummyReadThread(_connection, new DummyReadThread.IDisconnectListener() {
+					@Override
+					public void onDisconnect() {
+						try {
+							synchronized (_threadSync) {
+								_connection.close();
+								_running = false;
+								_threadSync.notifyAll();
+							}
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+				});
+				readThread.start();
+				while (_running) {
 					final IAction action;
 					// Get next action
 					synchronized (_threadSync) {
@@ -113,6 +111,10 @@ public class UpServer extends ServerSync {
 							} catch (InterruptedException e) {
 							}
 							_threadSync.notifyAll();
+							if (!_running) {
+								LOGGER.log(Level.INFO, "not running any more");
+								break;
+							}
 						}
 						// Pop action
 						action = _actions.getFirst().getData();
@@ -128,7 +130,13 @@ public class UpServer extends ServerSync {
 				synchronized (_editor.getHistory()) {
 					_editor.getHistory().removeListener(_documentHistoryListener);
 				}
-				_blockingConnection.close();
+				if (_connection != null) {
+					_connection.close();
+				}
+				if (readThread != null) {
+					readThread.stop();
+				}
+				onDisconnect(_connection);
 			}
 		}
 	}

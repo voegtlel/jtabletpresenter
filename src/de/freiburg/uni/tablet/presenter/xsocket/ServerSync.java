@@ -1,16 +1,11 @@
 package de.freiburg.uni.tablet.presenter.xsocket;
 
 import java.io.IOException;
-import java.nio.BufferUnderflowException;
+import java.net.InetSocketAddress;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.xsocket.MaxReadSizeExceededException;
-import org.xsocket.connection.IConnectHandler;
-import org.xsocket.connection.IConnection;
-import org.xsocket.connection.INonBlockingConnection;
-import org.xsocket.connection.IServer;
-import org.xsocket.connection.Server;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
@@ -18,23 +13,22 @@ import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 public abstract class ServerSync {
 	private final static Logger LOGGER = Logger.getLogger(ServerSync.class.getName());
 	
-	private IServer _server;
+	private int _port;
+	private ServerSocketChannel _server;
 	private String _name = "Server";
 	private String _authToken = null;
 	protected int _clientId = 0;
 	
 	private final int _serverMagic;
 	private final int _clientMagic;
+
+	private boolean _running;
+
+	private Thread _thread;
 	
 	public ServerSync(final int port, final int serverMagic, final int clientMagic) throws IOException {
-		_server = new Server(port, new IConnectHandler() {
-			@Override
-			public boolean onConnect(final INonBlockingConnection connection)
-					throws IOException, BufferUnderflowException,
-					MaxReadSizeExceededException {
-				return ServerSync.this.onConnect(connection);
-			}
-		});
+		_port = port;
+		_server = ServerSocketChannel.open();
 		_serverMagic = serverMagic;
 		_clientMagic = clientMagic;
 	}
@@ -55,30 +49,77 @@ public abstract class ServerSync {
 		return _name;
 	}
 	
-	public void start() throws IOException {
-		_server.start();
+	public void start() {
+		if (_thread == null || !_thread.isAlive()) {
+			stop();
+			_running = true;
+			_thread = new Thread() {
+				@Override
+				public void run() {
+					try {
+						ServerSync.this.onThread();
+					} catch (IOException e) {
+						e.printStackTrace();
+						// TODO: Application response
+					}
+				}
+			};
+			_thread.start();
+		}
 	}
 	
-	public void stop() throws IOException {
-		_server.close();
+	/**
+	 * Stops the internal thread
+	 */
+	@SuppressWarnings("deprecation")
+	public void stop() {
+		if (_thread != null) {
+			_running = false;
+			try {
+				_server.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			try {
+				_thread.join(500);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			if (_thread.isAlive()) {
+				_thread.stop();
+			}
+			_thread = null;
+		}
 	}
 	
-	public void setIdleTimeout(final long idleTimeout) {
-		_server.setIdleTimeoutMillis(idleTimeout);
+	private void onThread() throws IOException { 
+		{
+			final InetSocketAddress bound = new InetSocketAddress(_port);
+			_server.bind(bound);
+			LOGGER.log(Level.INFO, "Bound socket to " + bound);
+		}
+		while (_running) {
+			final SocketChannel socket = _server.accept();
+			try {
+				socket.finishConnect();
+				onConnect(socket);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
-	protected abstract boolean onConnect(final INonBlockingConnection connection) throws IOException;
+	protected abstract void onConnect(final SocketChannel connection) throws IOException;
 	
 	protected abstract class ClientSync extends Sync {
 		private int _clientId;
 
-		public ClientSync(final INonBlockingConnection connection, int clientId) throws IOException {
+		public ClientSync(final SocketChannel connection, int clientId) throws IOException {
 			_connection = connection;
 			_clientId = clientId;
-			connection.setHandler(_defaultHandler);
 		}
 		
-		protected void performInit(final BinarySerializer writer, final BinaryDeserializer reader, final IConnection connection) throws IOException {
+		protected void performInit(final BinarySerializer writer, final BinaryDeserializer reader, final SocketChannel connection) throws IOException {
 			// Check magic
 			final int magic = reader.readInt();
 			if (magic != _serverMagic) {

@@ -4,11 +4,6 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.xsocket.connection.BlockingConnection;
-import org.xsocket.connection.ConnectionUtils;
-import org.xsocket.connection.IBlockingConnection;
-import org.xsocket.connection.INonBlockingConnection;
-
 import de.freiburg.uni.tablet.presenter.actions.IAction;
 import de.freiburg.uni.tablet.presenter.actions.SetServerDocumentAction;
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
@@ -26,8 +21,6 @@ public class UpClient extends ClientSync {
 	private LinkedElementList<IAction> _actions = new LinkedElementList<IAction>();
 	
 	private Object _threadSync = new Object();
-	
-	private IBlockingConnection _blockingConnection;
 	
 	private boolean _syncDownInit = false;
 	
@@ -64,15 +57,12 @@ public class UpClient extends ClientSync {
 	}
 	
 	@Override
-	protected boolean onConnect(final INonBlockingConnection connection) throws IOException {
-		if (!super.onConnect(connection)) {
-			return false;
+	protected void stopThread() {
+		synchronized (_threadSync) {
+			_running = false;
+			_threadSync.notifyAll();
 		}
-		// Register blocking connection
-		final INonBlockingConnection nbc = ConnectionUtils.synchronizedConnection(connection);
-		_blockingConnection = new BlockingConnection(nbc);
-		startThread();
-		return true;
+		super.stopThread();
 	}
 	
 	@Override
@@ -81,15 +71,19 @@ public class UpClient extends ClientSync {
 			_editor.getHistory().addListener(_documentHistoryListener);
 		}
 		
+		DummyReadThread readThread = null;
 		try {
+			LOGGER.log(Level.INFO, "Open socket");
+			openSocket();
 			LOGGER.log(Level.INFO, "Initialize connection");
 			
-			final BinarySerializer writer = new BinarySerializer(_blockingConnection);
-			final BinaryDeserializer reader = new BinaryDeserializer(_blockingConnection);
+			final BinarySerializer writer = new BinarySerializer(_connection);
+			final BinaryDeserializer reader = new BinaryDeserializer(_connection);
 			// Exchange init
-			performInit(writer, reader, _blockingConnection);
+			performInit(writer, reader, _connection);
 			writer.writeBoolean(_syncDownInit);
 			writer.flush();
+			LOGGER.log(Level.INFO, "Initialize connection done");
 			if (_syncDownInit) {
 				LOGGER.log(Level.INFO, "Deserialize init doc");
 				try {
@@ -108,7 +102,24 @@ public class UpClient extends ClientSync {
 				LOGGER.log(Level.INFO, "Serialize init doc done");
 			}
 			fireConnected();
-			while (true) {
+			readThread = new DummyReadThread(_connection, new DummyReadThread.IDisconnectListener() {
+				@Override
+				public void onDisconnect() {
+					try {
+						LOGGER.log(Level.INFO, "onDisconnect");
+						synchronized (_threadSync) {
+							_connection.close();
+							_running = false;
+							LOGGER.log(Level.INFO, "sync");
+							_threadSync.notifyAll();
+						}
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			});
+			readThread.start();
+			while (_running) {
 				final IAction action;
 				// Get next action
 				synchronized (_threadSync) {
@@ -118,6 +129,10 @@ public class UpClient extends ClientSync {
 						} catch (InterruptedException e) {
 						}
 						_threadSync.notifyAll();
+						if (!_running) {
+							LOGGER.log(Level.INFO, "not running any more");
+							break;
+						}
 					}
 					// Pop action
 					action = _actions.getFirst().getData();
@@ -139,7 +154,13 @@ public class UpClient extends ClientSync {
 				_editor.getHistory().removeListener(_documentHistoryListener);
 			}
 			LOGGER.log(Level.INFO, "Close connection");
-			_blockingConnection.close();
+			if (_connection != null) {
+				_connection.close();
+			}
+			if (readThread != null) {
+				readThread.stop();
+			}
+			onDisconnect(_connection);
 		}
 	}
 }

@@ -70,8 +70,6 @@ public class ServerApp {
 		String authTokenUp = config.getString("server.up.authToken", "");
 		int portDown = config.getInt("server.down.port", 8025);
 		int portUp = config.getInt("server.up.port", 8025);
-		long timeoutDown = config.getLong("server.down.timeout", -1);
-		long timeoutUp = config.getLong("server.up.timeout", -1);
 		
 		boolean timedAutosave = config.getBoolean("server.timedAutosave.enabled", false);
 		_autosaveIntervall = config.getLong("server.timedAutosave.intervall", 600000);
@@ -149,9 +147,6 @@ public class ServerApp {
 			_upServer = new UpServer(portUp, _editor);
 			_upServer.setName(name);
 			_upServer.setAuthToken(authTokenUp);
-			if (timeoutUp != -1) {
-				_upServer.setIdleTimeout(timeoutUp);
-			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -159,9 +154,6 @@ public class ServerApp {
 			_downServer = new DownServer(portDown, _editor);
 			_downServer.setName(name);
 			_downServer.setAuthToken(authTokenDown);
-			if (timeoutDown != -1) {
-				_downServer.setIdleTimeout(timeoutDown);
-			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -179,18 +171,8 @@ public class ServerApp {
 	public void start() {
 		LOGGER.log(Level.INFO, "Start");
 		
-		try {
-			_upServer.start();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		try {
-			_downServer.start();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		_upServer.start();
+		_downServer.start();
 		
 		if (_autosaveThread != null) {
 			_autosaveRunning = true;
@@ -201,18 +183,8 @@ public class ServerApp {
 	public void stop() {
 		LOGGER.log(Level.INFO, "Stopping");
 		
-		try {
-			_upServer.stop();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		try {
-			_downServer.stop();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		_upServer.stop();
+		_downServer.stop();
 		
 		if (_autosaveThread != null) {
 			try {

@@ -6,9 +6,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
-import java.nio.channels.SeekableByteChannel;
-import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -18,8 +15,6 @@ import javax.swing.SwingUtilities;
 
 import com.sun.jna.NativeLibrary;
 
-import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
-import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.document.DocumentConfig;
 import de.freiburg.uni.tablet.presenter.document.ServerDocument;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.JPageEditor;
@@ -103,7 +98,6 @@ public class ClientApp {
 		if (_pageRenderer.getConfig().getBoolean("client.down.enabled", false)) {
 			String hostname = _pageRenderer.getConfig().getString("client.down.host", "");
 			int port = _pageRenderer.getConfig().getInt("client.down.port", 8024);
-			long timeout = _pageRenderer.getConfig().getInt("client.down.timeout", -1);
 			String clientName = _pageRenderer.getConfig().getString("client.down.name", "Client");
 			String authToken = _pageRenderer.getConfig().getString("client.down.authToken", "");
 			
@@ -111,9 +105,6 @@ public class ClientApp {
 				_clientDownSync = new DownClient(hostname, port, _pageRenderer.getDocumentEditor());
 				_clientDownSync.setAuthToken(authToken);
 				_clientDownSync.setName(clientName);
-				if (timeout >= 0) {
-					_clientDownSync.setIdleTimeout(timeout);
-				}
 				
 				_clientDownSync.addListener(new ClientListener() {
 					@Override
@@ -176,7 +167,6 @@ public class ClientApp {
 		if (_pageRenderer.getConfig().getBoolean("client.up.enabled", false)) {
 			String hostname = _pageRenderer.getConfig().getString("client.up.host", "");
 			int port = _pageRenderer.getConfig().getInt("client.up.port", 8024);
-			long timeout = _pageRenderer.getConfig().getLong("client.up.timeout", -1);
 			String clientName = _pageRenderer.getConfig().getString("client.up.name", "Client");
 			String authToken = _pageRenderer.getConfig().getString("client.up.authToken", "");
 			boolean readInitial = _pageRenderer.getConfig().getBoolean("client.up.readInitial", false);
@@ -186,9 +176,6 @@ public class ClientApp {
 				_clientUpSync.setAuthToken(authToken);
 				_clientUpSync.setName(clientName);
 				_clientUpSync.setSyncDownInit(readInitial);
-				if (timeout >= 0) {
-					_clientUpSync.setIdleTimeout(timeout);
-				}
 				_clientUpSync.addListener(new ClientListener() {
 					@Override
 					public void onError(final Exception e) {
