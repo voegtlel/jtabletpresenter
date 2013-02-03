@@ -51,6 +51,7 @@ public class DownClient extends ClientSync {
 			}
 		} finally {
 			_connection.close();
+			onDisconnect();
 		}
 	}
 }

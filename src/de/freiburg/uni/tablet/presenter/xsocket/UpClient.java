@@ -160,7 +160,7 @@ public class UpClient extends ClientSync {
 			if (readThread != null) {
 				readThread.stop();
 			}
-			onDisconnect(_connection);
+			onDisconnect();
 		}
 	}
 }

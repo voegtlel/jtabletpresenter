@@ -78,7 +78,7 @@ public class DownServer extends ServerSync {
 				if (_connection != null) {
 					_connection.close();
 				}
-				onDisconnect(_connection);
+				onDisconnect();
 			}
 		}
 	}

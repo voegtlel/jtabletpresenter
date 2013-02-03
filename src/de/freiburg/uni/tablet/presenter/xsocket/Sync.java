@@ -117,19 +117,11 @@ public abstract class Sync {
 	
 	
 
-	protected boolean onDisconnect(final SocketChannel connection) throws IOException {
-		if (connection != null) {
-			if (_remoteName != null) {
-				LOGGER.log(Level.INFO, "Net " + connection.getRemoteAddress() + " (" + _remoteName + ") disconnected");
-			} else {
-				LOGGER.log(Level.INFO, "Net " + connection.getRemoteAddress() + " disconnected");
-			}
+	protected boolean onDisconnect() throws IOException {
+		if (_remoteName != null) {
+			LOGGER.log(Level.INFO, "Net (" + _remoteName + ") disconnected");
 		} else {
-			if (_remoteName != null) {
-				LOGGER.log(Level.INFO, "Net (" + _remoteName + ") disconnected");
-			} else {
-				LOGGER.log(Level.INFO, "Net disconnected");
-			}
+			LOGGER.log(Level.INFO, "Net disconnected");
 		}
 		fireDisconnected();
 		return true;

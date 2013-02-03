@@ -136,7 +136,7 @@ public class UpServer extends ServerSync {
 				if (readThread != null) {
 					readThread.stop();
 				}
-				onDisconnect(_connection);
+				onDisconnect();
 			}
 		}
 	}
