@@ -57,14 +57,25 @@ public class UpClient extends ClientSync {
 	}
 	
 	@Override
+	protected void stopThread() {
+		synchronized (_threadSync) {
+			_running = false;
+			_threadSync.notifyAll();
+		}
+		super.stopThread();
+	}
+	
+	@Override
 	protected void onThread() throws IOException {
 		synchronized (_editor.getHistory()) {
 			_editor.getHistory().addListener(_documentHistoryListener);
 		}
 		
+		DummyReadThread readThread = null;
 		try {
-			LOGGER.log(Level.INFO, "Initialize connection");
+			LOGGER.log(Level.INFO, "Open socket");
 			openSocket();
+			LOGGER.log(Level.INFO, "Initialize connection");
 			
 			final BinarySerializer writer = new BinarySerializer(_connection);
 			final BinaryDeserializer reader = new BinaryDeserializer(_connection);
@@ -72,6 +83,7 @@ public class UpClient extends ClientSync {
 			performInit(writer, reader, _connection);
 			writer.writeBoolean(_syncDownInit);
 			writer.flush();
+			LOGGER.log(Level.INFO, "Initialize connection done");
 			if (_syncDownInit) {
 				LOGGER.log(Level.INFO, "Deserialize init doc");
 				try {
@@ -90,16 +102,37 @@ public class UpClient extends ClientSync {
 				LOGGER.log(Level.INFO, "Serialize init doc done");
 			}
 			fireConnected();
-			while (true) {
+			readThread = new DummyReadThread(_connection, new DummyReadThread.IDisconnectListener() {
+				@Override
+				public void onDisconnect() {
+					try {
+						LOGGER.log(Level.INFO, "onDisconnect");
+						synchronized (_threadSync) {
+							_connection.close();
+							_running = false;
+							LOGGER.log(Level.INFO, "sync");
+							_threadSync.notifyAll();
+						}
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			});
+			readThread.start();
+			while (_running) {
 				final IAction action;
 				// Get next action
 				synchronized (_threadSync) {
-					while (_actions.isEmpty()) {
+					while (_running && _actions.isEmpty()) {
 						try {
 							_threadSync.wait();
 						} catch (InterruptedException e) {
 						}
 						_threadSync.notifyAll();
+					}
+					if (!_running) {
+						LOGGER.log(Level.INFO, "not running any more");
+						break;
 					}
 					// Pop action
 					action = _actions.getFirst().getData();
@@ -110,9 +143,6 @@ public class UpClient extends ClientSync {
 				try {
 					writer.writeSerializableClass(action);
 					writer.flush();
-				} catch (IOException e) {
-					e.printStackTrace();
-					throw e;
 				} catch (Exception e) {
 					e.printStackTrace();
 					throw new IOException(e);
@@ -127,7 +157,10 @@ public class UpClient extends ClientSync {
 			if (_connection != null) {
 				_connection.close();
 			}
-			onDisconnect(_connection);
+			if (readThread != null) {
+				readThread.stop();
+			}
+			onDisconnect();
 		}
 	}
 }

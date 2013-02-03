@@ -14,6 +14,7 @@ public abstract class Sync {
 	protected String _remoteName = null;
 	
 	private Thread _thread;
+	protected boolean _running;
 	
 	public Sync() {
 	}
@@ -71,19 +72,22 @@ public abstract class Sync {
 	 */
 	protected void startThread() {
 		synchronized (_sync) {
-			stopThread();
-			_thread = new Thread() {
-				@Override
-				public void run() {
-					try {
-						Sync.this.onThread();
-					} catch (IOException e) {
-						e.printStackTrace();
-						// TODO: Application response
+			if (_thread == null || !_thread.isAlive()) {
+				stopThread();
+				_running = true;
+				_thread = new Thread() {
+					@Override
+					public void run() {
+						try {
+							Sync.this.onThread();
+						} catch (IOException e) {
+							e.printStackTrace();
+							// TODO: Application response
+						}
 					}
-				}
-			};
-			_thread.start();
+				};
+				_thread.start();
+			}
 		}
 	}
 	
@@ -93,10 +97,14 @@ public abstract class Sync {
 	@SuppressWarnings("deprecation")
 	protected void stopThread() {
 		if (_thread != null) {
+			_running = false;
 			try {
 				_thread.join(500);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
+			}
+			if (_thread.isAlive()) {
+				_thread.stop();
 			}
 			_thread = null;
 		}
@@ -105,33 +113,17 @@ public abstract class Sync {
 	/**
 	 * General thread method
 	 */
-	protected void onThread() throws IOException {
-	}
+	protected abstract void onThread() throws IOException;
+	
+	
 
-	protected boolean onDisconnect(final SocketChannel connection) throws IOException {
-		if (connection != null) {
-			if (_remoteName != null) {
-				LOGGER.log(Level.INFO, "Net " + connection.socket().getRemoteSocketAddress() + " (" + _remoteName + ") disconnected");
-			} else {
-				LOGGER.log(Level.INFO, "Net " + connection.socket().getRemoteSocketAddress() + " disconnected");
-			}
+	protected boolean onDisconnect() throws IOException {
+		if (_remoteName != null) {
+			LOGGER.log(Level.INFO, "Net (" + _remoteName + ") disconnected");
 		} else {
-			if (_remoteName != null) {
-				LOGGER.log(Level.INFO, "Net (" + _remoteName + ") disconnected");
-			} else {
-				LOGGER.log(Level.INFO, "Net disconnected");
-			}
+			LOGGER.log(Level.INFO, "Net disconnected");
 		}
 		fireDisconnected();
-		return true;
-	}
-
-	protected boolean onConnect(final SocketChannel connection) throws IOException {
-		if (_remoteName != null) {
-			LOGGER.log(Level.INFO, "Net " + connection.socket().getRemoteSocketAddress() + " (" + _remoteName + ") connect");
-		} else {
-			LOGGER.log(Level.INFO, "Net " + connection.socket().getRemoteSocketAddress() + " connect");
-		}
 		return true;
 	}
 	

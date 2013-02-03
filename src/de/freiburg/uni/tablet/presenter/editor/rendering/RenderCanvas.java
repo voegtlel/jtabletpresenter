@@ -74,17 +74,6 @@ public class RenderCanvas extends SurfaceView implements IPageRenderer {
 			}
 		});
 		
-		_renderThread = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					repaintThread();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-		});
-		
 		_pagePenDispatcher = new PagePenDispatcher();
 		_pagePenDispatcher.setDrawSize(this.getWidth(), this.getHeight());
 		System.out.println("Init render canvas done");
@@ -107,7 +96,18 @@ public class RenderCanvas extends SurfaceView implements IPageRenderer {
 	 * Start the rendering thread
 	 */
 	private void start() {
+		stop();
 		_running = true;
+		_renderThread = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					repaintThread();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		});
 		_renderThread.start();
 		System.out.println("Start render thread");
 	}
@@ -115,9 +115,8 @@ public class RenderCanvas extends SurfaceView implements IPageRenderer {
 	/**
 	 * Stop the rendering thread
 	 */
-	@SuppressWarnings("deprecation")
 	private void stop() {
-		if (_renderThread.isAlive()) {
+		if (_renderThread != null && _renderThread.isAlive()) {
 			synchronized (_repaintMonitor) {
 				_running = false;
 				_repaintMonitor.notifyAll();
@@ -134,9 +133,6 @@ public class RenderCanvas extends SurfaceView implements IPageRenderer {
 				_renderThread.join(500);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
-			}
-			if (_renderThread.isAlive()) {
-				_renderThread.stop();
 			}
 		}
 	}

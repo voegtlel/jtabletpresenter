@@ -1,7 +1,6 @@
 package de.freiburg.uni.tablet.presenter.xsocket;
 
 import java.io.IOException;
-import java.nio.channels.Pipe;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -17,29 +16,20 @@ public class DownClient extends ClientSync {
 	
 	private DocumentEditor _editor;
 	
-	private Pipe _readPipe;
-	
 	public DownClient(final String hostname, final int port, final DocumentEditor editor) throws IOException {
 		super(hostname, port, UpServer.SERVER_MAGIC, UpServer.CLIENT_MAGIC);
 		_editor = editor;
-		_readPipe = Pipe.open();
-		_readPipe.sink().configureBlocking(true);
-		_readPipe.source().configureBlocking(true);
 	}
 	
 	@Override
 	protected void onThread() throws IOException {
 		try {
-			LOGGER.log(Level.INFO, "Init socket");
 			openSocket();
-			LOGGER.log(Level.INFO, "Init data");
 			final BinaryDeserializer reader = new BinaryDeserializer(_connection);
 			final BinarySerializer writer = new BinarySerializer(_connection);
-			LOGGER.log(Level.INFO, "Initial data");
 			performInit(writer, reader, _connection);
 			fireConnected();
-			LOGGER.log(Level.INFO, "Init done");
-			while (true) {
+			while (_running) {
 				try {
 					final IAction action = reader.readSerializableClass();
 					LOGGER.log(Level.INFO, "Read action " + action.getClass().getName());
@@ -60,10 +50,8 @@ public class DownClient extends ClientSync {
 				}
 			}
 		} finally {
-			if (_connection != null) {
-				_connection.close();
-				onDisconnect(_connection);
-			}
+			_connection.close();
+			onDisconnect();
 		}
 	}
 }

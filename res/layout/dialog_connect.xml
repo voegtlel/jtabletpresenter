@@ -13,7 +13,7 @@
         android:layout_toLeftOf="@+id/connect_port"
         android:ems="10"
         android:hint="@string/connect_host"
-        android:text="192.168.21.22" >
+        android:text="infornautik.de" >
 
         <requestFocus />
     </EditText>
@@ -27,7 +27,7 @@
         android:layout_alignParentTop="true"
         android:ems="10"
         android:hint="@string/connect_port"
-        android:text="8024" />
+        android:text="8025" />
 
     <CheckBox
         android:id="@+id/connect_up"
@@ -47,7 +47,7 @@
         android:layout_below="@+id/connect_up"
         android:ems="10"
         android:hint="@string/connect_auth"
-        android:text="Bla" />
+        android:text="BlaBla" />
 
     <CheckBox
         android:id="@+id/connect_init_down"
