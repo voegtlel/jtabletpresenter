@@ -60,7 +60,7 @@ public class ToolImage extends AbstractTool {
 				final float y2 = Math.max(data.getY(), _startData.getY());
 				_image.setLocation(x1, y1);
 				_image.setSize(x2-x1, y2-y1);
-				_editor.getFrontRenderer().requireRepaint();
+				_editor.getFrontRenderer().requireRepaint(_image, true);
 			}
 		}
 	}
@@ -79,7 +79,6 @@ public class ToolImage extends AbstractTool {
 		
 		_editor.getFrontRenderer().setRepaintListener(null);
 		
-		_editor.getFrontRenderer().requireRepaint();
 		_editor.getPageEditor().resumeRepaint();
 	}
 

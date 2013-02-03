@@ -6,6 +6,7 @@ package de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons;
 
 import java.awt.Component;
 
+import de.freiburg.uni.tablet.presenter.document.DocumentPage;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 
 /**
@@ -30,11 +31,10 @@ public class ButtonPrevious extends AbstractButtonAction {
 		if (_editor.getConfig().getBoolean("autosave.previous", true)) {
 			FileHelper.autosave(_editor.getDocumentEditor());
 		}
-		final int currentPageIndex = _editor.getDocumentEditor()
-				.getCurrentPageIndex();
-		if (currentPageIndex > 0) {
-			_editor.getDocumentEditor().setCurrentPageByIndex(
-					currentPageIndex - 1, true);
+		final DocumentPage currentPage = _editor.getDocumentEditor().getCurrentPage();
+		final DocumentPage previousPage = _editor.getDocumentEditor().getDocument().getPreviousPage(currentPage);
+		if (previousPage != null) {
+			_editor.getDocumentEditor().setCurrentPage(previousPage);
 		}
 	}
 }

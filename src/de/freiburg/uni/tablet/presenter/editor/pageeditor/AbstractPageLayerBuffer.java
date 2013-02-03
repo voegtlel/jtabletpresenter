@@ -3,7 +3,6 @@ package de.freiburg.uni.tablet.presenter.editor.pageeditor;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.Transparency;
 import java.awt.geom.AffineTransform;
@@ -12,22 +11,40 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
-import java.util.ArrayList;
-import java.util.List;
 
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
+import de.freiburg.uni.tablet.presenter.list.LinkedElement;
+import de.freiburg.uni.tablet.presenter.list.LinkedElementList;
 import de.freiburg.uni.tablet.presenter.page.IPen;
 
 public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer {
+	// Repaint nothing
+	private final static int REPAINT_NONE = 0;
+	// Only add a renderable on top
+	private final static int REPAINT_ADD_PAINT = 1;
+	// Repaint only rect
+	private final static int REPAINT_CLEAR_RECT = 2;
+	// Repaint whole image
+	private final static int REPAINT_ALL = 3;
+	// Recreate whole image
+	private final static int REPAINT_RESIZE = 4;
+	
+	
 	private Graphics2D _graphics = null;
 	private Image _imageBuffer = null;
 	
 	private Object _repaintSync = new Object();
 
-	private boolean _requireResize = true;
 	private int _newWidth = 1;
 	private int _newHeight = 1;
-	private boolean _requireRepaint = true;
+	private int _requireRepaint = REPAINT_ALL;
+	
+	private LinkedElementList<IRenderable> _repaintAddObjects = null;
+	private float _repaintMinX = 1;
+	private float _repaintMinY = 1;
+	private float _repaintMaxX = 0;
+	private float _repaintMaxY = 0;
+	private float _repaintRadius = 0;
 	
 	private boolean _isEmpty = true;
 
@@ -40,10 +57,6 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer {
 
 	private final Ellipse2D.Float _ellipseRenderer = new Ellipse2D.Float();
 	private final Line2D.Float _lineRenderer = new Line2D.Float();
-	
-	private boolean _repaintAddOnly = false;
-	private List<IRenderable> _repaintObjects = new ArrayList<IRenderable>();
-	private RectangleF _repaintRect = new RectangleF();
 
 	public AbstractPageLayerBuffer(final IDisplayRenderer displayRenderer) {
 		_displayRenderer = displayRenderer;
@@ -54,8 +67,10 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer {
 	 */
 	public void requireRepaint() {
 		synchronized (_repaintSync) {
-			_requireRepaint = true;
-			_displayRenderer.requireRepaint();
+			if (_requireRepaint < REPAINT_ALL) {
+				_requireRepaint = REPAINT_ALL;
+				_displayRenderer.requireRepaint();
+			}
 		}
 	}
 	
@@ -67,10 +82,27 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer {
 	 * otherwise only the renderable is added
 	 */
 	public void requireRepaint(final IRenderable renderable, final boolean clear) {
-		// TODO: implement
-		requireRepaint();
+		synchronized (_repaintSync) {
+			if (_requireRepaint <= REPAINT_CLEAR_RECT) {
+				_repaintMinX = Math.min(_repaintMinX, renderable.getMinX());
+				_repaintMinY = Math.min(_repaintMinY, renderable.getMinY());
+				_repaintMaxX = Math.max(_repaintMaxX, renderable.getMaxX());
+				_repaintMaxY = Math.max(_repaintMaxY, renderable.getMaxY());
+				_repaintRadius = Math.max(_repaintRadius, renderable.getRadius());
+				if (_requireRepaint <= REPAINT_ADD_PAINT && !clear) {
+					if (_repaintAddObjects == null) {
+						_repaintAddObjects = new LinkedElementList<>();
+					}
+					_repaintAddObjects.addLast(renderable);
+					_requireRepaint = REPAINT_ADD_PAINT;
+				} else {
+					_requireRepaint = REPAINT_CLEAR_RECT;
+				}
+			}
+			_displayRenderer.requireRepaint();
+		}
 	}
-
+	
 	/**
 	 * Sets the rendering hints for the given graphics object
 	 * 
@@ -82,31 +114,54 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer {
 	 * Repaints all objects to graphics
 	 */
 	protected abstract void repaint();
+	
+	/**
+	 * Paints one object to graphics
+	 */
+	protected abstract void paint(IRenderable renderable);
 
 	@Override
 	public void resize(final int width, final int height) {
 		synchronized (_repaintSync) {
 			_newWidth = width;
 			_newHeight = height;
-			_requireResize = true;
+			if (_requireRepaint < REPAINT_RESIZE) {
+				_requireRepaint = REPAINT_RESIZE;
+			}
 		}
 	}
 
 	@Override
 	public void drawBuffer(final Graphics2D g, final ImageObserver obs) {
-		boolean requireResize;
-		boolean requireRepaint;
+		int requireRepaint;
+		LinkedElementList<IRenderable> repaintAddObjects;
+		float repaintMinX;
+		float repaintMinY;
+		float repaintMaxX;
+		float repaintMaxY;
+		float repaintRadius;
 		synchronized (_repaintSync) {
-			requireResize = _requireResize;
-			_requireResize = false;
 			_renderWidth = _newWidth;
 			_renderHeight = _newHeight;
 			_renderFactorX = _renderWidth;
 			_renderFactorY = _renderHeight;
 			requireRepaint = _requireRepaint;
-			_requireRepaint = false;
+			_requireRepaint = REPAINT_NONE;
+			
+			repaintAddObjects = _repaintAddObjects;
+			repaintMinX = _repaintMinX;
+			repaintMinY = _repaintMinY;
+			repaintMaxX = _repaintMaxX;
+			repaintMaxY = _repaintMaxY;
+			repaintRadius = _repaintRadius;
+			_repaintAddObjects = null;
+			_repaintMinX = 1;
+			_repaintMinY = 1;
+			_repaintMaxX = 0;
+			_repaintMaxY = 0;
+			_repaintRadius = 0;
 		}
-		if (requireResize) {
+		if (requireRepaint >= REPAINT_RESIZE) {
 			if (_graphics != null) {
 				_graphics.dispose();
 			}
@@ -119,12 +174,31 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer {
 			setRenderingHints(_graphics);
 			_graphics.setBackground(new Color(0, true));
 			_isEmpty = true;
-			requireRepaint = true;
 			System.out.println("Resized: " + _renderWidth + "x" + _renderHeight);
 		}
-		if (requireRepaint) {
-			if (_graphics != null) {
-				repaint();
+		if (requireRepaint > REPAINT_NONE) {
+			if (requireRepaint <= REPAINT_CLEAR_RECT) {
+				repaintMinX = repaintMinX * _renderFactorX - repaintRadius - 1;
+				repaintMinY = repaintMinY * _renderFactorY - repaintRadius - 1;
+				repaintMaxX = repaintMaxX * _renderFactorX + repaintRadius + 2;
+				repaintMaxY = repaintMaxY * _renderFactorY + repaintRadius + 2;
+				/*System.out.println("repaint clip: " + repaintMinX + ", " + repaintMinY + "; " + repaintMaxX + ", " + repaintMaxY);
+				_graphics.setClip(null);
+				_graphics.setColor(Color.red);
+				_graphics.drawRect((int)repaintMinX, (int)repaintMinY, (int)(repaintMaxX - repaintMinX), (int)(repaintMaxY - repaintMinY));*/
+				_graphics.setClip((int)repaintMinX, (int)repaintMinY, (int)(repaintMaxX - repaintMinX), (int)(repaintMaxY - repaintMinY));
+			} else {
+				_graphics.setClip(null);
+			}
+			if (requireRepaint >= REPAINT_CLEAR_RECT) {
+				if (_graphics != null) {
+					repaint();
+				}
+			} else if (requireRepaint == REPAINT_ADD_PAINT) {
+				_isEmpty = false;
+				for (LinkedElement<IRenderable> element = repaintAddObjects.getFirst(); element != null; element = element.getNext()) {
+					paint(element.getData());
+				}
 			}
 		}
 		if (!_isEmpty) {

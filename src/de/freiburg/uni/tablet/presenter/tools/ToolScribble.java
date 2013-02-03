@@ -51,7 +51,7 @@ public class ToolScribble extends AbstractTool {
 	synchronized public void draw(final DataPoint data) {
 		if (_scribble != null) {
 			_scribble.addPoint(data);
-			_editor.getFrontRenderer().requireRepaint();
+			_editor.getFrontRenderer().requireRepaint(_scribble, true);
 		}
 	}
 
@@ -67,7 +67,6 @@ public class ToolScribble extends AbstractTool {
 		
 		_editor.getFrontRenderer().setRepaintListener(null);
 		
-		_editor.getFrontRenderer().requireRepaint();
 		_editor.getPageEditor().resumeRepaint();
 	}
 

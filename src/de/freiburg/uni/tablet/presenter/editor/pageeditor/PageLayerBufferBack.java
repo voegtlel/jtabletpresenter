@@ -4,6 +4,7 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 
 import de.freiburg.uni.tablet.presenter.editor.IPageRepaintListener;
+import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
 
 public class PageLayerBufferBack extends AbstractPageLayerBuffer implements
@@ -24,6 +25,11 @@ public class PageLayerBufferBack extends AbstractPageLayerBuffer implements
 				RenderingHints.VALUE_ANTIALIAS_ON);
 		g.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS,
 				RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+	}
+	
+	@Override
+	protected void paint(final IRenderable renderable) {
+		renderable.render(this);
 	}
 	
 	@Override

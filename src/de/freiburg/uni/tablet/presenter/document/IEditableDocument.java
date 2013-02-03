@@ -88,4 +88,12 @@ public interface IEditableDocument extends IDocument {
 	 */
 	DocumentPage clonePage(DocumentPage page);
 
+	/**
+	 * Gets the next page or throws exception
+	 * @param page
+	 * @param createIfNotExists
+	 * @return
+	 */
+	DocumentPage getNextPage(DocumentPage page, boolean createIfNotExists);
+
 }

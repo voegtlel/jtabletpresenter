@@ -112,6 +112,7 @@ public class BitmapImage extends AbstractRenderable {
 		final CollisionInfo collisionInfo = eraseInfo.getCollisionInfo();
 		
 		if (collides(collisionInfo)) {
+			_parent.fireRenderableModified(this);
 			ellipse.x = collisionInfo.getCenterX() - collisionInfo.getRadiusX() - _x;
 			ellipse.y = collisionInfo.getCenterY() - collisionInfo.getRadiusY() - _y;
 			ellipse.width = collisionInfo.getRadiusX() * 2f;
@@ -120,7 +121,7 @@ public class BitmapImage extends AbstractRenderable {
 			ellipse.y *= (float)_image.getHeight() / _height;
 			ellipse.width *= (float)_image.getWidth() / _width;
 			ellipse.height *= (float)_image.getHeight() / _height;
-			System.out.println("Ellipse: " + ellipse.x + ", " + ellipse.y + ", " + ellipse.width + "x" + ellipse.height);
+			System.out.println("Clear ellipse: " + ellipse.x + ", " + ellipse.y + ", " + ellipse.width + "x" + ellipse.height);
 			g.fill(ellipse);
 			_parent.fireRenderableModified(this);
 		}
@@ -138,6 +139,7 @@ public class BitmapImage extends AbstractRenderable {
 			return false;
 		}
 		if (_image != reducedImage) {
+			_parent.fireRenderableModified(this);
 			_image = reducedImage;
 			try {
 				final ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -150,11 +152,11 @@ public class BitmapImage extends AbstractRenderable {
 				_width = _width * (float)newRect.width / (float)origWidth;
 				_height = _height * (float)newRect.height / (float)origHeight;
 				System.out.println("Stored new image data for " + _x + ", " + _y + ", " + _width + "x" + _height);
+				_parent.fireRenderableModified(this);
 			} catch (IOException e) {
 				e.printStackTrace();
 				return false;
 			}
-			_parent.fireRenderableModified(this);
 		}
 		_parent.fireRenderableModifyEnd(this); 
 		System.out.println("End Successfull");
@@ -238,6 +240,7 @@ public class BitmapImage extends AbstractRenderable {
 		_fileData = reader.readByteArray();
 		_image = readImage(_fileData);
 		_parent.fireRenderableModified(this);
+		_parent.fireRenderableModifyEnd(this);
 	}
 	
 	@Override

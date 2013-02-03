@@ -27,7 +27,7 @@ public class BitmapHelper {
 				break;
 			}
 		}
-		if (newRect.x >= newRect.width) {
+		if (newRect.width <= 0) {
 			return null;
 		}
 		for (int iX = newRect.width - 1; iX >= newRect.x; iX--) {

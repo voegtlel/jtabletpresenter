@@ -115,6 +115,7 @@ public class Scribble extends AbstractRenderable {
 	
 	@Override
 	synchronized public boolean eraseAt(final EraseInfo eraseInfo) {
+		_parent.fireRenderableModified(this);
 		boolean wasModified = false;
 		for (LinkedElement<ScribbleSegment> seg = _segments.getFirst(); seg != null;) {
 			LinkedElement<ScribbleSegment> nextSeg = seg.getNext();

@@ -212,7 +212,6 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 
 	protected void onWindowOpened() {
 		_pageRenderer.start();
-		//_pageRenderer.requestFocusInWindow();
 		System.out.println("onWindowOpened");
 	}
 	
