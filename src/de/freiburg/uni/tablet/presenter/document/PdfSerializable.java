@@ -9,23 +9,18 @@ import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.FileHelper
 import de.intarsys.pdf.parser.COSLoadException;
 import de.intarsys.pdf.pd.PDDocument;
 import de.intarsys.tools.locator.ByteArrayLocator;
-import de.intarsys.tools.locator.FileLocator;
 
 public class PdfSerializable implements IEntity {
 	private final long _id;
 	private final IDocument _parent;
-	private final PDDocument _document;
+	private boolean _documentLoaded = false;
+	private PDDocument _document = null;
 	private final byte[] _data;
 	
 	public PdfSerializable(final IDocument parent, final File srcFile) throws IOException {
 		_id = parent.nextId();
 		_parent = parent;
-		try {
-			_data = FileHelper.readFile(srcFile);
-			_document = PDDocument.createFromLocator(new FileLocator(srcFile));
-		} catch (COSLoadException e) {
-			throw new IOException(e);
-		}
+		_data = FileHelper.readFile(srcFile);
 	}
 	
 	/**
@@ -33,15 +28,35 @@ public class PdfSerializable implements IEntity {
 	 * @param parent
 	 * @param document
 	 */
-	private PdfSerializable(final IDocument parent, final PDDocument document, byte[] data) {
+	private PdfSerializable(final IDocument parent, final PDDocument document, final byte[] data) {
 		_id = parent.nextId();
 		_parent = parent;
 		_document = document;
 		_data = data;
 	}
 	
-	
+	/**
+	 * Gets the lazy-load pdf document
+	 * @return
+	 */
 	public PDDocument getDocument() {
+		if (!_documentLoaded) {
+			_documentLoaded = true;
+			final ByteArrayLocator loc = new ByteArrayLocator(_data, "virtual", "pdf");
+			try {
+				_document = PDDocument.createFromLocator(loc);
+			} catch (COSLoadException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			} finally {
+				try {
+					loc.delete();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 		return _document;
 	}
 	
@@ -51,17 +66,9 @@ public class PdfSerializable implements IEntity {
 		_parent.deserializeId(_id);
 		final boolean pdfAvailable = reader.readBoolean();
 		if (pdfAvailable) {
-			_document = null;
-			_data = null;
-		} else {
 			_data = reader.readByteArray();
-			final ByteArrayLocator loc = new ByteArrayLocator(_data, "virtual", "pdf");
-			try {
-				_document = PDDocument.createFromLocator(loc);
-			} catch (COSLoadException e) {
-				throw new IOException(e);
-			}
-			loc.delete();
+		} else {
+			_data = null;
 		}
 	}
 
@@ -70,11 +77,11 @@ public class PdfSerializable implements IEntity {
 		writer.writeLong(_id);
 		writer.writeObjectTable(_parent);
 		
-		if (_data == null) {
-			writer.writeBoolean(false);
-		} else {
+		if (_data != null) {
 			writer.writeBoolean(true);
 			writer.writeByteArray(_data, 0, _data.length);
+		} else {
+			writer.writeBoolean(false);
 		}
 	}
 

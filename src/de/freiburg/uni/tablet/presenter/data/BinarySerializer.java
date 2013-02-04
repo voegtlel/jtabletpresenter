@@ -100,7 +100,6 @@ public class BinarySerializer {
 		int len = length;
 		while (len > 0) {
 			final int write = Math.min(_buffer.remaining(), len);
-			checkFlush(write);
 			_buffer.put(data, off, write);
 			write();
 			len -= write;

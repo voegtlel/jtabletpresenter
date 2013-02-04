@@ -72,7 +72,7 @@ public class ButtonSpinnerPage extends AbstractButtonAction {
 			FileHelper.autosave(_editor.getDocumentEditor());
 		}
 		if (newPageIndex >= _editor.getDocumentEditor().getMaxPageCount()) {
-			newPageIndex = _editor.getDocumentEditor().getMaxPageCount();
+			newPageIndex = _editor.getDocumentEditor().getMaxPageCount() - 1;
 		} else if (newPageIndex < 0) {
 			newPageIndex = 0;
 		}
