@@ -4,6 +4,7 @@ import java.awt.Component;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
@@ -306,5 +307,14 @@ public class FileHelper {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public static byte[] readFile(final File file) throws IOException {
+		final RandomAccessFile raf = new RandomAccessFile(file, "r");
+		final byte[] data = new byte[(int) raf.getChannel().size()];
+		raf.readFully(data);
+		raf.close();
+		System.out.println("Read file " + file);
+		return data;
 	}
 }

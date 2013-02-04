@@ -14,13 +14,13 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 
 import javax.imageio.ImageIO;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
+import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.FileHelper;
 import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
 
 public class BitmapImage extends AbstractRenderable {
@@ -37,7 +37,7 @@ public class BitmapImage extends AbstractRenderable {
 	private BufferedImage _image;
 
 	public BitmapImage(final DocumentPage parent, final File file, float x, float y, float width, float height) throws IOException {
-		this(parent, readFile(file), null, x, y, width, height);
+		this(parent, FileHelper.readFile(file), null, x, y, width, height);
 	}
 	
 	public BitmapImage(final DocumentPage parent, final byte[] fileData, BufferedImage image, float x, float y, float width, float height) {
@@ -56,15 +56,6 @@ public class BitmapImage extends AbstractRenderable {
 		} else {
 			_image = image;
 		}
-	}
-	
-	public static byte[] readFile(final File file) throws IOException {
-		final RandomAccessFile raf = new RandomAccessFile(file, "r");
-		final byte[] data = new byte[(int) raf.getChannel().size()];
-		raf.readFully(data);
-		raf.close();
-		System.out.println("Read file " + file);
-		return data;
 	}
 	
 	public static BufferedImage readImage(final byte[] data) throws IOException {
