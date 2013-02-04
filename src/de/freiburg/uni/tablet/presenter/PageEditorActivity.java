@@ -114,4 +114,10 @@ public class PageEditorActivity extends Activity {
     	super.onOptionsItemSelected(item);
     	return performAction(item.getItemId(), item.getGroupId());
     }
+    
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putByteArray("Editor", data);
+    }
 }
