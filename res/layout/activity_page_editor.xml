@@ -1,73 +1,73 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/black_overlay"
+    android:orientation="vertical"
     tools:context=".PageEditorActivity" >
 
     <!--
          The primary full-screen view. This can be replaced with whatever view
          is needed to present your content, e.g. VideoView, SurfaceView,
-         TextureView, etc.
-    -->
+         TextureView, etc.    -->
 
 
     <!--
          This FrameLayout insets its children based on system windows using
-         android:fitsSystemWindows.
-    -->
-
-    <ImageButton
-        android:id="@+id/previous"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:contentDescription="@string/menu_previous"
-        android:src="@drawable/icon_previous" />
-
-    <ImageButton
-        android:id="@+id/undo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_toRightOf="@+id/previous"
-        android:contentDescription="@string/menu_undo"
-        android:src="@drawable/icon_undo" />
-
-    <ImageButton
-        android:id="@+id/tool_scribble"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_toRightOf="@+id/undo"
-        android:contentDescription="@string/menu_tool_scribble"
-        android:src="@drawable/icon_tool_scribble" />
-
-    <ImageButton
-        android:id="@+id/tool_eraser"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_toRightOf="@+id/tool_scribble"
-        android:contentDescription="@string/menu_tool_eraser"
-        android:src="@drawable/icon_tool_eraser" />
+         android:fitsSystemWindows.    -->
 
     <de.freiburg.uni.tablet.presenter.editor.rendering.RenderCanvas
         android:id="@+id/render_canvas"
         android:layout_width="fill_parent"
-        android:layout_height="383dp"
-        android:layout_above="@+id/previous"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true" />
+        android:layout_height="fill_parent"
+        android:layout_weight="1" />
 
-    <ImageButton
-        android:id="@+id/next"
+    <HorizontalScrollView
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:contentDescription="@string/menu_next"
-        android:src="@drawable/icon_next" />
+        android:layout_height="wrap_content" >
 
-</RelativeLayout>
+        <LinearLayout
+            android:id="@+id/layout_tools"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <ImageButton
+                android:id="@+id/previous"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/menu_previous"
+                android:src="@drawable/icon_previous" />
+
+            <ImageButton
+                android:id="@+id/undo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/menu_undo"
+                android:src="@drawable/icon_undo" />
+
+            <ImageButton
+                android:id="@+id/tool_scribble"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/menu_tool_scribble"
+                android:src="@drawable/icon_tool_scribble" />
+
+            <ImageButton
+                android:id="@+id/tool_eraser"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/menu_tool_eraser"
+                android:src="@drawable/icon_tool_eraser" />
+
+            <ImageButton
+                android:id="@+id/next"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/menu_next"
+                android:src="@drawable/icon_next" />
+        </LinearLayout>
+    </HorizontalScrollView>
+
+</LinearLayout>

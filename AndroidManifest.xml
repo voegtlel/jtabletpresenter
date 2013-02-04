@@ -15,7 +15,7 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name="de.freiburg.uni.tablet.presenter.PageEditorActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:configChanges="keyboardHidden|orientation|screenSize|screenLayout"
             android:label="@string/app_name"
             android:theme="@style/FullscreenTheme" >
             <intent-filter>

@@ -43,7 +43,6 @@ public class DummyReadThread {
 	/**
 	 * Stops the internal thread
 	 */
-	@SuppressWarnings("deprecation")
 	public void stop() {
 		if (_thread != null) {
 			_running = false;
@@ -51,9 +50,6 @@ public class DummyReadThread {
 				_thread.join(500);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
-			}
-			if (_thread.isAlive()) {
-				_thread.stop();
 			}
 			_thread = null;
 		}

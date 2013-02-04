@@ -94,7 +94,6 @@ public abstract class Sync {
 	/**
 	 * Stops the internal thread
 	 */
-	@SuppressWarnings("deprecation")
 	protected void stopThread() {
 		if (_thread != null) {
 			_running = false;
@@ -102,9 +101,6 @@ public abstract class Sync {
 				_thread.join(500);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
-			}
-			if (_thread.isAlive()) {
-				_thread.stop();
 			}
 			_thread = null;
 		}

@@ -4,6 +4,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import android.app.Activity;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -11,6 +12,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import de.freiburg.uni.tablet.presenter.document.DocumentConfig;
 import de.freiburg.uni.tablet.presenter.document.ServerDocument;
 import de.freiburg.uni.tablet.presenter.editor.rendering.RenderCanvas;
@@ -30,6 +32,7 @@ public class PageEditorActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         
         Logger.getLogger("de.freiburg.uni.tablet.presenter").setLevel(Level.ALL);
@@ -77,6 +80,21 @@ public class PageEditorActivity extends Activity {
 				performAction(v.getId(), -1);
 			}
 		});
+    }
+    
+    @Override
+    public void onConfigurationChanged(final Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        
+        final LinearLayout layoutMain = (LinearLayout) findViewById(R.id.layout_main);
+        final LinearLayout layoutTools = (LinearLayout) findViewById(R.id.layout_tools);
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        	layoutMain.setOrientation(LinearLayout.HORIZONTAL);
+        	layoutTools.setOrientation(LinearLayout.VERTICAL);
+        } else {
+        	layoutMain.setOrientation(LinearLayout.VERTICAL);
+        	layoutTools.setOrientation(LinearLayout.HORIZONTAL);
+        }
     }
     
     @Override

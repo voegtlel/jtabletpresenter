@@ -27,7 +27,7 @@
         android:layout_alignParentTop="true"
         android:ems="10"
         android:hint="@string/connect_port"
-        android:text="8025" />
+        android:text="8024" />
 
     <CheckBox
         android:id="@+id/connect_up"
@@ -47,7 +47,7 @@
         android:layout_below="@+id/connect_up"
         android:ems="10"
         android:hint="@string/connect_auth"
-        android:text="BlaBla" />
+        android:text="Bla" />
 
     <CheckBox
         android:id="@+id/connect_init_down"

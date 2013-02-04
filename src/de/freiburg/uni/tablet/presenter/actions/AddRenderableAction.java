@@ -55,6 +55,14 @@ public class AddRenderableAction implements IAction {
 	@Override
 	public void perform(final DocumentEditor editor) {
 		_page.insertRenderable(_afterRenderable, _renderable);
+		// If we changed the front document -> goto changed page
+		if (editor.getDocument().hasPage(_page)) {
+			System.out.println("Has page -> check");
+			if (_page != editor.getCurrentPage() && _page != editor.getCurrentBackPage()) {
+				System.out.println("Set page");
+				editor.setCurrentPage(_page);
+			}
+		}
 	}
 
 	@Override

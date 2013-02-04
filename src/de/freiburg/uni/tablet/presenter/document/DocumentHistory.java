@@ -152,16 +152,18 @@ public class DocumentHistory {
 	 * @param action
 	 */
 	public void addAction(final IAction action) {
-		if (_currentActionGroup != null) {
-			_currentActionGroup.addAction(action);
-		} else if (action.hasUndoAction()) {
-			if (_top == null) {
-				_history.addLast(action);
+		if (action.hasUndoAction()) {
+			if (_currentActionGroup != null) {
+				_currentActionGroup.addAction(action);
 			} else {
-				_history.setNext(_top, action);
+				if (_top == null) {
+					_history.addLast(action);
+				} else {
+					_history.setNext(_top, action);
+				}
+				_top = _history.getLast();
+				_topNext = null;
 			}
-			_top = _history.getLast();
-			_topNext = null;
 		}
 		if (!(action instanceof ActionGroup)) {
 			fireActionAdded(action);
