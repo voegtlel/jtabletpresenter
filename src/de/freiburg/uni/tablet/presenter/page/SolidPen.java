@@ -36,7 +36,7 @@ public class SolidPen implements IPen {
 	@Override
 	public void serialize(final BinarySerializer writer) throws IOException {
 		writer.writeFloat(getThickness());
-		writer.writeInt(getColor().getAlpha() << 24 | getColor().getRGB());
+		writer.writeInt((getColor().getAlpha() << 24) | getColor().getRGB());
 	}
 
 	@Override
