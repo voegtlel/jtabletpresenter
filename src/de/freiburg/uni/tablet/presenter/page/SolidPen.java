@@ -27,8 +27,8 @@ public class SolidPen implements IPen {
 	public SolidPen(final BinaryDeserializer reader) throws IOException {
 		_thickness = reader.readFloat();
 		final int color = reader.readInt();
-		_paint = new Color(color & 0xff, color >> 8 & 0xff, color >> 16 & 0xff,
-				color >> 24 & 0xff);
+		_paint = new Color((color >> 16) & 0xff, (color >> 8) & 0xff, color & 0xff,
+				(color >> 24) & 0xff);
 		_stroke = new BasicStroke(_thickness, BasicStroke.CAP_ROUND,
 				BasicStroke.JOIN_ROUND);
 	}
