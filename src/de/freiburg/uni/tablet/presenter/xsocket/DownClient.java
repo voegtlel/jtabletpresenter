@@ -9,14 +9,14 @@ import de.freiburg.uni.tablet.presenter.actions.SetClientDocumentAction;
 import de.freiburg.uni.tablet.presenter.actions.SetServerDocumentAction;
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
-import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
+import de.freiburg.uni.tablet.presenter.document.IDocumentEditor;
 
 public class DownClient extends ClientSync {
 	private final static Logger LOGGER = Logger.getLogger(DownClient.class.getName());
 	
-	private DocumentEditor _editor;
+	private IDocumentEditor _editor;
 	
-	public DownClient(final String hostname, final int port, final DocumentEditor editor) throws IOException {
+	public DownClient(final String hostname, final int port, final IDocumentEditor editor) throws IOException {
 		super(hostname, port, UpServer.SERVER_MAGIC, UpServer.CLIENT_MAGIC);
 		_editor = editor;
 	}

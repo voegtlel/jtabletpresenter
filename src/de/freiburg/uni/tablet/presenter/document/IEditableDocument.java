@@ -1,7 +1,7 @@
 package de.freiburg.uni.tablet.presenter.document;
 
 
-public interface IEditableDocument extends IDocument {
+public interface IEditableDocument extends IClientDocument {
 	/**
 	 * Reset indices and use first page as first pdf page
 	 */
@@ -50,24 +50,6 @@ public interface IEditableDocument extends IDocument {
 	 * @return
 	 */
 	DocumentPage insertPage(DocumentPage afterPage);
-
-	/**
-	 * Inserts a page after the given page.
-	 * 
-	 * @param afterPage
-	 *            the previous page to the inserted page (null for first)
-	 * @return
-	 */
-	DocumentPage insertPage(DocumentPage afterPage,
-			DocumentPage page);
-
-	/**
-	 * Removes a page.
-	 * 
-	 * @param page
-	 *            the page to remove
-	 */
-	void removePage(DocumentPage page);
 
 	/**
 	 * Removes all pages

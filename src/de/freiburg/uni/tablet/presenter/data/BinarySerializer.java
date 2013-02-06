@@ -108,9 +108,25 @@ public class BinarySerializer {
 		}
 	}
 
+	/**
+	 * Writes a serializable object
+	 * @param serializable
+	 * @throws IOException
+	 */
 	public void writeSerializableClass(final IBinarySerializable serializable)
 			throws IOException {
-		writeStringTable(serializable.getClass().getName());
+		writeSerializableClass(serializable, serializable.getClass());
+	}
+	
+	/**
+	 * Writes a serializable class with a new class type (or the same)
+	 * @param serializable
+	 * @param newClassType class to use on deserialization
+	 * @throws IOException
+	 */
+	public void writeSerializableClass(final IBinarySerializable serializable, final Class<?> newClassType)
+			throws IOException {
+		writeStringTable(newClassType.getName());
 		serializable.serialize(this);
 	}
 
@@ -126,11 +142,31 @@ public class BinarySerializer {
 		}
 	}
 	
+	/**
+	 * Puts an object to the internal object table
+	 * @param obj
+	 * @throws IOException
+	 */
 	public void putObjectTable(final IBinarySerializableId obj) throws IOException {
 		_objectTable.put(obj.getId(), obj);
 	}
-
+	
+	/**
+	 * Serializes an object
+	 * @param obj
+	 * @throws IOException
+	 */
 	public void writeObjectTable(final IBinarySerializableId obj) throws IOException {
+		writeObjectTable(obj, obj.getClass());
+	}
+
+	/**
+	 * Serializes an object with another class type (or the same)
+	 * @param obj
+	 * @param newClassType class to be used on deserialization
+	 * @throws IOException
+	 */
+	public void writeObjectTable(final IBinarySerializableId obj, final Class<?> newClassType) throws IOException {
 		if (obj == null) {
 			writeLong(0);
 			return;
@@ -144,7 +180,7 @@ public class BinarySerializer {
 		} else {
 			_objectTable.put(obj.getId(), obj);
 			writeLong(obj.getId() | 0x8000000000000000l);
-			writeSerializableClass(obj);
+			writeSerializableClass(obj, newClassType);
 		}
 	}
 	

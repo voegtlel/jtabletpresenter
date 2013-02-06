@@ -27,7 +27,7 @@ public class DocumentPage implements IEntity, IPageRepaintListener {
 	private final LinkedElementList<IRenderable> _renderablesList = new LinkedElementList<IRenderable>();
 	
 	private PdfPageSerializable _pdfPage = null;
-
+	
 	/**
 	 * Creates a new document page for a document. The page will not be added to the document.
 	 */

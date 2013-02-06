@@ -22,6 +22,14 @@ public interface IDocument extends IEntity {
 	 * @return true if page is contained
 	 */
 	boolean hasPage(DocumentPage page);
+	
+	/**
+	 * Gets a page by id
+	 * 
+	 * @param id
+	 * @return
+	 */
+	DocumentPage getPageById(long id);
 
 	/**
 	 * Gets a page index

@@ -9,7 +9,7 @@ public abstract class DocumentEditorAdapter implements DocumentEditorListener {
 	}
 
 	@Override
-	public void documentChanged(final IEditableDocument lastDocument) {
+	public void documentChanged(final IClientDocument lastDocument) {
 	}
 	
 	@Override

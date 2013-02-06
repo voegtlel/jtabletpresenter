@@ -5,7 +5,7 @@
 package de.freiburg.uni.tablet.presenter.actions;
 
 import de.freiburg.uni.tablet.presenter.data.IBinarySerializable;
-import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
+import de.freiburg.uni.tablet.presenter.document.IDocumentEditor;
 
 /**
  * Interface for a general action
@@ -31,5 +31,5 @@ public interface IAction extends IBinarySerializable {
 	/**
 	 * @param editor
 	 */
-	void perform(DocumentEditor editor);
+	void perform(IDocumentEditor editor);
 }

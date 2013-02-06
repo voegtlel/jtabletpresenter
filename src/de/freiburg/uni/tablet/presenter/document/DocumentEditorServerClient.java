@@ -2,6 +2,7 @@ package de.freiburg.uni.tablet.presenter.document;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -11,7 +12,7 @@ import de.freiburg.uni.tablet.presenter.data.IBinarySerializableId;
 import de.freiburg.uni.tablet.presenter.geometry.BitmapImage;
 import de.freiburg.uni.tablet.presenter.page.IPen;
 
-public class DocumentEditor implements IBinarySerializableId {
+public class DocumentEditorServerClient implements IDocumentEditor {
 	private IPen _currentPen = null;
 	private File _currentImageFile = null;
 	private BitmapImage _currentImage = null;
@@ -25,17 +26,70 @@ public class DocumentEditor implements IBinarySerializableId {
 	
 	private final List<DocumentEditorListener> _listeners = new LinkedList<DocumentEditorListener>();
 	private DocumentListener _documentListener;
+	private DocumentListener _baseDocumentListener;
+	
+	private HashMap<Long, Long> _pageTranslator = new HashMap<Long, Long>();
+	private HashMap<Long, Long> _basePageTranslator = new HashMap<Long, Long>();
 
-	public DocumentEditor() {
+
+	public DocumentEditorServerClient() {
 		_history = new DocumentHistory(this);
 		_documentListener = new DocumentAdapter() {
 			@Override
-			public void pageRemoved(final IEditableDocument document, final DocumentPage prevPage,
+			public void pageRemoved(final IClientDocument document, final DocumentPage prevPage,
 					final DocumentPage page) {
 				onDocumentPageRemoved(document, prevPage, page);
 			}
 		};
+		
+		_baseDocumentListener = new DocumentAdapter() {
+			@Override
+			public void pageRemoved(final IClientDocument document, final DocumentPage prevPage,
+					final DocumentPage page) {
+				onBaseDocumentPageRemoved(document, prevPage, page);
+			}
+			
+			@Override
+			public void pageInserted(IClientDocument document,
+					DocumentPage prevPage, DocumentPage page) {
+				onBaseDocumentPageInserted(document, prevPage, page);
+			}
+		};
 	}
+	
+	private DocumentPage pageToBackPage(final DocumentPage page) {
+		final Long result = _pageTranslator.get(page.getId());
+		if (result != null) {
+			return _document.getPageById(result);
+		}
+		return null;
+	}
+	
+	private DocumentPage backPageToPage(final DocumentPage backPage) {
+		final Long result = _basePageTranslator.get(backPage.getId());
+		if (result != null) {
+			return _baseDocument.getPageById(result);
+		}
+		throw new IllegalArgumentException("Missing page for backPage");
+	}
+
+	protected void onBaseDocumentPageRemoved(final IClientDocument document,
+			final DocumentPage prevBackPage, final DocumentPage backPage) {
+		// TODO: Here might be a bug on page deletion and thread sync
+		final DocumentPage page = backPageToPage(backPage);
+		_document.removePage(page);
+	}
+	
+	protected void onBaseDocumentPageInserted(final IClientDocument document,
+			final DocumentPage prevBackPage, final DocumentPage backPage) {
+		// TODO: Here might be a bug on page deletion and thread sync
+		final DocumentPage prevPage = backPageToPage(prevBackPage);
+		final DocumentPage page = _document.insertPage(prevPage);
+		_pageTranslator.put(page.getId(), backPage.getId());
+		_basePageTranslator.put(backPage.getId(), page.getId());
+	}
+	
+	
 
 	/**
 	 * Returns the current page.
@@ -66,14 +120,10 @@ public class DocumentEditor implements IBinarySerializableId {
 		final DocumentPage lastBackPage = _currentBackPage;
 		if (_document.hasPage(page)) {
 			_currentPage = page;
-			if (_baseDocument != null) {
-				int pageIndex = _document.getPageIndex(page);
-				_currentBackPage = _baseDocument.getPageByIndex(pageIndex);
-			}
+			_currentBackPage = pageToBackPage(_currentPage);
 		} else if ((_baseDocument != null) && _baseDocument.hasPage(page)) {
 			_currentBackPage = page;
-			int pageIndex = _baseDocument.getPageIndex(page);
-			_currentPage = _document.getPageByIndex(pageIndex, true);
+			_currentPage = backPageToPage(_currentBackPage);
 		} else {
 			throw new IllegalArgumentException("Page not in document");
 		}
@@ -86,9 +136,10 @@ public class DocumentEditor implements IBinarySerializableId {
 	 * @param prevPage
 	 * @param page
 	 */
-	protected void onDocumentPageRemoved(final IEditableDocument document,
+	protected void onDocumentPageRemoved(final IDocument document,
 			final DocumentPage prevPage, final DocumentPage page) {
-		if (_currentPage == page || _currentBackPage == page) {
+		// TODO: Recreate front page or insert event to prevent deletion
+		if (_currentPage == page) {
 			if (prevPage != null) {
 				final DocumentPage nextPage = document.getNextPage(prevPage);
 				if (nextPage != null) {
@@ -116,9 +167,6 @@ public class DocumentEditor implements IBinarySerializableId {
 	 * @return Integer.MAX_VALUE or number of maximum pages
 	 */
 	public int getMaxPageCount() {
-		if (_baseDocument != null) {
-			return _baseDocument.getPageCount();
-		}
 		return Integer.MAX_VALUE;
 	}
 
@@ -130,19 +178,17 @@ public class DocumentEditor implements IBinarySerializableId {
 	 */
 	public void setCurrentPageByIndex(final int index,
 			final boolean createIfNotExisting) {
-		if (_baseDocument != null) {
-			// Only verify here
-			DocumentPage backPage = _baseDocument.getPageByIndex(index);
-			if (backPage == null) {
-				throw new IllegalStateException("Page index out of range");
-			}
-		}
 		final DocumentPage page = _document.getPageByIndex(index,
 				createIfNotExisting);
 		if (page == null) {
 			throw new IllegalStateException("Page index out of range");
 		}
 		setCurrentPage(page);
+	}
+	
+	@Override
+	public void setCurrentPageByIndex(final int index) {
+		setCurrentPageByIndex(index, false);
 	}
 
 	/**
@@ -192,22 +238,34 @@ public class DocumentEditor implements IBinarySerializableId {
 	 */
 	public void setBaseDocument(final IDocument baseDocument) {
 		fireChanging();
+		if (_baseDocument != null) {
+			_baseDocument.removeListener(_baseDocumentListener);
+		}
 		final IDocument lastDocument = _baseDocument;
 		_baseDocument = baseDocument;
-		fireBaseDocumentChanged(lastDocument);
-		boolean pageChanged = false;
 		if (_baseDocument != null) {
-			int length = _baseDocument.getPageCount();
-			// Create all pages
-			_document.getPageByIndex(length - 1, true);
-			// Set page index
-			if (getCurrentPageIndex() >= length) {
-				setCurrentPageByIndex(length - 1, true);
-				pageChanged = true;
-			}
+			_baseDocument.addListener(_baseDocumentListener);
 		}
-		if (!pageChanged) {
-			setCurrentPage(_currentPage);
+		fireBaseDocumentChanged(lastDocument);
+		if (_baseDocument != null) {
+			// Create all pages for back document and insert them (merge)
+			DocumentPage currentFrontPage = null;
+			DocumentPage prevPage = null;
+			for (DocumentPage page = _baseDocument.getPageByIndex(0); page != null; page = _baseDocument.getNextPage(page)) {
+				if (!_basePageTranslator.containsKey(page.getId())) {
+					// Find previous front page for previous back page and insert after this page
+					final Long prevPageId = _basePageTranslator.get(prevPage);
+					if (prevPageId != null && ((currentFrontPage == null) || (currentFrontPage.getId() != prevPageId))) {
+						currentFrontPage = _document.getPageById(prevPageId);
+					}
+					// Insert new front page
+					currentFrontPage = _document.insertPage(currentFrontPage);
+					_basePageTranslator.put(page.getId(), currentFrontPage.getId());
+					_pageTranslator.put(currentFrontPage.getId(), page.getId());
+				}
+				prevPage = page;
+			}
+			// TODO: Delete unused back pages
 		}
 	}
 	
@@ -229,6 +287,9 @@ public class DocumentEditor implements IBinarySerializableId {
 	 * @param document
 	 */
 	public void setDocument(final IEditableDocument document) {
+		if (_baseDocument != null) {
+			throw new IllegalStateException("Can't set document if having base document");
+		}
 		fireChanging();
 		if (_document != null) {
 			_document.removeListener(_documentListener);
@@ -298,7 +359,7 @@ public class DocumentEditor implements IBinarySerializableId {
 		return _history;
 	}
 
-	public DocumentEditor(final BinaryDeserializer reader) throws IOException {
+	public DocumentEditorServerClient(final BinaryDeserializer reader) throws IOException {
 		reader.resetState();
 		_document = reader.readObjectTable();
 		reader.resetState();

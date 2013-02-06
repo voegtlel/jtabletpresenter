@@ -8,7 +8,7 @@ import java.io.IOException;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
-import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
+import de.freiburg.uni.tablet.presenter.document.IDocumentEditor;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 
 /**
@@ -46,7 +46,7 @@ public class RenderableModifiedAction implements IAction {
 	}
 
 	@Override
-	public void perform(final DocumentEditor editor) {
+	public void perform(final IDocumentEditor editor) {
 	}
 
 	@Override

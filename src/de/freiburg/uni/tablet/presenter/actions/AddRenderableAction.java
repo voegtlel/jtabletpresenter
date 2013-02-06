@@ -8,8 +8,8 @@ import java.io.IOException;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
-import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
+import de.freiburg.uni.tablet.presenter.document.IDocumentEditor;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 
 /**
@@ -53,7 +53,7 @@ public class AddRenderableAction implements IAction {
 	}
 
 	@Override
-	public void perform(final DocumentEditor editor) {
+	public void perform(final IDocumentEditor editor) {
 		_page.insertRenderable(_afterRenderable, _renderable);
 		// If we changed the front document -> goto changed page
 		if (editor.getDocument().hasPage(_page)) {

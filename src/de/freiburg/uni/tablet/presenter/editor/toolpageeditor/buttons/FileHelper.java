@@ -18,9 +18,10 @@ import javax.swing.filechooser.FileFilter;
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.document.DocumentConfig;
-import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
+import de.freiburg.uni.tablet.presenter.document.DocumentEditorServer;
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
 import de.freiburg.uni.tablet.presenter.document.IDocument;
+import de.freiburg.uni.tablet.presenter.document.IDocumentEditor;
 import de.freiburg.uni.tablet.presenter.document.IEditableDocument;
 import de.freiburg.uni.tablet.presenter.document.PdfSerializable;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
@@ -149,7 +150,7 @@ public class FileHelper {
 		}
 	}
 	
-	public static void saveSession(final DocumentEditor editor, final File file) throws IOException {
+	public static void saveSession(final DocumentEditorServer editor, final File file) throws IOException {
 		SeekableByteChannel bc = Files.newByteChannel(file.toPath(), StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
 		BinarySerializer bs = new BinarySerializer(bc);
 		editor.serialize(bs);
@@ -239,7 +240,7 @@ public class FileHelper {
 	 * @param editor
 	 * @throws IOException
 	 */
-	public static void openSession(final File file, final DocumentEditor editor) throws IOException {
+	public static void openSession(final File file, final IDocumentEditor editor) throws IOException {
 		System.out.println("Loading session");
 		SeekableByteChannel bs = Files.newByteChannel(file.toPath(), StandardOpenOption.READ);
 		BinaryDeserializer bd = new BinaryDeserializer(bs);
@@ -295,7 +296,7 @@ public class FileHelper {
 		return false;
 	}
 	
-	public static void autosave(DocumentEditor editor) {
+	public static void autosave(IDocumentEditor editor) {
 		try {
 			int index = editor.getCurrentPageIndex();
 			DocumentPage page = editor.getCurrentPage();

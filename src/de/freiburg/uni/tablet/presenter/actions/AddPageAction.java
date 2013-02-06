@@ -8,23 +8,23 @@ import java.io.IOException;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
-import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
-import de.freiburg.uni.tablet.presenter.document.IEditableDocument;
+import de.freiburg.uni.tablet.presenter.document.IClientDocument;
+import de.freiburg.uni.tablet.presenter.document.IDocumentEditor;
 
 /**
  * @author lukas
  * 
  */
 public class AddPageAction implements IAction {
-	private final IEditableDocument _document;
+	private final IClientDocument _document;
 	private final DocumentPage _prevPage;
 	private final DocumentPage _page;
 
 	/**
 	 * 
 	 */
-	public AddPageAction(final IEditableDocument document, final DocumentPage prevPage, final DocumentPage page) {
+	public AddPageAction(final IClientDocument document, final DocumentPage prevPage, final DocumentPage page) {
 		_document = document;
 		_prevPage = prevPage;
 		_page = page;
@@ -51,7 +51,7 @@ public class AddPageAction implements IAction {
 	}
 
 	@Override
-	public void perform(final DocumentEditor editor) {
+	public void perform(final IDocumentEditor editor) {
 		_document.insertPage(_prevPage, _page);
 	}
 

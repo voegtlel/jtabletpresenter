@@ -8,14 +8,14 @@ import de.freiburg.uni.tablet.presenter.actions.IAction;
 import de.freiburg.uni.tablet.presenter.actions.SetServerDocumentAction;
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
-import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
 import de.freiburg.uni.tablet.presenter.document.DocumentHistoryListener;
+import de.freiburg.uni.tablet.presenter.document.IDocumentEditor;
 import de.freiburg.uni.tablet.presenter.list.LinkedElementList;
 
 public class UpClient extends ClientSync {
 	private final static Logger LOGGER = Logger.getLogger(UpClient.class.getName());
 	
-	private final DocumentEditor _editor;
+	private final IDocumentEditor _editor;
 	
 	private DocumentHistoryListener _documentHistoryListener;
 	private LinkedElementList<IAction> _actions = new LinkedElementList<IAction>();
@@ -24,7 +24,7 @@ public class UpClient extends ClientSync {
 	
 	private boolean _syncDownInit = false;
 	
-	public UpClient(final String hostname, final int port, final DocumentEditor editor) throws IOException {
+	public UpClient(final String hostname, final int port, final IDocumentEditor editor) throws IOException {
 		super(hostname, port, DownServer.SERVER_MAGIC, DownServer.CLIENT_MAGIC);
 		_editor = editor;
 		

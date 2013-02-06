@@ -29,7 +29,7 @@ public class DocumentHistory {
 	private final LinkedElementList<IAction> _history = new LinkedElementList<IAction>();
 	private LinkedElement<IAction> _top;
 	private LinkedElement<IAction> _topNext;
-	private final DocumentEditor _documentEditor;
+	private final IDocumentEditor _documentEditor;
 	private final DocumentListener _documentListener;
 	private ActionGroup _currentActionGroup;
 	
@@ -37,7 +37,7 @@ public class DocumentHistory {
 
 	private boolean _isPerforming = false;
 
-	public DocumentHistory(final DocumentEditor documentEditor) {
+	public DocumentHistory(final IDocumentEditor documentEditor) {
 		_documentEditor = documentEditor;
 		_documentListener = new DocumentListener() {
 			@Override
@@ -57,7 +57,7 @@ public class DocumentHistory {
 			}
 
 			@Override
-			public void pageRemoved(final IEditableDocument document, final DocumentPage prevPage,
+			public void pageRemoved(final IClientDocument document, final DocumentPage prevPage,
 					final DocumentPage page) {
 				if (!_isPerforming) {
 					addAction(new RemovePageAction(document, prevPage, page));
@@ -65,7 +65,7 @@ public class DocumentHistory {
 			}
 
 			@Override
-			public void pageInserted(final IEditableDocument document, final DocumentPage prevPage,
+			public void pageInserted(final IClientDocument document, final DocumentPage prevPage,
 					final DocumentPage page) {
 				if (!_isPerforming) {
 					addAction(new AddPageAction(document, prevPage, page));
@@ -94,8 +94,9 @@ public class DocumentHistory {
 			}
 		};
 		_documentEditor.addListener(new DocumentEditorAdapter() {
+			
 			@Override
-			public void documentChanged(IEditableDocument lastDocument) {
+			public void documentChanged(IClientDocument lastDocument) {
 				if (lastDocument != null) {
 					lastDocument.removeListener(_documentListener);
 				}

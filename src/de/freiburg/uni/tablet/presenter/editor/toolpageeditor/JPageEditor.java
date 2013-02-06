@@ -31,11 +31,12 @@ import javax.swing.KeyStroke;
 import de.freiburg.uni.tablet.presenter.document.DocumentAdapter;
 import de.freiburg.uni.tablet.presenter.document.DocumentConfig;
 import de.freiburg.uni.tablet.presenter.document.DocumentConfig.KeyValue;
-import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
+import de.freiburg.uni.tablet.presenter.document.DocumentEditorServer;
 import de.freiburg.uni.tablet.presenter.document.DocumentEditorAdapter;
 import de.freiburg.uni.tablet.presenter.document.DocumentListener;
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
 import de.freiburg.uni.tablet.presenter.document.IDocument;
+import de.freiburg.uni.tablet.presenter.document.IDocumentEditor;
 import de.freiburg.uni.tablet.presenter.document.IEditableDocument;
 import de.freiburg.uni.tablet.presenter.document.PdfPageSerializable;
 import de.freiburg.uni.tablet.presenter.editor.IPageEditor;
@@ -77,7 +78,7 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 	private PageLayerBufferBack _serverSyncLayer;
 	private PageLayerBufferFront _frontLayer;
 
-	private DocumentEditor _documentEditor = new DocumentEditor();
+	private IDocumentEditor _documentEditor = new DocumentEditorServer();
 
 	private final DocumentListener _documentListener;
 
@@ -419,7 +420,7 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 	}
 
 	@Override
-	public DocumentEditor getDocumentEditor() {
+	public IDocumentEditor getDocumentEditor() {
 		return _documentEditor;
 	}
 

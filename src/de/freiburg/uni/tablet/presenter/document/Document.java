@@ -75,6 +75,16 @@ public class Document implements IDocumentNotify {
 	}
 	
 	@Override
+	public DocumentPage getPageById(final long id) {
+		for (LinkedElement<DocumentPage> element = _pages.getFirst(); element != null; element = element.getNext()) {
+			if (element.getData().getId() == id) {
+				return element.getData();
+			}
+		}
+		throw new IllegalArgumentException("Page " + String.format("%X", id) + " not in document");
+	}
+	
+	@Override
 	public DocumentPage getNextPage(final DocumentPage page) {
 		final LinkedElement<DocumentPage> pageElement = _pages.getElement(page);
 		if (pageElement == null) {
@@ -121,14 +131,14 @@ public class Document implements IDocumentNotify {
 	public IEntity getParent() {
 		return null;
 	}
-
-	protected void firePageInserted(final IEditableDocument document, final DocumentPage prevPage, final DocumentPage page) {
+	
+	protected void firePageInserted(final IClientDocument document, final DocumentPage prevPage, final DocumentPage page) {
 		for (final DocumentListener listener : _listeners) {
 			listener.pageInserted(document, prevPage, page);
 		}
 	}
 
-	protected void firePageRemoved(final IEditableDocument document, final DocumentPage prevPage, final DocumentPage page) {
+	protected void firePageRemoved(final IClientDocument document, final DocumentPage prevPage, final DocumentPage page) {
 		for (final DocumentListener listener : _listeners) {
 			listener.pageRemoved(document, prevPage, page);
 		}

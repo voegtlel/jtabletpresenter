@@ -8,10 +8,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import de.freiburg.uni.tablet.presenter.document.DocumentConfig;
-import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
+import de.freiburg.uni.tablet.presenter.document.DocumentEditorServer;
 import de.freiburg.uni.tablet.presenter.document.DocumentEditorAdapter;
 import de.freiburg.uni.tablet.presenter.document.DocumentListener;
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
+import de.freiburg.uni.tablet.presenter.document.IClientDocument;
+import de.freiburg.uni.tablet.presenter.document.IDocumentEditor;
 import de.freiburg.uni.tablet.presenter.document.IEditableDocument;
 import de.freiburg.uni.tablet.presenter.document.PdfPageSerializable;
 import de.freiburg.uni.tablet.presenter.document.ServerDocument;
@@ -23,7 +25,7 @@ import de.freiburg.uni.tablet.presenter.xsocket.UpServer;
 public class ServerApp {
 	private static final Logger LOGGER = Logger.getLogger(ServerApp.class.getName());
 	
-	private DocumentEditor _editor;
+	private IDocumentEditor _editor;
 	
 	private UpServer _upServer;
 	private DownServer _downServer;
@@ -78,17 +80,17 @@ public class ServerApp {
 		final boolean autosaveDocChange = config.getBoolean("server.changeDocumentAutosave.enabled", true);
 		final String autosaveDocPath = config.getString("server.changeDocumentAutosave.path", "autosave-{time}.jpd");
 		
-		_editor = new DocumentEditor();
+		_editor = new DocumentEditorServer();
 		// If required, additional events can be placed here
 		_documentListener = new DocumentListener() {
 			@Override
-			public void pageInserted(IEditableDocument document,
+			public void pageInserted(IClientDocument document,
 					DocumentPage prevPage, DocumentPage page) {
 				_autosaveLastChange = System.currentTimeMillis();
 			}
 
 			@Override
-			public void pageRemoved(IEditableDocument document,
+			public void pageRemoved(IClientDocument document,
 					DocumentPage prevPage, DocumentPage page) {
 				_autosaveLastChange = System.currentTimeMillis();
 			}

@@ -32,6 +32,7 @@ public class PdfSerializable implements IEntity {
 		_id = parent.nextId();
 		_parent = parent;
 		_document = document;
+		_documentLoaded = (document != null);
 		_data = data;
 	}
 	

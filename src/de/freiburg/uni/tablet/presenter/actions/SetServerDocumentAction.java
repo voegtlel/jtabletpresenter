@@ -8,21 +8,24 @@ import java.io.IOException;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
-import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
-import de.freiburg.uni.tablet.presenter.document.IEditableDocument;
+import de.freiburg.uni.tablet.presenter.document.ClientDocument;
+import de.freiburg.uni.tablet.presenter.document.IClientDocument;
+import de.freiburg.uni.tablet.presenter.document.IDocument;
+import de.freiburg.uni.tablet.presenter.document.IDocumentEditor;
+import de.freiburg.uni.tablet.presenter.document.ServerDocument;
 
 /**
  * @author lukas
  * 
  */
 public class SetServerDocumentAction implements IAction {
-	private final IEditableDocument _document;
+	private final IDocument _document;
 	private final int _currentPageIndex;
 
 	/**
-	 * 
+	 * Action for forwarding the active document
 	 */
-	public SetServerDocumentAction(final IEditableDocument document, final int currentPageIndex) {
+	public SetServerDocumentAction(final IClientDocument document, final int currentPageIndex) {
 		_document = document;
 		_currentPageIndex = currentPageIndex;
 	}
@@ -37,10 +40,6 @@ public class SetServerDocumentAction implements IAction {
 		_document = reader.readObjectTable();
 		_currentPageIndex = reader.readInt();
 	}
-	
-	public SetClientDocumentAction getClientAction() {
-		return new SetClientDocumentAction(_document, _currentPageIndex);
-	}
 
 	@Override
 	public boolean hasUndoAction() {
@@ -53,7 +52,7 @@ public class SetServerDocumentAction implements IAction {
 	}
 
 	@Override
-	public void perform(final DocumentEditor editor) {
+	public void perform(final IDocumentEditor editor) {
 		editor.setDocument(_document);
 		editor.setCurrentPageByIndex(_currentPageIndex, false);
 	}
@@ -61,7 +60,7 @@ public class SetServerDocumentAction implements IAction {
 	@Override
 	public void serialize(final BinarySerializer writer) throws IOException {
 		writer.resetState();
-		writer.writeObjectTable(_document);
+		writer.writeObjectTable(_document, ClientDocument.class);
 		writer.writeInt(_currentPageIndex);
 	}
 }

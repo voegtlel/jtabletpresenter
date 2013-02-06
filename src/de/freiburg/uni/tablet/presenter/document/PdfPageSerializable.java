@@ -45,6 +45,7 @@ public class PdfPageSerializable implements IEntity {
 		writer.writeLong(_id);
 		writer.writeObjectTable(_parent);
 		writer.writeObjectTable(_basePdf);
+		System.out.println("Serialize pdf index " + _page.getNodeIndex());
 		writer.writeInt(_page.getNodeIndex());
 	}
 

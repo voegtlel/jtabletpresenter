@@ -9,8 +9,8 @@ import de.freiburg.uni.tablet.presenter.actions.IAction;
 import de.freiburg.uni.tablet.presenter.actions.SetClientDocumentAction;
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
-import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
 import de.freiburg.uni.tablet.presenter.document.DocumentHistoryListener;
+import de.freiburg.uni.tablet.presenter.document.IDocumentEditor;
 import de.freiburg.uni.tablet.presenter.list.LinkedElementList;
 
 public class UpServer extends ServerSync {
@@ -19,9 +19,9 @@ public class UpServer extends ServerSync {
 	
 	private final static Logger LOGGER = Logger.getLogger(UpServer.class.getName());
 	
-	private final DocumentEditor _editor;
+	private final IDocumentEditor _editor;
 	
-	public UpServer(final int port, final DocumentEditor editor) throws IOException {
+	public UpServer(final int port, final IDocumentEditor editor) throws IOException {
 		super(port, SERVER_MAGIC, CLIENT_MAGIC);
 		_editor = editor;
 	}

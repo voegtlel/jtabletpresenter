@@ -10,7 +10,7 @@ import de.freiburg.uni.tablet.presenter.actions.SetClientDocumentAction;
 import de.freiburg.uni.tablet.presenter.actions.SetServerDocumentAction;
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
-import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
+import de.freiburg.uni.tablet.presenter.document.IDocumentEditor;
 
 public class DownServer extends ServerSync {
 	public static final int CLIENT_MAGIC = 0x63263533;
@@ -18,9 +18,9 @@ public class DownServer extends ServerSync {
 	
 	private final static Logger LOGGER = Logger.getLogger(DownServer.class.getName());
 	
-	private DocumentEditor _editor;
+	private IDocumentEditor _editor;
 	
-	public DownServer(final int port, final DocumentEditor editor) throws IOException {
+	public DownServer(final int port, final IDocumentEditor editor) throws IOException {
 		super(port, SERVER_MAGIC, CLIENT_MAGIC);
 		_editor = editor;
 	}

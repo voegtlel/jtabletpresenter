@@ -8,7 +8,7 @@ import java.io.IOException;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
-import de.freiburg.uni.tablet.presenter.document.DocumentEditor;
+import de.freiburg.uni.tablet.presenter.document.IDocumentEditor;
 import de.freiburg.uni.tablet.presenter.list.LinkedElement;
 import de.freiburg.uni.tablet.presenter.list.LinkedElementList;
 
@@ -69,7 +69,7 @@ public class ActionGroup implements IAction {
 	}
 
 	@Override
-	public void perform(final DocumentEditor editor) {
+	public void perform(final IDocumentEditor editor) {
 		for (LinkedElement<IAction> e = _actions.getFirst(); e != null; e = e
 				.getNext()) {
 			e.getData().perform(editor);
