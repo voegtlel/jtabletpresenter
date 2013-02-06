@@ -8,11 +8,10 @@ import java.util.List;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
-import de.freiburg.uni.tablet.presenter.data.IBinarySerializableId;
 import de.freiburg.uni.tablet.presenter.geometry.BitmapImage;
 import de.freiburg.uni.tablet.presenter.page.IPen;
 
-public class DocumentEditorServerClient implements IDocumentEditor {
+public class DocumentEditorServerClient implements IDocumentEditorClient {
 	private IPen _currentPen = null;
 	private File _currentImageFile = null;
 	private BitmapImage _currentImage = null;
@@ -91,29 +90,17 @@ public class DocumentEditorServerClient implements IDocumentEditor {
 	
 	
 
-	/**
-	 * Returns the current page.
-	 * 
-	 * @return
-	 */
+	@Override
 	public DocumentPage getCurrentPage() {
 		return _currentPage;
 	}
 	
-	/**
-	 * Returns the current page.
-	 * 
-	 * @return
-	 */
+	@Override
 	public DocumentPage getCurrentBackPage() {
 		return _currentBackPage;
 	}
 
-	/**
-	 * Set the current page
-	 * 
-	 * @param page
-	 */
+	@Override
 	public void setCurrentPage(final DocumentPage page) {
 		fireChanging();
 		final DocumentPage lastPage = _currentPage;
@@ -194,6 +181,7 @@ public class DocumentEditorServerClient implements IDocumentEditor {
 	/**
 	 * @return
 	 */
+	@Override
 	public IPen getCurrentPen() {
 		return _currentPen;
 	}
@@ -302,7 +290,7 @@ public class DocumentEditorServerClient implements IDocumentEditor {
 		if (_document != null) {
 			_currentPage = document.getPageByIndex(0, true);
 			if (_baseDocument != null) {
-				_currentBackPage = _baseDocument.getPageByIndex(0);
+				_currentBackPage = pageToBackPage(_currentPage);
 			}
 			_document.addListener(_documentListener);
 		} else {
@@ -313,6 +301,10 @@ public class DocumentEditorServerClient implements IDocumentEditor {
 		fireCurrentPageChanged(lastPage, lastBackPage);
 	}
 	
+	@Override
+	public void setDocument(final IClientDocument document) {
+		setDocument((IEditableDocument)document);
+	}
 
 	public void addListener(final DocumentEditorListener listener) {
 		_listeners.add(listener);

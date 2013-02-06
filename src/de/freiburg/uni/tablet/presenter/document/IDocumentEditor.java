@@ -1,9 +1,12 @@
 package de.freiburg.uni.tablet.presenter.document;
 
+import java.io.File;
 import java.io.IOException;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.IBinarySerializableId;
+import de.freiburg.uni.tablet.presenter.geometry.BitmapImage;
+import de.freiburg.uni.tablet.presenter.page.IPen;
 
 public interface IDocumentEditor extends IBinarySerializableId {
 
@@ -69,5 +72,4 @@ public interface IDocumentEditor extends IBinarySerializableId {
 	 * @throws IOException
 	 */
 	void deserialize(BinaryDeserializer reader) throws IOException;
-
 }

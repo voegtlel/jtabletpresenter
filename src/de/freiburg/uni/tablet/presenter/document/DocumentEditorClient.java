@@ -2,26 +2,47 @@ package de.freiburg.uni.tablet.presenter.document;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.geometry.BitmapImage;
 import de.freiburg.uni.tablet.presenter.page.IPen;
 
-public class DocumentEditorClient extends DocumentEditorServer {
+public class DocumentEditorClient implements IDocumentEditorClient {
 	private IPen _currentPen = null;
 	private File _currentImageFile = null;
 	private BitmapImage _currentImage = null;
+	
+	private IEditableDocument _document = null;
+	private final DocumentHistory _history;
+	private DocumentPage _currentPage = null;
+	
+	private final List<DocumentEditorListener> _listeners = new LinkedList<DocumentEditorListener>();
+	private DocumentListener _documentListener;
 
-	private IDocument _baseDocument = null;
-	
-	protected final DocumentHistory _history;
-	
+
 	public DocumentEditorClient() {
-		super();
 		_history = new DocumentHistory(this);
+		_documentListener = new DocumentAdapter() {
+			@Override
+			public void pageRemoved(final IClientDocument document, final DocumentPage prevPage,
+					final DocumentPage page) {
+				onDocumentPageRemoved(document, prevPage, page);
+			}
+		};
 	}
-
+	
+	/**
+	 * Returns the current page.
+	 * 
+	 * @return
+	 */
+	public DocumentPage getCurrentPage() {
+		return _currentPage;
+	}
+	
 	/**
 	 * Set the current page
 	 * 
@@ -30,21 +51,44 @@ public class DocumentEditorClient extends DocumentEditorServer {
 	public void setCurrentPage(final DocumentPage page) {
 		fireChanging();
 		final DocumentPage lastPage = _currentPage;
-		final DocumentPage lastBackPage = _currentBackPage;
 		if (_document.hasPage(page)) {
 			_currentPage = page;
-			if (_baseDocument != null) {
-				int pageIndex = _document.getPageIndex(page);
-				_currentBackPage = _baseDocument.getPageByIndex(pageIndex);
-			}
-		} else if ((_baseDocument != null) && _baseDocument.hasPage(page)) {
-			_currentBackPage = page;
-			int pageIndex = _baseDocument.getPageIndex(page);
-			_currentPage = ((IEditableDocument)_document).getPageByIndex(pageIndex, true);
 		} else {
 			throw new IllegalArgumentException("Page not in document");
 		}
-		fireCurrentPageChanged(lastPage, lastBackPage);
+		fireCurrentPageChanged(lastPage, null);
+	}
+	
+	/**
+	 * Event
+	 * @param document
+	 * @param prevPage
+	 * @param page
+	 */
+	protected void onDocumentPageRemoved(final IDocument document,
+			final DocumentPage prevPage, final DocumentPage page) {
+		// TODO: Recreate front page or insert event to prevent deletion
+		if (_currentPage == page) {
+			if (prevPage != null) {
+				final DocumentPage nextPage = document.getNextPage(prevPage);
+				if (nextPage != null) {
+					setCurrentPage(nextPage);
+				} else {
+					setCurrentPage(prevPage);
+				}
+			} else {
+				setCurrentPage(_document.getPageByIndex(0));
+			}
+		}
+	}
+
+	/**
+	 * Returns the current page index.
+	 * 
+	 * @return
+	 */
+	public int getCurrentPageIndex() {
+		return _document.getPageIndex(_currentPage);
 	}
 	
 	/**
@@ -52,9 +96,6 @@ public class DocumentEditorClient extends DocumentEditorServer {
 	 * @return Integer.MAX_VALUE or number of maximum pages
 	 */
 	public int getMaxPageCount() {
-		if (_baseDocument != null) {
-			return _baseDocument.getPageCount();
-		}
 		return Integer.MAX_VALUE;
 	}
 
@@ -66,18 +107,17 @@ public class DocumentEditorClient extends DocumentEditorServer {
 	 */
 	public void setCurrentPageByIndex(final int index,
 			final boolean createIfNotExisting) {
-		if (_baseDocument != null) {
-			// Only verify here
-			DocumentPage backPage = _baseDocument.getPageByIndex(index);
-			if (backPage == null) {
-				throw new IllegalStateException("Page index out of range");
-			}
-		}
-		final DocumentPage page = ((IEditableDocument)_document).getPageByIndex(index, createIfNotExisting);
+		final DocumentPage page = _document.getPageByIndex(index,
+				createIfNotExisting);
 		if (page == null) {
 			throw new IllegalStateException("Page index out of range");
 		}
 		setCurrentPage(page);
+	}
+	
+	@Override
+	public void setCurrentPageByIndex(final int index) {
+		setCurrentPageByIndex(index, false);
 	}
 
 	/**
@@ -122,42 +162,10 @@ public class DocumentEditorClient extends DocumentEditorServer {
 	}
 	
 	/**
-	 * 
-	 * @param baseDocument
-	 */
-	public void setBaseDocument(final IDocument baseDocument) {
-		fireChanging();
-		final IDocument lastDocument = _baseDocument;
-		_baseDocument = baseDocument;
-		fireBaseDocumentChanged(lastDocument);
-		boolean pageChanged = false;
-		if (_baseDocument != null) {
-			int length = _baseDocument.getPageCount();
-			// Create all pages
-			((IEditableDocument)_document).getPageByIndex(length - 1, true);
-			// Set page index
-			if (getCurrentPageIndex() >= length) {
-				setCurrentPageByIndex(length - 1, true);
-				pageChanged = true;
-			}
-		}
-		if (!pageChanged) {
-			setCurrentPage(_currentPage);
-		}
-	}
-	
-	/**
-	 * @return
-	 */
-	public IDocument getBaseDocument() {
-		return _baseDocument;
-	}
-
-	/**
 	 * @return
 	 */
 	public IEditableDocument getDocument() {
-		return (IEditableDocument) _document;
+		return _document;
 	}
 
 	/**
@@ -168,25 +176,24 @@ public class DocumentEditorClient extends DocumentEditorServer {
 		if (_document != null) {
 			_document.removeListener(_documentListener);
 		}
-		final IClientDocument lastDocument = _document;
+		final IEditableDocument lastDocument = _document;
 		_document = document;
 		
 		final DocumentPage lastPage = _currentPage;
-		final DocumentPage lastBackPage = _currentBackPage;
 		if (_document != null) {
 			_currentPage = document.getPageByIndex(0, true);
-			if (_baseDocument != null) {
-				_currentBackPage = _baseDocument.getPageByIndex(0);
-			}
 			_document.addListener(_documentListener);
 		} else {
 			_currentPage = null;
-			_currentBackPage = null;
 		}
 		fireDocumentChanged(lastDocument);
-		fireCurrentPageChanged(lastPage, lastBackPage);
+		fireCurrentPageChanged(lastPage, null);
 	}
 	
+	@Override
+	public void setDocument(final IClientDocument document) {
+		setDocument((IEditableDocument)document);
+	}
 
 	public void addListener(final DocumentEditorListener listener) {
 		_listeners.add(listener);
@@ -208,15 +215,9 @@ public class DocumentEditorClient extends DocumentEditorServer {
 		}
 	}
 
-	private void fireDocumentChanged(final IClientDocument lastDocument) {
+	private void fireDocumentChanged(final IEditableDocument lastDocument) {
 		for (final DocumentEditorListener listener : _listeners) {
 			listener.documentChanged(lastDocument);
-		}
-	}
-	
-	private void fireBaseDocumentChanged(final IDocument lastDocument) {
-		for (final DocumentEditorListener listener : _listeners) {
-			listener.baseDocumentChanged(lastDocument);
 		}
 	}
 	
@@ -232,13 +233,14 @@ public class DocumentEditorClient extends DocumentEditorServer {
 	public DocumentHistory getHistory() {
 		return _history;
 	}
+	
+	@Override
+	public DocumentPage getCurrentBackPage() {
+		return null;
+	}
 
 	public DocumentEditorClient(final BinaryDeserializer reader) throws IOException {
-		reader.resetState();
 		_document = reader.readObjectTable();
-		reader.resetState();
-		_baseDocument = reader.readObjectTable();
-		reader.resetState();
 		_currentPen = reader.readSerializableClass();
 		int pageIndex = reader.readInt();
 		setCurrentPageByIndex(pageIndex, false);
@@ -248,9 +250,6 @@ public class DocumentEditorClient extends DocumentEditorServer {
 	@Override
 	public void serialize(final BinarySerializer writer) throws IOException {
 		writer.writeObjectTable(_document);
-		writer.resetState();
-		writer.writeObjectTable(_baseDocument);
-		writer.resetState();
 		writer.writeSerializableClass(_currentPen);
 		writer.writeInt(getCurrentPageIndex());
 	}
@@ -261,10 +260,8 @@ public class DocumentEditorClient extends DocumentEditorServer {
 	 * @throws IOException
 	 */
 	public void deserialize(final BinaryDeserializer reader) throws IOException {
+		reader.resetState();
 		setDocument((IEditableDocument) reader.readObjectTable());
-		reader.resetState();
-		setBaseDocument((IEditableDocument) reader.readObjectTable());
-		reader.resetState();
 		setCurrentPen((IPen) reader.readSerializableClass());
 		int pageIndex = reader.readInt();
 		setCurrentPageByIndex(pageIndex, false);
