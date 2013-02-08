@@ -9,7 +9,9 @@ import de.freiburg.uni.tablet.presenter.actions.SetServerDocumentAction;
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.document.DocumentHistoryListener;
-import de.freiburg.uni.tablet.presenter.document.IDocumentEditor;
+import de.freiburg.uni.tablet.presenter.document.DocumentPage;
+import de.freiburg.uni.tablet.presenter.document.document.IEditableDocument;
+import de.freiburg.uni.tablet.presenter.document.editor.IDocumentEditor;
 import de.freiburg.uni.tablet.presenter.list.LinkedElementList;
 
 public class UpClient extends ClientSync {
@@ -87,8 +89,10 @@ public class UpClient extends ClientSync {
 			if (_syncDownInit) {
 				LOGGER.log(Level.INFO, "Deserialize init doc");
 				try {
-					final SetServerDocumentAction initAction = reader.readSerializableClass();
-					initAction.perform(_editor);
+					final IEditableDocument document = reader.readObjectTable();
+					final DocumentPage currentPage = reader.readObjectTable();
+					_editor.setDocument(document);
+					_editor.setCurrentPage(currentPage);
 				} catch (Exception e) {
 					e.printStackTrace();
 					throw new IOException(e);
@@ -97,7 +101,7 @@ public class UpClient extends ClientSync {
 			} else {
 				// Send initial data
 				LOGGER.log(Level.INFO, "Serialize init doc");
-				writer.writeSerializableClass(new SetServerDocumentAction(_editor.getDocument(), _editor.getCurrentPageIndex()));
+				writer.writeSerializableClass(new SetServerDocumentAction(_editor.getFrontDocument(), _editor.getCurrentPage()));
 				writer.flush();
 				LOGGER.log(Level.INFO, "Serialize init doc done");
 			}

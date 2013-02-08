@@ -2,14 +2,19 @@
  * Copyright Lukas Voegtle
  * Albert Ludwigs University of Freiburg
  */
-package de.freiburg.uni.tablet.presenter.document;
+package de.freiburg.uni.tablet.presenter.document.document;
 
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
+import de.freiburg.uni.tablet.presenter.document.DocumentListener;
+import de.freiburg.uni.tablet.presenter.document.DocumentPage;
+import de.freiburg.uni.tablet.presenter.document.IEntity;
+import de.freiburg.uni.tablet.presenter.document.PdfPageSerializable;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 import de.freiburg.uni.tablet.presenter.list.LinkedElement;
 import de.freiburg.uni.tablet.presenter.list.LinkedElementList;
@@ -21,6 +26,8 @@ import de.freiburg.uni.tablet.presenter.list.LinkedElementList;
 public class Document implements IDocumentNotify {
 	protected final LinkedElementList<DocumentPage> _pages = new LinkedElementList<DocumentPage>();
 
+	private final UUID _docUuid;
+	
 	private int _docId;
 	private int _uniqueId = 1;
 
@@ -31,6 +38,7 @@ public class Document implements IDocumentNotify {
 	 */
 	protected Document(final int docId) {
 		_docId = docId;
+		_docUuid = UUID.randomUUID();
 	}
 	
 	/**
@@ -40,6 +48,7 @@ public class Document implements IDocumentNotify {
 	 */
 	protected Document(final int docId, final Document base) {
 		_docId = docId;
+		_docUuid = UUID.randomUUID();
 		for (LinkedElement<DocumentPage> j = _pages.getFirst(); j != null; j = j.getNext()) {
 			_pages.addLast(j.getData().clone(this));
 		}
@@ -81,7 +90,7 @@ public class Document implements IDocumentNotify {
 				return element.getData();
 			}
 		}
-		throw new IllegalArgumentException("Page " + String.format("%X", id) + " not in document");
+		return null;
 	}
 	
 	@Override
@@ -126,10 +135,20 @@ public class Document implements IDocumentNotify {
 	public long getId() {
 		return (long)_docId << 32;
 	}
+	
+	@Override
+	public UUID getUuid() {
+		return _docUuid;
+	}
 
 	@Override
 	public IEntity getParent() {
 		return null;
+	}
+	
+	@Override
+	public Iterable<DocumentPage> getPages() {
+		return _pages;
 	}
 	
 	protected void firePageInserted(final IClientDocument document, final DocumentPage prevPage, final DocumentPage page) {
@@ -196,6 +215,9 @@ public class Document implements IDocumentNotify {
 		// Read Ids
 		_uniqueId = reader.readInt();
 		_docId = reader.readInt();
+		final long uuidMsb = reader.readLong();
+		final long uuidLsb = reader.readLong();
+		_docUuid = new UUID(uuidMsb, uuidLsb);
 		// Put this to object table
 		reader.putObjectTable(this.getId(), this);
 		// Read pages
@@ -210,6 +232,8 @@ public class Document implements IDocumentNotify {
 	public void serialize(final BinarySerializer writer) throws IOException {
 		writer.writeInt(_uniqueId);
 		writer.writeInt(_docId);
+		writer.writeLong(_docUuid.getMostSignificantBits());
+		writer.writeLong(_docUuid.getLeastSignificantBits());
 		// Always has first
 		writer.writeInt(_pages.getCount());
 		for (LinkedElement<DocumentPage> dp = _pages.getFirst(); dp != null; dp = dp

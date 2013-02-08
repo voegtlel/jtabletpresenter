@@ -1,17 +1,20 @@
-package de.freiburg.uni.tablet.presenter.document;
+package de.freiburg.uni.tablet.presenter.document.document;
 
 import java.io.IOException;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
+import de.freiburg.uni.tablet.presenter.document.DocumentPage;
+import de.freiburg.uni.tablet.presenter.document.PdfPageSerializable;
+import de.freiburg.uni.tablet.presenter.document.PdfSerializable;
 import de.freiburg.uni.tablet.presenter.list.LinkedElement;
 import de.intarsys.pdf.pd.PDPage;
 import de.intarsys.pdf.pd.PDPageTree;
 
-public class ServerDocument extends Document implements IEditableDocument {
+public class DocumentServer extends Document implements IEditableDocument {
 	/**
 	 * Create a new server document.
 	 */
-	public ServerDocument(final int docId) {
+	public DocumentServer(final int docId) {
 		super(docId);
 		_pages.addFirst(new DocumentPage(this));
 	}
@@ -21,7 +24,7 @@ public class ServerDocument extends Document implements IEditableDocument {
 	 * @param docId
 	 * @param base
 	 */
-	protected ServerDocument(final int docId, final ServerDocument base) {
+	protected DocumentServer(final int docId, final DocumentServer base) {
 		super(docId, base);
 	}
 	
@@ -224,12 +227,12 @@ public class ServerDocument extends Document implements IEditableDocument {
 		return page.clone(this);
 	}
 	
-	public ServerDocument(final BinaryDeserializer reader) throws IOException {
+	public DocumentServer(final BinaryDeserializer reader) throws IOException {
 		super(reader);
 	}
 	
 	@Override
 	public IEditableDocument clone(final int docId) {
-		return new ServerDocument(docId, this);
+		return new DocumentServer(docId, this);
 	}
 }

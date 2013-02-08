@@ -1,5 +1,6 @@
 package de.freiburg.uni.tablet.presenter.document;
 
+import de.freiburg.uni.tablet.presenter.document.document.IClientDocument;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 
 public interface DocumentListener {

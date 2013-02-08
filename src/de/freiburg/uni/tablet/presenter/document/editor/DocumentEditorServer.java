@@ -1,4 +1,4 @@
-package de.freiburg.uni.tablet.presenter.document;
+package de.freiburg.uni.tablet.presenter.document.editor;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -6,6 +6,13 @@ import java.util.List;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
+import de.freiburg.uni.tablet.presenter.document.DocumentHistory;
+import de.freiburg.uni.tablet.presenter.document.DocumentListener;
+import de.freiburg.uni.tablet.presenter.document.DocumentPage;
+import de.freiburg.uni.tablet.presenter.document.document.DocumentAdapter;
+import de.freiburg.uni.tablet.presenter.document.document.IClientDocument;
+import de.freiburg.uni.tablet.presenter.document.document.IDocument;
+import de.freiburg.uni.tablet.presenter.document.document.IEditableDocument;
 
 public class DocumentEditorServer implements IDocumentEditor {
 	private IClientDocument _document = null;
@@ -43,7 +50,9 @@ public class DocumentEditorServer implements IDocumentEditor {
 	public void setCurrentPage(final DocumentPage page) {
 		fireChanging();
 		final DocumentPage lastPage = _currentPage;
-		if (_document.hasPage(page)) {
+		if (page == null) {
+			_currentPage = null;
+		} else if (_document.hasPage(page)) {
 			_currentPage = page;
 		} else {
 			throw new IllegalArgumentException("Page not in document");
@@ -69,7 +78,7 @@ public class DocumentEditorServer implements IDocumentEditor {
 	}
 	
 	@Override
-	public IClientDocument getDocument() {
+	public IClientDocument getFrontDocument() {
 		return _document;
 	}
 
@@ -153,5 +162,16 @@ public class DocumentEditorServer implements IDocumentEditor {
 	@Override
 	public long getId() {
 		return 0;
+	}
+
+	@Override
+	public void setBackDocument(final IClientDocument backDocument) {
+		// This is the same here (called by SetServerDocument)
+		setDocument(backDocument);
+	}
+	
+	@Override
+	public boolean isCurrentPage(final DocumentPage page) {
+		return _currentPage == page;
 	}
 }

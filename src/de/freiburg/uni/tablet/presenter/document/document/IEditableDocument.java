@@ -1,4 +1,7 @@
-package de.freiburg.uni.tablet.presenter.document;
+package de.freiburg.uni.tablet.presenter.document.document;
+
+import de.freiburg.uni.tablet.presenter.document.DocumentPage;
+import de.freiburg.uni.tablet.presenter.document.PdfSerializable;
 
 
 public interface IEditableDocument extends IClientDocument {
@@ -26,7 +29,7 @@ public interface IEditableDocument extends IClientDocument {
 	void setPdfPages(PdfSerializable document, int pdfMode);
 
 	/**
-	 * Gets a page by its index
+	 * Gets a page by its index or null
 	 * 
 	 * @param index
 	 * @param createIfNotExisting
@@ -61,6 +64,7 @@ public interface IEditableDocument extends IClientDocument {
 	 * @param docId
 	 * @return
 	 */
+	@Override
 	IEditableDocument clone(int docId);
 
 	/**

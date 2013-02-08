@@ -8,15 +8,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import de.freiburg.uni.tablet.presenter.document.DocumentConfig;
-import de.freiburg.uni.tablet.presenter.document.DocumentEditorServer;
-import de.freiburg.uni.tablet.presenter.document.DocumentEditorAdapter;
 import de.freiburg.uni.tablet.presenter.document.DocumentListener;
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
-import de.freiburg.uni.tablet.presenter.document.IClientDocument;
-import de.freiburg.uni.tablet.presenter.document.IDocumentEditor;
-import de.freiburg.uni.tablet.presenter.document.IEditableDocument;
 import de.freiburg.uni.tablet.presenter.document.PdfPageSerializable;
-import de.freiburg.uni.tablet.presenter.document.ServerDocument;
+import de.freiburg.uni.tablet.presenter.document.document.IClientDocument;
+import de.freiburg.uni.tablet.presenter.document.document.DocumentServer;
+import de.freiburg.uni.tablet.presenter.document.editor.DocumentEditorAdapter;
+import de.freiburg.uni.tablet.presenter.document.editor.DocumentEditorServer;
+import de.freiburg.uni.tablet.presenter.document.editor.IDocumentEditor;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.FileHelper;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 import de.freiburg.uni.tablet.presenter.xsocket.DownServer;
@@ -44,7 +43,7 @@ public class ServerApp {
 	/**
 	 * @param args
 	 */
-	public static void main(String[] args) {
+	public static void main(final String[] args) {
 		Logger.getLogger("de.freiburg.uni.tablet.presenter").setLevel(Level.ALL);
 		
 		String configFile = "config.ini";
@@ -84,55 +83,55 @@ public class ServerApp {
 		// If required, additional events can be placed here
 		_documentListener = new DocumentListener() {
 			@Override
-			public void pageInserted(IClientDocument document,
-					DocumentPage prevPage, DocumentPage page) {
+			public void pageInserted(final IClientDocument document,
+					final DocumentPage prevPage, final DocumentPage page) {
 				_autosaveLastChange = System.currentTimeMillis();
 			}
 
 			@Override
-			public void pageRemoved(IClientDocument document,
-					DocumentPage prevPage, DocumentPage page) {
+			public void pageRemoved(final IClientDocument document,
+					final DocumentPage prevPage, final DocumentPage page) {
 				_autosaveLastChange = System.currentTimeMillis();
 			}
 
 			@Override
-			public void renderableAdded(IRenderable renderableAfter,
-					IRenderable renderable, DocumentPage page) {
+			public void renderableAdded(final IRenderable renderableAfter,
+					final IRenderable renderable, final DocumentPage page) {
 				_autosaveLastChange = System.currentTimeMillis();
 			}
 
 			@Override
-			public void renderableRemoved(IRenderable renderableAfter,
-					IRenderable renderable, DocumentPage page) {
+			public void renderableRemoved(final IRenderable renderableAfter,
+					final IRenderable renderable, final DocumentPage page) {
 				_autosaveLastChange = System.currentTimeMillis();
 			}
 
 			@Override
-			public void pdfPageChanged(DocumentPage documentPage,
-					PdfPageSerializable lastPdfPage) {
+			public void pdfPageChanged(final DocumentPage documentPage,
+					final PdfPageSerializable lastPdfPage) {
 				_autosaveLastChange = System.currentTimeMillis();
 			}
 
 			@Override
-			public void renderableModified(IRenderable renderable,
-					DocumentPage page) {
+			public void renderableModified(final IRenderable renderable,
+					final DocumentPage page) {
 				_autosaveLastChange = System.currentTimeMillis();
 			}
 
 			@Override
-			public void renderableModifyEnd(IRenderable renderable,
-					DocumentPage page) {
+			public void renderableModifyEnd(final IRenderable renderable,
+					final DocumentPage page) {
 				_autosaveLastChange = System.currentTimeMillis();
 			}
 		};
 		_editor.addListener(new DocumentEditorAdapter() {
 			@Override
-			public void documentChanged(final IEditableDocument lastDocument) {
+			public void documentChanged(final IClientDocument lastDocument) {
 				if (lastDocument != null) {
 					lastDocument.removeListener(_documentListener);
 				}
-				if (_editor.getDocument() != null) {
-					_editor.getDocument().addListener(_documentListener);
+				if (_editor.getFrontDocument() != null) {
+					_editor.getFrontDocument().addListener(_documentListener);
 					if (autosaveDocChange) {
 						try {
 							saveDocument(lastDocument, autosaveDocPath);
@@ -143,7 +142,7 @@ public class ServerApp {
 				}
 			}
 		});
-		_editor.setDocument(new ServerDocument(1));
+		_editor.setDocument(new DocumentServer(1));
 		
 		try {
 			_upServer = new UpServer(portUp, _editor);
@@ -203,7 +202,7 @@ public class ServerApp {
 		LOGGER.log(Level.INFO, "Finished");
 	}
 	
-	protected void saveDocument(final IEditableDocument document, final String basePath) throws IOException {
+	protected void saveDocument(final IClientDocument document, final String basePath) throws IOException {
 		final String dateString = _dateFormat.format(new Date());
 		final File autosavePath = new File(basePath.replaceAll("\\{time\\}", dateString));
 		LOGGER.log(Level.INFO, "Saving to " + autosavePath);
@@ -228,7 +227,7 @@ public class ServerApp {
 					return;
 				}
 				try {
-					saveDocument(_editor.getDocument(), _autosavePath);
+					saveDocument(_editor.getFrontDocument(), _autosavePath);
 				} catch (IOException e) {
 					LOGGER.log(Level.SEVERE, "Autosaving canceled: " + e.toString());
 					return;

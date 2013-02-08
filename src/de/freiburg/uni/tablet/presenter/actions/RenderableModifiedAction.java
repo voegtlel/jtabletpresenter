@@ -8,7 +8,7 @@ import java.io.IOException;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
-import de.freiburg.uni.tablet.presenter.document.IDocumentEditor;
+import de.freiburg.uni.tablet.presenter.document.editor.IDocumentEditor;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 
 /**

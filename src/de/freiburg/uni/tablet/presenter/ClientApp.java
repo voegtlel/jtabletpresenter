@@ -16,7 +16,7 @@ import javax.swing.SwingUtilities;
 import com.sun.jna.NativeLibrary;
 
 import de.freiburg.uni.tablet.presenter.document.DocumentConfig;
-import de.freiburg.uni.tablet.presenter.document.ServerDocument;
+import de.freiburg.uni.tablet.presenter.document.document.DocumentServer;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.JPageEditor;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.FileHelper;
 import de.freiburg.uni.tablet.presenter.page.SolidPen;
@@ -93,7 +93,7 @@ public class ClientApp {
 		//_pageRenderer.setBounds(100, 100, 640, 480);
 		_pageRenderer.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-		_pageRenderer.getDocumentEditor().setDocument(new ServerDocument(1));
+		_pageRenderer.getDocumentEditor().setDocument(new DocumentServer(1));
 		
 		if (_pageRenderer.getConfig().getBoolean("client.down.enabled", false)) {
 			String hostname = _pageRenderer.getConfig().getString("client.down.host", "");

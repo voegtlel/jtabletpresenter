@@ -1,5 +1,8 @@
-package de.freiburg.uni.tablet.presenter.document;
+package de.freiburg.uni.tablet.presenter.document.editor;
 
+import de.freiburg.uni.tablet.presenter.document.DocumentPage;
+import de.freiburg.uni.tablet.presenter.document.document.IClientDocument;
+import de.freiburg.uni.tablet.presenter.document.document.IDocument;
 import de.freiburg.uni.tablet.presenter.page.IPen;
 
 public interface DocumentEditorListener {
@@ -24,7 +27,7 @@ public interface DocumentEditorListener {
 	 * 
 	 * @param lastDocument
 	 */
-	void baseDocumentChanged(IDocument lastDocument);
+	void backDocumentChanged(IDocument lastDocument);
 
 	/**
 	 * Fired when something is about to change

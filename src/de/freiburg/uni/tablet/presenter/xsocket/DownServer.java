@@ -6,11 +6,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import de.freiburg.uni.tablet.presenter.actions.IAction;
-import de.freiburg.uni.tablet.presenter.actions.SetClientDocumentAction;
-import de.freiburg.uni.tablet.presenter.actions.SetServerDocumentAction;
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
-import de.freiburg.uni.tablet.presenter.document.IDocumentEditor;
+import de.freiburg.uni.tablet.presenter.document.document.DocumentServer;
+import de.freiburg.uni.tablet.presenter.document.editor.IDocumentEditor;
 
 public class DownServer extends ServerSync {
 	public static final int CLIENT_MAGIC = 0x63263533;
@@ -54,7 +53,8 @@ public class DownServer extends ServerSync {
 				if (reader.readBoolean()) {
 					LOGGER.log(Level.INFO, "Serialize init doc");
 					// Here the client requests to receive the server document first
-					writer.writeSerializableClass(new SetServerDocumentAction(_editor.getDocument(), _editor.getCurrentPageIndex()));
+					writer.writeObjectTable(_editor.getFrontDocument(), DocumentServer.class);
+					writer.writeObjectTable(_editor.getCurrentPage());
 					writer.flush();
 					LOGGER.log(Level.INFO, "Serialize init doc done");
 				}
@@ -63,12 +63,7 @@ public class DownServer extends ServerSync {
 					final IAction action = reader.readSerializableClass();
 					LOGGER.log(Level.INFO, "Read action " + action.getClass().getName());
 					try {
-						if (action instanceof SetClientDocumentAction) {
-							SetServerDocumentAction serverAction = ((SetClientDocumentAction) action).getServerAction();
-							serverAction.perform(_editor);
-						} else {
-							action.perform(_editor);
-						}
+						action.perform(_editor);
 					} catch (Exception e) {
 						throw new IOException(e);
 					}

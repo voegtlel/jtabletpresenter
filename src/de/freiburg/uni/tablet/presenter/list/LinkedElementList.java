@@ -1,6 +1,8 @@
 package de.freiburg.uni.tablet.presenter.list;
 
-public class LinkedElementList<T> {
+import java.util.Iterator;
+
+public class LinkedElementList<T> implements Iterable<T> {
 	private LinkedElement<T> _first;
 	private LinkedElement<T> _last;
 
@@ -238,5 +240,10 @@ public class LinkedElementList<T> {
 
 	public boolean hasOne() {
 		return _first == _last;
+	}
+	
+	@Override
+	public Iterator<T> iterator() {
+		return new LinkedElementIterator<T>(_first);
 	}
 }

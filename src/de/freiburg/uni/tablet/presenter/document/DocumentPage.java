@@ -8,6 +8,8 @@ import java.io.IOException;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
+import de.freiburg.uni.tablet.presenter.document.document.IDocument;
+import de.freiburg.uni.tablet.presenter.document.document.IDocumentNotify;
 import de.freiburg.uni.tablet.presenter.editor.IPageRepaintListener;
 import de.freiburg.uni.tablet.presenter.geometry.CollisionInfo;
 import de.freiburg.uni.tablet.presenter.geometry.CollisionListener;

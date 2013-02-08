@@ -9,8 +9,8 @@ import java.io.IOException;
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
-import de.freiburg.uni.tablet.presenter.document.IClientDocument;
-import de.freiburg.uni.tablet.presenter.document.IDocumentEditor;
+import de.freiburg.uni.tablet.presenter.document.document.IClientDocument;
+import de.freiburg.uni.tablet.presenter.document.editor.IDocumentEditor;
 
 /**
  * @author lukas

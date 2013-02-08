@@ -8,7 +8,7 @@ import java.awt.Component;
 
 import javax.swing.JOptionPane;
 
-import de.freiburg.uni.tablet.presenter.document.ServerDocument;
+import de.freiburg.uni.tablet.presenter.document.document.DocumentServer;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 
 /**
@@ -38,6 +38,6 @@ public class ButtonDocumentNew extends AbstractButtonAction {
 		} else if (result == JOptionPane.CANCEL_OPTION) {
 			return;
 		}
-		_editor.getDocumentEditor().setDocument(new ServerDocument(1));
+		_editor.getDocumentEditor().setDocument(new DocumentServer(1));
 	}
 }

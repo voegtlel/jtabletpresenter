@@ -157,7 +157,7 @@ public class BinarySerializer {
 	 * @throws IOException
 	 */
 	public void writeObjectTable(final IBinarySerializableId obj) throws IOException {
-		writeObjectTable(obj, obj.getClass());
+		writeObjectTable(obj, ((obj == null)?Object.class:obj.getClass()));
 	}
 
 	/**

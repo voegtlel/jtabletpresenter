@@ -12,8 +12,8 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import de.freiburg.uni.tablet.presenter.document.DocumentEditorAdapter;
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
+import de.freiburg.uni.tablet.presenter.document.editor.DocumentEditorAdapter;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.JPageToolButton;
 
@@ -56,10 +56,12 @@ public class ButtonSpinnerPage extends AbstractButtonAction {
 	}
 
 	protected void onUpdateSpinner() {
-		final int pageNumber = _editor.getDocumentEditor()
-				.getCurrentPageIndex() + 1;
-		if (!_spinner.getValue().equals(pageNumber)) {
-			_spinner.setValue(pageNumber);
+		if (_editor.getDocumentEditor().getCurrentPage() != null) {
+			final int pageNumber = _editor.getDocumentEditor()
+					.getCurrentPageIndex() + 1;
+			if (!_spinner.getValue().equals(pageNumber)) {
+				_spinner.setValue(pageNumber);
+			}
 		}
 	}
 
@@ -71,9 +73,7 @@ public class ButtonSpinnerPage extends AbstractButtonAction {
 		if (_editor.getConfig().getBoolean("autosave.spinner", true)) {
 			FileHelper.autosave(_editor.getDocumentEditor());
 		}
-		if (newPageIndex >= _editor.getDocumentEditor().getMaxPageCount()) {
-			newPageIndex = _editor.getDocumentEditor().getMaxPageCount() - 1;
-		} else if (newPageIndex < 0) {
+		if (newPageIndex < 0) {
 			newPageIndex = 0;
 		}
 		_editor.getDocumentEditor().setCurrentPageByIndex(newPageIndex, true);

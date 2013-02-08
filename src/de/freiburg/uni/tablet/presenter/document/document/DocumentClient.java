@@ -1,15 +1,16 @@
-package de.freiburg.uni.tablet.presenter.document;
+package de.freiburg.uni.tablet.presenter.document.document;
 
 import java.io.IOException;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
+import de.freiburg.uni.tablet.presenter.document.DocumentPage;
 import de.freiburg.uni.tablet.presenter.list.LinkedElement;
 
-public class ClientDocument extends Document implements IClientDocument {
+public class DocumentClient extends Document implements IClientDocument {
 	/**
 	 * Create a new client document.
 	 */
-	public ClientDocument(final int docId) {
+	public DocumentClient(final int docId) {
 		super(docId);
 	}
 	
@@ -18,7 +19,7 @@ public class ClientDocument extends Document implements IClientDocument {
 	 * @param docId
 	 * @param base
 	 */
-	protected ClientDocument(final int docId, final ClientDocument base) {
+	protected DocumentClient(final int docId, final DocumentClient base) {
 		super(docId, base);
 	}
 
@@ -61,12 +62,12 @@ public class ClientDocument extends Document implements IClientDocument {
 		firePageRemoved(this, (prevPage == null?null:prevPage.getData()), element.getData());
 	}
 	
-	public ClientDocument(final BinaryDeserializer reader) throws IOException {
+	public DocumentClient(final BinaryDeserializer reader) throws IOException {
 		super(reader);
 	}
 	
 	@Override
 	public IClientDocument clone(final int docId) {
-		return new ClientDocument(docId, this);
+		return new DocumentClient(docId, this);
 	}
 }

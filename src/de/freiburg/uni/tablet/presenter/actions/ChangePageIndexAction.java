@@ -9,7 +9,7 @@ import java.io.IOException;
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
-import de.freiburg.uni.tablet.presenter.document.IDocumentEditor;
+import de.freiburg.uni.tablet.presenter.document.editor.IDocumentEditor;
 
 /**
  * @author lukas
@@ -51,8 +51,7 @@ public class ChangePageIndexAction implements IAction {
 
 	@Override
 	public void perform(final IDocumentEditor editor) {
-		if ((editor.getCurrentPage() == _lastPage)
-				|| (editor.getCurrentBackPage() == _lastPage)) {
+		if (editor.isCurrentPage(_lastPage)) {
 			// Only change if we are at the last page
 			editor.setCurrentPage(_page);
 		}

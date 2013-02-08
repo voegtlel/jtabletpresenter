@@ -1,4 +1,10 @@
-package de.freiburg.uni.tablet.presenter.document;
+package de.freiburg.uni.tablet.presenter.document.document;
+
+import java.util.UUID;
+
+import de.freiburg.uni.tablet.presenter.document.DocumentListener;
+import de.freiburg.uni.tablet.presenter.document.DocumentPage;
+import de.freiburg.uni.tablet.presenter.document.IEntity;
 
 public interface IDocument extends IEntity {
 
@@ -24,7 +30,7 @@ public interface IDocument extends IEntity {
 	boolean hasPage(DocumentPage page);
 	
 	/**
-	 * Gets a page by id
+	 * Gets a page by id or null
 	 * 
 	 * @param id
 	 * @return
@@ -76,4 +82,16 @@ public interface IDocument extends IEntity {
 	 * @return
 	 */
 	DocumentPage getPreviousPage(DocumentPage page);
+
+	/**
+	 * Gets the unique identifier of the document
+	 * @return
+	 */
+	UUID getUuid();
+	
+	/**
+	 * Gets an iterable for the pages
+	 * @return
+	 */
+	Iterable<DocumentPage> getPages();
 }

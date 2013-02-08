@@ -1,12 +1,12 @@
-package de.freiburg.uni.tablet.presenter.document;
+package de.freiburg.uni.tablet.presenter.document.editor;
 
-import java.io.File;
 import java.io.IOException;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.IBinarySerializableId;
-import de.freiburg.uni.tablet.presenter.geometry.BitmapImage;
-import de.freiburg.uni.tablet.presenter.page.IPen;
+import de.freiburg.uni.tablet.presenter.document.DocumentHistory;
+import de.freiburg.uni.tablet.presenter.document.DocumentPage;
+import de.freiburg.uni.tablet.presenter.document.document.IClientDocument;
 
 public interface IDocumentEditor extends IBinarySerializableId {
 
@@ -30,6 +30,12 @@ public interface IDocumentEditor extends IBinarySerializableId {
 	 * @return
 	 */
 	int getCurrentPageIndex();
+	
+	/**
+	 * Checks if the given page is the current page
+	 * @param page
+	 */
+	boolean isCurrentPage(DocumentPage page);
 
 	/**
 	 * Set the current page
@@ -40,9 +46,10 @@ public interface IDocumentEditor extends IBinarySerializableId {
 	void setCurrentPageByIndex(int index);
 
 	/**
+	 * Gets the front document
 	 * @return
 	 */
-	IClientDocument getDocument();
+	IClientDocument getFrontDocument();
 
 	/**
 	 * @param document
@@ -72,4 +79,10 @@ public interface IDocumentEditor extends IBinarySerializableId {
 	 * @throws IOException
 	 */
 	void deserialize(BinaryDeserializer reader) throws IOException;
+
+	/**
+	 * Sets the base document
+	 * @param document
+	 */
+	void setBackDocument(IClientDocument backDocument);
 }

@@ -18,12 +18,11 @@ import javax.swing.filechooser.FileFilter;
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.document.DocumentConfig;
-import de.freiburg.uni.tablet.presenter.document.DocumentEditorServer;
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
-import de.freiburg.uni.tablet.presenter.document.IDocument;
-import de.freiburg.uni.tablet.presenter.document.IDocumentEditor;
-import de.freiburg.uni.tablet.presenter.document.IEditableDocument;
 import de.freiburg.uni.tablet.presenter.document.PdfSerializable;
+import de.freiburg.uni.tablet.presenter.document.document.IDocument;
+import de.freiburg.uni.tablet.presenter.document.document.IEditableDocument;
+import de.freiburg.uni.tablet.presenter.document.editor.IDocumentEditor;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 import de.freiburg.uni.tablet.presenter.editor.pdf.PdfRenderer;
 
@@ -32,7 +31,7 @@ public class FileHelper {
 		private final int _key;
 		private final String _text;
 
-		public PdfModeOption(int key, String text) {
+		public PdfModeOption(final int key, final String text) {
 			_key = key;
 			_text = text;
 		}
@@ -102,7 +101,7 @@ public class FileHelper {
 		}
 	}
 	
-	public static void saveDocument(final IEditableDocument document, final File file) throws IOException {
+	public static void saveDocument(final IDocument document, final File file) throws IOException {
 		final SeekableByteChannel fileChannel = Files.newByteChannel(file.toPath(), StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 		
 		final BinarySerializer writer = new BinarySerializer(
@@ -112,7 +111,7 @@ public class FileHelper {
 		fileChannel.close();
 	}
 	
-	public static void saveDocumentPage(DocumentPage page, File file) throws IOException {
+	public static void saveDocumentPage(final DocumentPage page, final File file) throws IOException {
 		final SeekableByteChannel fileChannel = Files.newByteChannel(file.toPath(), StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 		
 		final BinarySerializer writer = new BinarySerializer(
@@ -122,7 +121,7 @@ public class FileHelper {
 		fileChannel.close();
 	}
 	
-	public static void savePdf(IDocument document, IDocument baseDocument, DocumentConfig config, File file) throws IOException {
+	public static void savePdf(final IDocument document, final IDocument baseDocument, final DocumentConfig config, final File file) throws IOException {
 		Logger.getLogger(ButtonSaveAs.class.getName()).log(Level.INFO, "Render as PDF " + file.getPath());
 		try {
 			final int pdfDefaultWidth = config.getInt("pdf.defaultWidth", 1024);
@@ -135,7 +134,7 @@ public class FileHelper {
 					pdfDefaultWidth, pdfDefaultHeight,
 					pdfIgnoreEmptyPages, pdfIgnoreEmptyPageNumber, pdfShowPageNumber, pdfThicknessFactor);
 			final int count = document.getPageCount();
-			for(int i = 0; i < count; i++) {
+			for (int i = 0; i < count; i++) {
 				final DocumentPage page = document.getPageByIndex(i);
 				final DocumentPage basePage = ((baseDocument != null)?baseDocument.getPageByIndex(i):null);
 				pdfRenderer.nextPage((basePage != null)?basePage.getPdfPage():page.getPdfPage());
@@ -150,9 +149,9 @@ public class FileHelper {
 		}
 	}
 	
-	public static void saveSession(final DocumentEditorServer editor, final File file) throws IOException {
-		SeekableByteChannel bc = Files.newByteChannel(file.toPath(), StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
-		BinarySerializer bs = new BinarySerializer(bc);
+	public static void saveSession(final IDocumentEditor editor, final File file) throws IOException {
+		final SeekableByteChannel bc = Files.newByteChannel(file.toPath(), StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
+		final BinarySerializer bs = new BinarySerializer(bc);
 		editor.serialize(bs);
 		bs.flush();
 		bc.close();
@@ -184,7 +183,7 @@ public class FileHelper {
 					saveDocumentPage(editor.getDocumentEditor().getCurrentPage(), f);
 					return true;
 				} else if (f.getPath().toLowerCase().endsWith(".pdf")) {
-					savePdf(editor.getDocumentEditor().getDocument(), editor.getDocumentEditor().getBaseDocument(), editor.getConfig(), f);
+					savePdf(editor.getDocumentEditor().getFrontDocument(), editor.getDocumentEditor().getBackDocument(), editor.getConfig(), f);
 					return true;
 				} else {
 					JOptionPane.showMessageDialog(component, "Can't save. Unrecognized file type.");
@@ -209,7 +208,7 @@ public class FileHelper {
 	 * @return
 	 * @throws IOException
 	 */
-	public static IEditableDocument openDocument(File file) throws IOException {
+	public static IEditableDocument openDocument(final File file) throws IOException {
 		final SeekableByteChannel fileChannel = Files.newByteChannel(file.toPath(), StandardOpenOption.READ);
 		
 		final BinaryDeserializer reader = new BinaryDeserializer(fileChannel);
@@ -249,7 +248,7 @@ public class FileHelper {
 		System.out.println("Session loaded");
 	}
 	
-	public static boolean showOpenDialog(final Component component, IToolPageEditor editor, FileFilter defaultFilter) {
+	public static boolean showOpenDialog(final Component component, final IToolPageEditor editor, final FileFilter defaultFilter) {
 		final JFileChooser fileChooser = new JFileChooser();
 		fileChooser.addChoosableFileFilter(FILTER_presenterDocumentFile);
 		fileChooser.addChoosableFileFilter(FILTER_presenterPageFile);
@@ -278,7 +277,7 @@ public class FileHelper {
 					if (dialogResult != null) {
 						final PdfModeOption res = (PdfModeOption)dialogResult;
 						final PdfSerializable pdf = new PdfSerializable(editor.getDocumentEditor().getDocument(), f);
-						editor.getDocumentEditor().getDocument().setPdfPages(pdf, res.getKey());
+						editor.getDocumentEditor().getFrontDocument().setPdfPages(pdf, res.getKey());
 						return true;
 					}
 				} else if (f.getPath().toLowerCase().endsWith("session.dat")) {
@@ -296,15 +295,17 @@ public class FileHelper {
 		return false;
 	}
 	
-	public static void autosave(IDocumentEditor editor) {
+	public static void autosave(final IDocumentEditor editor) {
 		try {
-			int index = editor.getCurrentPageIndex();
-			DocumentPage page = editor.getCurrentPage();
-			File autosaveDir = new File("autosave");
-			if (!autosaveDir.exists()) {
-				autosaveDir.mkdirs();
+			final int index = editor.getCurrentPageIndex();
+			final DocumentPage page = editor.getCurrentPage();
+			if (page != null) {
+				File autosaveDir = new File("autosave");
+				if (!autosaveDir.exists()) {
+					autosaveDir.mkdirs();
+				}
+				FileHelper.saveDocumentPage(page, new File("autosave/page_" + index + "-" + String.format("%X", page.getId()) + ".jpp"));
 			}
-			FileHelper.saveDocumentPage(page, new File("autosave/page_" + index + "-" + String.format("%X", page.getId()) + ".jpp"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

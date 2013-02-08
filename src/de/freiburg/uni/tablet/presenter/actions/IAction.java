@@ -5,7 +5,7 @@
 package de.freiburg.uni.tablet.presenter.actions;
 
 import de.freiburg.uni.tablet.presenter.data.IBinarySerializable;
-import de.freiburg.uni.tablet.presenter.document.IDocumentEditor;
+import de.freiburg.uni.tablet.presenter.document.editor.IDocumentEditor;
 
 /**
  * Interface for a general action

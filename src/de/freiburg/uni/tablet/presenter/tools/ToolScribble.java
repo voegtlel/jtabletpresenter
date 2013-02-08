@@ -7,7 +7,7 @@ import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 
-import de.freiburg.uni.tablet.presenter.document.DocumentEditorAdapter;
+import de.freiburg.uni.tablet.presenter.document.editor.DocumentEditorAdapter;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 import de.freiburg.uni.tablet.presenter.geometry.AbstractRenderable;
 import de.freiburg.uni.tablet.presenter.geometry.DataPoint;

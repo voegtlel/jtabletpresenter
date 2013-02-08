@@ -17,6 +17,9 @@ import de.freiburg.uni.tablet.presenter.actions.RemovePageAction;
 import de.freiburg.uni.tablet.presenter.actions.RemoveRenderableAction;
 import de.freiburg.uni.tablet.presenter.actions.RenderableModifiedAction;
 import de.freiburg.uni.tablet.presenter.actions.SetServerDocumentAction;
+import de.freiburg.uni.tablet.presenter.document.document.IClientDocument;
+import de.freiburg.uni.tablet.presenter.document.editor.DocumentEditorAdapter;
+import de.freiburg.uni.tablet.presenter.document.editor.IDocumentEditor;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 import de.freiburg.uni.tablet.presenter.list.LinkedElement;
 import de.freiburg.uni.tablet.presenter.list.LinkedElementList;
@@ -73,8 +76,8 @@ public class DocumentHistory {
 			}
 			
 			@Override
-			public void pdfPageChanged(DocumentPage documentPage,
-					PdfPageSerializable lastPdfPage) {
+			public void pdfPageChanged(final DocumentPage documentPage,
+					final PdfPageSerializable lastPdfPage) {
 				if (!_isPerforming) {
 					addAction(new ChangePdfPageAction(documentPage, documentPage.getPdfPage(), lastPdfPage));
 				}
@@ -94,22 +97,21 @@ public class DocumentHistory {
 			}
 		};
 		_documentEditor.addListener(new DocumentEditorAdapter() {
-			
 			@Override
-			public void documentChanged(IClientDocument lastDocument) {
+			public void documentChanged(final IClientDocument lastDocument) {
 				if (lastDocument != null) {
 					lastDocument.removeListener(_documentListener);
 				}
-				_documentEditor.getDocument().addListener(_documentListener);
-				addAction(new SetServerDocumentAction(_documentEditor.getDocument(), _documentEditor.getCurrentPageIndex()));
+				_documentEditor.getFrontDocument().addListener(_documentListener);
+				addAction(new SetServerDocumentAction(_documentEditor.getFrontDocument(), _documentEditor.getCurrentPage()));
 				// Clear history
 				clear();
 			}
 			
 			@Override
-			public void currentPageChanged(DocumentPage lastCurrentPage,
-					DocumentPage lastCurrentBackPage) {
-				if (!_isPerforming && (lastCurrentPage != null) && (lastCurrentPage.getParent() == _documentEditor.getDocument())) {
+			public void currentPageChanged(final DocumentPage lastCurrentPage,
+					final DocumentPage lastCurrentBackPage) {
+				if (!_isPerforming && (lastCurrentPage != null) && (lastCurrentPage.getParent() == _documentEditor.getFrontDocument())) {
 					addAction(new ChangePageIndexAction(_documentEditor
 							.getCurrentPage(), lastCurrentPage));
 				}

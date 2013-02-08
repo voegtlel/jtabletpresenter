@@ -6,11 +6,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import de.freiburg.uni.tablet.presenter.actions.IAction;
-import de.freiburg.uni.tablet.presenter.actions.SetClientDocumentAction;
+import de.freiburg.uni.tablet.presenter.actions.SetServerDocumentAction;
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.document.DocumentHistoryListener;
-import de.freiburg.uni.tablet.presenter.document.IDocumentEditor;
+import de.freiburg.uni.tablet.presenter.document.editor.IDocumentEditor;
 import de.freiburg.uni.tablet.presenter.list.LinkedElementList;
 
 public class UpServer extends ServerSync {
@@ -82,7 +82,7 @@ public class UpServer extends ServerSync {
 				performInit(writer, reader, _connection);
 				// Send initial data
 				LOGGER.log(Level.INFO, "Serialize init doc");
-				writer.writeSerializableClass(new SetClientDocumentAction(_editor.getDocument(), _editor.getCurrentPageIndex()));
+				writer.writeSerializableClass(new SetServerDocumentAction(_editor.getFrontDocument(), _editor.getCurrentPage()));
 				writer.flush();
 				LOGGER.log(Level.INFO, "Serialize init doc done");
 				fireConnected();

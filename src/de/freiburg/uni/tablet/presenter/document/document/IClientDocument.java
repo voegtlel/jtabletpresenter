@@ -1,4 +1,6 @@
-package de.freiburg.uni.tablet.presenter.document;
+package de.freiburg.uni.tablet.presenter.document.document;
+
+import de.freiburg.uni.tablet.presenter.document.DocumentPage;
 
 public interface IClientDocument extends IDocument {
 

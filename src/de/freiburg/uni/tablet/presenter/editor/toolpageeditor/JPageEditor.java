@@ -28,17 +28,17 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 
-import de.freiburg.uni.tablet.presenter.document.DocumentAdapter;
 import de.freiburg.uni.tablet.presenter.document.DocumentConfig;
 import de.freiburg.uni.tablet.presenter.document.DocumentConfig.KeyValue;
-import de.freiburg.uni.tablet.presenter.document.DocumentEditorServer;
-import de.freiburg.uni.tablet.presenter.document.DocumentEditorAdapter;
 import de.freiburg.uni.tablet.presenter.document.DocumentListener;
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
-import de.freiburg.uni.tablet.presenter.document.IDocument;
-import de.freiburg.uni.tablet.presenter.document.IDocumentEditor;
-import de.freiburg.uni.tablet.presenter.document.IEditableDocument;
 import de.freiburg.uni.tablet.presenter.document.PdfPageSerializable;
+import de.freiburg.uni.tablet.presenter.document.document.DocumentAdapter;
+import de.freiburg.uni.tablet.presenter.document.document.IClientDocument;
+import de.freiburg.uni.tablet.presenter.document.document.IDocument;
+import de.freiburg.uni.tablet.presenter.document.editor.DocumentEditorAdapter;
+import de.freiburg.uni.tablet.presenter.document.editor.DocumentEditorClient;
+import de.freiburg.uni.tablet.presenter.document.editor.IDocumentEditorClient;
 import de.freiburg.uni.tablet.presenter.editor.IPageEditor;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 import de.freiburg.uni.tablet.presenter.editor.pageeditor.PageLayerBufferBack;
@@ -78,7 +78,7 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 	private PageLayerBufferBack _serverSyncLayer;
 	private PageLayerBufferFront _frontLayer;
 
-	private IDocumentEditor _documentEditor = new DocumentEditorServer();
+	private IDocumentEditorClient _documentEditor = new DocumentEditorClient();
 
 	private final DocumentListener _documentListener;
 
@@ -91,7 +91,7 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 
 	/**
 	 * Create the panel.
-	 * @param configFilename 
+	 * @param configFilename
 	 */
 	public JPageEditor(final DocumentConfig config) {
 		_documentListener = new DocumentAdapter() {
@@ -139,13 +139,13 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 			}
 			
 			@Override
-			public void documentChanged(final IEditableDocument lastDocument) {
+			public void documentChanged(final IClientDocument lastDocument) {
 				onDocumentChanged(lastDocument);
 			}
 			
 			@Override
-			public void baseDocumentChanged(final IDocument lastDocument) {
-				onBaseDocumentChanged(lastDocument);
+			public void backDocumentChanged(final IDocument lastDocument) {
+				onBackDocumentChanged(lastDocument);
 			}
 		});
 		_config = config;
@@ -160,23 +160,23 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 		
 		addWindowListener(new WindowAdapter() {
 			@Override
-			public void windowOpened(WindowEvent e) {
+			public void windowOpened(final WindowEvent e) {
 				onWindowOpened();
 			}
 			
 			@Override
-			public void windowClosing(WindowEvent e) {
+			public void windowClosing(final WindowEvent e) {
 				onWindowClosing();
 			}
 		});
 		
 		addWindowFocusListener(new WindowFocusListener() {
 			@Override
-			public void windowLostFocus(WindowEvent e) {
+			public void windowLostFocus(final WindowEvent e) {
 			}
 			
 			@Override
-			public void windowGainedFocus(WindowEvent e) {
+			public void windowGainedFocus(final WindowEvent e) {
 				onWindowFocus();
 			}
 		});
@@ -295,12 +295,12 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 					private static final long serialVersionUID = 1L;
 
 					@Override
-					public void actionPerformed(ActionEvent e) {
+					public void actionPerformed(final ActionEvent e) {
 						System.out.println("Shortcut " + ks + " activated for " + actionName);
 						final Point loc = MouseInfo.getPointerInfo().getLocation();
 						refButton.perform(loc);
 					}
-				}; 
+				};
 				this.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(ks, actionName);
 				this.getRootPane().getActionMap().put(actionName, action);
 				System.out.println("Shortcut " + ks + " registered for " + actionName);
@@ -311,7 +311,7 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 	}
 	
 	@Override
-	public void setToolbarVisible(boolean visible) {
+	public void setToolbarVisible(final boolean visible) {
 		_panelTools.setVisible(visible);
 	}
 	
@@ -391,12 +391,12 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 		// Next PDF Page
 		if (_documentEditor.getCurrentBackPage() != null) {
 			_pdfLayer.setPdfPage(_documentEditor.getCurrentBackPage().getPdfPage());
-		} else {
+		} else if (_documentEditor.getCurrentPage() != null) {
 			_pdfLayer.setPdfPage(_documentEditor.getCurrentPage().getPdfPage());
 		}
 	}
 
-	protected void onDocumentChanged(final IEditableDocument lastDocument) {
+	protected void onDocumentChanged(final IClientDocument lastDocument) {
 		if (lastDocument != null) {
 			lastDocument.removeListener(_documentListener);
 		}
@@ -405,12 +405,12 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 		}
 	}
 	
-	protected void onBaseDocumentChanged(final IDocument lastDocument) {
+	protected void onBackDocumentChanged(final IDocument lastDocument) {
 		if (lastDocument != null) {
 			lastDocument.removeListener(_documentListener);
 		}
-		if (_documentEditor.getBaseDocument() != null) {
-			_documentEditor.getBaseDocument().addListener(_documentListener);
+		if (_documentEditor.getBackDocument() != null) {
+			_documentEditor.getBackDocument().addListener(_documentListener);
 		}
 	}
 	
@@ -420,7 +420,7 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 	}
 
 	@Override
-	public IDocumentEditor getDocumentEditor() {
+	public IDocumentEditorClient getDocumentEditor() {
 		return _documentEditor;
 	}
 
@@ -429,6 +429,7 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 		return _pageRenderer;
 	}
 	
+	@Override
 	public DocumentConfig getConfig() {
 		return _config;
 	}

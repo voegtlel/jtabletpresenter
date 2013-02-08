@@ -5,7 +5,7 @@
 package de.freiburg.uni.tablet.presenter.editor;
 
 import de.freiburg.uni.tablet.presenter.document.DocumentConfig;
-import de.freiburg.uni.tablet.presenter.document.IDocumentEditor;
+import de.freiburg.uni.tablet.presenter.document.editor.IDocumentEditorClient;
 import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
 
 /**
@@ -33,7 +33,7 @@ public interface IToolPageEditor {
 	 * 
 	 * @return
 	 */
-	IDocumentEditor getDocumentEditor();
+	IDocumentEditorClient getDocumentEditor();
 
 	/**
 	 * Gets the front renderer
