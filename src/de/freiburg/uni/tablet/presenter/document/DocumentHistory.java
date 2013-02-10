@@ -167,6 +167,7 @@ public class DocumentHistory {
 			_topNext = null;
 		}
 		if (!(action instanceof ActionGroup)) {
+			System.out.println("Add action " + action.toString());
 			fireActionAdded(action);
 		}
 	}

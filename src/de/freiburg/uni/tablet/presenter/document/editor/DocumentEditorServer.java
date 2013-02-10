@@ -92,14 +92,14 @@ public class DocumentEditorServer implements IDocumentEditor {
 		_document = document;
 		
 		final DocumentPage lastPage = _currentPage;
+		_currentPage = null;
+		fireCurrentPageChanged(lastPage, null);
 		if (_document != null) {
 			_currentPage = document.getPageByIndex(0);
 			_document.addListener(_documentListener);
-		} else {
-			_currentPage = null;
+			fireCurrentPageChanged(null, null);
 		}
 		fireDocumentChanged(lastDocument);
-		fireCurrentPageChanged(lastPage, null);
 	}
 	
 

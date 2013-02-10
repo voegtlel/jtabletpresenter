@@ -62,4 +62,9 @@ public class SetServerDocumentAction implements IAction {
 		writer.writeObjectTable(_document, DocumentClient.class);
 		writer.writeObjectTable(_currentPage);
 	}
+	
+	@Override
+	public String toString() {
+		return String.format("SetDocument: to %s, currentPage: %X", _document.getUuid(), (_currentPage==null?0:_currentPage.getId()));
+	}
 }

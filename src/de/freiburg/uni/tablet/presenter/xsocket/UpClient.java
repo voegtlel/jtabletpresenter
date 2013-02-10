@@ -91,6 +91,7 @@ public class UpClient extends ClientSync {
 				try {
 					final IEditableDocument document = reader.readObjectTable();
 					final DocumentPage currentPage = reader.readObjectTable();
+					_editor.setBackDocument(null);
 					_editor.setDocument(document);
 					_editor.setCurrentPage(currentPage);
 				} catch (Exception e) {

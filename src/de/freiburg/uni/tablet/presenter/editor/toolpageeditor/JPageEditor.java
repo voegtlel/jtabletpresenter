@@ -18,6 +18,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
+import java.io.IOException;
 import java.util.List;
 
 import javax.swing.AbstractAction;
@@ -57,6 +58,9 @@ import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonTool
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonUndo;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
+import de.freiburg.uni.tablet.presenter.xsocket.ClientListener;
+import de.freiburg.uni.tablet.presenter.xsocket.DownClient;
+import de.freiburg.uni.tablet.presenter.xsocket.UpClient;
 
 /**
  * @author lukas
@@ -88,6 +92,10 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 	private PageLayerBufferPdf _pdfLayer;
 
 	private DocumentConfig _config;
+	
+	private DownClient _downClient;
+	private UpClient _upClient;
+	private boolean _isConnected;
 
 	/**
 	 * Create the panel.
@@ -432,5 +440,80 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 	@Override
 	public DocumentConfig getConfig() {
 		return _config;
+	}
+	
+	@Override
+	public boolean isConnectedUp() {
+		return _isConnected && (_upClient != null);
+	}
+	
+	@Override
+	public boolean isConnectedDown() {
+		return _isConnected && (_downClient != null);
+	}
+	
+	@Override
+	public void disconnect() {
+		if (_upClient != null) {
+			_upClient.stop();
+			_upClient = null;
+		}
+		if (_downClient != null) {
+			_downClient.stop();
+			_downClient = null;
+		}
+		_isConnected = false;
+	}
+	
+	@Override
+	public void connectUpClient(final String hostname, final int port, final boolean initDown, final String authToken) throws IOException {
+		disconnect();
+		_upClient = new UpClient(hostname, port, _documentEditor);
+		_upClient.setName("AndroidClient");
+		_upClient.setSyncDownInit(initDown);
+		_upClient.setAuthToken(authToken);
+		_upClient.addListener(new ClientListener() {
+			@Override
+			public void onError(final Exception e) {
+			}
+			
+			@Override
+			public void onDisconnected() {
+				_isConnected = false;
+			}
+			
+			@Override
+			public void onConnected() {
+				_isConnected = true;
+			}
+		});
+		_upClient.start();
+		_isConnected = true;
+	}
+	
+	@Override
+	public void connectDownClient(final String hostname, final int port, final String authToken) throws IOException {
+		disconnect();
+		
+		_downClient = new DownClient(hostname, port, _documentEditor);
+		_downClient.setName("AndroidClient");
+		_downClient.setAuthToken(authToken);
+		_downClient.addListener(new ClientListener() {
+			@Override
+			public void onError(final Exception e) {
+			}
+			
+			@Override
+			public void onDisconnected() {
+				_isConnected = false;
+			}
+			
+			@Override
+			public void onConnected() {
+				_isConnected = true;
+			}
+		});
+		_downClient.start();
+		_isConnected = true;
 	}
 }

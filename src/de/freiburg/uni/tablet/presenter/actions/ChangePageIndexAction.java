@@ -63,4 +63,8 @@ public class ChangePageIndexAction implements IAction {
 		writer.writeObjectTable(_lastPage);
 	}
 
+	@Override
+	public String toString() {
+		return String.format("ChangePageIndex: (Last: %X) to %X", (_lastPage==null?0:_lastPage.getId()), _page.getId());
+	}
 }

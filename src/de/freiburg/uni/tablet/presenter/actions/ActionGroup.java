@@ -37,7 +37,7 @@ public class ActionGroup implements IAction {
 		}
 	}
 	
-	public void addAction(IAction action) {
+	public void addAction(final IAction action) {
 		_actions.addLast(action);
 	}
 	
@@ -84,5 +84,10 @@ public class ActionGroup implements IAction {
 				.getNext()) {
 			writer.writeSerializableClass(e.getData());
 		}
+	}
+	
+	@Override
+	public String toString() {
+		return "ActionGroup";
 	}
 }

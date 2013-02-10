@@ -259,6 +259,7 @@ public class FileHelper {
 			try {
 				final File f = fileChooser.getSelectedFile();
 				if (f.getPath().toLowerCase().endsWith(".jpd")) {
+					editor.getDocumentEditor().setBackDocument(null);
 					editor.getDocumentEditor().setDocument(openDocument(f));
 					return true;
 				} else if (f.getPath().toLowerCase().endsWith(".jpp")) {

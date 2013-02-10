@@ -61,4 +61,9 @@ public class RemovePageAction implements IAction {
 		writer.writeObjectTable(_prevPage);
 		writer.writeObjectTable(_page);
 	}
+
+	@Override
+	public String toString() {
+		return String.format("RemovePage: (Prev: %X) %X to %s", (_prevPage==null?0:_prevPage.getId()), _page.getId(), _document.getUuid());
+	}
 }

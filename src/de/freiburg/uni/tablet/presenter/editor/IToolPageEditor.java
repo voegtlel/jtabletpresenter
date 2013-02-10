@@ -4,6 +4,8 @@
  */
 package de.freiburg.uni.tablet.presenter.editor;
 
+import java.io.IOException;
+
 import de.freiburg.uni.tablet.presenter.document.DocumentConfig;
 import de.freiburg.uni.tablet.presenter.document.editor.IDocumentEditorClient;
 import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
@@ -67,4 +69,42 @@ public interface IToolPageEditor {
 	 * @return
 	 */
 	boolean isToolbarVisible();
+	
+	/**
+	 * Gets if the editor is connected to a networking page
+	 * @return
+	 */
+	boolean isConnectedUp();
+	
+	/**
+	 * Gets if the editor is connected to a networking page
+	 * @return
+	 */
+	boolean isConnectedDown();
+	
+	/**
+	 * Disconnect all networking
+	 */
+	void disconnect();
+
+	/**
+	 * Connect as uploading client
+	 * @param hostname
+	 * @param port
+	 * @param initDown
+	 * @param authToken
+	 * @throws IOException
+	 */
+	void connectUpClient(String hostname, int port, boolean initDown,
+			String authToken) throws IOException;
+
+	/**
+	 * Connect as downloading client
+	 * @param hostname
+	 * @param port
+	 * @param authToken
+	 * @throws IOException
+	 */
+	void connectDownClient(String hostname, int port, String authToken)
+			throws IOException;
 }
