@@ -91,6 +91,7 @@ public class UpClient extends ClientSync {
 				try {
 					final IEditableDocument document = reader.readObjectTable();
 					final DocumentPage currentPage = reader.readObjectTable();
+					reader.debugPrint();
 					_editor.setBackDocument(null);
 					_editor.setDocument(document);
 					_editor.setCurrentPage(currentPage);
@@ -104,6 +105,7 @@ public class UpClient extends ClientSync {
 				LOGGER.log(Level.INFO, "Serialize init doc");
 				writer.writeSerializableClass(new SetServerDocumentAction(_editor.getFrontDocument(), _editor.getCurrentPage()));
 				writer.flush();
+				writer.debugPrint();
 				LOGGER.log(Level.INFO, "Serialize init doc done");
 			}
 			fireConnected();
@@ -147,6 +149,7 @@ public class UpClient extends ClientSync {
 				LOGGER.log(Level.INFO, "Serialize " + action.getClass().getName());
 				try {
 					writer.writeSerializableClass(action);
+					writer.debugPrint();
 					writer.flush();
 				} catch (Exception e) {
 					e.printStackTrace();

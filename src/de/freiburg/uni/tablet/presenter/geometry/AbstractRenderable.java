@@ -52,4 +52,9 @@ public abstract class AbstractRenderable implements IBinarySerializableId,
 		writer.writeLong(_id);
 		writer.writeObjectTable(_parent);
 	}
+	
+	@Override
+	public String toString() {
+		return String.format("Renderable %s (%X)", this.getClass().getSimpleName(), System.identityHashCode(this));
+	}
 }

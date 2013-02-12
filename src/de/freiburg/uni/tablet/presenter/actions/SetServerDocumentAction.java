@@ -65,6 +65,6 @@ public class SetServerDocumentAction implements IAction {
 	
 	@Override
 	public String toString() {
-		return String.format("SetDocument: to %s, currentPage: %X", _document.getUuid(), (_currentPage==null?0:_currentPage.getId()));
+		return String.format("SetDocument: to %s, currentPage: %s", _document, _currentPage);
 	}
 }

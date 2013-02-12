@@ -66,6 +66,6 @@ public class ChangePdfPageAction implements IAction {
 
 	@Override
 	public String toString() {
-		return String.format("ChangePdfPage: (Last: %X) to %X in %X", (_lastPdfPage==null?0:_lastPdfPage.getId()), _pdfPage.getId(), _page.getId());
+		return String.format("ChangePdfPage: (Last: %s) to %s in %s", _lastPdfPage, _pdfPage, _page);
 	}
 }

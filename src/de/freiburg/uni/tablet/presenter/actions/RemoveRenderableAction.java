@@ -70,6 +70,6 @@ public class RemoveRenderableAction implements IAction {
 
 	@Override
 	public String toString() {
-		return String.format("RemoveRenderable: (Prev: %X) %X to %s", (_afterRenderable == null?0:_afterRenderable.getId()), _renderable.getId(), _page.getId());
+		return String.format("RemoveRenderable: (Prev: %s) %s to %s", _afterRenderable, _renderable, _page);
 	}
 }

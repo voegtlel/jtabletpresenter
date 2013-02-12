@@ -250,4 +250,9 @@ public class DocumentPage implements IEntity, IPageRepaintListener {
 	public DocumentPage clone(final IDocumentNotify dstDocument) {
 		return new DocumentPage(dstDocument, this);
 	}
+	
+	@Override
+	public String toString() {
+		return String.format("Page %X in %s (%X)", _id, (_document==null?"null":_document.getUuid()), System.identityHashCode(this));
+	}
 }

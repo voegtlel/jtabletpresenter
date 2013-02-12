@@ -503,4 +503,9 @@ public class DocumentClientServer implements IEditableDocument {
 	public Iterable<DocumentPage> getPages() {
 		return _document.getPages();
 	}
+	
+	@Override
+	public String toString() {
+		return String.format("DocumentServerClient %X (%X)", getId(), System.identityHashCode(this));
+	}
 }

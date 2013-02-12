@@ -183,8 +183,8 @@ public class BinaryDeserializer {
 		for (int i = 0; i < _stringTable.size(); i++) {
 			System.out.println("str[" + i + "] = " + _stringTable.get(i));
 		}
-		for (Map.Entry<Long,IBinarySerializableId> entry : _objectTable.entrySet()) {
-			System.out.println("obj[" + String.format("%16x", entry.getKey()) + "] = " + entry.getValue().getClass().getName());
+		for (Map.Entry<Long, IBinarySerializableId> entry : _objectTable.entrySet()) {
+			System.out.println("obj[" + String.format("%16x", entry.getKey()) + "] = " + entry.getValue());
 		}
 	}
 	

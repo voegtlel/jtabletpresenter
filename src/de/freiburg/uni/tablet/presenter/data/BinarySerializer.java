@@ -189,7 +189,7 @@ public class BinarySerializer {
 			System.out.println("str[" + entry.getKey() + "] = " + entry.getValue());
 		}
 		for (Map.Entry<Long,IBinarySerializableId> entry : _objectTable.entrySet()) {
-			System.out.println("obj[" + String.format("%16x", entry.getKey()) + "] = " + entry.getValue().getClass().getName());
+			System.out.println("obj[" + String.format("%16x", entry.getKey()) + "] = " + entry.getValue());
 		}
 	}
 	

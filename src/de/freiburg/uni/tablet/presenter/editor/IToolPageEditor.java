@@ -96,7 +96,7 @@ public interface IToolPageEditor {
 	 * @throws IOException
 	 */
 	void connectUpClient(String hostname, int port, boolean initDown,
-			String authToken) throws IOException;
+			String name, String authToken) throws IOException;
 
 	/**
 	 * Connect as downloading client
@@ -105,6 +105,6 @@ public interface IToolPageEditor {
 	 * @param authToken
 	 * @throws IOException
 	 */
-	void connectDownClient(String hostname, int port, String authToken)
+	void connectDownClient(String hostname, int port, String name, String authToken)
 			throws IOException;
 }

@@ -466,10 +466,10 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 	}
 	
 	@Override
-	public void connectUpClient(final String hostname, final int port, final boolean initDown, final String authToken) throws IOException {
+	public void connectUpClient(final String hostname, final int port, final boolean initDown, final String name, final String authToken) throws IOException {
 		disconnect();
 		_upClient = new UpClient(hostname, port, _documentEditor);
-		_upClient.setName("AndroidClient");
+		_upClient.setName(name);
 		_upClient.setSyncDownInit(initDown);
 		_upClient.setAuthToken(authToken);
 		_upClient.addListener(new ClientListener() {
@@ -492,11 +492,11 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 	}
 	
 	@Override
-	public void connectDownClient(final String hostname, final int port, final String authToken) throws IOException {
+	public void connectDownClient(final String hostname, final int port, final String name, final String authToken) throws IOException {
 		disconnect();
 		
 		_downClient = new DownClient(hostname, port, _documentEditor);
-		_downClient.setName("AndroidClient");
+		_downClient.setName(name);
 		_downClient.setAuthToken(authToken);
 		_downClient.addListener(new ClientListener() {
 			@Override

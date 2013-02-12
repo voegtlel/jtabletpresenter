@@ -241,4 +241,9 @@ public class Document implements IDocumentNotify {
 			writer.writeObjectTable(dp.getData());
 		}
 	}
+	
+	@Override
+	public String toString() {
+		return String.format("Document %X (%X)", getId(), System.identityHashCode(this));
+	}
 }

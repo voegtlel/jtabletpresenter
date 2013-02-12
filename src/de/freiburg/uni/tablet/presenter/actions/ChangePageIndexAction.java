@@ -65,6 +65,6 @@ public class ChangePageIndexAction implements IAction {
 
 	@Override
 	public String toString() {
-		return String.format("ChangePageIndex: (Last: %X) to %X", (_lastPage==null?0:_lastPage.getId()), _page.getId());
+		return String.format("ChangePageIndex: (Last: %s) to %s", _lastPage, _page);
 	}
 }
