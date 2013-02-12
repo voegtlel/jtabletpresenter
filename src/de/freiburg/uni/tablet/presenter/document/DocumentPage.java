@@ -253,6 +253,6 @@ public class DocumentPage implements IEntity, IPageRepaintListener {
 	
 	@Override
 	public String toString() {
-		return String.format("Page %X in %s (%X)", _id, (_document==null?"null":_document.getUuid()), System.identityHashCode(this));
+		return String.format("Page %X [in %s] (%X)", getId(), _document, System.identityHashCode(this));
 	}
 }
