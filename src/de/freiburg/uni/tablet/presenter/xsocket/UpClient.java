@@ -91,8 +91,10 @@ public class UpClient extends ClientSync {
 				LOGGER.log(Level.INFO, "Deserialize init doc");
 				try {
 					final IEditableDocument document = reader.readObjectTable();
-					final DocumentPage currentPage = reader.readObjectTable();
-					reader.debugPrint();
+					DocumentPage currentPage = reader.readObjectTable();
+					if (currentPage == null) {
+						currentPage = document.getPageByIndex(0, true);
+					}
 					_editor.setBackDocument(null);
 					_editor.setDocument(document);
 					_editor.setCurrentPage(currentPage);
@@ -100,14 +102,21 @@ public class UpClient extends ClientSync {
 					e.printStackTrace();
 					throw new IOException(e);
 				}
+				synchronized (_threadSync) {
+					_actions.clear();
+				}
 				LOGGER.log(Level.INFO, "Deserialize init doc done");
-			} else {
-				// Send initial data
+			}
+			{
+				// Send initial data always, also if serialized down
 				LOGGER.log(Level.INFO, "Serialize init doc");
+				// Clear actions
+				synchronized (_threadSync) {
+					_actions.clear();
+				}
 				writer.writeSerializableClass(new SetServerDocumentAction(_editor.getFrontDocument()));
 				writer.writeSerializableClass(new ChangePageIndexAction(_editor.getCurrentPage(), null));
 				writer.flush();
-				writer.debugPrint();
 				LOGGER.log(Level.INFO, "Serialize init doc done");
 			}
 			fireConnected();
@@ -148,10 +157,9 @@ public class UpClient extends ClientSync {
 					_actions.removeFirst();
 				}
 				// Write action
-				LOGGER.log(Level.INFO, "Serialize " + action.getClass().getName());
+				LOGGER.log(Level.INFO, "Serialize " + action);
 				try {
 					writer.writeSerializableClass(action);
-					writer.debugPrint();
 					writer.flush();
 				} catch (Exception e) {
 					e.printStackTrace();

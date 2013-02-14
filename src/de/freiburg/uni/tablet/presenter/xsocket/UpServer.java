@@ -123,7 +123,7 @@ public class UpServer extends ServerSync {
 						_actions.removeFirst();
 					}
 					// Write action
-					LOGGER.log(Level.INFO, "Serialize " + action.getClass().getName());
+					LOGGER.log(Level.INFO, "Serialize " + action);
 					writer.writeSerializableClass(action);
 					writer.flush();
 					LOGGER.log(Level.INFO, "Serialize " + action.getClass().getName() + " done");

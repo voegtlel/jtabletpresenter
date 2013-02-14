@@ -30,7 +30,7 @@ public class DownClient extends ClientSync {
 			while (_running) {
 				try {
 					final IAction action = reader.readSerializableClass();
-					LOGGER.log(Level.INFO, "Read action " + action.getClass().getName());
+					LOGGER.log(Level.INFO, "Read action " + action);
 					action.perform(_editor);
 					LOGGER.log(Level.INFO, "Action " + action.getClass().getName() + " performed");
 				} catch (IOException e) {

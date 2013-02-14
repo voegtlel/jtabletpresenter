@@ -111,7 +111,7 @@ public class DocumentHistory {
 			@Override
 			public void currentPageChanged(final DocumentPage lastCurrentPage,
 					final DocumentPage lastCurrentBackPage) {
-				if (!_isPerforming && (lastCurrentPage != null) && (lastCurrentPage.getParent() == _documentEditor.getFrontDocument())) {
+				if (!_isPerforming && ((lastCurrentPage == null) || (lastCurrentPage.getParent() == _documentEditor.getFrontDocument()))) {
 					addAction(new ChangePageIndexAction(_documentEditor
 							.getCurrentPage(), lastCurrentPage));
 				}

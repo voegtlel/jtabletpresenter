@@ -168,8 +168,16 @@ public class DocumentEditorClient implements IDocumentEditorClient {
 	@Override
 	public void setBackDocument(final IClientDocument backDocument) {
 		fireChanging();
+		final DocumentPage lastBackPage = _currentBackPage;
+		final DocumentPage lastPage = _currentPage;
+		_currentBackPage = null;
 		final IClientDocument lastBackDocument = _document.getBackDocument();
 		_document.setBackDocument(backDocument);
+		if (!_document.hasPage(_currentPage)) {
+			_currentPage = _document.getPageByIndex(0, true);
+		}
+		_currentBackPage = _document.getBackPage(_currentPage);
+		fireCurrentPageChanged(lastPage, lastBackPage);
 		fireBackDocumentChanged(lastBackDocument);
 	}
 	
