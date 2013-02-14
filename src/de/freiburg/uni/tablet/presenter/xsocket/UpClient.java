@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import de.freiburg.uni.tablet.presenter.actions.ChangePageIndexAction;
 import de.freiburg.uni.tablet.presenter.actions.IAction;
 import de.freiburg.uni.tablet.presenter.actions.SetServerDocumentAction;
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
@@ -103,7 +104,8 @@ public class UpClient extends ClientSync {
 			} else {
 				// Send initial data
 				LOGGER.log(Level.INFO, "Serialize init doc");
-				writer.writeSerializableClass(new SetServerDocumentAction(_editor.getFrontDocument(), _editor.getCurrentPage()));
+				writer.writeSerializableClass(new SetServerDocumentAction(_editor.getFrontDocument()));
+				writer.writeSerializableClass(new ChangePageIndexAction(_editor.getCurrentPage(), null));
 				writer.flush();
 				writer.debugPrint();
 				LOGGER.log(Level.INFO, "Serialize init doc done");

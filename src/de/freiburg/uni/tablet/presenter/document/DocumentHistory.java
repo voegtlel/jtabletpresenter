@@ -103,7 +103,7 @@ public class DocumentHistory {
 					lastDocument.removeListener(_documentListener);
 				}
 				_documentEditor.getFrontDocument().addListener(_documentListener);
-				addAction(new SetServerDocumentAction(_documentEditor.getFrontDocument(), _documentEditor.getCurrentPage()));
+				addAction(new SetServerDocumentAction(_documentEditor.getFrontDocument()));
 				// Clear history
 				clear();
 			}

@@ -95,9 +95,7 @@ public class DocumentEditorServer implements IDocumentEditor {
 		_currentPage = null;
 		fireCurrentPageChanged(lastPage, null);
 		if (_document != null) {
-			_currentPage = document.getPageByIndex(0);
 			_document.addListener(_documentListener);
-			fireCurrentPageChanged(null, null);
 		}
 		fireDocumentChanged(lastDocument);
 	}

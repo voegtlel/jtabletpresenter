@@ -61,7 +61,7 @@ public class DownServer extends ServerSync {
 				fireConnected();
 				while (true) {
 					final IAction action = reader.readSerializableClass();
-					LOGGER.log(Level.INFO, "Read action " + action.getClass().getName());
+					LOGGER.log(Level.INFO, "Read action " + action);
 					try {
 						action.perform(_editor);
 					} catch (Exception e) {

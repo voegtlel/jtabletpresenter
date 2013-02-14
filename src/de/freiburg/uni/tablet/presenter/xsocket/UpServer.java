@@ -5,6 +5,7 @@ import java.nio.channels.SocketChannel;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import de.freiburg.uni.tablet.presenter.actions.ChangePageIndexAction;
 import de.freiburg.uni.tablet.presenter.actions.IAction;
 import de.freiburg.uni.tablet.presenter.actions.SetServerDocumentAction;
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
@@ -82,7 +83,8 @@ public class UpServer extends ServerSync {
 				performInit(writer, reader, _connection);
 				// Send initial data
 				LOGGER.log(Level.INFO, "Serialize init doc");
-				writer.writeSerializableClass(new SetServerDocumentAction(_editor.getFrontDocument(), _editor.getCurrentPage()));
+				writer.writeSerializableClass(new SetServerDocumentAction(_editor.getFrontDocument()));
+				writer.writeSerializableClass(new ChangePageIndexAction(_editor.getCurrentPage(), null));
 				writer.flush();
 				LOGGER.log(Level.INFO, "Serialize init doc done");
 				fireConnected();
