@@ -56,7 +56,7 @@ public class RemoveRenderableAction implements IAction {
 	public void perform(final IDocumentEditor editor) {
 		_page.removeRenderable(_renderable);
 		// If we changed the front document -> goto changed page
-		if (editor.getFrontDocument().hasPage(_page)) {
+		if (editor.getFrontDocument().hasPage(_page) && !editor.isCurrentPage(_page)) {
 			editor.setCurrentPage(_page);
 		}
 	}

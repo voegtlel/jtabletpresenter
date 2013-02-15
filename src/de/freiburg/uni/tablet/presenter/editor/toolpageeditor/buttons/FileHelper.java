@@ -277,7 +277,7 @@ public class FileHelper {
 					}, defOpt);
 					if (dialogResult != null) {
 						final PdfModeOption res = (PdfModeOption)dialogResult;
-						final PdfSerializable pdf = new PdfSerializable(editor.getDocumentEditor().getDocument(), f);
+						final PdfSerializable pdf = new PdfSerializable(editor.getDocumentEditor().getFrontDocument(), f);
 						editor.getDocumentEditor().getFrontDocument().setPdfPages(pdf, res.getKey());
 						return true;
 					}
