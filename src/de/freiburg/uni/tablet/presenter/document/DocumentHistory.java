@@ -17,6 +17,7 @@ import de.freiburg.uni.tablet.presenter.actions.RemovePageAction;
 import de.freiburg.uni.tablet.presenter.actions.RemoveRenderableAction;
 import de.freiburg.uni.tablet.presenter.actions.RenderableModifiedAction;
 import de.freiburg.uni.tablet.presenter.actions.SetServerDocumentAction;
+import de.freiburg.uni.tablet.presenter.document.document.DocumentAdapter;
 import de.freiburg.uni.tablet.presenter.document.document.IClientDocument;
 import de.freiburg.uni.tablet.presenter.document.editor.DocumentEditorAdapter;
 import de.freiburg.uni.tablet.presenter.document.editor.IDocumentEditor;
@@ -42,7 +43,7 @@ public class DocumentHistory {
 
 	public DocumentHistory(final IDocumentEditor documentEditor) {
 		_documentEditor = documentEditor;
-		_documentListener = new DocumentListener() {
+		_documentListener = new DocumentAdapter() {
 			@Override
 			public void renderableRemoved(final IRenderable afterRenderable, final IRenderable renderable,
 					final DocumentPage page) {
@@ -81,11 +82,6 @@ public class DocumentHistory {
 				if (!_isPerforming) {
 					addAction(new ChangePdfPageAction(documentPage, documentPage.getPdfPage(), lastPdfPage));
 				}
-			}
-			
-			@Override
-			public void renderableModified(final IRenderable renderable,
-					final DocumentPage page) {
 			}
 			
 			@Override

@@ -65,6 +65,24 @@ public class DocumentClientServer implements IEditableDocument {
 				final IRenderable renderable, final DocumentPage page) {
 			onDocumentRenderableRemoved(renderableAfter, renderable, page);
 		}
+		
+		@Override
+		public void renderableAdding(final IRenderable renderableAfter,
+				final IRenderable renderable, final DocumentPage page) {
+			onDocumentRenderableAdding(renderableAfter, renderable, page);
+		}
+		
+		@Override
+		public void renderableModifying(final IRenderable renderable,
+				final DocumentPage page) {
+			onDocumentRenderableModifying(renderable, page);
+		}
+		
+		@Override
+		public void renderableRemoving(final IRenderable renderableAfter,
+				final IRenderable renderable, final DocumentPage page) {
+			onDocumentRenderableRemoving(renderableAfter, renderable, page);
+		}
 	};
 	private DocumentListener _backDocumentListener = new DocumentListener() {
 		@Override
@@ -107,6 +125,24 @@ public class DocumentClientServer implements IEditableDocument {
 		public void renderableRemoved(final IRenderable renderableAfter,
 				final IRenderable renderable, final DocumentPage page) {
 			onDocumentRenderableRemoved(renderableAfter, renderable, page);
+		}
+		
+		@Override
+		public void renderableAdding(final IRenderable renderableAfter,
+				final IRenderable renderable, final DocumentPage page) {
+			onDocumentRenderableAdding(renderableAfter, renderable, page);
+		}
+		
+		@Override
+		public void renderableModifying(final IRenderable renderable,
+				final DocumentPage page) {
+			onDocumentRenderableModifying(renderable, page);
+		}
+		
+		@Override
+		public void renderableRemoving(final IRenderable renderableAfter,
+				final IRenderable renderable, final DocumentPage page) {
+			onDocumentRenderableRemoving(renderableAfter, renderable, page);
 		}
 	};
 	
@@ -156,6 +192,21 @@ public class DocumentClientServer implements IEditableDocument {
 	protected void onDocumentRenderableRemoved(final IRenderable renderableAfter,
 			final IRenderable renderable, final DocumentPage page) {
 		fireRenderableRemoved(renderableAfter, renderable, page);
+	}
+	
+	protected void onDocumentRenderableAdding(final IRenderable renderableAfter,
+			final IRenderable renderable, final DocumentPage page) {
+		fireRenderableAdding(renderableAfter, renderable, page);
+	}
+
+	protected void onDocumentRenderableModifying(final IRenderable renderable,
+			final DocumentPage page) {
+		fireRenderableModifying(renderable, page);
+	}
+
+	protected void onDocumentRenderableRemoving(final IRenderable renderableAfter,
+			final IRenderable renderable, final DocumentPage page) {
+		fireRenderableRemoving(renderableAfter, renderable, page);
 	}
 	
 	protected void onBackDocumentPageRemoved(final IClientDocument backDocument,
@@ -340,6 +391,13 @@ public class DocumentClientServer implements IEditableDocument {
 		}
 	}
 	
+	protected void fireRenderableAdding(final IRenderable afterRenderable, final IRenderable renderable,
+			final DocumentPage page) {
+		for (final DocumentListener listener : _listeners) {
+			listener.renderableAdding(afterRenderable, renderable, page);
+		}
+	}
+	
 	protected void fireRenderableRemoved(final IRenderable afterRenderable,
 			final IRenderable renderable, final DocumentPage page) {
 		for (final DocumentListener listener : _listeners) {
@@ -347,9 +405,22 @@ public class DocumentClientServer implements IEditableDocument {
 		}
 	}
 	
+	protected void fireRenderableRemoving(final IRenderable afterRenderable,
+			final IRenderable renderable, final DocumentPage page) {
+		for (final DocumentListener listener : _listeners) {
+			listener.renderableRemoving(afterRenderable, renderable, page);
+		}
+	}
+	
 	protected void fireRenderableModified(final IRenderable renderable, final DocumentPage page) {
 		for (final DocumentListener listener : _listeners) {
 			listener.renderableModified(renderable, page);
+		}
+	}
+	
+	protected void fireRenderableModifying(final IRenderable renderable, final DocumentPage page) {
+		for (final DocumentListener listener : _listeners) {
+			listener.renderableModifying(renderable, page);
 		}
 	}
 	

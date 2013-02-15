@@ -24,10 +24,19 @@ public interface DocumentListener {
 	 * Called, when a renderable was added
 	 * 
 	 * @param renderableAfter
-	 * @param renderable 
+	 * @param renderable
 	 * @param page
 	 */
 	void renderableAdded(IRenderable renderableAfter, IRenderable renderable, DocumentPage page);
+	
+	/**
+	 * Called, when a renderable is to be added
+	 * 
+	 * @param renderableAfter
+	 * @param renderable
+	 * @param page
+	 */
+	void renderableAdding(IRenderable renderableAfter, IRenderable renderable, DocumentPage page);
 
 	/**
 	 * Called, when a renderable was removed
@@ -37,6 +46,15 @@ public interface DocumentListener {
 	 * @param page
 	 */
 	void renderableRemoved(IRenderable renderableAfter, IRenderable renderable, DocumentPage page);
+	
+	/**
+	 * Called, when a renderable is to be removed
+	 * 
+	 * @param renderableAfter
+	 * @param renderable
+	 * @param page
+	 */
+	void renderableRemoving(IRenderable renderableAfter, IRenderable renderable, DocumentPage page);
 	
 	/**
 	 * Called, when a pdf page assignment was changed
@@ -52,6 +70,13 @@ public interface DocumentListener {
 	 * @param renderable
 	 */
 	void renderableModified(IRenderable renderable, DocumentPage page);
+	
+	/**
+	 * Called, when a renderable is to be modified
+	 * @param page
+	 * @param renderable
+	 */
+	void renderableModifying(IRenderable renderable, DocumentPage page);
 	
 	/**
 	 * Called, when a modifying a renderable ends

@@ -172,6 +172,14 @@ public class Document implements IDocumentNotify {
 	}
 	
 	@Override
+	public void fireRenderableAdding(final IRenderable afterRenderable, final IRenderable renderable,
+			final DocumentPage page) {
+		for (final DocumentListener listener : _listeners) {
+			listener.renderableAdding(afterRenderable, renderable, page);
+		}
+	}
+	
+	@Override
 	public void fireRenderableRemoved(final IRenderable afterRenderable,
 			final IRenderable renderable, final DocumentPage page) {
 		for (final DocumentListener listener : _listeners) {
@@ -180,9 +188,24 @@ public class Document implements IDocumentNotify {
 	}
 	
 	@Override
+	public void fireRenderableRemoving(final IRenderable afterRenderable,
+			final IRenderable renderable, final DocumentPage page) {
+		for (final DocumentListener listener : _listeners) {
+			listener.renderableRemoving(afterRenderable, renderable, page);
+		}
+	}
+	
+	@Override
 	public void fireRenderableModified(final IRenderable renderable, final DocumentPage page) {
 		for (final DocumentListener listener : _listeners) {
 			listener.renderableModified(renderable, page);
+		}
+	}
+	
+	@Override
+	public void fireRenderableModifying(final IRenderable renderable, final DocumentPage page) {
+		for (final DocumentListener listener : _listeners) {
+			listener.renderableModifying(renderable, page);
 		}
 	}
 	

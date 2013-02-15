@@ -104,6 +104,12 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 	public JPageEditor(final DocumentConfig config) {
 		_documentListener = new DocumentAdapter() {
 			@Override
+			public void renderableRemoving(final IRenderable renderableAfter,
+					final IRenderable renderable, final DocumentPage page) {
+				onRenderableChanged(renderable, page);
+			}
+			
+			@Override
 			public void renderableRemoved(final IRenderable renderableAfter,
 					final IRenderable renderable, final DocumentPage page) {
 				onRenderableChanged(renderable, page);
@@ -128,9 +134,9 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 			}
 			
 			@Override
-			public void renderableModifyEnd(final IRenderable renderable,
+			public void renderableModifying(final IRenderable renderable,
 					final DocumentPage page) {
-				// Not interesting here
+				onRenderableChanged(renderable, page);
 			}
 		};
 

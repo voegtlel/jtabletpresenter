@@ -115,7 +115,7 @@ public class Scribble extends AbstractRenderable {
 	
 	@Override
 	synchronized public boolean eraseAt(final EraseInfo eraseInfo) {
-		_parent.fireRenderableModified(this);
+		_parent.fireRenderableModifying(this);
 		boolean wasModified = false;
 		for (LinkedElement<ScribbleSegment> seg = _segments.getFirst(); seg != null;) {
 			LinkedElement<ScribbleSegment> nextSeg = seg.getNext();
@@ -186,6 +186,7 @@ public class Scribble extends AbstractRenderable {
 	
 	@Override
 	synchronized public void deserializeData(final BinaryDeserializer reader) throws IOException {
+		_parent.fireRenderableModifying(this);
 		final int count = reader.readInt();
 		_segments.clear();
 		for (int i = 0; i < count; i++) {

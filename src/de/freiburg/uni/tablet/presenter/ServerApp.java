@@ -11,8 +11,9 @@ import de.freiburg.uni.tablet.presenter.document.DocumentConfig;
 import de.freiburg.uni.tablet.presenter.document.DocumentListener;
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
 import de.freiburg.uni.tablet.presenter.document.PdfPageSerializable;
-import de.freiburg.uni.tablet.presenter.document.document.IClientDocument;
+import de.freiburg.uni.tablet.presenter.document.document.DocumentAdapter;
 import de.freiburg.uni.tablet.presenter.document.document.DocumentServer;
+import de.freiburg.uni.tablet.presenter.document.document.IClientDocument;
 import de.freiburg.uni.tablet.presenter.document.editor.DocumentEditorAdapter;
 import de.freiburg.uni.tablet.presenter.document.editor.DocumentEditorServer;
 import de.freiburg.uni.tablet.presenter.document.editor.IDocumentEditor;
@@ -81,7 +82,7 @@ public class ServerApp {
 		
 		_editor = new DocumentEditorServer();
 		// If required, additional events can be placed here
-		_documentListener = new DocumentListener() {
+		_documentListener = new DocumentAdapter() {
 			@Override
 			public void pageInserted(final IClientDocument document,
 					final DocumentPage prevPage, final DocumentPage page) {

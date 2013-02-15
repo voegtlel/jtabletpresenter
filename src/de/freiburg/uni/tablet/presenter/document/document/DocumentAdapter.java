@@ -38,4 +38,18 @@ public abstract class DocumentAdapter implements DocumentListener {
 	@Override
 	public void renderableModifyEnd(final IRenderable renderable, final DocumentPage page) {
 	}
+	
+	@Override
+	public void renderableAdding(final IRenderable renderableAfter,
+			final IRenderable renderable, final DocumentPage page) {
+	}
+	
+	@Override
+	public void renderableModifying(final IRenderable renderable, final DocumentPage page) {
+	}
+	
+	@Override
+	public void renderableRemoving(final IRenderable renderableAfter,
+			final IRenderable renderable, final DocumentPage page) {
+	}
 }

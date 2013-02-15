@@ -92,6 +92,7 @@ public class DocumentPage implements IEntity, IPageRepaintListener {
 	 * @param renderable
 	 */
 	public void insertRenderable(final IRenderable afterRenderable, final IRenderable renderable) {
+		_document.fireRenderableAdding(afterRenderable, renderable, this);
 		if (afterRenderable != null) {
 			final LinkedElement<IRenderable> element = _renderablesList.getElementByInstance(afterRenderable);
 			_renderablesList.insertAfter(element, renderable);
@@ -112,6 +113,7 @@ public class DocumentPage implements IEntity, IPageRepaintListener {
 		if (element.getPrevious() != null) {
 			previous = element.getPrevious().getData();
 		}
+		_document.fireRenderableRemoving(previous, renderable, this);
 		_renderablesList.remove(element);
 		_document.fireRenderableRemoved(previous, renderable, this);
 		return previous;
@@ -175,6 +177,14 @@ public class DocumentPage implements IEntity, IPageRepaintListener {
 	 */
 	public void fireRenderableModified(final IRenderable renderable) {
 		_document.fireRenderableModified(renderable, this);
+	}
+	
+	/**
+	 * Called by renderable, when modifying
+	 * @param renderable
+	 */
+	public void fireRenderableModifying(final IRenderable renderable) {
+		_document.fireRenderableModifying(renderable, this);
 	}
 	
 	/**
