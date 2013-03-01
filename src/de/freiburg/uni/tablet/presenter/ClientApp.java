@@ -73,7 +73,7 @@ public class ClientApp {
 
 	/**
 	 * Create the application.
-	 * @param args 
+	 * @param args
 	 */
 	public ClientApp(final DocumentConfig config) {
 		NativeLibrary.addSearchPath("freetype", ".");
@@ -87,7 +87,7 @@ public class ClientApp {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		_pageRenderer.setTitle("JTabletPresenter v1.02");
+		_pageRenderer.setTitle("JTabletPresenter v1.03");
 		_pageRenderer.setSize(800, 600);
 		_pageRenderer.setLocationByPlatform(true);
 		//_pageRenderer.setBounds(100, 100, 640, 480);
@@ -216,7 +216,7 @@ public class ClientApp {
 		
 		_pageRenderer.addWindowListener(new WindowAdapter() {
 			@Override
-			public void windowClosing(WindowEvent e) {
+			public void windowClosing(final WindowEvent e) {
 				if (_pageRenderer.getConfig().getBoolean("autosave.saveExit", false)) {
 					final File savedSession = new File("session.dat");
 					try {
