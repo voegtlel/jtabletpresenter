@@ -381,7 +381,7 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 			// _pageRenderer.requireRepaint();
 		} else if (page == _documentEditor.getCurrentBackPage()) {
 			// renderable.render(_serverSyncLayer);
-			_clientOnlyLayer.requireRepaint(renderable, false);
+			_serverSyncLayer.requireRepaint(renderable, false);
 			// _pageRenderer.requireRepaint();
 		}
 		// Else the object is not on a visible layer
