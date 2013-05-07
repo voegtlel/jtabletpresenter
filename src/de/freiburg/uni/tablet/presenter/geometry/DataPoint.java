@@ -51,6 +51,13 @@ public class DataPoint implements IBinarySerializable {
 	public float getYOrig() {
 		return _yOrig;
 	}
+	
+	/**
+	 * @return measured pressure
+	 */
+	public float getPressure() {
+		return _pressure;
+	}
 
 	/**
 	 * @return the timestamp

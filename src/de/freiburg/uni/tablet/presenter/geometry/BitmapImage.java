@@ -7,6 +7,8 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.geom.Ellipse2D;
+import java.awt.geom.Path2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.WritableRaster;
@@ -22,10 +24,14 @@ import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.FileHelper;
 import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
+import de.freiburg.uni.tablet.presenter.page.IPen;
+import de.freiburg.uni.tablet.presenter.page.SolidPen;
 
 public class BitmapImage extends AbstractRenderable {
 	private final static int DATA_ID_GRAPHICS2D = 0;
 	private final static int DATA_ID_ELLIPSE = 1;
+	
+	private final static IPen HIGHLIGHTED_PEN = new SolidPen(2.0f, Color.yellow);
 	
 	private float _x;
 	private float _y;
@@ -36,11 +42,11 @@ public class BitmapImage extends AbstractRenderable {
 	private byte[] _fileData;
 	private BufferedImage _image;
 
-	public BitmapImage(final DocumentPage parent, final File file, float x, float y, float width, float height) throws IOException {
+	public BitmapImage(final DocumentPage parent, final File file, final float x, final float y, final float width, final float height) throws IOException {
 		this(parent, FileHelper.readFile(file), null, x, y, width, height);
 	}
 	
-	public BitmapImage(final DocumentPage parent, final byte[] fileData, BufferedImage image, float x, float y, float width, float height) {
+	public BitmapImage(final DocumentPage parent, final byte[] fileData, final BufferedImage image, final float x, final float y, final float width, final float height) {
 		super(parent);
 		_fileData = fileData;
 		_x = x;
@@ -80,12 +86,21 @@ public class BitmapImage extends AbstractRenderable {
 	}
 	
 	@Override
+	synchronized public BitmapImage cloneRenderable(final DocumentPage page, final float offsetX, final float offsetY) {
+		System.out.println("clone image " + getId());
+		final ColorModel m = _image.getColorModel();
+		final WritableRaster wr = _image.copyData(null);
+		final BufferedImage clone = new BufferedImage(m, wr, m.isAlphaPremultiplied(), null);
+		return new BitmapImage(page, _fileData, clone, _x + offsetX, _y + offsetY, _width, _height);
+	}
+	
+	@Override
 	synchronized public boolean eraseStart(final EraseInfo eraseInfo) {
 		if (eraseInfo.getCollisionInfo().isCheckOnlyBoundaries()) {
 			return false;
 		}
 		final Ellipse2D.Float ellipse = new Ellipse2D.Float();
-		final Graphics2D graphics = (Graphics2D)_image.createGraphics();
+		final Graphics2D graphics = _image.createGraphics();
 		graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		graphics.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
 		graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
@@ -108,10 +123,10 @@ public class BitmapImage extends AbstractRenderable {
 			ellipse.y = collisionInfo.getCenterY() - collisionInfo.getRadiusY() - _y;
 			ellipse.width = collisionInfo.getRadiusX() * 2f;
 			ellipse.height = collisionInfo.getRadiusY() * 2f;
-			ellipse.x *= (float)_image.getWidth() / _width;
-			ellipse.y *= (float)_image.getHeight() / _height;
-			ellipse.width *= (float)_image.getWidth() / _width;
-			ellipse.height *= (float)_image.getHeight() / _height;
+			ellipse.x *= _image.getWidth() / _width;
+			ellipse.y *= _image.getHeight() / _height;
+			ellipse.width *= _image.getWidth() / _width;
+			ellipse.height *= _image.getHeight() / _height;
 			System.out.println("Clear ellipse: " + ellipse.x + ", " + ellipse.y + ", " + ellipse.width + "x" + ellipse.height);
 			g.fill(ellipse);
 			_parent.fireRenderableModified(this);
@@ -138,10 +153,10 @@ public class BitmapImage extends AbstractRenderable {
 				_fileData = bos.toByteArray();
 				final int origWidth = _image.getWidth();
 				final int origHeight = _image.getHeight();
-				_x = _x + _width * (float)newRect.x / (float)origWidth;
-				_y = _y + _height * (float)newRect.y / (float)origHeight;
-				_width = _width * (float)newRect.width / (float)origWidth;
-				_height = _height * (float)newRect.height / (float)origHeight;
+				_x = _x + _width * newRect.x / origWidth;
+				_y = _y + _height * newRect.y / origHeight;
+				_width = _width * newRect.width / origWidth;
+				_height = _height * newRect.height / origHeight;
 				System.out.println("Stored new image data for " + _x + ", " + _y + ", " + _width + "x" + _height);
 				_parent.fireRenderableModified(this);
 			} catch (IOException e) {
@@ -149,7 +164,7 @@ public class BitmapImage extends AbstractRenderable {
 				return false;
 			}
 		}
-		_parent.fireRenderableModifyEnd(this); 
+		_parent.fireRenderableModifyEnd(this);
 		System.out.println("End Successfull");
 		return true;
 	}
@@ -164,12 +179,18 @@ public class BitmapImage extends AbstractRenderable {
 		renderer.draw(_image, _x, _y, _width, _height);
 	}
 	
-	public void setLocation(float x, float y) {
+	@Override
+	synchronized public void renderHighlighted(final IPageBackRenderer renderer) {
+		renderer.draw(_image, _x, _y, _width, _height);
+		renderer.draw(HIGHLIGHTED_PEN, new Path2D.Float(new Rectangle2D.Float(_x, _y, _width, _height)));
+	}
+	
+	public void setLocation(final float x, final float y) {
 		_x = x;
 		_y = y;
 	}
 	
-	public void setSize(float width, float height) {
+	public void setSize(final float width, final float height) {
 		_width = width;
 		_height = height;
 	}

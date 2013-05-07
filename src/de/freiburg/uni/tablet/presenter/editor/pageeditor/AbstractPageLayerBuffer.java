@@ -15,9 +15,10 @@ import java.awt.image.ImageObserver;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 import de.freiburg.uni.tablet.presenter.list.LinkedElement;
 import de.freiburg.uni.tablet.presenter.list.LinkedElementList;
+import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
 import de.freiburg.uni.tablet.presenter.page.IPen;
 
-public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer {
+public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer, IPageBackRenderer {
 	// Repaint nothing
 	private final static int REPAINT_NONE = 0;
 	// Only add a renderable on top
@@ -65,6 +66,7 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer {
 	/**
 	 * Called to mark that a repaint is required
 	 */
+	@Override
 	public void requireRepaint() {
 		synchronized (_repaintSync) {
 			if (_requireRepaint < REPAINT_ALL) {
@@ -81,6 +83,7 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer {
 	 * @param clear if true, the rectangle below the renderable is cleared and also redrawn,
 	 * otherwise only the renderable is added
 	 */
+	@Override
 	public void requireRepaint(final IRenderable renderable, final boolean clear) {
 		synchronized (_repaintSync) {
 			if (_requireRepaint <= REPAINT_CLEAR_RECT) {
@@ -216,15 +219,7 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer {
 		}
 	}
 
-	/**
-	 * Draws a line
-	 * 
-	 * @param pen
-	 * @param x1
-	 * @param y1
-	 * @param x2
-	 * @param y2
-	 */
+	@Override
 	public void draw(final IPen pen, final float x1,
 			final float y1, final float x2, final float y2) {
 		if (_graphics != null) {
@@ -246,6 +241,7 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer {
 	 * @param x
 	 * @param y
 	 */
+	@Override
 	public void draw(final IPen pen, final float x,
 			final float y) {
 		if (_graphics != null) {
@@ -265,6 +261,7 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer {
 	 * @param pen
 	 * @param path
 	 */
+	@Override
 	public void draw(final IPen pen, final Path2D path) {
 		if (_graphics != null) {
 			_graphics.setPaint(pen.getColor());
@@ -286,13 +283,19 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer {
 	 * @param height
 	 * @param obs (optional)
 	 */
+	@Override
 	public void draw(final BufferedImage image, final float x, final float y, final float width, final float height) {
 		if (_graphics != null) {
 			final AffineTransform t = AffineTransform.getScaleInstance(_renderFactorX, _renderFactorY);
 			t.translate(x, y);
-			t.scale(width/(float)image.getWidth(_displayRenderer.getObserver()), height/(float)image.getHeight(_displayRenderer.getObserver()));
+			t.scale(width/image.getWidth(_displayRenderer.getObserver()), height/image.getHeight(_displayRenderer.getObserver()));
 			_graphics.drawImage(image, t, _displayRenderer.getObserver());
 			_isEmpty = false;
 		}
+	}
+	
+	@Override
+	public void setOffset(final float x, final float y) {
+		_graphics.translate(x, y);
 	}
 }

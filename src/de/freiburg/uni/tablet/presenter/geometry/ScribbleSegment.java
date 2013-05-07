@@ -285,4 +285,29 @@ public class ScribbleSegment implements IBinarySerializable {
 		}
 		return result;
 	}
+	
+	/**
+	 * Clones this object
+	 * 
+	 * @return
+	 */
+	public ScribbleSegment cloneRenderable(final float offsetX, final float offsetY) {
+		final ScribbleSegment result = new ScribbleSegment();
+		result._hasBoundary = _hasBoundary;
+		result._minX = _minX;
+		result._minY = _minY;
+		result._maxX = _maxX;
+		result._maxY = _maxY;
+		result._path = null;
+		/*if (_path != null) {
+			result._path = (Path2D) _path.clone();
+		}*/
+		for (LinkedElement<DataPoint> element = _points.getFirst(); element != null; element = element
+				.getNext()) {
+			DataPoint offsetPoint = new DataPoint(element.getData().getX() + offsetX, element.getData().getY() + offsetY,
+					element.getData().getXOrig(), element.getData().getYOrig(), element.getData().getPressure(), element.getData().getTimestamp());
+			result._points.addLast(offsetPoint);
+		}
+		return result;
+	}
 }

@@ -36,6 +36,24 @@ public interface IPageBackRenderer {
 	 * @param height
 	 */
 	void draw(BufferedImage image, float x, float y, float width, float height);
+	
+	/**
+	 * Draws a line
+	 * 
+	 * @param pen
+	 * @param x1
+	 * @param y1
+	 * @param x2
+	 * @param y2
+	 */
+	void draw(IPen pen, float x1, float y1, float x2, float y2);
+	
+	/**
+	 * Sets the rendering offset
+	 * @param x
+	 * @param y
+	 */
+	void setOffset(float x, float y);
 
 	/**
 	 * Sets the repaint listener

@@ -79,6 +79,27 @@ public class DocumentPage implements IEntity, IPageRepaintListener {
 	}
 	
 	/**
+	 * Collides the given rectangle with the renderables and calls listener for each renderable hit
+	 * @param minX
+	 * @param minY
+	 * @param maxX
+	 * @param maxY
+	 * @param listener
+	 */
+	public void collideWith(final float minX, final float minY, final float maxX, final float maxY, final CollisionListener listener) {
+		for (LinkedElement<IRenderable> r = _renderablesList.getFirst(); r != null; ) {
+			final LinkedElement<IRenderable> next = r.getNext();
+			if ((r.getData().getMinX() >= minX)
+					&& (r.getData().getMaxX() <= maxX)
+					&& (r.getData().getMinY() >= minY)
+					&& (r.getData().getMaxY() <= maxY)) {
+				listener.collides(r.getData());
+			}
+			r = next;
+		}
+	}
+	
+	/**
 	 * Adds a renderable
 	 * @param renderable
 	 */

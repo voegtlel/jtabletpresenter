@@ -1,5 +1,6 @@
 package de.freiburg.uni.tablet.presenter.geometry;
 
+import java.awt.Color;
 import java.io.IOException;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
@@ -9,8 +10,10 @@ import de.freiburg.uni.tablet.presenter.list.LinkedElement;
 import de.freiburg.uni.tablet.presenter.list.LinkedElementList;
 import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
 import de.freiburg.uni.tablet.presenter.page.IPen;
+import de.freiburg.uni.tablet.presenter.page.SolidPen;
 
 public class Scribble extends AbstractRenderable {
+	
 	private final LinkedElementList<ScribbleSegment> _segments = new LinkedElementList<ScribbleSegment>();
 
 	private final IPen _pen;
@@ -26,6 +29,16 @@ public class Scribble extends AbstractRenderable {
 		for (LinkedElement<ScribbleSegment> segment = _segments.getFirst(); segment != null; segment = segment
 				.getNext()) {
 			result._segments.addLast(segment.getData().cloneRenderable());
+		}
+		return result;
+	}
+	
+	@Override
+	public IRenderable cloneRenderable(final DocumentPage parent, final float offsetX, final float offsetY) {
+		final Scribble result = new Scribble(parent, _pen);
+		for (LinkedElement<ScribbleSegment> segment = _segments.getFirst(); segment != null; segment = segment
+				.getNext()) {
+			result._segments.addLast(segment.getData().cloneRenderable(offsetX, offsetY));
 		}
 		return result;
 	}
@@ -167,6 +180,15 @@ public class Scribble extends AbstractRenderable {
 		for (LinkedElement<ScribbleSegment> e = _segments.getFirst(); e != null; e = e
 				.getNext()) {
 			e.getData().render(_pen, renderer);
+		}
+	}
+	
+	@Override
+	synchronized public void renderHighlighted(final IPageBackRenderer renderer) {
+		final IPen highlightPen = new SolidPen(_pen.getThickness(), Color.yellow);
+		for (LinkedElement<ScribbleSegment> e = _segments.getFirst(); e != null; e = e
+				.getNext()) {
+			e.getData().render(highlightPen, renderer);
 		}
 	}
 	

@@ -50,7 +50,6 @@ public class PdfRenderer implements IPageBackRenderer {
 	private CDSRectangle _pageSize;
 	private boolean _showPageNumber;
 	
-	
 	private boolean _wasEmptyPage = true;
 	private boolean _ignoreEmptyPage;
 	private float _thicknessFactor;
@@ -208,7 +207,7 @@ public class PdfRenderer implements IPageBackRenderer {
 	}
 	
 	@Override
-	public void draw(BufferedImage image, float x, float y, float width, float height) {
+	public void draw(final BufferedImage image, final float x, final float y, final float width, final float height) {
 		try {
 			final BufferedImage rgbImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
 			final Graphics g = rgbImage.getGraphics();
@@ -228,6 +227,11 @@ public class PdfRenderer implements IPageBackRenderer {
 	}
 	
 	@Override
+	public void draw(final IPen pen, final float x1, final float y1, final float x2, final float y2) {
+		throw new IllegalStateException("Can't draw line in pdf");
+	}
+	
+	@Override
 	public void requireRepaint() {
 		throw new IllegalStateException("Can't repaint pdf");
 	}
@@ -238,7 +242,12 @@ public class PdfRenderer implements IPageBackRenderer {
 	}
 
 	@Override
-	public void setRepaintListener(IPageRepaintListener repaintListener) {
+	public void setRepaintListener(final IPageRepaintListener repaintListener) {
 		// Ignore
+	}
+	
+	@Override
+	public void setOffset(final float x, final float y) {
+		throw new IllegalStateException("Can't pdf");
 	}
 }

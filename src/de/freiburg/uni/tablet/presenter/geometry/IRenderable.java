@@ -17,6 +17,15 @@ public interface IRenderable extends IEntity {
 	 * @return
 	 */
 	IRenderable cloneRenderable(DocumentPage parent);
+	
+	/**
+	 * Creates a clone of this renderable with a new id and an offset
+	 * 
+	 * @param parent
+	 * 
+	 * @return
+	 */
+	IRenderable cloneRenderable(DocumentPage parent, float offsetX, float offsetY);
 
 	/**
 	 * Renders the object
@@ -26,6 +35,14 @@ public interface IRenderable extends IEntity {
 	 */
 	void render(IPageBackRenderer renderer);
 
+	/**
+	 * Renders the object highlighted
+	 * 
+	 * @param renderer
+	 *            renderer
+	 */
+	void renderHighlighted(IPageBackRenderer renderer);
+	
 	/**
 	 * Begin erasing this instance.
 	 * @param eraseInfo
@@ -44,7 +61,7 @@ public interface IRenderable extends IEntity {
 	
 	/**
 	 * Ends the erase process.
-	 * @param eraseInfo 
+	 * @param eraseInfo
 	 * 
 	 * @return false if the object is empty and should be removed
 	 */
@@ -96,14 +113,14 @@ public interface IRenderable extends IEntity {
 	/**
 	 * Updates the data of the renderable to load data from a reader
 	 * @param reader
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	void deserializeData(BinaryDeserializer reader) throws IOException;
 	
 	/**
 	 * Stores the inner data of the renderable
 	 * @param writer
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	void serializeData(BinarySerializer writer) throws IOException;
 }

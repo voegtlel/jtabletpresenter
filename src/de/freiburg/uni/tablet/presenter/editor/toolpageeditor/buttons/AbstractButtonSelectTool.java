@@ -19,6 +19,7 @@ import de.freiburg.uni.tablet.presenter.tools.ITool;
 import de.freiburg.uni.tablet.presenter.tools.ToolEraser;
 import de.freiburg.uni.tablet.presenter.tools.ToolImage;
 import de.freiburg.uni.tablet.presenter.tools.ToolScribble;
+import de.freiburg.uni.tablet.presenter.tools.ToolSelectMove;
 
 /**
  * @author lukas
@@ -39,6 +40,8 @@ public abstract class AbstractButtonSelectTool extends AbstractButtonAction {
 	
 	protected final ToolImage _toolImage;
 	
+	protected final ToolSelectMove _toolSelectMove;
+	
 	/**
 	 * Creates the action with an editor.
 	 * 
@@ -50,15 +53,17 @@ public abstract class AbstractButtonSelectTool extends AbstractButtonAction {
 		super(name, editor, text, imageResource);
 		_tool = new JPageToolMenuSelectFrame<ITool>();
 		_tool.setSize(JPageToolButton.WIDTH_WIDE * 1,
-				JPageToolButton.HEIGHT_NORMAL * 4);
+				JPageToolButton.HEIGHT_NORMAL * 5);
 		_toolScribble = new ToolScribble(_editor);
 		_toolEraser = new ToolEraser(_editor, false);
 		_toolDeleter = new ToolEraser(_editor, true);
 		_toolImage = new ToolImage(_editor);
+		_toolSelectMove = new ToolSelectMove(_editor, true);
 		_tool.addValue("Pen", "/buttons/edit-scribble.png", _toolScribble);
 		_tool.addValue("Eraser", "/buttons/edit-erase.png", _toolEraser);
 		_tool.addValue("Deleter", "/buttons/edit-delete.png", _toolDeleter);
 		_tool.addValue("Image", "/buttons/edit-image.png", _toolImage);
+		_tool.addValue("Drag", "/buttons/edit-drag.png", _toolSelectMove);
 	}
 
 	@Override
@@ -74,7 +79,7 @@ public abstract class AbstractButtonSelectTool extends AbstractButtonAction {
 	}
 	
 	@Override
-	public void performLater(Component component) {
+	public void performLater(final Component component) {
 		final ITool selectedTool = _tool.getSelectedValue();
 		if (selectedTool == _toolImage) {
 			// Select image to insert
@@ -86,7 +91,7 @@ public abstract class AbstractButtonSelectTool extends AbstractButtonAction {
 				}
 				
 				@Override
-				public boolean accept(File f) {
+				public boolean accept(final File f) {
 					if (!f.isFile()) {
 						return true;
 					}
