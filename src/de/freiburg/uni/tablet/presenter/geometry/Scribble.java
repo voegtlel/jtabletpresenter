@@ -185,7 +185,7 @@ public class Scribble extends AbstractRenderable {
 	
 	@Override
 	synchronized public void renderHighlighted(final IPageBackRenderer renderer) {
-		final IPen highlightPen = new SolidPen(_pen.getThickness(), Color.yellow);
+		final IPen highlightPen = new SolidPen(_pen.getThickness() + 4, Color.yellow);
 		for (LinkedElement<ScribbleSegment> e = _segments.getFirst(); e != null; e = e
 				.getNext()) {
 			e.getData().render(highlightPen, renderer);

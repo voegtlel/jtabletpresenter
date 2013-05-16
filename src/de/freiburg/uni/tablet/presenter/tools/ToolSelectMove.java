@@ -56,6 +56,10 @@ public class ToolSelectMove extends AbstractTool implements CollisionListener {
 	
 	@Override
 	public void render(final IPageBackRenderer renderer) {
+		//TODO: What happens if we undo? The old objects will still be drawn :-(
+		if (_editor.getDocumentEditor().getCurrentPage() != _selectPage) {
+			return;
+		}
 		if (_isDragging) {
 			renderer.setOffset(_dragStartX - _dragEndX, _dragStartY - _dragEndY);
 		}
@@ -153,13 +157,21 @@ public class ToolSelectMove extends AbstractTool implements CollisionListener {
 		_editor.getPageEditor().suspendRepaint();
 		
 		if (_isDragging) {
+			LinkedElementList<IRenderable> newSelection = new LinkedElementList<IRenderable>();
 			float offsetX = _dragEndX - _dragStartX;
 			float offsetY = _dragEndY - _dragStartY;
 			_editor.getDocumentEditor().getHistory().beginActionGroup();
 			for (IRenderable renderable : _selectedObjects) {
-				_selectPage.replaceRenderable(renderable, renderable.cloneRenderable(_selectPage, offsetX, offsetY));
+				IRenderable newRenderable = renderable.cloneRenderable(_selectPage, offsetX, offsetY);
+				newSelection.addLast(newRenderable);
+				_selectPage.replaceRenderable(renderable, newRenderable);
 			}
 			_editor.getDocumentEditor().getHistory().endActionGroup();
+			_selectedObjects = newSelection;
+			_selectStartX += offsetX;
+			_selectEndX += offsetX;
+			_selectStartY += offsetY;
+			_selectEndY += offsetY;
 		}
 		
 		if (_selectedObjects.isEmpty()) {

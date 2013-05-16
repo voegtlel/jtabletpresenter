@@ -296,6 +296,6 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer, IPage
 	
 	@Override
 	public void setOffset(final float x, final float y) {
-		_graphics.translate(x, y);
+		_graphics.setTransform(AffineTransform.getTranslateInstance(-x * _renderFactorX, -y * _renderFactorY));
 	}
 }

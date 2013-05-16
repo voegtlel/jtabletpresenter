@@ -294,10 +294,10 @@ public class ScribbleSegment implements IBinarySerializable {
 	public ScribbleSegment cloneRenderable(final float offsetX, final float offsetY) {
 		final ScribbleSegment result = new ScribbleSegment();
 		result._hasBoundary = _hasBoundary;
-		result._minX = _minX;
-		result._minY = _minY;
-		result._maxX = _maxX;
-		result._maxY = _maxY;
+		result._minX = _minX + offsetX;
+		result._minY = _minY + offsetY;
+		result._maxX = _maxX + offsetX;
+		result._maxY = _maxY + offsetY;
 		result._path = null;
 		/*if (_path != null) {
 			result._path = (Path2D) _path.clone();
