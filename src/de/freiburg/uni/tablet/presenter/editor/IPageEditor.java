@@ -72,6 +72,12 @@ public interface IPageEditor {
 	void stopTool();
 	
 	/**
+	 * Updates the tools (called when the elements on the document were modified otherwise)
+	 * TODO: call and implement in selection
+	 */
+	void updateTool();
+	
+	/**
 	 * Require repaint
 	 */
 	void requireRepaint();

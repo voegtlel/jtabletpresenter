@@ -62,7 +62,7 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 		
 		addComponentListener(new ComponentAdapter() {
 			@Override
-			public void componentResized(ComponentEvent e) {
+			public void componentResized(final ComponentEvent e) {
 				requireRepaint();
 			}
 		});
@@ -224,7 +224,7 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 	}
 	
 	@Override
-	public Image createImageBuffer(int width, int height, int transparency) {
+	public Image createImageBuffer(final int width, final int height, final int transparency) {
 		return getGraphicsConfiguration().createCompatibleImage(width, height, transparency);
 	}
 	
@@ -266,5 +266,11 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 	@Override
 	public void stopTool() {
 		_pagePenDispatcher.stopTool();
+	}
+	
+	@Override
+	public void updateTool() {
+		_pagePenDispatcher.getNormalTool().updateTool();
+		_pagePenDispatcher.getInvertedTool().updateTool();
 	}
 }

@@ -56,7 +56,7 @@ public class ToolSelectMove extends AbstractTool implements CollisionListener {
 	
 	@Override
 	public void render(final IPageBackRenderer renderer) {
-		//TODO: What happens if we undo? The old objects will still be drawn :-(
+		// TODO: What happens if we undo? The old objects will still be drawn :-(
 		if (_editor.getDocumentEditor().getCurrentPage() != _selectPage) {
 			return;
 		}

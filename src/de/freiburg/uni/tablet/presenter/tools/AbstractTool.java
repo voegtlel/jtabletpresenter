@@ -17,6 +17,7 @@ public abstract class AbstractTool implements ITool, IPageRepaintListener {
 		_editor = editor;
 	}
 
+	@Override
 	public void invalidateCursor() {
 		_cursor = null;
 		if (_isActive) {
@@ -52,5 +53,9 @@ public abstract class AbstractTool implements ITool, IPageRepaintListener {
 	@Override
 	public void out() {
 		_isActive = false;
+	}
+	
+	@Override
+	public void updateTool() {
 	}
 }

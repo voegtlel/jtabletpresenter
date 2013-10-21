@@ -40,4 +40,9 @@ public interface ITool {
 	 * Call to update cursor
 	 */
 	void invalidateCursor();
+	
+	/**
+	 * Called after the document was modified and the tool may update its state
+	 */
+	void updateTool();
 }
