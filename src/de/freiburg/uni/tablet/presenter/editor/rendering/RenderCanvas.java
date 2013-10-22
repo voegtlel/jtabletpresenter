@@ -6,11 +6,11 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.image.BufferStrategy;
+import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 
 import javax.swing.SwingUtilities;
@@ -224,7 +224,7 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 	}
 	
 	@Override
-	public Image createImageBuffer(final int width, final int height, final int transparency) {
+	public BufferedImage createImageBuffer(final int width, final int height, final int transparency) {
 		return getGraphicsConfiguration().createCompatibleImage(width, height, transparency);
 	}
 	

@@ -29,7 +29,7 @@ public class DocumentServer extends Document implements IEditableDocument {
 	}
 	
 	@Override
-	public void setPdfPages(final PdfSerializable document, int pdfMode) {
+	public void setPdfPages(final PdfSerializable document, final int pdfMode) {
 		if (document != null) {
 			if (pdfMode == PDF_MODE_REINDEX) {
 				final PDPageTree pageTree = document.getDocument().getPageTree();
@@ -40,7 +40,7 @@ public class DocumentServer extends Document implements IEditableDocument {
 				LinkedElement<DocumentPage> docPage = _pages.getFirst();
 				while (pdfPage != null) {
 					// Set indices
-					docPage.getData().setPdfPage(new PdfPageSerializable(docPage.getData(), document, pdfPage));
+					docPage.getData().setPdfPage(new PdfPageSerializable(docPage.getData(), document, pdfPage, document.getDocument2().getPage(pdfPage.getNodeIndex() + 1)));
 					pdfPage = pdfPage.getNextPage();
 					docPage = docPage.getNext();
 				}
@@ -63,7 +63,7 @@ public class DocumentServer extends Document implements IEditableDocument {
 					PDPage pdfPage = pageTree.getPageAt(lastPdfIndex);
 					while (pdfPage != null) {
 						final DocumentPage newPage = this.addPage();
-						newPage.setPdfPage(new PdfPageSerializable(newPage, document, pdfPage));
+						newPage.setPdfPage(new PdfPageSerializable(newPage, document, pdfPage, document.getDocument2().getPage(lastPdfIndex + 1)));
 						pdfPage = pdfPage.getNextPage();
 					}
 				}
@@ -78,7 +78,7 @@ public class DocumentServer extends Document implements IEditableDocument {
 				PDPage pdfPage = pageTree.getFirstPage();
 				while (pdfPage != null) {
 					final DocumentPage newPage = this.addPage();
-					newPage.setPdfPage(new PdfPageSerializable(newPage, document, pdfPage));
+					newPage.setPdfPage(new PdfPageSerializable(newPage, document, pdfPage, document.getDocument2().getPage(pdfPage.getNodeIndex() + 1)));
 					pdfPage = pdfPage.getNextPage();
 				}
 			} else if (pdfMode == PDF_MODE_CLEAR) {
@@ -88,12 +88,12 @@ public class DocumentServer extends Document implements IEditableDocument {
 				final DocumentPage firstPage = this.getPageByIndex(0);
 				PDPage pdfPage = pageTree.getFirstPage();
 				if (pdfPage != null) {
-					firstPage.setPdfPage(new PdfPageSerializable(firstPage, document, pdfPage));
+					firstPage.setPdfPage(new PdfPageSerializable(firstPage, document, pdfPage, document.getDocument2().getPage(pdfPage.getNodeIndex() + 1)));
 					pdfPage = pdfPage.getNextPage();
 				}
 				while (pdfPage != null) {
 					final DocumentPage newPage = this.addPage();
-					newPage.setPdfPage(new PdfPageSerializable(newPage, document, pdfPage));
+					newPage.setPdfPage(new PdfPageSerializable(newPage, document, pdfPage, document.getDocument2().getPage(pdfPage.getNodeIndex() + 1)));
 					pdfPage = pdfPage.getNextPage();
 				}
 			}

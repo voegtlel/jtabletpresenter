@@ -1,15 +1,15 @@
 package de.freiburg.uni.tablet.presenter.editor.pageeditor;
 
-import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 
 public interface IDisplayRenderer {
 	/**
 	 * Creates an image for buffering
 	 * 
-	 * @return new image
+	 * @return new buffered image
 	 */
-	public Image createImageBuffer(int width, int height, int transparency);
+	public BufferedImage createImageBuffer(int width, int height, int transparency);
 
 	/**
 	 * Returns, if we can work with this

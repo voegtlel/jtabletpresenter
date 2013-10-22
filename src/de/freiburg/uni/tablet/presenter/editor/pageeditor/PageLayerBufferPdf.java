@@ -16,7 +16,7 @@ import de.intarsys.pdf.content.CSContent;
 import de.intarsys.pdf.pd.PDPage;
 import de.intarsys.pdf.platform.cwt.rendering.CSPlatformRenderer;
 
-public class PageLayerBufferPdf implements IPageLayerBuffer {
+public class PageLayerBufferPdf implements IPageLayerBufferPdf {
 	protected Image _imageBuffer = null;
 
 	protected int _sizeX = 1;
@@ -58,6 +58,7 @@ public class PageLayerBufferPdf implements IPageLayerBuffer {
 	 * Sets the document
 	 * @param document
 	 */
+	@Override
 	public void setPdfPage(final PdfPageSerializable pdfPage) {
 		synchronized (_repaintSync) {
 			_pdfPage = pdfPage;
@@ -137,7 +138,7 @@ public class PageLayerBufferPdf implements IPageLayerBuffer {
 		final Composite defaultComp = _graphics.getComposite();
 		final AffineTransform defaultTransform = new AffineTransform();
 		_graphics.setTransform(defaultTransform);
-		_graphics.setComposite(AlphaComposite.Clear); 
+		_graphics.setComposite(AlphaComposite.Clear);
 		_graphics.setColor(new Color(0, 0, 0, 0));
 		_graphics.fillRect(0, 0, width, height);
 		_graphics.setComposite(defaultComp);

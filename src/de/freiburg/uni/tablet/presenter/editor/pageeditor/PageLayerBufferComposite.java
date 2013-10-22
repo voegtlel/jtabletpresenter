@@ -33,9 +33,17 @@ public class PageLayerBufferComposite implements IPageLayerBuffer {
 		return result;
 	}
 	
-	public PageLayerBufferPdf addPdfBuffer() {
-		final PageLayerBufferPdf result = new PageLayerBufferPdf(
-				_displayRenderer);
+	public IPageLayerBufferPdf addPdfBuffer(final int libraryType) {
+		final IPageLayerBufferPdf result;
+		if (libraryType == PDF_LIBRARY_TYPE_JPOD) {
+			result = new PageLayerBufferPdf(
+					_displayRenderer);
+		} else if (libraryType == PDF_LIBRARY_TYPE_MUPDF) {
+			result = new PageLayerBufferPdf2(
+					_displayRenderer);
+		} else {
+			throw new IllegalArgumentException("libraryType for pdf layer invalid");
+		}
 		_pageLayerBuffers.add(result);
 		return result;
 	}
@@ -64,4 +72,7 @@ public class PageLayerBufferComposite implements IPageLayerBuffer {
 			pageLayerBuffer.drawBuffer(g, obs);
 		}
 	}
+	
+	public static final int PDF_LIBRARY_TYPE_JPOD = 0;
+	public static final int PDF_LIBRARY_TYPE_MUPDF = 1;
 }

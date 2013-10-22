@@ -42,11 +42,11 @@ import de.freiburg.uni.tablet.presenter.document.editor.DocumentEditorClient;
 import de.freiburg.uni.tablet.presenter.document.editor.IDocumentEditorClient;
 import de.freiburg.uni.tablet.presenter.editor.IPageEditor;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
+import de.freiburg.uni.tablet.presenter.editor.pageeditor.IPageLayerBufferPdf;
 import de.freiburg.uni.tablet.presenter.editor.pageeditor.PageLayerBufferBack;
 import de.freiburg.uni.tablet.presenter.editor.pageeditor.PageLayerBufferColor;
 import de.freiburg.uni.tablet.presenter.editor.pageeditor.PageLayerBufferComposite;
 import de.freiburg.uni.tablet.presenter.editor.pageeditor.PageLayerBufferFront;
-import de.freiburg.uni.tablet.presenter.editor.pageeditor.PageLayerBufferPdf;
 import de.freiburg.uni.tablet.presenter.editor.rendering.RenderCanvas;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonColor;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonNext;
@@ -89,7 +89,7 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 	private IButtonAction[] _buttonActions = new IButtonAction[] {};
 
 	private PageLayerBufferColor _backgroundLayer;
-	private PageLayerBufferPdf _pdfLayer;
+	private IPageLayerBufferPdf _pdfLayer;
 
 	private DocumentConfig _config;
 	
@@ -204,7 +204,7 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 				pageRenderer);
 		_backgroundLayer = pageLayers.addColorBuffer();
 		_backgroundLayer.setColor(_config.getColor("document.background.color", Color.white));
-		_pdfLayer = pageLayers.addPdfBuffer();
+		_pdfLayer = pageLayers.addPdfBuffer(_config.getInt("pdf.renderer", PageLayerBufferComposite.PDF_LIBRARY_TYPE_JPOD));
 		_serverSyncLayer = pageLayers.addBackBuffer();
 		_clientOnlyLayer = pageLayers.addBackBuffer();
 		_frontLayer = pageLayers.addFrontBuffer();
