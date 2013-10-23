@@ -13,6 +13,7 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
+import com.jmupdf.JmuPdf;
 import com.sun.jna.NativeLibrary;
 
 import de.freiburg.uni.tablet.presenter.document.DocumentConfig;
@@ -77,6 +78,18 @@ public class ClientApp {
 	 */
 	public ClientApp(final DocumentConfig config) {
 		NativeLibrary.addSearchPath("freetype", ".");
+		
+		try {
+			JmuPdf.getLibVersion();
+		} catch (Exception e) {
+			e.printStackTrace();
+			String val = System.getProperty("sun.arch.data.model");
+			if (val.equals("64")) {
+				System.load("libjmupdf64.so");
+			} else {
+				System.load("libjmupdf32.so");
+			}
+		}
 		
 		_pageRenderer = new JPageEditor(config);
 		
