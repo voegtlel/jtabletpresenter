@@ -1,0 +1,5 @@
+This program uses jna (https://jna.dev.java.net/).
+
+jna is governed by the LGPL license, available in this directory.
+
+jna source code is available at https://jna.dev.java.net/.

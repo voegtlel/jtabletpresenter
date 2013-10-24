@@ -1,0 +1,4 @@
+The replacement fonts for the 4 standard PDF fonts are provided by URW.
+
+The fonts are governed by the GPL license - remember that you are not 
+authorized to distribute them with a non GPL product!
