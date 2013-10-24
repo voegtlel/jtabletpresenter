@@ -26,6 +26,8 @@ import de.freiburg.uni.tablet.presenter.xsocket.DownClient;
 import de.freiburg.uni.tablet.presenter.xsocket.UpClient;
 
 public class ClientApp {
+	
+	public final static String VersionString = "1.04";
 
 	private JPageEditor _pageRenderer;
 	private DownClient _clientDownSync;
@@ -100,7 +102,7 @@ public class ClientApp {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		_pageRenderer.setTitle("JTabletPresenter v1.03");
+		_pageRenderer.setTitle("JTabletPresenter v" + VersionString);
 		_pageRenderer.setSize(800, 600);
 		_pageRenderer.setLocationByPlatform(true);
 		//_pageRenderer.setBounds(100, 100, 640, 480);

@@ -45,6 +45,7 @@ public class ServerApp {
 	 * @param args
 	 */
 	public static void main(final String[] args) {
+		System.out.println("Starting Server v" + ClientApp.VersionString);
 		Logger.getLogger("de.freiburg.uni.tablet.presenter").setLevel(Level.ALL);
 		
 		String configFile = "config.ini";

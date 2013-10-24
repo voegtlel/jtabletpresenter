@@ -19,7 +19,7 @@ public class DocumentConfig {
 		public final String key;
 		public Object value;
 		
-		public KeyValue(String key, Object value) {
+		public KeyValue(final String key, final Object value) {
 			this.key = key;
 			this.value = value;
 		}
@@ -28,7 +28,7 @@ public class DocumentConfig {
 	private List<KeyValue> _data = new ArrayList<KeyValue>();
 	private boolean _configChanged = false;
 	
-	public DocumentConfig(String filename) {
+	public DocumentConfig(final String filename) {
 		try {
 			FileInputStream fis = new FileInputStream(new File(filename));
 			BufferedInputStream bufferedInputStream = new BufferedInputStream(fis);
@@ -64,7 +64,7 @@ public class DocumentConfig {
 		}
 	}
 	
-	private KeyValue put(String key, Object value) {
+	private KeyValue put(final String key, final Object value) {
 		if (key == null) {
 			KeyValue keyValue = new KeyValue(null, value);
 			_data.add(keyValue);
@@ -84,7 +84,7 @@ public class DocumentConfig {
 		return newEntry;
 	}
 	
-	private KeyValue get(String key) {
+	private KeyValue get(final String key) {
 		for (KeyValue kv : _data) {
 			if(key.equals(kv.key)) {
 				return kv;
@@ -93,9 +93,24 @@ public class DocumentConfig {
 		return null;
 	}
 	
-	public String getString(String key, String defaultValue) {
+	public void setString(final String key, final String value) {
 		KeyValue kv = get(key);
 		if (kv == null) {
+			kv = new KeyValue(key, value);
+			_data.add(kv);
+			_configChanged = true;
+		} else {
+			_configChanged = !kv.value.equals(value);
+			kv.value = value;
+		}
+	}
+	
+	public String getString(final String key, final String defaultValue) {
+		KeyValue kv = get(key);
+		if (kv == null) {
+			if (defaultValue == null) {
+				return null;
+			}
 			kv = new KeyValue(key, defaultValue);
 			_data.add(kv);
 			_configChanged = true;
@@ -103,7 +118,7 @@ public class DocumentConfig {
 		return kv.value.toString();
 	}
 	
-	public List<KeyValue> getAll(String keyPrefix) {
+	public List<KeyValue> getAll(final String keyPrefix) {
 		List<KeyValue> result = new ArrayList<KeyValue>();
 		for (KeyValue e : _data) {
 			if ((e.key != null) && e.key.startsWith(keyPrefix)) {
@@ -113,9 +128,12 @@ public class DocumentConfig {
 		return result;
 	}
 	
-	private <T> KeyValue getDefault(String key, T defaultValue) {
+	private <T> KeyValue getDefault(final String key, final T defaultValue) {
 		KeyValue keyValue = get(key);
 		if (keyValue == null) {
+			if (defaultValue == null) {
+				return null;
+			}
 			keyValue = new KeyValue(key, defaultValue);
 			_data.add(keyValue);
 			_configChanged = true;
@@ -123,7 +141,7 @@ public class DocumentConfig {
 		return keyValue;
 	}
 	
-	public int getInt(String key, int defaultValue) {
+	public int getInt(final String key, final int defaultValue) {
 		KeyValue keyValue = getDefault(key, defaultValue);
 		if (keyValue.value instanceof String) {
 			keyValue.value = Integer.parseInt(keyValue.value.toString());
@@ -134,7 +152,7 @@ public class DocumentConfig {
 		throw new IllegalStateException("Invalid config type for (int)" + key + ": " + keyValue.value.getClass().getName());
 	}
 	
-	public long getLong(String key, long defaultValue) {
+	public long getLong(final String key, final long defaultValue) {
 		KeyValue keyValue = getDefault(key, defaultValue);
 		if (keyValue.value instanceof String) {
 			keyValue.value = Long.parseLong(keyValue.value.toString());
@@ -145,7 +163,7 @@ public class DocumentConfig {
 		throw new IllegalStateException("Invalid config type for (long)" + key + ": " + keyValue.value.getClass().getName());
 	}
 	
-	public float getFloat(String key, float defaultValue) {
+	public float getFloat(final String key, final float defaultValue) {
 		KeyValue keyValue = getDefault(key, defaultValue);
 		if (keyValue.value instanceof String) {
 			keyValue.value = Float.parseFloat(keyValue.value.toString());
@@ -156,7 +174,7 @@ public class DocumentConfig {
 		throw new IllegalStateException("Invalid config type for (float)" + key + ": " + keyValue.value.getClass().getName());
 	}
 	
-	public boolean getBoolean(String key, boolean defaultValue) {
+	public boolean getBoolean(final String key, final boolean defaultValue) {
 		KeyValue keyValue = getDefault(key, defaultValue);
 		if (keyValue.value instanceof String) {
 			keyValue.value = Boolean.parseBoolean(keyValue.value.toString());
@@ -167,7 +185,7 @@ public class DocumentConfig {
 		throw new IllegalStateException("Invalid config type for (boolean)" + key + ": " + keyValue.value.getClass().getName());
 	}
 	
-	public Color getColor(String key, Color defaultValue) {
+	public Color getColor(final String key, final Color defaultValue) {
 		KeyValue keyValue = getDefault(key, defaultValue);
 		if (keyValue.value instanceof String) {
 			long intVal = Long.parseLong(keyValue.value.toString(), 16);
@@ -179,7 +197,7 @@ public class DocumentConfig {
 		throw new IllegalStateException("Invalid config type for (color)" + key + ": " + keyValue.value.getClass().getName());
 	}
 	
-	public void write(boolean force) {
+	public void write(final boolean force) {
 		if (_configChanged || force) {
 			try {
 				FileOutputStream fos = new FileOutputStream(new File("config.ini"));

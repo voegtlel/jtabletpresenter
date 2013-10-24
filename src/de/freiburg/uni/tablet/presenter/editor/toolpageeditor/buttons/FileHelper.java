@@ -163,9 +163,22 @@ public class FileHelper {
 		fileChooser.addChoosableFileFilter(FILTER_presenterDocumentFile);
 		fileChooser.addChoosableFileFilter(FILTER_presenterPageFile);
 		fileChooser.setFileFilter(defaultType);
+		final String defaultDir = editor.getConfig().getString("file.dialog.location", "");
+		if (!defaultDir.isEmpty()) {
+			fileChooser.setCurrentDirectory(new File(defaultDir));
+		}
 		if (fileChooser.showSaveDialog(component) == JFileChooser.APPROVE_OPTION) {
-			File f = fileChooser.getSelectedFile();
 			try {
+				if (editor.getConfig().getBoolean("file.dialog.saveLocation", false)) {
+					File location = fileChooser.getCurrentDirectory();
+					if (location == null) {
+						editor.getConfig().setString("file.dialog.location", "");
+					} else {
+						editor.getConfig().setString("file.dialog.location", location.getPath());
+					}
+					editor.getConfig().write(false);
+				}
+				File f = fileChooser.getSelectedFile();
 				if ((fileChooser.getFileFilter() == FILTER_pdf)
 						&& !fileChooser.getSelectedFile().getPath().toLowerCase().endsWith(".pdf")) {
 					f = new File(f.getPath() + ".pdf");
@@ -255,8 +268,21 @@ public class FileHelper {
 		fileChooser.addChoosableFileFilter(FILTER_pdf);
 		fileChooser.addChoosableFileFilter(FILTER_session);
 		fileChooser.setFileFilter(defaultFilter);
+		final String defaultDir = editor.getConfig().getString("file.dialog.location", "");
+		if (!defaultDir.isEmpty()) {
+			fileChooser.setCurrentDirectory(new File(defaultDir));
+		}
 		if (fileChooser.showOpenDialog(component) == JFileChooser.APPROVE_OPTION) {
 			try {
+				if (editor.getConfig().getBoolean("file.dialog.saveLocation", false)) {
+					File location = fileChooser.getCurrentDirectory();
+					if (location == null) {
+						editor.getConfig().setString("file.dialog.location", "");
+					} else {
+						editor.getConfig().setString("file.dialog.location", location.getPath());
+					}
+					editor.getConfig().write(false);
+				}
 				final File f = fileChooser.getSelectedFile();
 				if (f.getPath().toLowerCase().endsWith(".jpd")) {
 					editor.getDocumentEditor().setBackDocument(null);
