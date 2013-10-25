@@ -10,8 +10,10 @@ public interface IPageLayerBuffer {
 	 * 
 	 * @param width
 	 * @param height
+	 * @param offsetX
+	 * @param offsetY
 	 */
-	void resize(final int width, final int height);
+	void resize(final int width, final int height, int offsetX, int offsetY);
 
 	/**
 	 * Renders the buffer to the given graphics
@@ -19,4 +21,10 @@ public interface IPageLayerBuffer {
 	 * @param g
 	 */
 	void drawBuffer(final Graphics2D g, ImageObserver obs);
+
+	/**
+	 * Gets the desired ratio of this layer buffer or null if there is no preference.
+	 * @return null or desired ratio
+	 */
+	Float getDesiredRatio();
 }

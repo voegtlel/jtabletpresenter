@@ -12,6 +12,7 @@ import java.awt.image.ImageObserver;
 import de.freiburg.uni.tablet.presenter.document.PdfPageSerializable;
 import de.intarsys.cwt.awt.environment.CwtAwtGraphicsContext;
 import de.intarsys.cwt.environment.IGraphicsContext;
+import de.intarsys.pdf.cds.CDSRectangle;
 import de.intarsys.pdf.content.CSContent;
 import de.intarsys.pdf.pd.PDPage;
 import de.intarsys.pdf.platform.cwt.rendering.CSPlatformRenderer;
@@ -21,6 +22,8 @@ public class PageLayerBufferPdf implements IPageLayerBufferPdf {
 
 	protected int _sizeX = 1;
 	protected int _sizeY = 1;
+	protected int _offsetX;
+	protected int _offsetY;
 	
 	protected float _renderFactorX = 1;
 	protected float _renderFactorY = 1;
@@ -34,6 +37,8 @@ public class PageLayerBufferPdf implements IPageLayerBufferPdf {
 	
 	private boolean _requireRepaint = true;
 	private boolean _requireResize = true;
+
+	private boolean _ratioEnabled = false;
 	
 	/**
 	 * Create an empty pdf renderer
@@ -44,13 +49,15 @@ public class PageLayerBufferPdf implements IPageLayerBufferPdf {
 	}
 	
 	@Override
-	public void resize(final int width, final int height) {
+	public void resize(final int width, final int height, final int offsetX, final int offsetY) {
 		synchronized (_repaintSync) {
+			_requireResize = (_sizeX != width || _sizeY != height);
 			_sizeX = width;
 			_sizeY = height;
+			_offsetX = offsetX;
+			_offsetY = offsetY;
 			_renderFactorX = width;
 			_renderFactorY = height;
-			_requireResize = true;
 		}
 	}
 	
@@ -72,6 +79,8 @@ public class PageLayerBufferPdf implements IPageLayerBufferPdf {
 		boolean requiresResize;
 		int width;
 		int height;
+		int offsetX;
+		int offsetY;
 		float factorX;
 		float factorY;
 		boolean requiresRepaint;
@@ -80,6 +89,8 @@ public class PageLayerBufferPdf implements IPageLayerBufferPdf {
 			requiresResize = _requireResize;
 			width = _sizeX;
 			height = _sizeY;
+			offsetX = _offsetX;
+			offsetY = _offsetY;
 			factorX = _renderFactorX;
 			factorY = _renderFactorY;
 			requiresRepaint = _requireRepaint;
@@ -97,7 +108,7 @@ public class PageLayerBufferPdf implements IPageLayerBufferPdf {
 			if (requiresRepaint) {
 				renderPdf(page, width, height, factorX, factorY);
 			}
-			g.drawImage(_imageBuffer, 0, 0, obs);
+			g.drawImage(_imageBuffer, offsetX, offsetY, obs);
 		}
 	}
 	
@@ -166,5 +177,24 @@ public class PageLayerBufferPdf implements IPageLayerBufferPdf {
 		} else {
 			System.out.println("Don't Render Pdf");
 		}
+	}
+	
+	@Override
+	public void setRatioEnabled(final boolean enabled) {
+		_ratioEnabled = enabled;
+	}
+	
+	@Override
+	public boolean isRatioEnabled() {
+		return _ratioEnabled;
+	}
+
+	@Override
+	public Float getDesiredRatio() {
+		if (_ratioEnabled && _pdfPage != null && _pdfPage.getPage() != null) {
+			final CDSRectangle r = _pdfPage.getPage().getMediaBox();
+			return r.getWidth() / r.getHeight();
+		}
+		return null;
 	}
 }

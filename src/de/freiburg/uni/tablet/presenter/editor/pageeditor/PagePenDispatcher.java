@@ -1,6 +1,7 @@
 package de.freiburg.uni.tablet.presenter.editor.pageeditor;
 
 import java.awt.Dimension;
+import java.awt.Point;
 
 import jpen.PButton;
 import jpen.PButtonEvent;
@@ -29,6 +30,7 @@ public class PagePenDispatcher implements PenListener {
 	private DataPoint _lastData = null;
 
 	private Dimension _drawSize = new Dimension();
+	private Point _drawOffset = new Point();
 
 	private long _frameReduction = 20;
 
@@ -43,9 +45,9 @@ public class PagePenDispatcher implements PenListener {
 	 * @return
 	 */
 	private DataPoint getDataPoint(final Pen pen, final long timestamp) {
-		return new DataPoint(pen.getLevelValue(Type.X) / _drawSize.width,
-				pen.getLevelValue(Type.Y) / _drawSize.height,
-				pen.getLevelValue(Type.X), pen.getLevelValue(Type.Y),
+		return new DataPoint((pen.getLevelValue(Type.X) - _drawOffset.x) / _drawSize.width,
+				(pen.getLevelValue(Type.Y) - _drawOffset.y) / _drawSize.height,
+				pen.getLevelValue(Type.X) - _drawOffset.x, pen.getLevelValue(Type.Y) - _drawOffset.y,
 				pen.getLevelValue(Type.PRESSURE), timestamp);
 	}
 
@@ -251,9 +253,14 @@ public class PagePenDispatcher implements PenListener {
 	public Dimension getDrawSize() {
 		return _drawSize;
 	}
+	
+	public Point getDrawOffset() {
+		return _drawOffset;
+	}
 
-	public void setDrawSize(final Dimension drawSize) {
+	public void setDrawSize(final Dimension drawSize, final Point drawOffset) {
 		_drawSize = drawSize;
+		_drawOffset = drawOffset;
 	}
 
 	public long getFrameReduction() {

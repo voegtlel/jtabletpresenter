@@ -27,7 +27,7 @@ import de.freiburg.uni.tablet.presenter.xsocket.UpClient;
 
 public class ClientApp {
 	
-	public final static String VersionString = "1.04";
+	public final static String VersionString = "1.05";
 
 	private JPageEditor _pageRenderer;
 	private DownClient _clientDownSync;
@@ -83,7 +83,7 @@ public class ClientApp {
 		
 		try {
 			JmuPdf.getLibVersion();
-		} catch (Exception e) {
+		} catch (UnsatisfiedLinkError e) {
 			e.printStackTrace();
 			String val = System.getProperty("sun.arch.data.model");
 			if (val.equals("64")) {

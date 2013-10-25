@@ -5,6 +5,9 @@ import java.awt.image.ImageObserver;
 import java.util.LinkedList;
 
 public class PageLayerBufferComposite implements IPageLayerBuffer {
+	public static final int PDF_LIBRARY_TYPE_JPOD = 0;
+	public static final int PDF_LIBRARY_TYPE_MUPDF = 1;
+	
 	private final IDisplayRenderer _displayRenderer;
 
 	private final LinkedList<IPageLayerBuffer> _pageLayerBuffers = new LinkedList<IPageLayerBuffer>();
@@ -60,9 +63,9 @@ public class PageLayerBufferComposite implements IPageLayerBuffer {
 	}
 
 	@Override
-	public void resize(final int width, final int height) {
+	public void resize(final int width, final int height, final int offsetX, final int offsetY) {
 		for (final IPageLayerBuffer pageLayerBuffer : _pageLayerBuffers) {
-			pageLayerBuffer.resize(width, height);
+			pageLayerBuffer.resize(width, height, offsetX, offsetY);
 		}
 	}
 
@@ -72,7 +75,16 @@ public class PageLayerBufferComposite implements IPageLayerBuffer {
 			pageLayerBuffer.drawBuffer(g, obs);
 		}
 	}
-	
-	public static final int PDF_LIBRARY_TYPE_JPOD = 0;
-	public static final int PDF_LIBRARY_TYPE_MUPDF = 1;
+
+	@Override
+	public Float getDesiredRatio() {
+		Float result = null;
+		for (final IPageLayerBuffer pageLayerBuffer : _pageLayerBuffers) {
+			final Float tmp = pageLayerBuffer.getDesiredRatio();
+			if (tmp != null) {
+				result = tmp;
+			}
+		}
+		return result;
+	}
 }

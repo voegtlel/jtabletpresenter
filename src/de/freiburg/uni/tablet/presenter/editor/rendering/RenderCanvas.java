@@ -6,6 +6,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -37,8 +38,13 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 	
 	private Thread _renderThread;
 	
+	private int _lastRenderOffsetX = 0;
+	private int _lastRenderOffsetY = 0;
 	private int _lastRenderWidth = 0;
 	private int _lastRenderHeight = 0;
+	
+	private int _lastWidth = 0;
+	private int _lastHeight = 0;
 	
 	/**
 	 * Dispatcher
@@ -47,7 +53,7 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 	
 	public RenderCanvas() {
 		super();
-		setBackground(Color.WHITE);
+		setBackground(Color.BLACK);
 		
 		_renderThread = new Thread(new Runnable() {
 			@Override
@@ -144,12 +150,25 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 		synchronized (_paintSync) {
 			int width = this.getWidth();
 			int height = this.getHeight();
-			if ((width != _lastRenderWidth) || (height != _lastRenderHeight)) {
-				_lastRenderWidth = width;
-				_lastRenderHeight = height;
-				_pagePenDispatcher.setDrawSize(new Dimension(width, height));
+			if ((width != _lastWidth) || (height != _lastHeight)) {
+				_lastWidth = width;
+				_lastHeight = height;
+				final Float desiredRatio = _renderBuffer.getDesiredRatio();
+				if (desiredRatio == null) {
+					_lastRenderWidth = width;
+					_lastRenderHeight = height;
+					_lastRenderOffsetX = 0;
+					_lastRenderOffsetY = 0;
+				} else {
+					System.out.println("Resize desired ratio: " + desiredRatio);
+					_lastRenderWidth = Math.min((int)(height * desiredRatio), width);
+					_lastRenderHeight = Math.min((int)(width / desiredRatio), height);
+					_lastRenderOffsetX = (_lastWidth - _lastRenderWidth) / 2;
+					_lastRenderOffsetY = (_lastHeight - _lastRenderHeight) / 2;
+				}
+				_pagePenDispatcher.setDrawSize(new Dimension(_lastRenderWidth, _lastRenderHeight), new Point(_lastRenderOffsetX, _lastRenderOffsetY));
 				if (_renderBuffer != null) {
-					_renderBuffer.resize(width, height);
+					_renderBuffer.resize(_lastRenderWidth, _lastRenderHeight, _lastRenderOffsetX, _lastRenderOffsetY);
 				}
 			}
 			
@@ -180,7 +199,7 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 		synchronized (_paintSync) {
 			_renderBuffer = pageLayer;
 			if (_renderBuffer != null) {
-				_renderBuffer.resize(_lastRenderWidth, _lastRenderHeight);
+				_renderBuffer.resize(_lastRenderWidth, _lastRenderHeight, _lastRenderOffsetX, _lastRenderOffsetY);
 			}
 		}
 		requireRepaint();
@@ -272,5 +291,15 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 	public void updateTool() {
 		_pagePenDispatcher.getNormalTool().updateTool();
 		_pagePenDispatcher.getInvertedTool().updateTool();
+	}
+
+	@Override
+	public Color getVoidColor() {
+		return getBackground();
+	}
+
+	@Override
+	public void setVoidColor(final Color voidColor) {
+		setBackground(voidColor);
 	}
 }

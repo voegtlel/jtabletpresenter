@@ -19,7 +19,7 @@ import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
 import de.freiburg.uni.tablet.presenter.page.IPen;
 
 public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer, IPageBackRenderer {
-	// Repaint nothing
+	// Repaint nothing (only reblit to graphics)
 	private final static int REPAINT_NONE = 0;
 	// Only add a renderable on top
 	private final static int REPAINT_ADD_PAINT = 1;
@@ -35,9 +35,13 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer, IPage
 	private Image _imageBuffer = null;
 	
 	private Object _repaintSync = new Object();
+	
+	private Float _desiredRatio;
 
 	private int _newWidth = 1;
 	private int _newHeight = 1;
+	private int _newOffsetX = 0;
+	private int _newOffsetY = 0;
 	private int _requireRepaint = REPAINT_ALL;
 	
 	private LinkedElementList<IRenderable> _repaintAddObjects = null;
@@ -51,6 +55,8 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer, IPage
 
 	protected int _renderWidth = 1;
 	protected int _renderHeight = 1;
+	protected int _renderOffsetX = 1;
+	protected int _renderOffsetY = 1;
 
 	protected float _renderFactorX = 1;
 	protected float _renderFactorY = 1;
@@ -124,13 +130,15 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer, IPage
 	protected abstract void paint(IRenderable renderable);
 
 	@Override
-	public void resize(final int width, final int height) {
+	public void resize(final int width, final int height, final int offsetX, final int offsetY) {
 		synchronized (_repaintSync) {
-			_newWidth = width;
-			_newHeight = height;
-			if (_requireRepaint < REPAINT_RESIZE) {
+			if ((_newWidth != width || _newHeight != height) && _requireRepaint < REPAINT_RESIZE) {
 				_requireRepaint = REPAINT_RESIZE;
 			}
+			_newWidth = width;
+			_newHeight = height;
+			_newOffsetX = offsetX;
+			_newOffsetY = offsetY;
 		}
 	}
 
@@ -146,6 +154,8 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer, IPage
 		synchronized (_repaintSync) {
 			_renderWidth = _newWidth;
 			_renderHeight = _newHeight;
+			_renderOffsetX = _newOffsetX;
+			_renderOffsetY = _newOffsetY;
 			_renderFactorX = _renderWidth;
 			_renderFactorY = _renderHeight;
 			requireRepaint = _requireRepaint;
@@ -205,7 +215,7 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer, IPage
 			}
 		}
 		if (!_isEmpty) {
-			g.drawImage(_imageBuffer, 0, 0, obs);
+			g.drawImage(_imageBuffer, _renderOffsetX, _renderOffsetY, obs);
 		}
 	}
 	
@@ -297,5 +307,14 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer, IPage
 	@Override
 	public void setOffset(final float x, final float y) {
 		_graphics.setTransform(AffineTransform.getTranslateInstance(-x * _renderFactorX, -y * _renderFactorY));
+	}
+	
+	public void setDesiredRatio(final Float desiredRatio) {
+		_desiredRatio = desiredRatio;
+	}
+	
+	@Override
+	public Float getDesiredRatio() {
+		return _desiredRatio;
 	}
 }

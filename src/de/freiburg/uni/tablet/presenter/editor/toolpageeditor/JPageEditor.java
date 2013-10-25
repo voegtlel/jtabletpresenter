@@ -197,6 +197,7 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 		
 		final RenderCanvas pageRenderer = new RenderCanvas();
 		_pageRenderer = pageRenderer;
+		_pageRenderer.setVoidColor(_config.getColor("editor.voidColor", Color.BLACK));
 		getContentPane().add(pageRenderer.getContainerComponent(),
 				BorderLayout.CENTER);
 
@@ -204,7 +205,11 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 				pageRenderer);
 		_backgroundLayer = pageLayers.addColorBuffer();
 		_backgroundLayer.setColor(_config.getColor("document.background.color", Color.white));
+		if (_config.getBoolean("document.useDefaultRatio", false)) {
+			_backgroundLayer.setDesiredRatio(_config.getFloat("document.defaultRatio", 4.0f/3.0f));
+		}
 		_pdfLayer = pageLayers.addPdfBuffer(_config.getInt("pdf.renderer", PageLayerBufferComposite.PDF_LIBRARY_TYPE_JPOD));
+		_pdfLayer.setRatioEnabled(_config.getBoolean("pdf.useRatio", false));
 		_serverSyncLayer = pageLayers.addBackBuffer();
 		_clientOnlyLayer = pageLayers.addBackBuffer();
 		_frontLayer = pageLayers.addFrontBuffer();
