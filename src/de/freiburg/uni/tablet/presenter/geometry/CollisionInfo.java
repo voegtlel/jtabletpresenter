@@ -22,13 +22,14 @@ public class CollisionInfo {
 	private final float _radiusXOrig;
 	private final float _radiusYOrig;
 	private final boolean _checkOnlyBoundaries;
+	private final boolean _fastCollide;
 	
 	private final DataPoint _sourceDataPoint;
 
 	public CollisionInfo(final float x, final float y, final float xOrig,
 			final float yOrig, final float radiusX, final float radiusY,
 			final float radiusXOrig, final float radiusYOrig,
-			final boolean checkOnlyBoundaries, final DataPoint sourceDataPoint) {
+			final boolean checkOnlyBoundaries, final DataPoint sourceDataPoint, final boolean fastCollide) {
 		_x = x;
 		_y = y;
 		_xOrig = xOrig;
@@ -39,6 +40,7 @@ public class CollisionInfo {
 		_radiusYOrig = radiusYOrig;
 		_checkOnlyBoundaries = checkOnlyBoundaries;
 		_sourceDataPoint = sourceDataPoint;
+		_fastCollide = fastCollide;
 	}
 
 	public boolean collides(final float minX, final float minY,
@@ -98,7 +100,6 @@ public class CollisionInfo {
 		float c3sqrt = (float)Math.sqrt(c3);
 		float f1 = -c1 - c3sqrt;
 		float f2 = -c1 + c3sqrt;
-		System.out.println("f1: " + f1 + ", f2: " + f2);
 		if (((f1 <= 0) && (f2 <= 0))
 				|| ((f1 >= 1) && (f2 >= 1))) {
 			return COLLIDE_NONE;
@@ -166,5 +167,9 @@ public class CollisionInfo {
 
 	public DataPoint getSourceDataPoint() {
 		return _sourceDataPoint;
+	}
+
+	public boolean isFastCollide() {
+		return _fastCollide;
 	}
 }

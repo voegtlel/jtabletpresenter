@@ -63,7 +63,7 @@ public class ToolEraser extends AbstractTool implements CollisionListener {
 					data.getX() / data.getXOrig() * _pen.getThickness() / 2.0f,
 					data.getY() / data.getYOrig() * _pen.getThickness() / 2.0f,
 					_pen.getThickness(), _pen.getThickness(),
-					_checkOnlyBoundaries, data);
+					_checkOnlyBoundaries, data, _editor.getConfig().getBoolean("editor.eraser.fastCollide", true));
 			_erasePage.collideWith(_eraseInfo.getCollisionInfo(), this);
 			_editor.getPageEditor().resumeRepaint();
 		}

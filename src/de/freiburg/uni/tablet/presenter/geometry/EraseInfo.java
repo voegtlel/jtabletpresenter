@@ -22,13 +22,16 @@ public class EraseInfo {
 	 * @param radiusYOrig
 	 * @param checkOnlyBoundaries
 	 * @param sourceDataPoint
+	 * @param fastCollide
 	 */
 	public void createCollisionInfo(final float x, final float y,
 			final float xOrig, final float yOrig, final float radiusX,
 			final float radiusY, final float radiusXOrig,
-			final float radiusYOrig, final boolean checkOnlyBoundaries, final DataPoint sourceDataPoint) {
+			final float radiusYOrig, final boolean checkOnlyBoundaries,
+			final DataPoint sourceDataPoint, final boolean fastCollide) {
 		_collisionInfo = new CollisionInfo(x, y, xOrig, yOrig, radiusX,
-				radiusY, radiusXOrig, radiusYOrig, checkOnlyBoundaries, sourceDataPoint);
+				radiusY, radiusXOrig, radiusYOrig, checkOnlyBoundaries,
+				sourceDataPoint, fastCollide);
 	}
 
 	/**

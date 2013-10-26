@@ -139,7 +139,7 @@ public class ToolSelectMove extends AbstractTool implements CollisionListener {
 						data.getX() / data.getXOrig() * _pen.getThickness() / 2.0f,
 						data.getY() / data.getYOrig() * _pen.getThickness() / 2.0f,
 						_pen.getThickness(), _pen.getThickness(),
-						_checkOnlyBoundaries, data);
+						_checkOnlyBoundaries, data, true);
 				_selectPage.collideWith(collisionInfo, this);
 				_editor.getPageEditor().resumeRepaint();
 			}
