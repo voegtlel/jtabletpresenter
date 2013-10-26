@@ -123,7 +123,7 @@ public class LinkedElementList<T> implements Iterable<T> {
 			newList._last = _last;
 			_last = first.getPrevious();
 			_last.setNext(null);
-			newList._last.setPrevious(null);
+			first.setPrevious(null);
 		}
 		return newList;
 	}

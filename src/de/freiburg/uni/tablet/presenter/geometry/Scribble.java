@@ -42,6 +42,14 @@ public class Scribble extends AbstractRenderable {
 		}
 		return result;
 	}
+	
+	/**
+	 * Replaces the last added point by data
+	 * @param data
+	 */
+	public void updateLastPoint(final DataPoint data) {
+		_segments.getLast().getData().updateLastPoint(data);
+	}
 
 	/**
 	 * Adds an additional point

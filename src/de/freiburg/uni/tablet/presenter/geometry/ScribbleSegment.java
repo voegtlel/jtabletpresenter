@@ -1,6 +1,7 @@
 package de.freiburg.uni.tablet.presenter.geometry;
 
 import java.awt.geom.Path2D;
+import java.awt.geom.Point2D;
 import java.io.IOException;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
@@ -48,6 +49,9 @@ public class ScribbleSegment implements IBinarySerializable {
 	 */
 	public void addPoint(final DataPoint data) {
 		// Add
+		if (!_points.isEmpty() && _points.getFirst().getData().getX() == data.getX() && _points.getFirst().getData().getY() == data.getY()) {
+			throw new IllegalStateException("Same point");
+		}
 		_points.addFirst(data);
 		// Check for baking object
 		if (_path != null) {
@@ -84,10 +88,9 @@ public class ScribbleSegment implements IBinarySerializable {
 		}
 		_hasBoundary = true;
 	}
-
+	
 	/**
-	 * Erases points at the location until the line must be splitted.
-	 * Additionally calculates the boundaries.
+	 * Erases points at the location until the line must be splitted. Also splits lines between points.
 	 * 
 	 * @param collisionInfo
 	 *            erase information
@@ -96,50 +99,91 @@ public class ScribbleSegment implements IBinarySerializable {
 	public ScribbleSegment eraseAt(final CollisionInfo collisionInfo) {
 		if (!_hasBoundary || collisionInfo.collides(_minX, _minY, _maxX, _maxY)) {
 			boolean wasModified = false;
-			_minX = Float.MAX_VALUE;
-			_minY = Float.MAX_VALUE;
-			_maxX = Float.MIN_VALUE;
-			_maxY = Float.MIN_VALUE;
+			if (_points.hasOne()) {
+				if (collisionInfo.collides(_points.getFirst().getData().getX(), _points.getFirst().getData().getY())) {
+					_points.clear();
+				}
+				return this;
+			}
 			for (LinkedElement<DataPoint> e = _points.getFirst(); e != null;) {
 				final LinkedElement<DataPoint> next = e.getNext();
-				if (collisionInfo.collides(e.getData().getX(), e.getData()
-						.getY())) {
-					wasModified = true;
-					if (collisionInfo.isCheckOnlyBoundaries()) {
-						while (!_points.isEmpty()) {
-							_points.removeFirst();
+				if (next != null) {
+					Point2D.Float coll1 = new Point2D.Float();
+					Point2D.Float coll2 = new Point2D.Float();
+					int result = collisionInfo.collidesSegment(e.getData().getX(), e.getData()
+							.getY(), next.getData().getX(), next.getData().getY(), coll1, coll2);
+					if (result != CollisionInfo.COLLIDE_NONE) {
+						wasModified = true;
+						_path = null;
+						_hasBoundary = false;
+						if (collisionInfo.isCheckOnlyBoundaries()) {
+							_points.clear();
+							break;
 						}
-						break;
 					}
-					if (e == _points.getFirst()) {
-						// Simply remove the point.
-						_points.removeFirst();
-						_path = null;
-					} else if (e == _points.getLast()) {
-						// Simply remove the point. Do not return.
-						_points.removeLast();
-						_path = null;
-					} else {
-						_path = null;
-						_hasBoundary = true;
-						return new ScribbleSegment(_points.splitAtRemove(e));
+					if (result == CollisionInfo.COLLIDE_P1_WITHIN) {
+						System.out.println("Collide P1 within at (" + e.getData().getX() + ", " + e.getData().getY() + "), " + coll2);
+						final DataPoint newDataPoint = new DataPoint(coll2.x, coll2.y, collisionInfo.getSourceDataPoint().getXOrig(), collisionInfo.getSourceDataPoint().getYOrig(), collisionInfo.getSourceDataPoint().getPressure(), collisionInfo.getSourceDataPoint().getTimestamp());
+						if (e == _points.getFirst()) {
+							// Remove the point.
+							_points.removeFirst();
+							_points.addFirst(newDataPoint);
+						} else {
+							_points.insertAfter(e, newDataPoint);
+							return new ScribbleSegment(_points.splitAtRemove(e));
+						}
+					} else if (result == CollisionInfo.COLLIDE_P2_WITHIN) {
+						System.out.println("Collide P2 within at " + coll1 + ", (" + next.getData().getX() + ", " + next.getData().getY() + ")");
+						final DataPoint newDataPoint = new DataPoint(coll1.x, coll1.y, collisionInfo.getSourceDataPoint().getXOrig(), collisionInfo.getSourceDataPoint().getYOrig(), collisionInfo.getSourceDataPoint().getPressure(), collisionInfo.getSourceDataPoint().getTimestamp());
+						_points.insertAfter(e, newDataPoint);
+						if (next == _points.getLast()) {
+							_points.removeLast();
+							break;
+						} else {
+							return new ScribbleSegment(_points.splitAt(next));
+						}
+					} else if (result == CollisionInfo.COLLIDE_BOTH_WITHIN) {
+						System.out.println("Collide both within at (" + e.getData().getX() + ", " + e.getData().getY() + "), (" + next.getData().getX() + ", " + next.getData().getY() + ")");
+						if (e == _points.getFirst()) {
+							// Simply remove the point.
+							_points.removeFirst();
+						} else {
+							return new ScribbleSegment(_points.splitAtRemove(e));
+						}
+					} else if (result == CollisionInfo.COLLIDE_SEGMENT) {
+						System.out.println("Collide segment within at " + coll1 + ", " + coll2 + ")");
+						final DataPoint newDataPoint1 = new DataPoint(coll1.x, coll1.y, collisionInfo.getSourceDataPoint().getXOrig(), collisionInfo.getSourceDataPoint().getYOrig(), collisionInfo.getSourceDataPoint().getPressure(), collisionInfo.getSourceDataPoint().getTimestamp());
+						final DataPoint newDataPoint2 = new DataPoint(coll2.x, coll2.y, collisionInfo.getSourceDataPoint().getXOrig(), collisionInfo.getSourceDataPoint().getYOrig(), collisionInfo.getSourceDataPoint().getPressure(), collisionInfo.getSourceDataPoint().getTimestamp());
+						_points.insertAfter(e, newDataPoint1);
+						_points.insertBefore(next, newDataPoint2);
+						final LinkedElement<DataPoint> firstNext = next.getPrevious();
+						return new ScribbleSegment(_points.splitAt(firstNext));
 					}
-				} else {
-					_minX = Math.min(_minX, e.getData().getX());
-					_minY = Math.min(_minY, e.getData().getY());
-					_maxX = Math.max(_maxX, e.getData().getX());
-					_maxY = Math.max(_maxY, e.getData().getY());
 				}
 				e = next;
 			}
-			_hasBoundary = true;
 			if (wasModified) {
 				return this;
 			}
 		}
 		return null;
 	}
-
+	
+	/**
+	 * Replaces the last point by data.
+	 * @param data
+	 */
+	public void updateLastPoint(final DataPoint data) {
+		_points.removeLast();
+		_points.addLast(data);
+		if (_path != null) {
+			_path.reset();
+			generatePathData();
+		}
+		// recalc boundary
+		_hasBoundary = false;
+	}
+	
 	/**
 	 * Checks if the collision info is in range
 	 * 
@@ -151,16 +195,29 @@ public class ScribbleSegment implements IBinarySerializable {
 			if (collisionInfo.isCheckOnlyBoundaries()) {
 				return true;
 			}
+			if (_points.hasOne()) {
+				return collisionInfo.collides(_points.getFirst().getData().getX(), _points.getFirst().getData().getY());
+			}
 			for (LinkedElement<DataPoint> e = _points.getFirst(); e != null;) {
 				final LinkedElement<DataPoint> next = e.getNext();
-				if (collisionInfo.collides(e.getData().getX(), e.getData()
-						.getY())) {
-					return true;
+				if (next != null) {
+					if (collisionInfo.collidesSegment(e.getData().getX(), e.getData()
+							.getY(), next.getData().getX(), next.getData().getY())) {
+						return true;
+					}
 				}
 				e = next;
 			}
 		}
 		return false;
+	}
+	
+	private void generatePathData() {
+		LinkedElement<DataPoint> e = _points.getFirst();
+		_path.moveTo(e.getData().getX(), e.getData().getY());
+		for (e = e.getNext(); e != null; e = e.getNext()) {
+			_path.lineTo(e.getData().getX(), e.getData().getY());
+		}
 	}
 
 	/**
@@ -169,11 +226,7 @@ public class ScribbleSegment implements IBinarySerializable {
 	public void bake() {
 		if (!_points.isEmpty() && !_points.hasOne()) {
 			_path = new Path2D.Float(Path2D.WIND_NON_ZERO, _points.getCount());
-			LinkedElement<DataPoint> e = _points.getFirst();
-			_path.moveTo(e.getData().getX(), e.getData().getY());
-			for (e = e.getNext(); e != null; e = e.getNext()) {
-				_path.lineTo(e.getData().getX(), e.getData().getY());
-			}
+			generatePathData();
 		}
 	}
 

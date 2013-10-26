@@ -65,6 +65,11 @@ public class DataPoint implements IBinarySerializable {
 	public long getTimestamp() {
 		return _timestamp;
 	}
+	
+	@Override
+	public DataPoint clone() {
+		return new DataPoint(_x, _y, _xOrig, _yOrig, _pressure, _timestamp);
+	}
 
 	public DataPoint(final BinaryDeserializer reader) throws IOException {
 		_xOrig = reader.readFloat();

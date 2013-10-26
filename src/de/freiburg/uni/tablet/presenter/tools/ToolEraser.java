@@ -31,7 +31,7 @@ public class ToolEraser extends AbstractTool implements CollisionListener {
 	 * @param editor
 	 * @param checkOnlyBoundaries
 	 */
-	public ToolEraser(final IToolPageEditor editor, boolean checkOnlyBoundaries) {
+	public ToolEraser(final IToolPageEditor editor, final boolean checkOnlyBoundaries) {
 		super(editor);
 		_pen = new SolidPen(editor.getConfig().getFloat("editor.eraser.thickness", 15f), new Color(0xFF, 0xFF, 0xFF,
 				0xAA));
@@ -63,7 +63,7 @@ public class ToolEraser extends AbstractTool implements CollisionListener {
 					data.getX() / data.getXOrig() * _pen.getThickness() / 2.0f,
 					data.getY() / data.getYOrig() * _pen.getThickness() / 2.0f,
 					_pen.getThickness(), _pen.getThickness(),
-					_checkOnlyBoundaries);
+					_checkOnlyBoundaries, data);
 			_erasePage.collideWith(_eraseInfo.getCollisionInfo(), this);
 			_editor.getPageEditor().resumeRepaint();
 		}

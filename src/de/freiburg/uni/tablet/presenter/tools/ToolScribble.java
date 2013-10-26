@@ -17,14 +17,18 @@ import de.freiburg.uni.tablet.presenter.page.IPen;
 
 public class ToolScribble extends AbstractTool {
 	private Scribble _scribble = null;
+	private boolean _dragLines;
+	private boolean _isFirstPoint = false;
 	
 	/**
 	 * 
-	 * @param container
+	 * @param editor
 	 *            used for cursor changing
+	 * @param dragLines if true, this scribble tool drags lines instead of scribbling
 	 */
-	public ToolScribble(final IToolPageEditor editor) {
+	public ToolScribble(final IToolPageEditor editor, final boolean dragLines) {
 		super(editor);
+		_dragLines = dragLines;
 		editor.getDocumentEditor().addListener(new DocumentEditorAdapter() {
 			@Override
 			public void currentPenChanged(final IPen lastPen) {
@@ -38,6 +42,7 @@ public class ToolScribble extends AbstractTool {
 	synchronized public void begin() {
 		_scribble = new Scribble(_editor.getDocumentEditor().getCurrentPage(), _editor.getDocumentEditor().getCurrentPen());
 		_editor.getFrontRenderer().setRepaintListener(this);
+		_isFirstPoint = true;
 	}
 	
 	@Override
@@ -50,7 +55,17 @@ public class ToolScribble extends AbstractTool {
 	@Override
 	synchronized public void draw(final DataPoint data) {
 		if (_scribble != null) {
-			_scribble.addPoint(data);
+			if (_dragLines) {
+				if (_isFirstPoint ) {
+					_isFirstPoint = false;
+					_scribble.addPoint(data);
+					_scribble.addPoint(data.clone());
+				} else {
+					_scribble.updateLastPoint(data);
+				}
+			} else {
+				_scribble.addPoint(data);
+			}
 			_editor.getFrontRenderer().requireRepaint(_scribble, true);
 		}
 	}

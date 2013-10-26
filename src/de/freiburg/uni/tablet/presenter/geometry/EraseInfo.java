@@ -21,13 +21,14 @@ public class EraseInfo {
 	 * @param radiusXOrig
 	 * @param radiusYOrig
 	 * @param checkOnlyBoundaries
+	 * @param sourceDataPoint
 	 */
 	public void createCollisionInfo(final float x, final float y,
 			final float xOrig, final float yOrig, final float radiusX,
 			final float radiusY, final float radiusXOrig,
-			final float radiusYOrig, final boolean checkOnlyBoundaries) {
+			final float radiusYOrig, final boolean checkOnlyBoundaries, final DataPoint sourceDataPoint) {
 		_collisionInfo = new CollisionInfo(x, y, xOrig, yOrig, radiusX,
-				radiusY, radiusXOrig, radiusYOrig, checkOnlyBoundaries);
+				radiusY, radiusXOrig, radiusYOrig, checkOnlyBoundaries, sourceDataPoint);
 	}
 
 	/**
@@ -45,7 +46,7 @@ public class EraseInfo {
 	 * @param dataId the id for the property
 	 * @param data the actual data
 	 */
-	public <T> void addObjectData(final IRenderable object, final int dataId, T data) {
+	public <T> void addObjectData(final IRenderable object, final int dataId, final T data) {
 		HashMap<Integer, Object> objectData = _objectsData.get(object.getId());
 		if (objectData == null) {
 			objectData = new HashMap<Integer, Object>();

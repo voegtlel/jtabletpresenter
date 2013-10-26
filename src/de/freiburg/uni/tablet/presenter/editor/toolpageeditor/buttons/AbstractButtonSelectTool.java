@@ -34,6 +34,7 @@ public abstract class AbstractButtonSelectTool extends AbstractButtonAction {
 	private final JPageToolMenuSelectFrame<ITool> _tool;
 
 	protected final ToolScribble _toolScribble;
+	protected final ToolScribble _toolLine;
 
 	protected final ToolEraser _toolEraser;
 	protected final ToolEraser _toolDeleter;
@@ -54,12 +55,14 @@ public abstract class AbstractButtonSelectTool extends AbstractButtonAction {
 		_tool = new JPageToolMenuSelectFrame<ITool>();
 		_tool.setSize(JPageToolButton.WIDTH_WIDE * 1,
 				JPageToolButton.HEIGHT_NORMAL * 5);
-		_toolScribble = new ToolScribble(_editor);
+		_toolScribble = new ToolScribble(_editor, false);
+		_toolLine = new ToolScribble(_editor, true);
 		_toolEraser = new ToolEraser(_editor, false);
 		_toolDeleter = new ToolEraser(_editor, true);
 		_toolImage = new ToolImage(_editor);
 		_toolSelectMove = new ToolSelectMove(_editor, true);
 		_tool.addValue("Pen", "/buttons/edit-scribble.png", _toolScribble);
+		_tool.addValue("Line", "/buttons/edit-line.png", _toolLine);
 		_tool.addValue("Eraser", "/buttons/edit-erase.png", _toolEraser);
 		_tool.addValue("Deleter", "/buttons/edit-delete.png", _toolDeleter);
 		_tool.addValue("Image", "/buttons/edit-image.png", _toolImage);
@@ -121,6 +124,8 @@ public abstract class AbstractButtonSelectTool extends AbstractButtonAction {
 	public ITool getTool(final String name) {
 		if (name.equals("scribble")) {
 			return _toolScribble;
+		} else if (name.equals("line")) {
+			return _toolLine;
 		} else if (name.equals("eraser")) {
 			return _toolEraser;
 		} else if (name.equals("deleter")) {
