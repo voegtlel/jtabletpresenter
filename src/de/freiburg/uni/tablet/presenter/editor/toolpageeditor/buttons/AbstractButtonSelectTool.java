@@ -127,6 +127,8 @@ public abstract class AbstractButtonSelectTool extends AbstractButtonAction {
 			return _toolDeleter;
 		} else if (name.equals("image")) {
 			return _toolImage;
+		} else if (name.equals("selectMove")) {
+			return _toolSelectMove;
 		}
 		return null;
 	}
