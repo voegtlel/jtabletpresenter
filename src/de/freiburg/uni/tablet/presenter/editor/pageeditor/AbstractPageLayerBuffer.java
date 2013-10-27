@@ -1,5 +1,6 @@
 package de.freiburg.uni.tablet.presenter.editor.pageeditor;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -9,14 +10,20 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 
+import de.freiburg.uni.tablet.presenter.document.TextFont;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 import de.freiburg.uni.tablet.presenter.list.LinkedElement;
 import de.freiburg.uni.tablet.presenter.list.LinkedElementList;
 import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
 import de.freiburg.uni.tablet.presenter.page.IPen;
+import de.intarsys.cwt.awt.environment.CwtAwtGraphicsContext;
+import de.intarsys.pdf.cos.COSName;
+import de.intarsys.pdf.platform.cwt.rendering.CSPlatformDevice;
+import de.intarsys.pdf.platform.cwt.rendering.CSPlatformRenderer;
 
 public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer, IPageBackRenderer {
 	// Repaint nothing (only reblit to graphics)
@@ -237,9 +244,30 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer, IPage
 			_lineRenderer.y1 = y1 * _renderFactorY;
 			_lineRenderer.x2 = x2 * _renderFactorX;
 			_lineRenderer.y2 = y2 * _renderFactorY;
-			_graphics.setStroke(pen.getStroke());
-			_graphics.setPaint(pen.getColor());
+			if (pen == null) {
+				_graphics.setPaint(Color.black);
+			} else {
+				_graphics.setStroke(pen.getStroke());
+				_graphics.setPaint(pen.getColor());
+			}
 			_graphics.draw(_lineRenderer);
+			_isEmpty = false;
+		}
+	}
+	
+	/**
+	 * Draws a debug rectangle
+	 */
+	public void drawDebugRect(final float x1,
+			final float y1, final float x2, final float y2) {
+		if (_graphics != null) {
+			_graphics.setPaint(Color.black);
+			_graphics.setStroke(new BasicStroke(1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+			float xMin = Math.min(x1, x2);
+			float yMin = Math.min(y1, y2);
+			float w = Math.abs(x2 - x1);
+			float h = Math.abs(y2 - y1);
+			_graphics.draw(new Rectangle2D.Float(xMin * _renderFactorX, yMin * _renderFactorY, w * _renderFactorX, h *_renderFactorY));
 			_isEmpty = false;
 		}
 	}
@@ -300,6 +328,30 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer, IPage
 			t.translate(x, y);
 			t.scale(width/image.getWidth(_displayRenderer.getObserver()), height/image.getHeight(_displayRenderer.getObserver()));
 			_graphics.drawImage(image, t, _displayRenderer.getObserver());
+			_isEmpty = false;
+		}
+	}
+	
+	@Override
+	public void draw(final float x, final float y, final String text, final TextFont font) {
+		if (_graphics != null) {
+			//java.awt.geom.Point2D.Float measureText = font.measureText(text);
+			//drawDebugRect(x, y, x + measureText.x, y - measureText.y);
+			CwtAwtGraphicsContext ctx = new CwtAwtGraphicsContext(_graphics);
+			CSPlatformRenderer dummyRenderer = new CSPlatformRenderer(null, ctx);
+			CSPlatformDevice csPlatformDevice = new CSPlatformDevice(ctx);
+			csPlatformDevice.open(dummyRenderer);
+			csPlatformDevice.saveState();
+			AffineTransform t = AffineTransform.getScaleInstance(_renderFactorX, _renderFactorY);
+			t.translate(x, y);
+			t.scale(1, -1);
+			ctx.setTransform(t);
+			csPlatformDevice.textBegin();
+			csPlatformDevice.textSetFont(COSName.constant("TextFont"), font.getPDFont(), font.getSize());
+			csPlatformDevice.textShow(text);
+			csPlatformDevice.textEnd();
+			csPlatformDevice.close();
+			csPlatformDevice.restoreState();
 			_isEmpty = false;
 		}
 	}

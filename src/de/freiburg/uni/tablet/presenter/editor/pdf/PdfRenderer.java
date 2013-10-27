@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import de.freiburg.uni.tablet.presenter.document.PdfPageSerializable;
+import de.freiburg.uni.tablet.presenter.document.TextFont;
 import de.freiburg.uni.tablet.presenter.editor.IPageRepaintListener;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
@@ -92,7 +93,7 @@ public class PdfRenderer implements IPageBackRenderer {
 				String s = Integer.valueOf(_pageIndex).toString();
 				
 				byte[] data = s.getBytes(Charset.forName("windows-1252"));
-				float sWidth = PDFontTools.getGlyphWidthEncoded(_font, data, 0, data.length) * fontSize / 1000f;
+				float sWidth = PDFontTools.getGlyphWidthEncodedScaled(_font, fontSize, data, 0, data.length);
 				_creator.textMoveTo(_renderFactorX - sWidth - 10, 12);
 				_creator.textShow(s);
 				
@@ -229,6 +230,16 @@ public class PdfRenderer implements IPageBackRenderer {
 	@Override
 	public void draw(final IPen pen, final float x1, final float y1, final float x2, final float y2) {
 		throw new IllegalStateException("Can't draw line in pdf");
+	}
+	
+	@Override
+	public void draw(final float x, final float y, final String text, final TextFont font) {
+		// Draw page number
+		_creator.textSetFont(null, font.getPDFont(), font.getSize());
+		//byte[] data = font.getEncodedTextData(text);
+		_creator.textMoveTo(x, y);
+		//_creator.textShow(data, 0, data.length);
+		_creator.textShow(text);
 	}
 	
 	@Override

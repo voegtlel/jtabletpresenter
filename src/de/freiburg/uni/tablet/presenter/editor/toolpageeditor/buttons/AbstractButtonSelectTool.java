@@ -20,6 +20,7 @@ import de.freiburg.uni.tablet.presenter.tools.ToolEraser;
 import de.freiburg.uni.tablet.presenter.tools.ToolImage;
 import de.freiburg.uni.tablet.presenter.tools.ToolScribble;
 import de.freiburg.uni.tablet.presenter.tools.ToolSelectMove;
+import de.freiburg.uni.tablet.presenter.tools.ToolText;
 
 /**
  * @author lukas
@@ -41,6 +42,8 @@ public abstract class AbstractButtonSelectTool extends AbstractButtonAction {
 	
 	protected final ToolImage _toolImage;
 	
+	protected final ToolText _toolText;
+	
 	protected final ToolSelectMove _toolSelectMove;
 	
 	/**
@@ -54,18 +57,20 @@ public abstract class AbstractButtonSelectTool extends AbstractButtonAction {
 		super(name, editor, text, imageResource);
 		_tool = new JPageToolMenuSelectFrame<ITool>();
 		_tool.setSize(JPageToolButton.WIDTH_WIDE * 1,
-				JPageToolButton.HEIGHT_NORMAL * 5);
+				JPageToolButton.HEIGHT_NORMAL * 7);
 		_toolScribble = new ToolScribble(_editor, false);
 		_toolLine = new ToolScribble(_editor, true);
 		_toolEraser = new ToolEraser(_editor, false);
 		_toolDeleter = new ToolEraser(_editor, true);
 		_toolImage = new ToolImage(_editor);
+		_toolText = new ToolText(_editor);
 		_toolSelectMove = new ToolSelectMove(_editor, true);
 		_tool.addValue("Pen", "/buttons/edit-scribble.png", _toolScribble);
 		_tool.addValue("Line", "/buttons/edit-line.png", _toolLine);
 		_tool.addValue("Eraser", "/buttons/edit-erase.png", _toolEraser);
 		_tool.addValue("Deleter", "/buttons/edit-delete.png", _toolDeleter);
 		_tool.addValue("Image", "/buttons/edit-image.png", _toolImage);
+		_tool.addValue("Text", "/buttons/edit-text.png", _toolText);
 		_tool.addValue("Drag", "/buttons/edit-drag.png", _toolSelectMove);
 	}
 

@@ -31,7 +31,7 @@ public class BitmapImage extends AbstractRenderable {
 	private final static int DATA_ID_GRAPHICS2D = 0;
 	private final static int DATA_ID_ELLIPSE = 1;
 	
-	private final static IPen HIGHLIGHTED_PEN = new SolidPen(2.0f, Color.yellow);
+	final static IPen HIGHLIGHTED_PEN = new SolidPen(2.0f, Color.yellow);
 	
 	private float _x;
 	private float _y;

@@ -3,6 +3,7 @@ package de.freiburg.uni.tablet.presenter.page;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 
+import de.freiburg.uni.tablet.presenter.document.TextFont;
 import de.freiburg.uni.tablet.presenter.editor.IPageRepaintListener;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 
@@ -54,6 +55,15 @@ public interface IPageBackRenderer {
 	 * @param y
 	 */
 	void setOffset(float x, float y);
+	
+	/**
+	 * Draws a string using the given font. Attention: The text is rendered in -y direction. x,y specify the baseline.
+	 * @param x
+	 * @param y
+	 * @param text
+	 * @param font
+	 */
+	void draw(float x, float y, String text, TextFont font);
 
 	/**
 	 * Sets the repaint listener
