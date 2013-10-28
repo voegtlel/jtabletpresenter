@@ -31,10 +31,19 @@ public abstract class AbstractButtonMenuTool extends AbstractButtonAction {
 	 */
 	public AbstractButtonMenuTool(final String name, final IToolPageEditor editor,
 			final String text, final String imageResource, final int count) {
+		this(name, editor, text, imageResource, true, 1, count);
+	}
+	
+	/**
+	 * Creates the action with an editor.
+	 */
+	public AbstractButtonMenuTool(final String name, final IToolPageEditor editor,
+			final String text, final String imageResource, final boolean wideMode, final int countX, final int countY) {
 		super(name, editor, text, imageResource);
 		_frame = new JPageToolMenuFrame<AbstractButtonAction>();
-		_frame.setSize(JPageToolButton.WIDTH_WIDE * 1,
-				JPageToolButton.HEIGHT_NORMAL * count);
+		int width = (wideMode ? JPageToolButton.WIDTH_WIDE : JPageToolButton.WIDTH_NORMAL);
+		_frame.setSize(width * countX,
+				JPageToolButton.HEIGHT_NORMAL * countY);
 	}
 
 	@Override

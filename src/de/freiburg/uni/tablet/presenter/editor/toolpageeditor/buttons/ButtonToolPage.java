@@ -21,9 +21,9 @@ public class ButtonToolPage extends AbstractButtonMenuTool {
 	 */
 	public ButtonToolPage(final IToolPageEditor editor) {
 		super("page", editor, "Page", "/buttons/tool-page.png", 4);
-		this._frame.addItem(new ButtonPageNew(editor));
-		this._frame.addItem(new ButtonPageClone(editor));
-		this._frame.addItem(new ButtonPageDelete(editor));
-		this._frame.addItem(new ButtonPageClear(editor));
+		this._frame.addItem(new ButtonPageNew(editor), true);
+		this._frame.addItem(new ButtonPageClone(editor), true);
+		this._frame.addItem(new ButtonPageDelete(editor), true);
+		this._frame.addItem(new ButtonPageClear(editor), true);
 	}
 }

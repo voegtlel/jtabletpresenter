@@ -21,14 +21,14 @@ public class ButtonTools extends AbstractButtonMenuTool {
 	 */
 	public ButtonTools(final IToolPageEditor editor) {
 		super("tools", editor, "Tools", "/buttons/document-properties.png", 8);
-		this._frame.addItem(new ButtonDocumentNew(editor));
-		this._frame.addItem(new ButtonOpenFrom(editor));
-		this._frame.addItem(new ButtonSaveAs(editor));
-		this._frame.addItem(new ButtonToggleShowToolbar(editor));
-		//this._frame.addItem(new ButtonPreferences(editor));
-		this._frame.addItem(new ButtonPrimary(editor));
-		this._frame.addItem(new ButtonSecondary(editor));
-		this._frame.addItem(new ButtonToolPage(editor));
-		this._frame.addItem(new ButtonToolDocument(editor));
+		this._frame.addItem(new ButtonDocumentNew(editor), true);
+		this._frame.addItem(new ButtonOpenFrom(editor), true);
+		this._frame.addItem(new ButtonSaveAs(editor), true);
+		this._frame.addItem(new ButtonToggleShowToolbar(editor), true);
+		//this._frame.addItem(new ButtonPreferences(editor), true);
+		this._frame.addItem(new ButtonPrimary(editor), true);
+		this._frame.addItem(new ButtonSecondary(editor), true);
+		this._frame.addItem(new ButtonToolPage(editor), true);
+		this._frame.addItem(new ButtonToolDocument(editor), true);
 	}
 }

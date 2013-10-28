@@ -21,8 +21,8 @@ public class ButtonToolDocument extends AbstractButtonMenuTool {
 	 */
 	public ButtonToolDocument(final IToolPageEditor editor) {
 		super("document", editor, "Document", "/buttons/tool-document.png", 3);
-		this._frame.addItem(new ButtonDocumentNew(editor));
-		this._frame.addItem(new ButtonDocumentClearPdf(editor));
-		this._frame.addItem(new ButtonDocumentOpenPdf(editor));
+		this._frame.addItem(new ButtonDocumentNew(editor), true);
+		this._frame.addItem(new ButtonDocumentClearPdf(editor), true);
+		this._frame.addItem(new ButtonDocumentOpenPdf(editor), true);
 	}
 }

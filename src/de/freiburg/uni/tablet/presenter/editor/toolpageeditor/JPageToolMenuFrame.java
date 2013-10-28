@@ -72,14 +72,14 @@ public class JPageToolMenuFrame<T> extends JDialog {
 	 * Adds a subitem
 	 * @param buttonAction
 	 */
-	public void addItem(AbstractButtonAction buttonAction) {
+	public void addItem(final AbstractButtonAction buttonAction, final boolean wideMode) {
 		if (buttonAction.getControl() != null) {
 			getContentPane().add(buttonAction.getControl());
 		} else {
 			final IButtonAction action = buttonAction;
 			final JButton button = new JPageToolButton(
 					buttonAction.getText(),
-					buttonAction.getImageResource(), true);
+					buttonAction.getImageResource(), wideMode);
 			button.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(final ActionEvent e) {
@@ -91,7 +91,7 @@ public class JPageToolMenuFrame<T> extends JDialog {
 		_actions.add(buttonAction);
 	}
 	
-	private void onActionPerformed(JButton button, IButtonAction action) {
+	private void onActionPerformed(final JButton button, final IButtonAction action) {
 		if (_activeComponent == null) {
 			_activeComponent = button;
 			for (Component c : getContentPane().getComponents()) {
@@ -141,7 +141,7 @@ public class JPageToolMenuFrame<T> extends JDialog {
 	 * 
 	 * @param location
 	 */
-	public void showAt(Point location) {
+	public void showAt(final Point location) {
 		_activeComponent = null;
 		JPageToolMenuFrame.this.setEnabled(true);
 		for (Component c : getContentPane().getComponents()) {
