@@ -258,6 +258,7 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer, IPage
 	/**
 	 * Draws a debug rectangle
 	 */
+	@Override
 	public void drawDebugRect(final float x1,
 			final float y1, final float x2, final float y2) {
 		if (_graphics != null) {
@@ -335,8 +336,9 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer, IPage
 	@Override
 	public void draw(final float x, final float y, final String text, final TextFont font) {
 		if (_graphics != null) {
-			//java.awt.geom.Point2D.Float measureText = font.measureText(text);
-			//drawDebugRect(x, y, x + measureText.x, y - measureText.y);
+			//java.awt.geom.Rectangle2D.Float measureText = font.measureText(text);
+			//drawDebugRect(x+measureText.x, y - measureText.y, x + measureText.x + measureText.width, y - (measureText.y + measureText.height));
+			//System.out.println("measure: " + measureText);
 			CwtAwtGraphicsContext ctx = new CwtAwtGraphicsContext(_graphics);
 			CSPlatformRenderer dummyRenderer = new CSPlatformRenderer(null, ctx);
 			CSPlatformDevice csPlatformDevice = new CSPlatformDevice(ctx);

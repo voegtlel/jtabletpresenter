@@ -85,4 +85,13 @@ public interface IPageBackRenderer {
 	 * otherwise only the renderable is added
 	 */
 	void requireRepaint(IRenderable renderable, boolean clear);
+
+	/**
+	 * Draws a debugging rectangle
+	 * @param minX
+	 * @param minY
+	 * @param maxX
+	 * @param maxY
+	 */
+	void drawDebugRect(float minX, float minY, float maxX, float maxY);
 }

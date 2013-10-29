@@ -44,7 +44,7 @@ public class ToolText extends AbstractTool {
 
 	@Override
 	synchronized public void end() {
-		Text newElement = new Text(_editor.getDocumentEditor().getCurrentPage(), _startData.getX(), _startData.getY(), "Blablaäöü+~'#´`<>|!°^", _font);
+		Text newElement = new Text(_editor.getDocumentEditor().getCurrentPage(), _startData.getX(), _startData.getY(), "Blablaäöügpq+~'#´`<>|!°^", _font);
 		_startData = null;
 
 		_editor.getPageEditor().suspendRepaint();

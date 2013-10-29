@@ -261,4 +261,9 @@ public class PdfRenderer implements IPageBackRenderer {
 	public void setOffset(final float x, final float y) {
 		throw new IllegalStateException("Can't pdf");
 	}
+	
+	@Override
+	public void drawDebugRect(final float minX, final float minY, final float maxX, final float maxY) {
+		throw new IllegalStateException("Can't pdf");
+	}
 }

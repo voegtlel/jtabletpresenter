@@ -2,11 +2,13 @@ package de.freiburg.uni.tablet.presenter.document;
 
 import java.awt.geom.Point2D;
 import java.awt.geom.Point2D.Float;
+import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.document.document.IDocument;
+import de.intarsys.pdf.cds.CDSRectangle;
 import de.intarsys.pdf.cos.COSObject;
 import de.intarsys.pdf.encoding.WinAnsiEncoding;
 import de.intarsys.pdf.font.PDFont;
@@ -91,11 +93,18 @@ public class TextFont implements IEntity {
 				0, text.length());
 	}
 
-	public Float measureText(final String text) {
+	public Float measureText2(final String text) {
 		final byte[] data = getEncodedTextData(text);
 		final float sWidth = PDFontTools.getGlyphWidthEncodedScaled(_font, _size, data, 0, data.length);
 		final float sHeight = PDFontTools.getGlyphHeightScaled(_font, _size);
 		return new Point2D.Float(sWidth, sHeight);
+	}
+	
+	public Rectangle2D.Float measureText(final String text) {
+		final byte[] data = getEncodedTextData(text);
+		final float sWidth = PDFontTools.getGlyphWidthEncodedScaled(_font, _size, data, 0, data.length);
+		CDSRectangle rect = _font.getFontDescriptor().getFontBB();
+		return new Rectangle2D.Float(0, (_size * rect.getLowerLeftY()) / 1000f, sWidth, (_size * (rect.getUpperRightY() - rect.getLowerLeftY())) / 1000f);
 	}
 
 	public PDFont getPDFont() {
