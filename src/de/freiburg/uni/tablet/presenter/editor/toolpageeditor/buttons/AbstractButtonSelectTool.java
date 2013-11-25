@@ -62,7 +62,7 @@ public abstract class AbstractButtonSelectTool extends AbstractButtonMenuTool {
 		this._frame.addItem(new ButtonToolItem(editor, this, "image", "Image", "/buttons/edit-image.png", _toolImage), true);
 		this._frame.addItem(new ButtonToolItem(editor, this, "text", "Text", "/buttons/edit-text.png", _toolText), true);
 		this._frame.addItem(new ButtonToolItem(editor, this, "selectMove", "Drag", "/buttons/edit-drag.png", _toolSelectMove), true);
-		this._frame.addItem(new ButtonToolItem(editor, this, "pdfCursor", "Pdf Cursor", "/buttons/edit-drag.png", _toolPdfCursor), true);
+		this._frame.addItem(new ButtonToolItem(editor, this, "pdfCursor", "Pdf Cursor", "/buttons/edit-pdf-cursor.png", _toolPdfCursor), true);
 	}
 	
 	public ITool getTool(final String name) {
