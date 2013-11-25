@@ -13,6 +13,13 @@ public interface ITool {
 	 * Called, when drawing starts
 	 */
 	void begin();
+	
+	/**
+	 * Called also when the tool is not active (within begin/end).
+	 * 
+	 * @param data
+	 */
+	void drawAlways(final DataPoint data);
 
 	/**
 	 * Called on every draw-update

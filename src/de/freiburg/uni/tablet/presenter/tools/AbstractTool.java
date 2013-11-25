@@ -7,6 +7,7 @@ import java.awt.image.BufferedImage;
 
 import de.freiburg.uni.tablet.presenter.editor.IPageRepaintListener;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
+import de.freiburg.uni.tablet.presenter.geometry.DataPoint;
 
 public abstract class AbstractTool implements ITool, IPageRepaintListener {
 	private boolean _isActive = false;
@@ -26,6 +27,10 @@ public abstract class AbstractTool implements ITool, IPageRepaintListener {
 	}
 
 	protected abstract Cursor generateCursor();
+	
+	@Override
+	public void drawAlways(final DataPoint data) {
+	}
 
 	protected void updateCursor() {
 		_cursor = generateCursor();

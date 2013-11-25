@@ -114,8 +114,8 @@ public class PagePenDispatcher implements PenListener {
 						_hoverTool.over();
 					}
 					// Activate tool
-					_activeTool.begin();
 					final DataPoint dp = getDataPoint(e.pen, e.getTime());
+					_activeTool.begin();
 					_lastData = null;
 					_activeTool.draw(dp);
 				}
@@ -141,20 +141,21 @@ public class PagePenDispatcher implements PenListener {
 		if (!e.isMovement()) {
 			return;
 		}
-		if (_activeTool != null) {
-			// if there is an active tool
-			final DataPoint dp = getDataPoint(e.pen, e.getTime());
-			boolean usePoint = true;
-			if (_lastData != null) {
-				// if it is not the first point, check if we have moved enough
-				final float xDiff = dp.getXOrig() - _lastData.getXOrig();
-				final float yDiff = dp.getYOrig() - _lastData.getYOrig();
-				usePoint = xDiff * xDiff + yDiff * yDiff > 3.0f;
-			}
-			if (usePoint) {
+		final DataPoint dp = getDataPoint(e.pen, e.getTime());
+		boolean usePoint = true;
+		if (_lastData != null) {
+			// if it is not the first point, check if we have moved enough
+			final float xDiff = dp.getXOrig() - _lastData.getXOrig();
+			final float yDiff = dp.getYOrig() - _lastData.getYOrig();
+			usePoint = xDiff * xDiff + yDiff * yDiff > 3.0f;
+		}
+		if (usePoint) {
+			if (_activeTool != null) {
 				_activeTool.draw(dp);
 				_lastData = dp;
 			}
+			_invertedTool.drawAlways(dp);
+			_normalTool.drawAlways(dp);
 		}
 	}
 

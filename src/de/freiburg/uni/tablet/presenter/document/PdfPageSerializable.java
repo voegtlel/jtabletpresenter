@@ -31,6 +31,10 @@ public class PdfPageSerializable implements IEntity {
 		this(parent, base._basePdf, base._page, base._page2);
 	}
 	
+	public PdfSerializable getParentPdf() {
+		return _basePdf;
+	}
+	
 	public PDPage getPage() {
 		return _page;
 	}

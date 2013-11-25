@@ -9,6 +9,7 @@ import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.IButtonAction;
 import de.freiburg.uni.tablet.presenter.tools.ITool;
 import de.freiburg.uni.tablet.presenter.tools.ToolEraser;
 import de.freiburg.uni.tablet.presenter.tools.ToolImage;
+import de.freiburg.uni.tablet.presenter.tools.ToolPdfCursor;
 import de.freiburg.uni.tablet.presenter.tools.ToolScribble;
 import de.freiburg.uni.tablet.presenter.tools.ToolSelectMove;
 import de.freiburg.uni.tablet.presenter.tools.ToolText;
@@ -35,6 +36,8 @@ public abstract class AbstractButtonSelectTool extends AbstractButtonMenuTool {
 	
 	protected final ToolSelectMove _toolSelectMove;
 	
+	protected final ToolPdfCursor _toolPdfCursor;
+	
 	/**
 	 * Creates the action with an editor.
 	 * 
@@ -43,7 +46,7 @@ public abstract class AbstractButtonSelectTool extends AbstractButtonMenuTool {
 	 */
 	public AbstractButtonSelectTool(final String name, final IToolPageEditor editor,
 			final String text, final String imageResource) {
-		super(name, editor, text, imageResource, 7);
+		super(name, editor, text, imageResource, 8);
 		_toolScribble = new ToolScribble(_editor, false);
 		_toolLine = new ToolScribble(_editor, true);
 		_toolEraser = new ToolEraser(_editor, false);
@@ -51,6 +54,7 @@ public abstract class AbstractButtonSelectTool extends AbstractButtonMenuTool {
 		_toolImage = new ToolImage(_editor);
 		_toolText = new ToolText(_editor);
 		_toolSelectMove = new ToolSelectMove(_editor, true);
+		_toolPdfCursor = new ToolPdfCursor(_editor);
 		this._frame.addItem(new ButtonToolItem(editor, this, "scribble", "Pen", "/buttons/edit-scribble.png", _toolScribble), true);
 		this._frame.addItem(new ButtonToolItem(editor, this, "line", "Line", "/buttons/edit-line.png", _toolLine), true);
 		this._frame.addItem(new ButtonToolItem(editor, this, "eraser", "Eraser", "/buttons/edit-erase.png", _toolEraser), true);
@@ -58,6 +62,7 @@ public abstract class AbstractButtonSelectTool extends AbstractButtonMenuTool {
 		this._frame.addItem(new ButtonToolItem(editor, this, "image", "Image", "/buttons/edit-image.png", _toolImage), true);
 		this._frame.addItem(new ButtonToolItem(editor, this, "text", "Text", "/buttons/edit-text.png", _toolText), true);
 		this._frame.addItem(new ButtonToolItem(editor, this, "selectMove", "Drag", "/buttons/edit-drag.png", _toolSelectMove), true);
+		this._frame.addItem(new ButtonToolItem(editor, this, "pdfCursor", "Pdf Cursor", "/buttons/edit-drag.png", _toolPdfCursor), true);
 	}
 	
 	public ITool getTool(final String name) {
