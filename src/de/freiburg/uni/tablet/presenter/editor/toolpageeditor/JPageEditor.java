@@ -6,6 +6,7 @@ package de.freiburg.uni.tablet.presenter.editor.toolpageeditor;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -15,6 +16,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
@@ -28,6 +30,8 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
+import javax.swing.OverlayLayout;
+import javax.swing.SwingUtilities;
 
 import de.freiburg.uni.tablet.presenter.document.DocumentConfig;
 import de.freiburg.uni.tablet.presenter.document.DocumentConfig.KeyValue;
@@ -96,6 +100,8 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 	private DownClient _downClient;
 	private UpClient _upClient;
 	private boolean _isConnected;
+
+	private JPanel _containerPanel;
 
 	/**
 	 * Create the panel.
@@ -198,7 +204,25 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 		final RenderCanvas pageRenderer = new RenderCanvas();
 		_pageRenderer = pageRenderer;
 		_pageRenderer.setVoidColor(_config.getColor("editor.voidColor", Color.BLACK));
-		getContentPane().add(pageRenderer.getContainerComponent(),
+		_containerPanel = new JPanel() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected boolean processKeyBinding(final KeyStroke ks, final KeyEvent e,
+					final int condition, final boolean pressed) {
+				if (e.getSource() != null && e.getSource() instanceof Component) {
+					Component src = (Component) e.getSource();
+					if (SwingUtilities.isDescendingFrom(src, _containerPanel) && src != _pageRenderer) {
+						System.out.println("event " + e + " ignored");
+						return true;
+					}
+				}
+				return super.processKeyBinding(ks, e, condition, pressed);
+			}
+		};
+		_containerPanel.setLayout(new OverlayLayout(_containerPanel));
+		_containerPanel.add(pageRenderer.getContainerComponent());
+		getContentPane().add(_containerPanel,
 				BorderLayout.CENTER);
 
 		final PageLayerBufferComposite pageLayers = new PageLayerBufferComposite(
@@ -227,6 +251,8 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 	}
 
 	protected void onWindowClosing() {
+		_pageRenderer.setNormalTool(null);
+		_pageRenderer.setInvertedTool(null);
 		_pageRenderer.stop();
 	}
 
@@ -364,6 +390,16 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 				this.setVisible(true);
 			}
 		}
+	}
+	
+	@Override
+	public JFrame getMainComponent() {
+		return this;
+	}
+	
+	@Override
+	public void addDummyComponent(final Component c) {
+		_containerPanel.add(c);
 	}
 
 	protected void onRenderableChanged(final IRenderable renderable,

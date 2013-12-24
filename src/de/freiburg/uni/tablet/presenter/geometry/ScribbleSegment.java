@@ -461,8 +461,7 @@ public class ScribbleSegment implements IBinarySerializable {
 		}*/
 		for (LinkedElement<DataPoint> element = _points.getFirst(); element != null; element = element
 				.getNext()) {
-			DataPoint offsetPoint = new DataPoint(element.getData().getX() + offsetX, element.getData().getY() + offsetY,
-					element.getData().getXOrig(), element.getData().getYOrig(), element.getData().getPressure(), element.getData().getTimestamp());
+			DataPoint offsetPoint = element.getData().clone(offsetX, offsetY);
 			result._points.addLast(offsetPoint);
 		}
 		return result;

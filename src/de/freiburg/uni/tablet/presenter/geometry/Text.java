@@ -11,8 +11,7 @@ import de.freiburg.uni.tablet.presenter.document.TextFont;
 import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
 
 public class Text extends AbstractRenderable {
-	private float _x;
-	private float _y;
+	private DataPoint _location;
 	
 	private Rectangle2D.Float _rect = null;
 	
@@ -23,16 +22,14 @@ public class Text extends AbstractRenderable {
 	/**
 	 * Clone ctor
 	 * @param parent
-	 * @param x
-	 * @param y
+	 * @param location
 	 * @param text
 	 * @param font
 	 * @param rect
 	 */
-	private Text(final DocumentPage parent, final float x, final float y, final String text, final TextFont font, final Rectangle2D.Float rect) {
+	private Text(final DocumentPage parent, final DataPoint location, final String text, final TextFont font, final Rectangle2D.Float rect) {
 		super(parent);
-		_x = x;
-		_y = y;
+		_location = location;
 		_text = text;
 		_font = font;
 		_rect = rect;
@@ -41,15 +38,13 @@ public class Text extends AbstractRenderable {
 	/**
 	 * Creates a new text
 	 * @param parent
-	 * @param x
-	 * @param y
+	 * @param location
 	 * @param text
 	 * @param font
 	 */
-	public Text(final DocumentPage parent, final float x, final float y, final String text, final TextFont font) {
+	public Text(final DocumentPage parent, final DataPoint location, final String text, final TextFont font) {
 		super(parent);
-		_x = x;
-		_y = y;
+		_location = location;
 		_text = text;
 		_font = font;
 	}
@@ -57,12 +52,12 @@ public class Text extends AbstractRenderable {
 	@Override
 	synchronized public Text cloneRenderable(final DocumentPage page) {
 		System.out.println("clone text " + getId());
-		return new Text(page, _x, _y, _text, _font, (Rectangle2D.Float) _rect.clone());
+		return new Text(page, _location.clone(), _text, _font, (Rectangle2D.Float) _rect.clone());
 	}
 	
 	@Override
 	synchronized public Text cloneRenderable(final DocumentPage page, final float offsetX, final float offsetY) {
-		return new Text(page, _x + offsetX, _y + offsetY, _text, _font, (Rectangle2D.Float)_rect.clone());
+		return new Text(page, _location.clone(offsetX, offsetY), _text, _font, (Rectangle2D.Float)_rect.clone());
 	}
 	
 	@Override
@@ -90,12 +85,12 @@ public class Text extends AbstractRenderable {
 
 	@Override
 	synchronized public void render(final IPageBackRenderer renderer) {
-		renderer.draw(_x, _y, _text, _font);
+		renderer.draw(_location.getX(), _location.getY(), _text, _font);
 	}
 	
 	@Override
 	synchronized public void renderHighlighted(final IPageBackRenderer renderer) {
-		renderer.draw(_x, _y, _text, _font);
+		renderer.draw(_location.getX(), _location.getY(), _text, _font);
 		renderer.draw(BitmapImage.HIGHLIGHTED_PEN, new Path2D.Float(new Rectangle2D.Float(getMinX(), getMinY(), getMaxX() - getMinX(), getMaxY() - getMinY())));
 	}
 	
@@ -105,41 +100,52 @@ public class Text extends AbstractRenderable {
 		}
 	}
 	
-	public void setLocation(final float x, final float y) {
-		_x = x;
-		_y = y;
+	public void bake() {
+		_rect = null;
+	}
+	
+	public void setLocation(final DataPoint location) {
+		_location = location;
 	}
 	
 	public float getX() {
-		return _x;
+		return _location.getX();
 	}
 	
 	public float getY() {
-		return _y;
+		return _location.getY();
+	}
+	
+	public void setText(final String text) {
+		_text = text;
+	}
+	
+	public String getText() {
+		return _text;
 	}
 	
 	@Override
 	public float getMinX() {
 		calcDimensions();
-		return _x + _rect.x;
+		return getX() + _rect.x;
 	}
 
 	@Override
 	public float getMinY() {
 		calcDimensions();
-		return _y - (_rect.y + _rect.height);
+		return getY() + _rect.y;
 	}
 
 	@Override
 	public float getMaxX() {
 		calcDimensions();
-		return _x + _rect.x + _rect.width;
+		return getX() + _rect.x + _rect.width;
 	}
 
 	@Override
 	public float getMaxY() {
 		calcDimensions();
-		return _y - _rect.y;
+		return getY() + _rect.y + _rect.height;
 	}
 
 	@Override
@@ -160,8 +166,7 @@ public class Text extends AbstractRenderable {
 	
 	@Override
 	synchronized public void deserializeData(final BinaryDeserializer reader) throws IOException {
-		_x = reader.readFloat();
-		_y = reader.readFloat();
+		_location = reader.readSerializableClass();
 		if (reader.readBoolean()) {
 			_rect = new Rectangle2D.Float();
 			_rect.x = reader.readFloat();
@@ -177,8 +182,7 @@ public class Text extends AbstractRenderable {
 	
 	@Override
 	synchronized public void serializeData(final BinarySerializer writer) throws IOException {
-		writer.writeFloat(_x);
-		writer.writeFloat(_y);
+		writer.writeSerializableClass(_location);
 		writer.writeBoolean(_rect != null);
 		if (_rect != null) {
 			writer.writeFloat(_rect.x);
@@ -188,5 +192,18 @@ public class Text extends AbstractRenderable {
 		}
 		writer.writeString(_text);
 		writer.writeObjectTable(_font);
+	}
+
+	public TextFont getFont() {
+		return _font;
+	}
+	
+	@Override
+	public String toString() {
+		return super.toString() + " \"" + _text + "\"";
+	}
+
+	public DataPoint getLocation() {
+		return _location;
 	}
 }

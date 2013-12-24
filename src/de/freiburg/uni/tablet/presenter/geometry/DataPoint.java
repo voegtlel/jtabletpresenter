@@ -70,6 +70,10 @@ public class DataPoint implements IBinarySerializable {
 	public DataPoint clone() {
 		return new DataPoint(_x, _y, _xOrig, _yOrig, _pressure, _timestamp);
 	}
+	
+	public DataPoint clone(final float offsetX, final float offsetY) {
+		return new DataPoint(_x + offsetX, _y + offsetY, _xOrig, _yOrig, _pressure, _timestamp);
+	}
 
 	public DataPoint(final BinaryDeserializer reader) throws IOException {
 		_xOrig = reader.readFloat();

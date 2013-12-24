@@ -1,8 +1,7 @@
 package de.freiburg.uni.tablet.presenter.document;
 
-import java.awt.geom.Point2D;
-import java.awt.geom.Point2D.Float;
 import java.awt.geom.Rectangle2D;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
@@ -26,6 +25,8 @@ public class TextFont implements IEntity {
 
 	private PDFont _font;
 	private float _size;
+	
+	private ByteArrayOutputStream _bosBuffer = new ByteArrayOutputStream();
 
 	public TextFont(final IDocument parent, final String name, final float size) {
 		_id = parent.nextId();
@@ -92,19 +93,64 @@ public class TextFont implements IEntity {
 		return _font.getEncoding().encode(text.toCharArray(),
 				0, text.length());
 	}
+	
+	public byte[] getEncodedTextData(final char c) {
+		_bosBuffer.reset();
+		try {
+			_font.getEncoding().putNextDecoded(_bosBuffer, c);
+		} catch (IOException e) {
+			// this does not happen
+		}
+		return _bosBuffer.toByteArray();
+	}
 
-	public Float measureText2(final String text) {
+	/*public Float measureText2(final String text) {
 		final byte[] data = getEncodedTextData(text);
 		final float sWidth = PDFontTools.getGlyphWidthEncodedScaled(_font, _size, data, 0, data.length);
 		final float sHeight = PDFontTools.getGlyphHeightScaled(_font, _size);
 		return new Point2D.Float(sWidth, sHeight);
+	}*/
+	
+	/**
+	 * Transforms from pdf-Space to local space (and verce-vice)
+	 * @param x
+	 * @param y
+	 * @param rect
+	 */
+	public void measureToLocalSpace(final float x, final float y, final Rectangle2D.Float rect) {
+		rect.x += x;
+		rect.y = y - (rect.y + rect.height);
 	}
 	
 	public Rectangle2D.Float measureText(final String text) {
 		final byte[] data = getEncodedTextData(text);
 		final float sWidth = PDFontTools.getGlyphWidthEncodedScaled(_font, _size, data, 0, data.length);
 		CDSRectangle rect = _font.getFontDescriptor().getFontBB();
-		return new Rectangle2D.Float(0, (_size * rect.getLowerLeftY()) / 1000f, sWidth, (_size * (rect.getUpperRightY() - rect.getLowerLeftY())) / 1000f);
+		return new Rectangle2D.Float(0, -(_size * rect.getUpperRightY()) / 1000f, sWidth, (_size * (rect.getUpperRightY() - rect.getLowerLeftY())) / 1000f);
+	}
+	
+	public Rectangle2D.Float measureTextRange(final String text, final int beginIndex, final int endIndex) {
+		String begin = text.substring(0, beginIndex);
+		final byte[] dataBegin = getEncodedTextData(begin);
+		final float sWidthBegin = PDFontTools.getGlyphWidthEncodedScaled(_font, _size, dataBegin, 0, dataBegin.length);
+		String str = text.substring(beginIndex, endIndex);
+		final byte[] data = getEncodedTextData(str);
+		final float sWidth = PDFontTools.getGlyphWidthEncodedScaled(_font, _size, data, 0, data.length);
+		
+		CDSRectangle rect = _font.getFontDescriptor().getFontBB();
+		return new Rectangle2D.Float(sWidthBegin, -(_size * rect.getUpperRightY()) / 1000f, sWidth, (_size * (rect.getUpperRightY() - rect.getLowerLeftY())) / 1000f);
+	}
+	
+	public int getCaretIndex(final String text, final float x) {
+		float totalWidth = 0.0f;
+		for (int i = 0; i < text.length(); i++) {
+			byte[] charData = getEncodedTextData(text.charAt(i));
+			totalWidth += PDFontTools.getGlyphWidthEncodedScaled(_font, _size, charData, 0, charData.length);
+			if (x < totalWidth) {
+				return i;
+			}
+		}
+		return text.length();
 	}
 
 	public PDFont getPDFont() {

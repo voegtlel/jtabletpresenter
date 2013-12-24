@@ -4,7 +4,10 @@
  */
 package de.freiburg.uni.tablet.presenter.editor;
 
+import java.awt.Component;
 import java.io.IOException;
+
+import javax.swing.JFrame;
 
 import de.freiburg.uni.tablet.presenter.document.DocumentConfig;
 import de.freiburg.uni.tablet.presenter.document.editor.IDocumentEditorClient;
@@ -57,6 +60,18 @@ public interface IToolPageEditor {
 	 * @return
 	 */
 	DocumentConfig getConfig();
+	
+	/**
+	 * Gets the main dialog
+	 * @return
+	 */
+	JFrame getMainComponent();
+	
+	/**
+	 * Adds a component (hidden below the rendering canvas)
+	 * @param c
+	 */
+	void addDummyComponent(Component c);
 
 	/**
 	 * Sets if the toolbar should be visible

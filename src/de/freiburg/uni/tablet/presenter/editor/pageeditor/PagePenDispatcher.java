@@ -111,7 +111,9 @@ public class PagePenDispatcher implements PenListener {
 							_hoverTool.out();
 						}
 						_hoverTool = _activeTool;
-						_hoverTool.over();
+						if (_hoverTool != null) {
+							_hoverTool.over();
+						}
 					}
 					// Activate tool
 					final DataPoint dp = getDataPoint(e.pen, e.getTime());
@@ -128,7 +130,9 @@ public class PagePenDispatcher implements PenListener {
 						_invertedTool.out();
 						_activePenButton = PButton.Type.LEFT;
 						_hoverTool = _normalTool;
-						_normalTool.over();
+						if (_hoverTool != null) {
+							_hoverTool.over();
+						}
 					}
 					_activeTool = null;
 				}
@@ -226,7 +230,9 @@ public class PagePenDispatcher implements PenListener {
 				}
 				_normalTool.out();
 				_hoverTool = normalTool;
-				_hoverTool.over();
+				if (_hoverTool != null) {
+					_hoverTool.over();
+				}
 			}
 		}
 		_normalTool = normalTool;
@@ -245,7 +251,9 @@ public class PagePenDispatcher implements PenListener {
 				}
 				_hoverTool.out();
 				_hoverTool = invertedTool;
-				_hoverTool.over();
+				if (_hoverTool != null) {
+					_hoverTool.over();
+				}
 			}
 		}
 		_invertedTool = invertedTool;
@@ -279,7 +287,9 @@ public class PagePenDispatcher implements PenListener {
 				_invertedTool.out();
 				_activePenButton = PButton.Type.LEFT;
 				_hoverTool = _normalTool;
-				_normalTool.over();
+				if (_normalTool != null) {
+					_normalTool.over();
+				}
 			}
 			_activeTool = null;
 		}
