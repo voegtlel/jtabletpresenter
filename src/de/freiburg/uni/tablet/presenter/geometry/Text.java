@@ -15,7 +15,8 @@ public class Text extends AbstractRenderable {
 	
 	private Rectangle2D.Float _rect = null;
 	
-	private String _text;
+	private String[] _textLines;
+	private float[] _textLineWidths;
 	
 	private TextFont _font;
 	
@@ -27,10 +28,11 @@ public class Text extends AbstractRenderable {
 	 * @param font
 	 * @param rect
 	 */
-	private Text(final DocumentPage parent, final DataPoint location, final String text, final TextFont font, final Rectangle2D.Float rect) {
+	private Text(final DocumentPage parent, final DataPoint location, final String[] textLines, final TextFont font, final Rectangle2D.Float rect, final float[] textLineWidths) {
 		super(parent);
 		_location = location;
-		_text = text;
+		_textLines = textLines;
+		_textLineWidths = textLineWidths;
 		_font = font;
 		_rect = rect;
 	}
@@ -42,22 +44,22 @@ public class Text extends AbstractRenderable {
 	 * @param text
 	 * @param font
 	 */
-	public Text(final DocumentPage parent, final DataPoint location, final String text, final TextFont font) {
+	public Text(final DocumentPage parent, final DataPoint location, final String[] textLines, final TextFont font) {
 		super(parent);
 		_location = location;
-		_text = text;
+		_textLines = textLines;
 		_font = font;
 	}
 	
 	@Override
 	synchronized public Text cloneRenderable(final DocumentPage page) {
 		System.out.println("clone text " + getId());
-		return new Text(page, _location.clone(), _text, _font, (Rectangle2D.Float) _rect.clone());
+		return new Text(page, _location.clone(), _textLines, _font, (_rect!=null?(Rectangle2D.Float) _rect.clone():null), (_textLineWidths != null?_textLineWidths.clone():null));
 	}
 	
 	@Override
 	synchronized public Text cloneRenderable(final DocumentPage page, final float offsetX, final float offsetY) {
-		return new Text(page, _location.clone(offsetX, offsetY), _text, _font, (Rectangle2D.Float)_rect.clone());
+		return new Text(page, _location.clone(offsetX, offsetY), _textLines, _font, (_rect!=null?(Rectangle2D.Float) _rect.clone():null), (_textLineWidths != null?_textLineWidths.clone():null));
 	}
 	
 	@Override
@@ -80,28 +82,77 @@ public class Text extends AbstractRenderable {
 	
 	@Override
 	public boolean collides(final CollisionInfo collisionInfo) {
-		return collisionInfo.collides(getMinX(), getMinY(), getMaxX(), getMaxY());
+		if (collisionInfo.isFastCollide()) {
+			return collisionInfo.collides(getMinX(), getMinY(), getMaxX(), getMaxY());
+		} else {
+			for (int i = 0; i < _textLines.length; i++) {
+				if (collisionInfo.collides(getX(), getMinY() + _font.getLineHeight() * i, getX() + _textLineWidths[i], getMinY() + _font.getLineHeight() * (i + 1))) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	@Override
 	synchronized public void render(final IPageBackRenderer renderer) {
-		renderer.draw(_location.getX(), _location.getY(), _text, _font);
+		renderer.draw(_location.getX(), _location.getY(), _textLines, _font);
 	}
 	
 	@Override
 	synchronized public void renderHighlighted(final IPageBackRenderer renderer) {
-		renderer.draw(_location.getX(), _location.getY(), _text, _font);
+		renderer.draw(_location.getX(), _location.getY(), _textLines, _font);
 		renderer.draw(BitmapImage.HIGHLIGHTED_PEN, new Path2D.Float(new Rectangle2D.Float(getMinX(), getMinY(), getMaxX() - getMinX(), getMaxY() - getMinY())));
 	}
 	
 	private void calcDimensions() {
 		if (_rect == null) {
-			_rect = _font.measureText(_text);
+			_textLineWidths = new float[_textLines.length];
+			for (int i = 0; i < _textLines.length; i++) {
+				Rectangle2D.Float measureText = _font.measureText(_textLines[i]);
+				_textLineWidths[i] = measureText.width;
+				measureText.y += _font.getLineHeight() * i;
+				if (_rect == null) {
+					_rect = measureText;
+				} else {
+					if (_rect.x > measureText.x) {
+						_rect.width += _rect.x - measureText.x;
+						_rect.x = _rect.x;
+					}
+					if (_rect.y > measureText.y) {
+						_rect.height += _rect.y - measureText.y;
+						_rect.y = _rect.y;
+					}
+					if (_rect.x + _rect.width < measureText.x + measureText.width) {
+						_rect.width = measureText.x + measureText.width - _rect.x;
+					}
+					if (_rect.y + _rect.height < measureText.y + measureText.height) {
+						_rect.height = measureText.y + measureText.height - _rect.y;
+					}
+				}
+			}
 		}
+	}
+	
+	public int getCaretLine(final float x, final float y) {
+		calcDimensions();
+		float h = _font.getLineHeight();
+		float y0 = y - getMinY();
+		float x0 = x - getMinX();
+		for (int i = 0; i < _textLines.length; i++) {
+			if (y0 >= h * i && y0 < h * (i + 1)) {
+				if (x0 > 0 && x0 < _textLineWidths[i]) {
+					return i;
+				}
+				return -1;
+			}
+		}
+		return -1;
 	}
 	
 	public void bake() {
 		_rect = null;
+		_textLineWidths = null;
 	}
 	
 	public void setLocation(final DataPoint location) {
@@ -117,11 +168,13 @@ public class Text extends AbstractRenderable {
 	}
 	
 	public void setText(final String text) {
-		_text = text;
+		_textLines = text.split("\\r?\\n|\\r", -1);
+		_textLineWidths = null;
+		_rect = null;
 	}
 	
-	public String getText() {
-		return _text;
+	public String[] getTextLines() {
+		return _textLines;
 	}
 	
 	@Override
@@ -173,8 +226,16 @@ public class Text extends AbstractRenderable {
 			_rect.y = reader.readFloat();
 			_rect.width = reader.readFloat();
 			_rect.height = reader.readFloat();
+			_textLineWidths = new float[reader.readInt()];
+			for (int i = 0; i < _textLineWidths.length; i++) {
+				_textLineWidths[i] = reader.readFloat();
+			}
 		}
-		_text = reader.readString();
+		int linesCount = reader.readInt();
+		_textLines = new String[linesCount];
+		for (int i = 0; i < linesCount; i++) {
+			_textLines[i] = reader.readString();
+		}
 		_font = reader.readObjectTable();
 		_parent.fireRenderableModified(this);
 		_parent.fireRenderableModifyEnd(this);
@@ -189,8 +250,15 @@ public class Text extends AbstractRenderable {
 			writer.writeFloat(_rect.y);
 			writer.writeFloat(_rect.width);
 			writer.writeFloat(_rect.height);
+			writer.writeInt(_textLineWidths.length);
+			for (int i = 0; i < _textLineWidths.length; i++) {
+				writer.writeFloat(_textLineWidths[i]);
+			}
 		}
-		writer.writeString(_text);
+		writer.writeInt(_textLines.length);
+		for (int i = 0; i < _textLines.length; i++) {
+			writer.writeString(_textLines[i]);
+		}
 		writer.writeObjectTable(_font);
 	}
 
@@ -200,10 +268,27 @@ public class Text extends AbstractRenderable {
 	
 	@Override
 	public String toString() {
-		return super.toString() + " \"" + _text + "\"";
+		StringBuilder res = new StringBuilder(super.toString() + " \"");
+		res.append(_textLines[0]);
+		for (int i = 1; i < _textLines.length; i++) {
+			res.append('\n');
+			res.append(_textLines[i]);
+		}
+		res.append('"');
+		return res.toString();
 	}
 
 	public DataPoint getLocation() {
 		return _location;
+	}
+
+	public String getText() {
+		StringBuilder result = new StringBuilder();
+		result.append(_textLines[0]);
+		for (int i = 1; i < _textLines.length; i++) {
+			result.append('\n');
+			result.append(_textLines[i]);
+		}
+		return result.toString();
 	}
 }

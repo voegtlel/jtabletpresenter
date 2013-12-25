@@ -57,13 +57,13 @@ public interface IPageBackRenderer {
 	void setOffset(float x, float y);
 	
 	/**
-	 * Draws a string using the given font. Attention: The text is rendered in -y direction. x,y specify the baseline.
+	 * Draws a string using the given font. x,y specify the baseline.
 	 * @param x
 	 * @param y
-	 * @param text
+	 * @param textLines
 	 * @param font
 	 */
-	void draw(float x, float y, String text, TextFont font);
+	void draw(float x, float y, String[] textLines, TextFont font);
 
 	/**
 	 * Sets the repaint listener

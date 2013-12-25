@@ -233,13 +233,12 @@ public class PdfRenderer implements IPageBackRenderer {
 	}
 	
 	@Override
-	public void draw(final float x, final float y, final String text, final TextFont font) {
+	public void draw(final float x, final float y, final String[] textLines, final TextFont font) {
 		// Draw page number
 		_creator.textSetFont(null, font.getPDFont(), font.getSize());
-		//byte[] data = font.getEncodedTextData(text);
 		_creator.textMoveTo(x, y);
-		//_creator.textShow(data, 0, data.length);
-		_creator.textShow(text);
+		//_creator.textShow(text);
+		throw new IllegalStateException("Not implemented");
 	}
 	
 	@Override

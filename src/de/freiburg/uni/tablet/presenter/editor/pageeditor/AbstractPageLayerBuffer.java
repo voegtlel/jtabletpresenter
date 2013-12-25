@@ -334,14 +334,11 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer, IPage
 	}
 	
 	@Override
-	public void draw(final float x, final float y, final String text, final TextFont font) {
+	public void draw(final float x, final float y, final String[] textLines, final TextFont font) {
 		if (_graphics != null) {
-			//java.awt.geom.Rectangle2D.Float measureText = font.measureText(text);
-			//drawDebugRect(x+measureText.x, y - measureText.y, x + measureText.x + measureText.width, y - (measureText.y + measureText.height));
-			//System.out.println("measure: " + measureText);
-			CwtAwtGraphicsContext ctx = new CwtAwtGraphicsContext(_graphics);
-			CSPlatformRenderer dummyRenderer = new CSPlatformRenderer(null, ctx);
-			CSPlatformDevice csPlatformDevice = new CSPlatformDevice(ctx);
+			final CwtAwtGraphicsContext ctx = new CwtAwtGraphicsContext(_graphics);
+			final CSPlatformRenderer dummyRenderer = new CSPlatformRenderer(null, ctx);
+			final CSPlatformDevice csPlatformDevice = new CSPlatformDevice(ctx);
 			csPlatformDevice.open(dummyRenderer);
 			csPlatformDevice.saveState();
 			AffineTransform t = AffineTransform.getScaleInstance(_renderFactorX, _renderFactorY);
@@ -350,7 +347,13 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer, IPage
 			ctx.setTransform(t);
 			csPlatformDevice.textBegin();
 			csPlatformDevice.textSetFont(COSName.constant("TextFont"), font.getPDFont(), font.getSize());
-			csPlatformDevice.textShow(text);
+			for (int i = 0; i < textLines.length; i++) {
+				csPlatformDevice.textShow(textLines[i]);
+				if (i < textLines.length - 1) {
+					//csPlatformDevice.textLineNew();
+					csPlatformDevice.textLineMove(0, -font.getLineHeight());
+				}
+			}
 			csPlatformDevice.textEnd();
 			csPlatformDevice.close();
 			csPlatformDevice.restoreState();

@@ -145,12 +145,16 @@ public class TextFont implements IEntity {
 		float totalWidth = 0.0f;
 		for (int i = 0; i < text.length(); i++) {
 			byte[] charData = getEncodedTextData(text.charAt(i));
-			totalWidth += PDFontTools.getGlyphWidthEncodedScaled(_font, _size, charData, 0, charData.length);
-			if (x < totalWidth) {
+			float glyphWidth = PDFontTools.getGlyphWidthEncodedScaled(_font, _size, charData, 0, charData.length);
+			if (x < totalWidth + glyphWidth * 0.5f) {
 				return i;
 			}
+			totalWidth += glyphWidth;
 		}
-		return text.length();
+		if (x < totalWidth) {
+			return text.length();
+		}
+		return -1;
 	}
 
 	public PDFont getPDFont() {
@@ -164,5 +168,9 @@ public class TextFont implements IEntity {
 	@Override
 	public String toString() {
 		return "TextFont {id: " + _id + ", font: " + _font + ", size: " + _size + "}";
+	}
+
+	public float getLineHeight() {
+		return _size;
 	}
 }
