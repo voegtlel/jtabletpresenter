@@ -19,15 +19,33 @@ import de.intarsys.pdf.parser.PDFParser;
 import de.intarsys.pdf.writer.COSWriter;
 import de.intarsys.tools.randomaccess.RandomAccessByteArray;
 
+/**
+ * Class for a font
+ * @author Lukas
+ *
+ */
 public class TextFont implements IEntity {
 	private final long _id;
 	private final IDocument _parent;
 
+	/**
+	 * The internal font
+	 */
 	private PDFont _font;
 	private float _size;
 	
+	/**
+	 * A temporary buffer for faster methods
+	 */
 	private ByteArrayOutputStream _bosBuffer = new ByteArrayOutputStream();
 
+	/**
+	 * Creates the font by a name and size
+	 * TODO by name
+	 * @param parent
+	 * @param name
+	 * @param size
+	 */
 	public TextFont(final IDocument parent, final String name, final float size) {
 		_id = parent.nextId();
 		_parent = parent;
@@ -38,6 +56,11 @@ public class TextFont implements IEntity {
 		_size = size;
 	}
 
+	/**
+	 * Deserializer ctor
+	 * @param reader
+	 * @throws IOException
+	 */
 	public TextFont(final BinaryDeserializer reader) throws IOException {
 		_id = reader.readLong();
 		_parent = reader.readObjectTable();
@@ -89,11 +112,21 @@ public class TextFont implements IEntity {
 		return _parent;
 	}
 	
+	/**
+	 * Encodes the given text to bytes used by the internal font engine
+	 * @param text
+	 * @return
+	 */
 	public byte[] getEncodedTextData(final String text) {
 		return _font.getEncoding().encode(text.toCharArray(),
 				0, text.length());
 	}
 	
+	/**
+	 * Encodes the char to bytes (optimized)
+	 * @param c
+	 * @return
+	 */
 	public byte[] getEncodedTextData(final char c) {
 		_bosBuffer.reset();
 		try {
@@ -103,13 +136,6 @@ public class TextFont implements IEntity {
 		}
 		return _bosBuffer.toByteArray();
 	}
-
-	/*public Float measureText2(final String text) {
-		final byte[] data = getEncodedTextData(text);
-		final float sWidth = PDFontTools.getGlyphWidthEncodedScaled(_font, _size, data, 0, data.length);
-		final float sHeight = PDFontTools.getGlyphHeightScaled(_font, _size);
-		return new Point2D.Float(sWidth, sHeight);
-	}*/
 	
 	/**
 	 * Transforms from pdf-Space to local space (and verce-vice)
@@ -121,7 +147,14 @@ public class TextFont implements IEntity {
 		rect.x += x;
 		rect.y = y - (rect.y + rect.height);
 	}
-	
+
+	/**
+	 * Measures the text size. x is always 0. y and height are always constant for a font.
+	 * The width is calculated for the given text.
+	 * Does not process newlines.
+	 * @param text
+	 * @return
+	 */
 	public Rectangle2D.Float measureText(final String text) {
 		final byte[] data = getEncodedTextData(text);
 		final float sWidth = PDFontTools.getGlyphWidthEncodedScaled(_font, _size, data, 0, data.length);
@@ -129,6 +162,15 @@ public class TextFont implements IEntity {
 		return new Rectangle2D.Float(0, -(_size * rect.getUpperRightY()) / 1000f, sWidth, (_size * (rect.getUpperRightY() - rect.getLowerLeftY())) / 1000f);
 	}
 	
+	/**
+	 * Measures the given text range, starting at beginIndex and ending at endIndex.
+	 * x is the starting of the text at beginIndex. y and height are always constant for a font.
+	 * Does not process newlines.
+	 * @param text
+	 * @param beginIndex
+	 * @param endIndex
+	 * @return
+	 */
 	public Rectangle2D.Float measureTextRange(final String text, final int beginIndex, final int endIndex) {
 		String begin = text.substring(0, beginIndex);
 		final byte[] dataBegin = getEncodedTextData(begin);
@@ -141,6 +183,12 @@ public class TextFont implements IEntity {
 		return new Rectangle2D.Float(sWidthBegin, -(_size * rect.getUpperRightY()) / 1000f, sWidth, (_size * (rect.getUpperRightY() - rect.getLowerLeftY())) / 1000f);
 	}
 	
+	/**
+	 * Gets the caret index for a coordinate (in local text space) within the given text. Does not process newlines.
+	 * @param text
+	 * @param x
+	 * @return
+	 */
 	public int getCaretIndex(final String text, final float x) {
 		float totalWidth = 0.0f;
 		for (int i = 0; i < text.length(); i++) {
@@ -161,6 +209,10 @@ public class TextFont implements IEntity {
 		return _font;
 	}
 
+	/**
+	 * Gets the size of the font (needs not to be the size returned by measure)
+	 * @return
+	 */
 	public float getSize() {
 		return _size;
 	}
@@ -170,6 +222,10 @@ public class TextFont implements IEntity {
 		return "TextFont {id: " + _id + ", font: " + _font + ", size: " + _size + "}";
 	}
 
+	/**
+	 * Gets the height of a line
+	 * @return
+	 */
 	public float getLineHeight() {
 		return _size;
 	}

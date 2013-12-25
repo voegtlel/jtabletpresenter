@@ -156,7 +156,7 @@ public class ToolText extends AbstractTool implements CollisionListener {
 			Rectangle2D.Float measure = measure0;
 			float h = _font.getLineHeight();
 			float x = _currentText.getX();
-			float y = _currentText.getY() + h * selectStartLine;
+			float y = _currentText.getY() + measure0.y + measure0.height + h * selectStartLine;
 			selectBorder.moveTo(x + measure0.x, y + measure0.y);
 			selectBorder.lineTo(x + measure0.x + measure0.width, y + measure0.y);
 			selectBorder.lineTo(x + measure0.x + measure0.width, y + measure0.y + h);
@@ -175,9 +175,9 @@ public class ToolText extends AbstractTool implements CollisionListener {
 			_currentText.render(renderer);
 			if (_hasFocus) {
 				if (_caretDot < _caretMark) {
-					renderer.draw(x + measure0.x - _caretSize * 0.5f, y, new String[] {"|"}, _font);
+					renderer.draw(_currentText.getX() + measure0.x - _caretSize * 0.5f, _currentText.getY() + selectStartLine * h, new String[] {"|"}, _font);
 				} else {
-					renderer.draw(x + measure.width + measure.x - _caretSize * 0.5f, y + (selectEndLine - selectStartLine) * _font.getLineHeight(), new String[] {"|"}, _font);
+					renderer.draw(_currentText.getX() + measure.width + measure.x - _caretSize * 0.5f, _currentText.getY() + selectEndLine * h, new String[] {"|"}, _font);
 				}
 			}
 		}

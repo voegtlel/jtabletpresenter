@@ -105,6 +105,9 @@ public class Text extends AbstractRenderable {
 		renderer.draw(BitmapImage.HIGHLIGHTED_PEN, new Path2D.Float(new Rectangle2D.Float(getMinX(), getMinY(), getMaxX() - getMinX(), getMaxY() - getMinY())));
 	}
 	
+	/**
+	 * Calculates the internal _rect and _textLineWidths
+	 */
 	private void calcDimensions() {
 		if (_rect == null) {
 			_textLineWidths = new float[_textLines.length];
@@ -134,6 +137,12 @@ public class Text extends AbstractRenderable {
 		}
 	}
 	
+	/**
+	 * Gets the line number by x, y coordinates (of screen coordinates) for specifying the caret position
+	 * @param x
+	 * @param y
+	 * @return index of the line or -1 if the position is invalid
+	 */
 	public int getCaretLine(final float x, final float y) {
 		calcDimensions();
 		float h = _font.getLineHeight();
@@ -150,11 +159,18 @@ public class Text extends AbstractRenderable {
 		return -1;
 	}
 	
+	/**
+	 * Bakes the object, so it can be added to a page again after modification
+	 */
 	public void bake() {
 		_rect = null;
 		_textLineWidths = null;
 	}
 	
+	/**
+	 * Sets the location. This may only be used, if the object is not added to a page.
+	 * @param location
+	 */
 	public void setLocation(final DataPoint location) {
 		_location = location;
 	}
@@ -167,6 +183,10 @@ public class Text extends AbstractRenderable {
 		return _location.getY();
 	}
 	
+	/**
+	 * Sets the internal text (is split in lines)
+	 * @param text
+	 */
 	public void setText(final String text) {
 		_textLines = text.split("\\r?\\n|\\r", -1);
 		_textLineWidths = null;
@@ -282,6 +302,10 @@ public class Text extends AbstractRenderable {
 		return _location;
 	}
 
+	/**
+	 * Joins the lines to a string with newlines
+	 * @return
+	 */
 	public String getText() {
 		StringBuilder result = new StringBuilder();
 		result.append(_textLines[0]);
