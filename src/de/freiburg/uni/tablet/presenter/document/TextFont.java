@@ -3,6 +3,9 @@ package de.freiburg.uni.tablet.presenter.document;
 import java.awt.geom.Rectangle2D;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
@@ -54,6 +57,12 @@ public class TextFont implements IEntity {
 		_font.setEncoding(WinAnsiEncoding.UNIQUE);
 
 		_size = size;
+	}
+	
+	public static String[] getFonts() {
+		List<String> result = new ArrayList<String>();
+		result.addAll(Arrays.asList(PDFontType1.FONT_BUILTINS));
+		return (String[]) result.toArray();
 	}
 
 	/**

@@ -44,6 +44,8 @@ public class PdfRenderer implements IPageBackRenderer {
 	private PDForm _form;
 	private PDFont _font;
 	
+	private Map<PDFont, PDFont> _fontCopyMap = new HashMap<PDFont, PDFont>();
+	
 	private int _pageIndex = 0;
 	private CSCreator _creator;
 	
@@ -234,11 +236,25 @@ public class PdfRenderer implements IPageBackRenderer {
 	
 	@Override
 	public void draw(final float x, final float y, final String[] textLines, final TextFont font) {
-		// Draw page number
-		_creator.textSetFont(null, font.getPDFont(), font.getSize());
-		_creator.textMoveTo(x, y);
-		//_creator.textShow(text);
-		throw new IllegalStateException("Not implemented");
+		// Draw string
+		System.out.println("draw " + textLines[0] + "...");
+		PDFont docFont;
+		if (!_fontCopyMap.containsKey(font.getPDFont())) {
+			docFont = (PDFont)PDFont.META.createFromCos(font.getPDFont().cosGetObject().copyDeep());
+			_fontCopyMap.put(font.getPDFont(), docFont);
+		} else {
+			docFont = _fontCopyMap.get(font.getPDFont());
+		}
+		_creator.saveState();
+		_creator.transform(_renderFactorX, 0, 0, _renderFactorY, x * _renderFactorX, (1.0f-y) * _renderFactorY );
+		_creator.textSetFont(null, docFont, font.getSize());
+		for (int i = 0; i < textLines.length; i++) {
+			_creator.textShow(textLines[i]);
+			if (i < textLines.length - 1) {
+				_creator.textLineMove(0, -font.getLineHeight());
+			}
+		}
+		_creator.restoreState();
 	}
 	
 	@Override

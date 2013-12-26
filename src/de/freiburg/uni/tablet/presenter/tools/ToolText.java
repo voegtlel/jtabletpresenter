@@ -30,6 +30,11 @@ import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
 import de.freiburg.uni.tablet.presenter.page.IPen;
 import de.freiburg.uni.tablet.presenter.page.SolidPen;
 
+/**
+ * Tool for inserting text. Uses a dummy text box to process input.
+ * @author Lukas
+ *
+ */
 public class ToolText extends AbstractTool implements CollisionListener {
 	private TextFont _font = null;
 	private Text _currentText = null;
@@ -110,8 +115,10 @@ public class ToolText extends AbstractTool implements CollisionListener {
 		editor.addDummyComponent(_textArea);
 	}
 	
+	/**
+	 * Unfocuses the editor, so it stores its results and shortcuts work again.
+	 */
 	private void unfocusEditor() {
-		System.out.println("Unfocus editor");
 		_editor.getMainComponent().requestFocus();
 	}
 	
@@ -143,37 +150,42 @@ public class ToolText extends AbstractTool implements CollisionListener {
 	@Override
 	synchronized public void render(final IPageBackRenderer renderer) {
 		if (_currentText != null) {
-			int indexStart = Math.min(Math.min(_caretMark, _caretDot), _currentTextStr.length());
-			int indexEnd = Math.min(Math.max(_caretMark, _caretDot), _currentTextStr.length());
-			final String[] startLines = _currentTextStr.substring(0, indexStart).split("\\r?\\n|\\r", -1);
-			final String[] selectLines = _currentTextStr.substring(indexStart, indexEnd).split("\\r?\\n|\\r", -1);
-			String lastStartLine = (startLines.length > 0?startLines[startLines.length - 1]:"");
-			String firstSelectLine = (selectLines.length > 0?selectLines[0]:"");
-			int selectStartLine = startLines.length - 1;
-			int selectEndLine = selectStartLine + selectLines.length - 1;
-			Path2D selectBorder = new Path2D.Float();
-			Rectangle2D.Float measure0 = _font.measureTextRange(lastStartLine + firstSelectLine, lastStartLine.length(), lastStartLine.length() + firstSelectLine.length());
-			Rectangle2D.Float measure = measure0;
-			float h = _font.getLineHeight();
-			float x = _currentText.getX();
-			float y = _currentText.getY() + measure0.y + measure0.height + h * selectStartLine;
-			selectBorder.moveTo(x + measure0.x, y + measure0.y);
-			selectBorder.lineTo(x + measure0.x + measure0.width, y + measure0.y);
-			selectBorder.lineTo(x + measure0.x + measure0.width, y + measure0.y + h);
-			for (int i = 1; i < selectLines.length; i++) {
-				measure = _font.measureText(selectLines[i]);
-				selectBorder.lineTo(x + measure.width, y + h * i + measure.y);
-				selectBorder.lineTo(x + measure.width, y + h * i + measure.y + h);
-			}
-			if (selectLines.length > 1) {
-				selectBorder.lineTo(x, y + h * selectLines.length + measure.y);
-				selectBorder.lineTo(x, y + measure0.y + h);
-			}
-			selectBorder.lineTo(x + measure0.x, y + measure0.y + h);
-			selectBorder.closePath();
-			renderer.draw(_selectPen, selectBorder);
+			// Render the text
 			_currentText.render(renderer);
 			if (_hasFocus) {
+				// Determines the selected area
+				int indexStart = Math.min(Math.min(_caretMark, _caretDot), _currentTextStr.length());
+				int indexEnd = Math.min(Math.max(_caretMark, _caretDot), _currentTextStr.length());
+				final String[] startLines = _currentTextStr.substring(0, indexStart).split("\\r?\\n|\\r", -1);
+				final String[] selectLines = _currentTextStr.substring(indexStart, indexEnd).split("\\r?\\n|\\r", -1);
+				String lastStartLine = (startLines.length > 0?startLines[startLines.length - 1]:"");
+				String firstSelectLine = (selectLines.length > 0?selectLines[0]:"");
+				int selectStartLine = startLines.length - 1;
+				int selectEndLine = selectStartLine + selectLines.length - 1;
+				// Create a path for the selected area
+				Path2D selectBorder = new Path2D.Float();
+				Rectangle2D.Float measure0 = _font.measureTextRange(lastStartLine + firstSelectLine, lastStartLine.length(), lastStartLine.length() + firstSelectLine.length());
+				Rectangle2D.Float measure = measure0;
+				float h = _font.getLineHeight();
+				float x = _currentText.getX();
+				float y = _currentText.getY() + measure0.y + measure0.height + h * selectStartLine;
+				selectBorder.moveTo(x + measure0.x, y + measure0.y);
+				selectBorder.lineTo(x + measure0.x + measure0.width, y + measure0.y);
+				selectBorder.lineTo(x + measure0.x + measure0.width, y + measure0.y + h);
+				for (int i = 1; i < selectLines.length; i++) {
+					measure = _font.measureText(selectLines[i]);
+					selectBorder.lineTo(x + measure.width, y + h * i + measure.y);
+					selectBorder.lineTo(x + measure.width, y + h * i + measure.y + h);
+				}
+				if (selectLines.length > 1) {
+					selectBorder.lineTo(x, y + h * selectLines.length + measure.y);
+					selectBorder.lineTo(x, y + measure0.y + h);
+				}
+				selectBorder.lineTo(x + measure0.x, y + measure0.y + h);
+				selectBorder.closePath();
+				// Draw the selected area
+				renderer.draw(_selectPen, selectBorder);
+				// Draw the caret as "|"
 				if (_caretDot < _caretMark) {
 					renderer.draw(_currentText.getX() + measure0.x - _caretSize * 0.5f, _currentText.getY() + selectStartLine * h, new String[] {"|"}, _font);
 				} else {
@@ -183,6 +195,14 @@ public class ToolText extends AbstractTool implements CollisionListener {
 		}
 	}
 	
+	private void setFont(final TextFont font) {
+		_font = new TextFont(_editor.getDocumentEditor().getFrontDocument(), "Font1", 0.05f);
+		_caretSize = _font.measureText("|").width;
+	}
+	
+	/**
+	 * Ends the editing of the current text if active and adds it to the page, if not empty
+	 */
 	synchronized private void endEditingText() {
 		if (_currentText != null) {
 			System.out.println("End editing");
@@ -275,28 +295,18 @@ public class ToolText extends AbstractTool implements CollisionListener {
 	synchronized public void end() {
 		_startData = null;
 		
-		//Text newElement = new Text(_editor.getDocumentEditor().getCurrentPage(), _startData.getX(), _startData.getY(), "Blablaäöügpq+~'#´`<>|!°^", _font);
-
-		/*_editor.getPageEditor().suspendRepaint();
-		_editor.getDocumentEditor().getCurrentPage().addRenderable(newElement);
-		
-		_editor.getFrontRenderer().setRepaintListener(null);
-		
-		_editor.getPageEditor().resumeRepaint();*/
-		//_textDialog.requestFocus();
 		_textArea.requestFocus();
 	}
 	
 	@Override
 	public void over() {
 		super.over();
-		//_textDialog.setVisible(true);
+		// Create everything if needed
+		// TODO
 		if (_font == null || _font.getParent() != _editor.getDocumentEditor().getFrontDocument()) {
-			_font = new TextFont(_editor.getDocumentEditor().getFrontDocument(), "Font1", 0.05f);
-			_caretSize = _font.measureText("|").width;
+			setFont(new TextFont(_editor.getDocumentEditor().getFrontDocument(), "Font1", 0.05f));
 		}
 		_editor.getFrontRenderer().setRepaintListener(this);
-		System.out.println("Tool text renderer active");
 		_editor.getFrontRenderer().requireRepaint();
 	}
 	
@@ -309,7 +319,6 @@ public class ToolText extends AbstractTool implements CollisionListener {
 		endEditingText();
 		
 		_editor.getFrontRenderer().setRepaintListener(null);
-		System.out.println("Tool text renderer inactive");
 		
 		_editor.getPageEditor().resumeRepaint();
 	}
