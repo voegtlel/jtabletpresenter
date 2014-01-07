@@ -21,6 +21,7 @@ import de.freiburg.uni.tablet.presenter.page.IPen;
 import de.intarsys.pdf.cds.CDSRectangle;
 import de.intarsys.pdf.content.CSContent;
 import de.intarsys.pdf.content.common.CSCreator;
+import de.intarsys.pdf.cos.COSIndirectObject;
 import de.intarsys.pdf.encoding.WinAnsiEncoding;
 import de.intarsys.pdf.font.PDFont;
 import de.intarsys.pdf.font.PDFontTools;
@@ -108,7 +109,14 @@ public class PdfRenderer implements IPageBackRenderer {
 			if ((_form != null) && !_wasEmptyPage) {
 				_form.setBoundingBox(_pageSize);
 				System.out.println("overlay form");
-				AffineTransform transform = PdfPageHelper.calculateTransform(_page);
+				AffineTransform transform;
+				try {
+					transform = PdfPageHelper.calculateTransform(_page);
+				} catch(Exception e) {
+					System.err.println("Can't prerender page, skipping");
+					_wasEmptyPage = true;
+					return;
+				}
 				try {
 					transform.invert();
 				} catch (NoninvertibleTransformException e) {
@@ -240,7 +248,7 @@ public class PdfRenderer implements IPageBackRenderer {
 		System.out.println("draw " + textLines[0] + "...");
 		PDFont docFont;
 		if (!_fontCopyMap.containsKey(font.getPDFont())) {
-			docFont = (PDFont)PDFont.META.createFromCos(font.getPDFont().cosGetObject().copyDeep());
+			docFont = (PDFont)PDFont.META.createFromCos(COSIndirectObject.create(font.getPDFont().cosGetObject().copyDeep()).dereference());
 			_fontCopyMap.put(font.getPDFont(), docFont);
 		} else {
 			docFont = _fontCopyMap.get(font.getPDFont());
