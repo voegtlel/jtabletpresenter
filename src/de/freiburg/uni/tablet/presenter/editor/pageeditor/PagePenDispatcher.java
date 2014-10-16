@@ -33,6 +33,7 @@ public class PagePenDispatcher implements PenListener {
 	private Point _drawOffset = new Point();
 
 	private long _frameReduction = 20;
+	private boolean _lockPressure = false;
 
 	public PagePenDispatcher() {
 	}
@@ -48,7 +49,7 @@ public class PagePenDispatcher implements PenListener {
 		return new DataPoint((pen.getLevelValue(Type.X) - _drawOffset.x) / _drawSize.width,
 				(pen.getLevelValue(Type.Y) - _drawOffset.y) / _drawSize.height,
 				pen.getLevelValue(Type.X) - _drawOffset.x, pen.getLevelValue(Type.Y) - _drawOffset.y,
-				pen.getLevelValue(Type.PRESSURE), timestamp);
+				_lockPressure?0.5f:pen.getLevelValue(Type.PRESSURE), timestamp);
 	}
 
 	@Override
@@ -293,5 +294,13 @@ public class PagePenDispatcher implements PenListener {
 			}
 			_activeTool = null;
 		}
+	}
+
+	/**
+	 * Locks the pressure to a constant level
+	 * @param lockPressure
+	 */
+	public void setLockPressure(final boolean lockPressure) {
+		_lockPressure  = lockPressure;
 	}
 }

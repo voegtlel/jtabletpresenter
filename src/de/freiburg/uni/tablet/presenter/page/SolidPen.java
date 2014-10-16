@@ -9,6 +9,7 @@ import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 
 public class SolidPen implements IPen {
+	private static final float DEFAULT_PRESSURE = 0.5f;
 	private final BasicStroke _stroke;
 	private final Color _paint;
 	private final float _thickness;
@@ -43,10 +44,21 @@ public class SolidPen implements IPen {
 	public float getThickness() {
 		return _thickness;
 	}
+	
+	@Override
+	public float getThickness(final float pressure) {
+		return _thickness * (pressure + DEFAULT_PRESSURE);
+	}
 
 	@Override
 	public Stroke getStroke() {
 		return _stroke;
+	}
+	
+	@Override
+	public Stroke getStroke(final float pressure) {
+		return new BasicStroke(_thickness * (pressure + DEFAULT_PRESSURE), BasicStroke.CAP_ROUND,
+				BasicStroke.JOIN_ROUND);
 	}
 
 	@Override

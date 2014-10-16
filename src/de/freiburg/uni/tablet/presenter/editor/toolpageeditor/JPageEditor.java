@@ -203,6 +203,7 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 		
 		final RenderCanvas pageRenderer = new RenderCanvas();
 		_pageRenderer = pageRenderer;
+		_pageRenderer.setLockPressure(!_config.getBoolean("editor.variableThickness", false));
 		_pageRenderer.setVoidColor(_config.getColor("editor.voidColor", Color.BLACK));
 		_containerPanel = new JPanel() {
 			private static final long serialVersionUID = 1L;

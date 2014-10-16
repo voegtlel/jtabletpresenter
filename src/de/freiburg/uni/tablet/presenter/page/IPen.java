@@ -12,6 +12,13 @@ public interface IPen extends IBinarySerializable {
 	 * @return stroke
 	 */
 	Stroke getStroke();
+	
+	/**
+	 * Get system stroke with pressure.
+	 * 
+	 * @return stroke
+	 */
+	Stroke getStroke(float pressure);
 
 	/**
 	 * Get system paint.
@@ -26,4 +33,11 @@ public interface IPen extends IBinarySerializable {
 	 * @return thickness
 	 */
 	float getThickness();
+
+	/**
+	 * Gets the thickness for the specified pressure
+	 * @param pressure
+	 * @return
+	 */
+	float getThickness(float pressure);
 }

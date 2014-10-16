@@ -49,6 +49,31 @@ public interface IPageBackRenderer {
 	 */
 	void draw(IPen pen, float x1, float y1, float x2, float y2);
 	
+	
+	/**
+	 * Starts a new path with pressure
+	 * @param pen
+	 */
+	void beginPath(IPen pen);
+	
+	/**
+	 * Draws a line with pressure
+	 * @see #beginPath(IPen)
+	 * @see #endPath(IPen)
+	 * 
+	 * @param x1
+	 * @param y1
+	 * @param x2
+	 * @param y2
+	 * @param pressure
+	 */
+	void drawPath(float x1, float y1, float x2, float y2, float pressure);
+	
+	/**
+	 * Ends a path with pressure
+	 */
+	void endPath();
+	
 	/**
 	 * Sets the rendering offset
 	 * @param x

@@ -56,7 +56,7 @@ public class ToolScribble extends AbstractTool {
 	synchronized public void draw(final DataPoint data) {
 		if (_scribble != null) {
 			if (_dragLines) {
-				if (_isFirstPoint ) {
+				if (_isFirstPoint) {
 					_isFirstPoint = false;
 					_scribble.addPoint(data);
 					_scribble.addPoint(data.clone());

@@ -22,6 +22,8 @@ public class ScribbleSegment implements IBinarySerializable {
 	private float _maxY;
 
 	private final LinkedElementList<DataPoint> _points;
+	
+	private boolean _hasVariableWidth;
 
 	/**
 	 * Creates an empty path segment
@@ -30,15 +32,17 @@ public class ScribbleSegment implements IBinarySerializable {
 		_points = new LinkedElementList<DataPoint>();
 		_path = new Path2D.Float();
 		_hasBoundary = true;
+		_hasVariableWidth = false;
 		_minX = Float.MAX_VALUE;
 		_minY = Float.MAX_VALUE;
 		_maxX = Float.MIN_VALUE;
 		_maxY = Float.MIN_VALUE;
 	}
 
-	private ScribbleSegment(final LinkedElementList<DataPoint> points) {
+	private ScribbleSegment(final LinkedElementList<DataPoint> points, final boolean hasVariableWidth) {
 		_points = points;
 		_hasBoundary = false;
+		_hasVariableWidth = hasVariableWidth;
 	}
 
 	/**
@@ -48,6 +52,15 @@ public class ScribbleSegment implements IBinarySerializable {
 	 *            new point
 	 */
 	public void addPoint(final DataPoint data) {
+		System.out.println("P: " + data.getPressure());
+		// Check variable width
+		if (!_hasVariableWidth) {
+			if (!_points.isEmpty() && _points.getFirst().getData().getPressure() != data.getPressure() && _points.getFirst().getData().getPressure() != 0 && data.getPressure() != 0) {
+				System.out.println("Var Width");
+				_hasVariableWidth = true;
+				_path = null;
+			}
+		}
 		// Add
 		_points.addFirst(data);
 		// Check for baking object
@@ -76,12 +89,19 @@ public class ScribbleSegment implements IBinarySerializable {
 		_minY = Float.MAX_VALUE;
 		_maxX = Float.MIN_VALUE;
 		_maxY = Float.MIN_VALUE;
+		_hasVariableWidth = false;
+		float lastPressure = 0;
 		for (LinkedElement<DataPoint> e = _points.getFirst(); e != null; e = e
 				.getNext()) {
 			_minX = Math.min(_minX, e.getData().getX());
 			_minY = Math.min(_minY, e.getData().getY());
 			_maxX = Math.max(_maxX, e.getData().getX());
 			_maxY = Math.max(_maxY, e.getData().getY());
+			if (lastPressure != 0 && lastPressure != e.getData().getPressure() && e.getData().getPressure() != 0) {
+				_hasVariableWidth = true;
+				_path = null;
+			}
+			lastPressure = e.getData().getPressure();
 		}
 		_hasBoundary = true;
 	}
@@ -123,7 +143,7 @@ public class ScribbleSegment implements IBinarySerializable {
 					} else {
 						_path = null;
 						_hasBoundary = true;
-						return new ScribbleSegment(_points.splitAtRemove(e));
+						return new ScribbleSegment(_points.splitAtRemove(e), _hasVariableWidth);
 					}
 				} else {
 					_minX = Math.min(_minX, e.getData().getX());
@@ -162,8 +182,9 @@ public class ScribbleSegment implements IBinarySerializable {
 				if (next != null) {
 					Point2D.Float coll1 = new Point2D.Float();
 					Point2D.Float coll2 = new Point2D.Float();
+					Point2D.Float factors = new Point2D.Float();
 					int result = collisionInfo.collidesSegment(e.getData().getX(), e.getData()
-							.getY(), next.getData().getX(), next.getData().getY(), coll1, coll2);
+							.getY(), next.getData().getX(), next.getData().getY(), coll1, coll2, factors);
 					if (result != CollisionInfo.COLLIDE_NONE) {
 						wasModified = true;
 						_path = null;
@@ -175,24 +196,24 @@ public class ScribbleSegment implements IBinarySerializable {
 					}
 					if (result == CollisionInfo.COLLIDE_P1_WITHIN) {
 						//System.out.println("Collide P1 within at (" + e.getData().getX() + ", " + e.getData().getY() + "), " + coll2);
-						final DataPoint newDataPoint = new DataPoint(coll2.x, coll2.y, collisionInfo.getSourceDataPoint().getXOrig(), collisionInfo.getSourceDataPoint().getYOrig(), collisionInfo.getSourceDataPoint().getPressure(), collisionInfo.getSourceDataPoint().getTimestamp());
+						final DataPoint newDataPoint = new DataPoint(coll2.x, coll2.y, collisionInfo.getSourceDataPoint().getXOrig(), collisionInfo.getSourceDataPoint().getYOrig(), e.getData().getPressure() * factors.y + next.getData().getPressure() * (1.0f - factors.y), collisionInfo.getSourceDataPoint().getTimestamp());
 						if (e == _points.getFirst()) {
 							// Remove the point.
 							_points.removeFirst();
 							_points.addFirst(newDataPoint);
 						} else {
 							_points.insertAfter(e, newDataPoint);
-							return new ScribbleSegment(_points.splitAtRemove(e));
+							return new ScribbleSegment(_points.splitAtRemove(e), _hasVariableWidth);
 						}
 					} else if (result == CollisionInfo.COLLIDE_P2_WITHIN) {
 						//System.out.println("Collide P2 within at " + coll1 + ", (" + next.getData().getX() + ", " + next.getData().getY() + ")");
-						final DataPoint newDataPoint = new DataPoint(coll1.x, coll1.y, collisionInfo.getSourceDataPoint().getXOrig(), collisionInfo.getSourceDataPoint().getYOrig(), collisionInfo.getSourceDataPoint().getPressure(), collisionInfo.getSourceDataPoint().getTimestamp());
+						final DataPoint newDataPoint = new DataPoint(coll1.x, coll1.y, collisionInfo.getSourceDataPoint().getXOrig(), collisionInfo.getSourceDataPoint().getYOrig(), e.getData().getPressure() * factors.x + next.getData().getPressure() * (1.0f - factors.x), collisionInfo.getSourceDataPoint().getTimestamp());
 						_points.insertAfter(e, newDataPoint);
 						if (next == _points.getLast()) {
 							_points.removeLast();
 							break;
 						} else {
-							return new ScribbleSegment(_points.splitAt(next));
+							return new ScribbleSegment(_points.splitAt(next), _hasVariableWidth);
 						}
 					} else if (result == CollisionInfo.COLLIDE_BOTH_WITHIN) {
 						//System.out.println("Collide both within at (" + e.getData().getX() + ", " + e.getData().getY() + "), (" + next.getData().getX() + ", " + next.getData().getY() + ")");
@@ -200,16 +221,16 @@ public class ScribbleSegment implements IBinarySerializable {
 							// Simply remove the point.
 							_points.removeFirst();
 						} else {
-							return new ScribbleSegment(_points.splitAtRemove(e));
+							return new ScribbleSegment(_points.splitAtRemove(e), _hasVariableWidth);
 						}
 					} else if (result == CollisionInfo.COLLIDE_SEGMENT) {
 						//System.out.println("Collide segment within at " + coll1 + ", " + coll2 + ")");
-						final DataPoint newDataPoint1 = new DataPoint(coll1.x, coll1.y, collisionInfo.getSourceDataPoint().getXOrig(), collisionInfo.getSourceDataPoint().getYOrig(), collisionInfo.getSourceDataPoint().getPressure(), collisionInfo.getSourceDataPoint().getTimestamp());
-						final DataPoint newDataPoint2 = new DataPoint(coll2.x, coll2.y, collisionInfo.getSourceDataPoint().getXOrig(), collisionInfo.getSourceDataPoint().getYOrig(), collisionInfo.getSourceDataPoint().getPressure(), collisionInfo.getSourceDataPoint().getTimestamp());
+						final DataPoint newDataPoint1 = new DataPoint(coll1.x, coll1.y, collisionInfo.getSourceDataPoint().getXOrig(), collisionInfo.getSourceDataPoint().getYOrig(), e.getData().getPressure() * factors.x + next.getData().getPressure() * (1.0f - factors.x), collisionInfo.getSourceDataPoint().getTimestamp());
+						final DataPoint newDataPoint2 = new DataPoint(coll2.x, coll2.y, collisionInfo.getSourceDataPoint().getXOrig(), collisionInfo.getSourceDataPoint().getYOrig(), e.getData().getPressure() * factors.y + next.getData().getPressure() * (1.0f - factors.y), collisionInfo.getSourceDataPoint().getTimestamp());
 						_points.insertAfter(e, newDataPoint1);
 						_points.insertBefore(next, newDataPoint2);
 						final LinkedElement<DataPoint> firstNext = next.getPrevious();
-						return new ScribbleSegment(_points.splitAt(firstNext));
+						return new ScribbleSegment(_points.splitAt(firstNext), _hasVariableWidth);
 					}
 				}
 				e = next;
@@ -328,7 +349,7 @@ public class ScribbleSegment implements IBinarySerializable {
 	 * Creates the graphics object.
 	 */
 	public void bake() {
-		if (!_points.isEmpty() && !_points.hasOne()) {
+		if (!_points.isEmpty() && !_points.hasOne() && !_hasVariableWidth) {
 			_path = new Path2D.Float(Path2D.WIND_NON_ZERO, _points.getCount());
 			generatePathData();
 		}
@@ -374,10 +395,21 @@ public class ScribbleSegment implements IBinarySerializable {
 				renderer.draw(pen, _points.getFirst().getData().getX(), _points
 						.getFirst().getData().getY());
 			} else {
-				if (_path == null) {
-					bake();
+				if (_hasVariableWidth) {
+					LinkedElement<DataPoint> e = _points.getFirst();
+					LinkedElement<DataPoint> lastP = e;
+					renderer.beginPath(pen);
+					for (e = e.getNext(); e != null; e = e.getNext()) {
+						renderer.drawPath(lastP.getData().getX(), lastP.getData().getY(), e.getData().getX(), e.getData().getY(), e.getData().getPressure());
+						lastP = e;
+					}
+					renderer.endPath();
+				} else {
+					if (_path == null) {
+						bake();
+					}
+					renderer.draw(pen, _path);
 				}
-				renderer.draw(pen, _path);
 			}
 		}
 	}
@@ -399,6 +431,8 @@ public class ScribbleSegment implements IBinarySerializable {
 		_maxY = Float.MIN_VALUE;
 		_hasBoundary = true;
 
+		_hasVariableWidth = false;
+		float lastPressure = 0;
 		final int count = reader.readInt();
 		for (int i = 0; i < count; i++) {
 			final DataPoint e = new DataPoint(reader);
@@ -407,6 +441,8 @@ public class ScribbleSegment implements IBinarySerializable {
 			_minY = Math.min(_minY, e.getY());
 			_maxX = Math.max(_maxX, e.getX());
 			_maxY = Math.max(_maxY, e.getY());
+			_hasVariableWidth = _hasVariableWidth || (lastPressure != 0 && lastPressure != e.getPressure() && e.getPressure() != 0);
+			lastPressure = e.getPressure();
 		}
 	}
 
@@ -428,6 +464,7 @@ public class ScribbleSegment implements IBinarySerializable {
 	public ScribbleSegment cloneRenderable() {
 		final ScribbleSegment result = new ScribbleSegment();
 		result._hasBoundary = _hasBoundary;
+		result._hasVariableWidth = _hasVariableWidth;
 		result._minX = _minX;
 		result._minY = _minY;
 		result._maxX = _maxX;
@@ -451,6 +488,7 @@ public class ScribbleSegment implements IBinarySerializable {
 	public ScribbleSegment cloneRenderable(final float offsetX, final float offsetY) {
 		final ScribbleSegment result = new ScribbleSegment();
 		result._hasBoundary = _hasBoundary;
+		result._hasVariableWidth = _hasVariableWidth;
 		result._minX = _minX + offsetX;
 		result._minY = _minY + offsetY;
 		result._maxX = _maxX + offsetX;

@@ -262,6 +262,10 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 		return this;
 	}
 	
+	public void setLockPressure(final boolean lockPressure) {
+		_pagePenDispatcher.setLockPressure(lockPressure);
+	}
+	
 	@Override
 	public ITool getNormalTool() {
 		return _pagePenDispatcher.getNormalTool();

@@ -2,7 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="res"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7">
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
 		<accessrules>
 			<accessrule kind="accessible" pattern="**"/>
 		</accessrules>
@@ -22,17 +22,9 @@
 	<classpathentry kind="lib" path="lib/jai_imageio.jar"/>
 	<classpathentry kind="lib" path="lib/jbig2.jar"/>
 	<classpathentry kind="lib" path="lib/jna.jar"/>
-	<classpathentry kind="lib" path="lib/jPod.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="file:/C:/Users/Luke/workspace-lejos/JTabletPresenter/javadoc/jPod/"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="lib" path="lib/jPodFonts.jar"/>
-	<classpathentry kind="lib" path="lib/jPodRenderer.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="file:/C:/Users/Luke/workspace-lejos/JTabletPresenter/javadoc/jPodRenderer/"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="lib" path="lib/jmupdf.jar"/>
+	<classpathentry kind="lib" path="lib/jPod.jar"/>
+	<classpathentry kind="lib" path="lib/jPodRenderer.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

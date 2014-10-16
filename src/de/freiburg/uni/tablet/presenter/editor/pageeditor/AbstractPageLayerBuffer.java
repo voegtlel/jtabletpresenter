@@ -255,6 +255,35 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer, IPage
 		}
 	}
 	
+	private IPen _pathPen;
+	
+	@Override
+	public void beginPath(final IPen pen) {
+		_pathPen = pen;
+		if (_graphics != null) {
+			_graphics.setPaint(pen.getColor());
+		}
+	}
+	
+	@Override
+	public void endPath() {
+		_pathPen = null;
+	}
+	
+	@Override
+	public void drawPath(final float x1, final float y1, final float x2, final float y2,
+			final float pressure) {
+		if (_graphics != null) {
+			_lineRenderer.x1 = x1 * _renderFactorX;
+			_lineRenderer.y1 = y1 * _renderFactorY;
+			_lineRenderer.x2 = x2 * _renderFactorX;
+			_lineRenderer.y2 = y2 * _renderFactorY;
+			_graphics.setStroke(_pathPen.getStroke(pressure));
+			_graphics.draw(_lineRenderer);
+			_isEmpty = false;
+		}
+	}
+	
 	/**
 	 * Draws a debug rectangle
 	 */

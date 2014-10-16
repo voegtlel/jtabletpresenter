@@ -246,4 +246,18 @@ public class LinkedElementList<T> implements Iterable<T> {
 	public Iterator<T> iterator() {
 		return new LinkedElementIterator<T>(_first);
 	}
+	
+	@Override
+	public String toString() {
+		StringBuilder result = new StringBuilder();
+		result.append("[");
+		for (LinkedElement<T> j = _first; j != null; j = j.getNext()) {
+			if (j != _first) {
+				result.append(", ");
+			}
+			result.append(j.getData());
+		}
+		result.append("]");
+		return result.toString();
+	}
 }

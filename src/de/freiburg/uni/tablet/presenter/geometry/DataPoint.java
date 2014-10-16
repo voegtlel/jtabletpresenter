@@ -93,4 +93,9 @@ public class DataPoint implements IBinarySerializable {
 		writer.writeFloat(_pressure);
 		writer.writeLong(_timestamp);
 	}
+	
+	@Override
+	public String toString() {
+		return "DP {" + _x + ", " + _y + ", p: " + _pressure + ", t: " + _timestamp + "}";
+	}
 }

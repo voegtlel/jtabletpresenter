@@ -79,7 +79,7 @@ public class CollisionInfo {
 	public static final int COLLIDE_BOTH_WITHIN = 3;
 	public static final int COLLIDE_SEGMENT = 4;
 	
-	private int collideCircle(final float x, final float y, final float r, final float x1, final float y1, final float x2, final float y2, final Point2D.Float p1, final Point2D.Float p2) {
+	private int collideCircle(final float x, final float y, final float r, final float x1, final float y1, final float x2, final float y2, final Point2D.Float p1, final Point2D.Float p2, final Point2D.Float factors) {
 		float dx = x2 - x1;
 		float dy = y2 - y1;
 		
@@ -114,6 +114,9 @@ public class CollisionInfo {
 		p2.x = x1 + f2 * dx;
 		p2.y = y1 + f2 * dy;
 		
+		factors.x = f1;
+		factors.y = f2;
+		
 		if ((f1 >= 0) && (f2 <= 1)) {
 			return COLLIDE_SEGMENT;
 		} else if ((f1 <= 0) && (f2 >= 1)) {
@@ -135,10 +138,10 @@ public class CollisionInfo {
 				/ (_radiusY * _radiusY) <= 1;
 	}
 	
-	public int collidesSegment(final float x1, final float y1, final float x2, final float y2, final Point2D.Float coll1, final Point2D.Float coll2) {
+	public int collidesSegment(final float x1, final float y1, final float x2, final float y2, final Point2D.Float coll1, final Point2D.Float coll2, final Point2D.Float factors) {
 		float xFactor = _radiusY / _radiusX;
 		//float xFactor = 1.0f;
-		int result = collideCircle(_x * xFactor, _y, _radiusY, x1 * xFactor, y1, x2 * xFactor, y2, coll1, coll2);
+		int result = collideCircle(_x * xFactor, _y, _radiusY, x1 * xFactor, y1, x2 * xFactor, y2, coll1, coll2, factors);
 		coll1.x /= xFactor;
 		coll2.x /= xFactor;
 		return result;

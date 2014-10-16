@@ -217,6 +217,36 @@ public class PdfRenderer implements IPageBackRenderer {
 		_wasEmptyPage = false;
 	}
 	
+	private IPen _pathPen;
+	private float _pathLastX;
+	private float _pathLastY;
+	
+	@Override
+	public void beginPath(final IPen pen) {
+		_pathPen = pen;
+		_creator.setStrokeColorRGB(pen.getColor().getRed()/255f, pen.getColor().getGreen()/255f, pen.getColor().getBlue()/255f);
+		_pathLastX = Float.NaN;
+		_pathLastY = Float.NaN;
+	}
+	
+	@Override
+	public void endPath() {
+		_creator.pathStroke();
+		_pathPen = null;
+	}
+	
+	@Override
+	public void drawPath(final float x1, final float y1, final float x2, final float y2,
+			final float pressure) {
+		_creator.setLineWidth(_pathPen.getThickness(pressure) * _thicknessFactor);
+		if (x1 != _pathLastX || y1 != _pathLastY) {
+			_creator.penMoveTo(x1, y1);
+		}
+		_creator.penLineTo(x2, y2);
+		_pathLastX = x2;
+		_pathLastY = y2;
+	}
+	
 	@Override
 	public void draw(final BufferedImage image, final float x, final float y, final float width, final float height) {
 		try {
