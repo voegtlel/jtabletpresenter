@@ -47,7 +47,7 @@ public class SolidPen implements IPen {
 	
 	@Override
 	public float getThickness(final float pressure) {
-		return _thickness * (pressure + DEFAULT_PRESSURE);
+		return _thickness * pressure;
 	}
 
 	@Override
@@ -57,7 +57,7 @@ public class SolidPen implements IPen {
 	
 	@Override
 	public Stroke getStroke(final float pressure) {
-		return new BasicStroke(_thickness * (pressure + DEFAULT_PRESSURE), BasicStroke.CAP_ROUND,
+		return new BasicStroke(_thickness * pressure, BasicStroke.CAP_ROUND,
 				BasicStroke.JOIN_ROUND);
 	}
 
