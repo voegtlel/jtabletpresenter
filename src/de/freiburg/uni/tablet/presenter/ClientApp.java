@@ -27,7 +27,7 @@ import de.freiburg.uni.tablet.presenter.xsocket.UpClient;
 
 public class ClientApp {
 	
-	public final static String VersionString = "1.07";
+	public final static String VersionString = "1.08";
 
 	private JPageEditor _pageRenderer;
 	private DownClient _clientDownSync;
