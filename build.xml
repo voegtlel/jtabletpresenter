@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project basedir="." default="create_run_jar" name="jtabletpresenter">
+    <property environment="env"/>
+    <property name="debuglevel" value="source,lines,vars"/>
+    <property name="target" value="1.7"/>
+    <property name="source" value="1.7"/>
+    <path id="jtabletpresenter.classpath">
+        <pathelement location="bin"/>
+        <pathelement location="lib/jpen-2.jar"/>
+        <pathelement location="lib/iscwt.jar"/>
+        <pathelement location="lib/isfreetype.jar"/>
+        <pathelement location="lib/isnativec.jar"/>
+        <pathelement location="lib/isrt.jar"/>
+        <pathelement location="lib/jai_codec.jar"/>
+        <pathelement location="lib/jai_core.jar"/>
+        <pathelement location="lib/jai_imageio.jar"/>
+        <pathelement location="lib/jbig2.jar"/>
+        <pathelement location="lib/jna.jar"/>
+        <pathelement location="lib/jPodFonts.jar"/>
+        <pathelement location="lib/jmupdf.jar"/>
+        <pathelement location="lib/jPod.jar"/>
+        <pathelement location="lib/jPodRenderer.jar"/>
+    </path>
+    <target name="init">
+        <mkdir dir="bin"/>
+        <copy includeemptydirs="false" todir="bin">
+            <fileset dir="src">
+                <exclude name="**/*.launch"/>
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+        <copy includeemptydirs="false" todir="bin">
+            <fileset dir="res">
+                <exclude name="**/*.launch"/>
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+    </target>
+    <target name="clean">
+        <delete dir="bin"/>
+    	<delete dir="packed/JTabletPresenter_lib"/>
+        <delete file="packed/JTabletPresenter.jar"/>
+    </target>
+    <target depends="clean" name="cleanall"/>
+    <target depends="init" name="build">
+        <echo message="${ant.project.name}: ${ant.file}"/>
+        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" includeantruntime="false" source="${source}" target="${target}">
+            <src path="src"/>
+            <src path="res"/>
+            <classpath refid="jtabletpresenter.classpath"/>
+        </javac>
+    </target>
+    <target name="JTabletPresenter.ClientApp">
+        <java classname="de.freiburg.uni.tablet.presenter.ClientApp" failonerror="true" fork="yes">
+            <classpath refid="jtabletpresenter.classpath"/>
+        </java>
+    </target>
+	<target depends="build" name="create_run_jar">
+        <jar destfile="packed/JTabletPresenter.jar">
+            <manifest>
+                <attribute name="Main-Class" value="de.freiburg.uni.tablet.presenter.ClientApp"/>
+                <attribute name="Class-Path" value=". JTabletPresenter_lib/jpen-2.jar JTabletPresenter_lib/iscwt.jar JTabletPresenter_lib/isfreetype.jar JTabletPresenter_lib/isnativec.jar JTabletPresenter_lib/isrt.jar JTabletPresenter_lib/jai_codec.jar JTabletPresenter_lib/jai_core.jar JTabletPresenter_lib/jai_imageio.jar JTabletPresenter_lib/jbig2.jar JTabletPresenter_lib/jna.jar JTabletPresenter_lib/jPodFonts.jar JTabletPresenter_lib/jmupdf.jar JTabletPresenter_lib/jPod.jar JTabletPresenter_lib/jPodRenderer.jar"/>
+            </manifest>
+            <fileset dir="bin"/>
+        </jar>
+        <delete dir="packed/JTabletPresenter_lib"/>
+        <mkdir dir="packed/JTabletPresenter_lib"/>
+        <copy file="lib/jpen-2.jar" todir="packed/JTabletPresenter_lib"/>
+        <copy file="lib/iscwt.jar" todir="packed/JTabletPresenter_lib"/>
+        <copy file="lib/isfreetype.jar" todir="packed/JTabletPresenter_lib"/>
+        <copy file="lib/isnativec.jar" todir="packed/JTabletPresenter_lib"/>
+        <copy file="lib/isrt.jar" todir="packed/JTabletPresenter_lib"/>
+        <copy file="lib/jai_codec.jar" todir="packed/JTabletPresenter_lib"/>
+        <copy file="lib/jai_core.jar" todir="packed/JTabletPresenter_lib"/>
+        <copy file="lib/jai_imageio.jar" todir="packed/JTabletPresenter_lib"/>
+        <copy file="lib/jbig2.jar" todir="packed/JTabletPresenter_lib"/>
+        <copy file="lib/jna.jar" todir="packed/JTabletPresenter_lib"/>
+        <copy file="lib/jPodFonts.jar" todir="packed/JTabletPresenter_lib"/>
+        <copy file="lib/jmupdf.jar" todir="packed/JTabletPresenter_lib"/>
+        <copy file="lib/jPod.jar" todir="packed/JTabletPresenter_lib"/>
+        <copy file="lib/jPodRenderer.jar" todir="packed/JTabletPresenter_lib"/>
+    </target>
+</project>
