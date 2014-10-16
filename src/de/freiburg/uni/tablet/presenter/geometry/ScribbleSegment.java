@@ -52,7 +52,6 @@ public class ScribbleSegment implements IBinarySerializable {
 	 *            new point
 	 */
 	public void addPoint(final DataPoint data) {
-		System.out.println("P: " + data.getPressure());
 		// Check variable width
 		if (!_hasVariableWidth) {
 			if (!_points.isEmpty() && _points.getFirst().getData().getPressure() != data.getPressure() && _points.getFirst().getData().getPressure() != 0 && data.getPressure() != 0) {
