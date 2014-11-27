@@ -28,11 +28,13 @@ import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 import javax.swing.OverlayLayout;
 import javax.swing.SwingUtilities;
 
+import de.freiburg.uni.tablet.presenter.actions.IAction;
 import de.freiburg.uni.tablet.presenter.document.DocumentConfig;
 import de.freiburg.uni.tablet.presenter.document.DocumentConfig.KeyValue;
 import de.freiburg.uni.tablet.presenter.document.DocumentListener;
@@ -60,6 +62,7 @@ import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonSpin
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonToggleFullscreen;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonTools;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonUndo;
+import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.FileHelper;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
 import de.freiburg.uni.tablet.presenter.xsocket.ClientListener;
@@ -102,6 +105,8 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 	private boolean _isConnected;
 
 	private JPanel _containerPanel;
+	
+	private IAction _lastSavedAction = null;
 
 	/**
 	 * Create the panel.
@@ -177,6 +182,8 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 	 */
 	private void initialize() {
 		getContentPane().setLayout(new BorderLayout(0, 0));
+
+		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		
 		addWindowListener(new WindowAdapter() {
 			@Override
@@ -250,11 +257,29 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 		
 		registerShortcuts();
 	}
+	
+	@Override
+	public void wasSaved() {
+		_lastSavedAction = _documentEditor.getHistory().getLastAction();
+	}
 
 	protected void onWindowClosing() {
+		if (_documentEditor.getHistory().getLastAction() != _lastSavedAction) {
+			int res = JOptionPane.showConfirmDialog(_pageRenderer.getContainerComponent(), "Save before closing?", "Exit", JOptionPane.YES_NO_CANCEL_OPTION);
+			if (res == JOptionPane.CANCEL_OPTION) {
+				return;
+			}
+			if (res == JOptionPane.YES_OPTION) {
+				if (!FileHelper.showSaveDialog(_pageRenderer.getContainerComponent(), this, FileHelper.stringToFilter(_config.getString("save.defaultExt", "jpd")))) {
+					return;
+				}
+			}
+		}
+		
 		_pageRenderer.setNormalTool(null);
 		_pageRenderer.setInvertedTool(null);
 		_pageRenderer.stop();
+		this.dispose();
 	}
 
 	protected void onWindowOpened() {

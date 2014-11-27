@@ -215,6 +215,13 @@ public class DocumentHistory {
 		}
 	}
 	
+	/**
+	 * Gets the past performed action
+	 */
+	public IAction getLastAction() {
+		return (_top == null?null:_top.getData());
+	}
+	
 	protected void fireActionAdded(final IAction action) {
 		for (DocumentHistoryListener listener : _listeners) {
 			listener.actionAdded(action);

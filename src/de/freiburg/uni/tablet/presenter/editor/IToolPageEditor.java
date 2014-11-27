@@ -122,4 +122,9 @@ public interface IToolPageEditor {
 	 */
 	void connectDownClient(String hostname, int port, String name, String authToken)
 			throws IOException;
+
+	/**
+	 * Called when the current document was saved
+	 */
+	void wasSaved();
 }
