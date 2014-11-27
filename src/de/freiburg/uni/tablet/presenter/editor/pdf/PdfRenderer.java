@@ -8,6 +8,7 @@ import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
@@ -74,15 +75,11 @@ public class PdfRenderer implements IPageBackRenderer {
 		}
 	}
 	
-	public void close() {
-		try {
-			endPage();
-			System.out.println("save, close");
-			_pdf.save(new FileLocator(_file));
-			_pdf.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	public void close() throws IOException {
+		endPage();
+		System.out.println("save, close");
+		_pdf.save(new FileLocator(_file));
+		_pdf.close();
 	}
 	
 	private void endPage() {
