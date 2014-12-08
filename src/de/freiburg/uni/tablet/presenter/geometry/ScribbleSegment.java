@@ -54,7 +54,7 @@ public class ScribbleSegment implements IBinarySerializable {
 	public void addPoint(final DataPoint data) {
 		// Check variable width
 		if (!_hasVariableWidth) {
-			if (!_points.isEmpty() && _points.getFirst().getData().getPressure() != data.getPressure() && _points.getFirst().getData().getPressure() != 0 && data.getPressure() != 0) {
+			if (data.getPressure() != IPen.DEFAULT_PRESSURE && data.getPressure() != 0) {
 				System.out.println("Var Width");
 				_hasVariableWidth = true;
 				_path = null;
@@ -89,18 +89,16 @@ public class ScribbleSegment implements IBinarySerializable {
 		_maxX = Float.MIN_VALUE;
 		_maxY = Float.MIN_VALUE;
 		_hasVariableWidth = false;
-		float lastPressure = 0;
 		for (LinkedElement<DataPoint> e = _points.getFirst(); e != null; e = e
 				.getNext()) {
 			_minX = Math.min(_minX, e.getData().getX());
 			_minY = Math.min(_minY, e.getData().getY());
 			_maxX = Math.max(_maxX, e.getData().getX());
 			_maxY = Math.max(_maxY, e.getData().getY());
-			if (lastPressure != 0 && lastPressure != e.getData().getPressure() && e.getData().getPressure() != 0) {
+			if (e.getData().getPressure() != IPen.DEFAULT_PRESSURE && e.getData().getPressure() != 0) {
 				_hasVariableWidth = true;
 				_path = null;
 			}
-			lastPressure = e.getData().getPressure();
 		}
 		_hasBoundary = true;
 	}
@@ -431,7 +429,6 @@ public class ScribbleSegment implements IBinarySerializable {
 		_hasBoundary = true;
 
 		_hasVariableWidth = false;
-		float lastPressure = 0;
 		final int count = reader.readInt();
 		for (int i = 0; i < count; i++) {
 			final DataPoint e = new DataPoint(reader);
@@ -440,8 +437,7 @@ public class ScribbleSegment implements IBinarySerializable {
 			_minY = Math.min(_minY, e.getY());
 			_maxX = Math.max(_maxX, e.getX());
 			_maxY = Math.max(_maxY, e.getY());
-			_hasVariableWidth = _hasVariableWidth || (lastPressure != 0 && lastPressure != e.getPressure() && e.getPressure() != 0);
-			lastPressure = e.getPressure();
+			_hasVariableWidth = _hasVariableWidth || (e.getPressure() != IPen.DEFAULT_PRESSURE && e.getPressure() != 0);
 		}
 	}
 

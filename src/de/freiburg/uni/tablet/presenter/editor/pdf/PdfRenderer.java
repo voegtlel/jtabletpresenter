@@ -172,13 +172,14 @@ public class PdfRenderer implements IPageBackRenderer {
 	@Override
 	public void draw(final IPen pen, final float x,
 			final float y) {
-		_ellipseRenderer.x = x * _renderFactorX - pen.getThickness()  * _thicknessFactor / 2.0f;
-		_ellipseRenderer.y = _renderFactorY - y * _renderFactorY - pen.getThickness()  * _thicknessFactor / 2.0f;
-		_ellipseRenderer.width = pen.getThickness();
-		_ellipseRenderer.height = pen.getThickness();
+		float thickness = pen.getThickness(IPen.DEFAULT_PRESSURE);
+		_ellipseRenderer.x = x * _renderFactorX - thickness  * _thicknessFactor / 2.0f;
+		_ellipseRenderer.y = _renderFactorY - y * _renderFactorY - thickness  * _thicknessFactor / 2.0f;
+		_ellipseRenderer.width = thickness;
+		_ellipseRenderer.height = thickness;
 		try {
 			_creator.setNonStrokeColorRGB(pen.getColor().getRed()/255f, pen.getColor().getGreen()/255f, pen.getColor().getBlue()/255f);
-			_creator.penCircle(_ellipseRenderer.x + _ellipseRenderer.width / 2, _ellipseRenderer.y + _ellipseRenderer.height / 2, pen.getThickness() / 2);
+			_creator.penCircle(_ellipseRenderer.x + _ellipseRenderer.width / 2, _ellipseRenderer.y + _ellipseRenderer.height / 2, thickness / 2);
 			_creator.pathFillStrokeEvenOdd();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -190,7 +191,7 @@ public class PdfRenderer implements IPageBackRenderer {
 	public void draw(final IPen pen, final Path2D path) {
 		try {
 			_creator.setStrokeColorRGB(pen.getColor().getRed()/255f, pen.getColor().getGreen()/255f, pen.getColor().getBlue()/255f);
-			_creator.setLineWidth(pen.getThickness() * _thicknessFactor);
+			_creator.setLineWidth(pen.getThickness(IPen.DEFAULT_PRESSURE) * _thicknessFactor);
 			final PathIterator pathIterator = path.getPathIterator(AffineTransform.getScaleInstance(
 					_renderFactorX, _renderFactorY));
 			double[] coords = new double[6];
@@ -215,33 +216,43 @@ public class PdfRenderer implements IPageBackRenderer {
 	}
 	
 	private IPen _pathPen;
-	private float _pathLastX;
-	private float _pathLastY;
+	private boolean _isFirstPath = false;
+	private boolean _captureThickness = true;
 	
 	@Override
 	public void beginPath(final IPen pen) {
 		_pathPen = pen;
 		_creator.setStrokeColorRGB(pen.getColor().getRed()/255f, pen.getColor().getGreen()/255f, pen.getColor().getBlue()/255f);
-		_pathLastX = Float.NaN;
-		_pathLastY = Float.NaN;
+		if (!_captureThickness) {
+			_creator.setLineWidth(pen.getThickness(IPen.DEFAULT_PRESSURE) * _thicknessFactor);
+		}
+		_isFirstPath = true;
 	}
 	
 	@Override
 	public void endPath() {
-		_creator.pathStroke();
+		if (!_captureThickness) {
+			_creator.pathStroke();
+		}
 		_pathPen = null;
 	}
 	
 	@Override
 	public void drawPath(final float x1, final float y1, final float x2, final float y2,
 			final float pressure) {
-		_creator.setLineWidth(_pathPen.getThickness(pressure) * _thicknessFactor);
-		if (x1 != _pathLastX || y1 != _pathLastY) {
-			_creator.penMoveTo(x1, y1);
+		if (_captureThickness) {
+			_creator.setLineWidth(_pathPen.getThickness(pressure) * _thicknessFactor);
 		}
-		_creator.penLineTo(x2, y2);
-		_pathLastX = x2;
-		_pathLastY = y2;
+		float x1t = x1 * _renderFactorX;
+		float y1t = _renderFactorY - y1 * _renderFactorY;
+		float x2t = x2 * _renderFactorX;
+		float y2t = _renderFactorY - y2 * _renderFactorY;
+		if (!_captureThickness && _isFirstPath) {
+			_creator.penMoveTo(x1t, y1t);
+			_isFirstPath = false;
+		}
+		_creator.penLineTo(x2t, y2t);
+		_creator.pathStroke();
 	}
 	
 	@Override

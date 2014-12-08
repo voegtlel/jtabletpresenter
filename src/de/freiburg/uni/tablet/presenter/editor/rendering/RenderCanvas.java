@@ -20,6 +20,7 @@ import jpen.owner.multiAwt.AwtPenToolkit;
 import de.freiburg.uni.tablet.presenter.editor.pageeditor.IPageLayerBuffer;
 import de.freiburg.uni.tablet.presenter.editor.pageeditor.IPageRenderer;
 import de.freiburg.uni.tablet.presenter.editor.pageeditor.PagePenDispatcher;
+import de.freiburg.uni.tablet.presenter.page.IPen;
 import de.freiburg.uni.tablet.presenter.tools.ITool;
 
 public class RenderCanvas extends Canvas implements IPageRenderer {
@@ -76,7 +77,7 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 		_pagePenDispatcher = new PagePenDispatcher();
 		AwtPenToolkit.addPenListener(this, _pagePenDispatcher);
 		AwtPenToolkit.getPenManager().pen.levelEmulator
-				.setPressureTriggerForLeftCursorButton(0.5f);
+				.setPressureTriggerForLeftCursorButton(IPen.DEFAULT_PRESSURE);
 	}
 	
 	/**

@@ -313,10 +313,11 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer, IPage
 	public void draw(final IPen pen, final float x,
 			final float y) {
 		if (_graphics != null) {
-			_ellipseRenderer.x = x * _renderFactorX - pen.getThickness() / 2.0f;
-			_ellipseRenderer.y = y * _renderFactorY - pen.getThickness() / 2.0f;
-			_ellipseRenderer.width = pen.getThickness();
-			_ellipseRenderer.height = pen.getThickness();
+			float thickness = pen.getThickness(IPen.DEFAULT_PRESSURE);
+			_ellipseRenderer.x = x * _renderFactorX - thickness / 2.0f;
+			_ellipseRenderer.y = y * _renderFactorY - thickness / 2.0f;
+			_ellipseRenderer.width = thickness;
+			_ellipseRenderer.height = thickness;
 			_graphics.setPaint(pen.getColor());
 			_graphics.fill(_ellipseRenderer);
 			_isEmpty = false;

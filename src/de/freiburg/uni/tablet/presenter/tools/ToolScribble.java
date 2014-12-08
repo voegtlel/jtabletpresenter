@@ -19,6 +19,7 @@ public class ToolScribble extends AbstractTool {
 	private Scribble _scribble = null;
 	private boolean _dragLines;
 	private boolean _isFirstPoint = false;
+	private float _drawThreshold = 0.0f;
 	
 	/**
 	 * 
@@ -28,6 +29,7 @@ public class ToolScribble extends AbstractTool {
 	 */
 	public ToolScribble(final IToolPageEditor editor, final boolean dragLines) {
 		super(editor);
+		_drawThreshold = editor.getConfig().getFloat("editor.scribble.drawThreshold", 0.0f);
 		_dragLines = dragLines;
 		editor.getDocumentEditor().addListener(new DocumentEditorAdapter() {
 			@Override
@@ -64,7 +66,11 @@ public class ToolScribble extends AbstractTool {
 					_scribble.updateLastPoint(data);
 				}
 			} else {
-				_scribble.addPoint(data);
+				if (data.getPressure() >= _drawThreshold) {
+					_scribble.addPoint(data);
+				} else {
+					_scribble.addSegment();
+				}
 			}
 			_editor.getFrontRenderer().requireRepaint(_scribble, true);
 		}
@@ -91,7 +97,7 @@ public class ToolScribble extends AbstractTool {
 			return null;
 		}
 		final int diameter = (int) Math.max(_editor.getDocumentEditor()
-				.getCurrentPen().getThickness(), 2);
+				.getCurrentPen().getThickness(IPen.DEFAULT_PRESSURE), 2);
 		final int extraline = 3;
 		final BufferedImage img = createBitmap(diameter + 2 * extraline + 1,
 				diameter + 2 * extraline + 1);

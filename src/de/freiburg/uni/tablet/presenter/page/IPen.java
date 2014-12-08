@@ -7,6 +7,11 @@ import de.freiburg.uni.tablet.presenter.data.IBinarySerializable;
 
 public interface IPen extends IBinarySerializable {
 	/**
+	 * Pressure for a non-variable mode
+	 */
+	public static final float DEFAULT_PRESSURE = 0.5f;
+	
+	/**
 	 * Get system stroke.
 	 * 
 	 * @return stroke

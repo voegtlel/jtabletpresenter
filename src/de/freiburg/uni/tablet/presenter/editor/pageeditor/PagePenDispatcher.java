@@ -34,6 +34,7 @@ public class PagePenDispatcher implements PenListener {
 
 	private long _frameReduction = 20;
 	private boolean _lockPressure = false;
+	private float _minPressure = 0;
 
 	public PagePenDispatcher() {
 	}
@@ -49,7 +50,7 @@ public class PagePenDispatcher implements PenListener {
 		return new DataPoint((pen.getLevelValue(Type.X) - _drawOffset.x) / _drawSize.width,
 				(pen.getLevelValue(Type.Y) - _drawOffset.y) / _drawSize.height,
 				pen.getLevelValue(Type.X) - _drawOffset.x, pen.getLevelValue(Type.Y) - _drawOffset.y,
-				_lockPressure?0.5f:pen.getLevelValue(Type.PRESSURE), timestamp);
+				_lockPressure?0.5f:Math.max(_minPressure, pen.getLevelValue(Type.PRESSURE)), timestamp);
 	}
 
 	@Override
