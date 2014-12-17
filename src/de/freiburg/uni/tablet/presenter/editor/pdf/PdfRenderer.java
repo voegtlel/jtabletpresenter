@@ -247,12 +247,13 @@ public class PdfRenderer implements IPageBackRenderer {
 		float y1t = _renderFactorY - y1 * _renderFactorY;
 		float x2t = x2 * _renderFactorX;
 		float y2t = _renderFactorY - y2 * _renderFactorY;
-		if (!_captureThickness && _isFirstPath) {
+		if (_captureThickness || _isFirstPath) {
 			_creator.penMoveTo(x1t, y1t);
 			_isFirstPath = false;
 		}
 		_creator.penLineTo(x2t, y2t);
 		_creator.pathStroke();
+		_wasEmptyPage = false;
 	}
 	
 	@Override
