@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project basedir="." default="create_run_jar" name="jtabletpresenter">
+<project basedir="." default="create_packed_zip" name="jtabletpresenter">
     <property environment="env"/>
     <property name="debuglevel" value="source,lines,vars"/>
     <property name="target" value="1.7"/>
     <property name="source" value="1.7"/>
+	<property name="version" value="1.12"/>
     <path id="jtabletpresenter.classpath">
         <pathelement location="bin"/>
         <pathelement location="lib/jpen-2.jar"/>
@@ -21,6 +22,18 @@
         <pathelement location="lib/jPod.jar"/>
         <pathelement location="lib/jPodRenderer.jar"/>
     </path>
+	<target name="buildinfo">
+		<tstamp>
+			<format property="builtat" pattern="yyyyMMddHHmm" />
+		</tstamp>
+		
+		<propertyfile file="src/de/freiburg/uni/tablet/presenter/jtabletpresenter.properties"
+			comment="This file is generated - DO NOT EDIT"
+			>
+			<entry key="Version" value="${version}" />
+			<entry key="BuildTime" value="${builtat}" />
+		</propertyfile>
+	</target>
     <target name="init">
         <mkdir dir="bin"/>
         <copy includeemptydirs="false" todir="bin">
@@ -42,7 +55,7 @@
         <delete file="packed/JTabletPresenter.jar"/>
     </target>
     <target depends="clean" name="cleanall"/>
-    <target depends="init" name="build">
+    <target depends="init,buildinfo" name="build">
         <echo message="${ant.project.name}: ${ant.file}"/>
         <javac debug="true" debuglevel="${debuglevel}" destdir="bin" includeantruntime="false" source="${source}" target="${target}">
             <src path="src"/>
@@ -65,6 +78,7 @@
         </jar>
         <delete dir="packed/JTabletPresenter_lib"/>
         <mkdir dir="packed/JTabletPresenter_lib"/>
+		<mkdir dir="packed/autosave"/>
         <copy file="lib/jpen-2.jar" todir="packed/JTabletPresenter_lib"/>
         <copy file="lib/iscwt.jar" todir="packed/JTabletPresenter_lib"/>
         <copy file="lib/isfreetype.jar" todir="packed/JTabletPresenter_lib"/>
@@ -80,4 +94,9 @@
         <copy file="lib/jPod.jar" todir="packed/JTabletPresenter_lib"/>
         <copy file="lib/jPodRenderer.jar" todir="packed/JTabletPresenter_lib"/>
     </target>
+	<target depends="create_run_jar" name="create_packed_zip">
+		<zip destfile="JTB_VERSION_JTabletPresenter.zip">
+			<zipfileset prefix="JTabletPresenter" dir="packed" />
+		</zip>
+	</target>
 </project>

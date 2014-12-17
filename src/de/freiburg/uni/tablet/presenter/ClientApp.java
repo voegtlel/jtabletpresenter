@@ -6,6 +6,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -26,7 +28,19 @@ import de.freiburg.uni.tablet.presenter.xsocket.UpClient;
 
 public class ClientApp {
 	
-	public final static String VersionString = "1.11";
+	public final static String VersionString;
+	
+	static {
+		Properties javaProps = new Properties();
+		InputStream in = ClientApp.class.getResourceAsStream("jtabletpresenter.properties");
+		try {
+			javaProps.load(in);
+			in.close();
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
+		}
+		VersionString = javaProps.getProperty("Version", "INVALID_VERSION");
+	}
 
 	private JPageEditor _pageRenderer;
 	private DownClient _clientDownSync;
