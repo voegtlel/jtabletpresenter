@@ -279,7 +279,9 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 		_pageRenderer.setNormalTool(null);
 		_pageRenderer.setInvertedTool(null);
 		_pageRenderer.stop();
+		System.out.println("Dispose");
 		this.dispose();
+		System.gc();
 	}
 
 	protected void onWindowOpened() {
@@ -588,5 +590,15 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 		});
 		_downClient.start();
 		_isConnected = true;
+	}
+	
+	@Override
+	public void dispose() {
+		for (IButtonAction ba : _buttonActions) {
+			if (ba != null) {
+				ba.dispose();
+			}
+		}
+		super.dispose();
 	}
 }

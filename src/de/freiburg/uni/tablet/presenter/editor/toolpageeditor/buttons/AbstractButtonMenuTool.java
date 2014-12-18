@@ -68,4 +68,9 @@ public abstract class AbstractButtonMenuTool extends AbstractButtonAction {
 		}
 		return null;
 	}
+	
+	@Override
+	public void dispose() {
+		_frame.dispose();
+	}
 }

@@ -95,4 +95,8 @@ public abstract class AbstractButtonAction extends AbstractAction implements IBu
 		}
 		return null;
 	}
+	
+	@Override
+	public void dispose() {
+	}
 }

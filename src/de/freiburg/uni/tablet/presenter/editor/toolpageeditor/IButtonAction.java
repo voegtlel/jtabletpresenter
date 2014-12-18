@@ -46,4 +46,9 @@ public interface IButtonAction {
 	 * @return
 	 */
 	IButtonAction getButton(String name);
+	
+	/**
+	 * Releases all resources
+	 */
+	void dispose();
 }

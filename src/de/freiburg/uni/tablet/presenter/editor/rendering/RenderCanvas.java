@@ -75,7 +75,6 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 		});
 		
 		_pagePenDispatcher = new PagePenDispatcher();
-		AwtPenToolkit.addPenListener(this, _pagePenDispatcher);
 		AwtPenToolkit.getPenManager().pen.levelEmulator
 				.setPressureTriggerForLeftCursorButton(IPen.DEFAULT_PRESSURE);
 	}
@@ -84,6 +83,9 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 	 * Start the rendering thread
 	 */
 	public void start() {
+		AwtPenToolkit.addPenListener(RenderCanvas.this, _pagePenDispatcher);
+		System.out.println("Pen registered");
+		
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
@@ -100,6 +102,9 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 	 */
 	@SuppressWarnings("deprecation")
 	public void stop() {
+		AwtPenToolkit.removePenListener(RenderCanvas.this, _pagePenDispatcher);
+		System.out.println("Pen unregistered");
+		
 		if (_renderThread.isAlive()) {
 			synchronized (_repaintMonitor) {
 				_running = false;

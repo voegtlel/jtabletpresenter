@@ -250,6 +250,7 @@ public class ClientApp {
 						System.out.println("Saving session");
 						FileHelper.saveSession(_pageRenderer.getDocumentEditor(), savedSession);
 						System.out.println("Session autosaved");
+						System.gc();
 					} catch (Exception e1) {
 						e1.printStackTrace();
 					}
