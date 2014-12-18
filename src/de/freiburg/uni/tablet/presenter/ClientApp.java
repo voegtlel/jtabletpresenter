@@ -250,7 +250,13 @@ public class ClientApp {
 						System.out.println("Saving session");
 						FileHelper.saveSession(_pageRenderer.getDocumentEditor(), savedSession);
 						System.out.println("Session autosaved");
-						System.gc();
+						// Garbage collect all swing stuff
+						SwingUtilities.invokeLater(new Runnable() {
+							@Override
+							public void run() {
+								System.gc();
+							}
+						});
 					} catch (Exception e1) {
 						e1.printStackTrace();
 					}

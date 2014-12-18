@@ -150,4 +150,12 @@ public class JPageToolMenuFrame<T> extends JDialog {
 		setLocation(location.x, location.y);
 		setVisible(true);
 	}
+	
+	@Override
+	public void dispose() {
+		for (AbstractButtonAction buttonAction : _actions) {
+			buttonAction.dispose();
+		}
+		super.dispose();
+	}
 }
