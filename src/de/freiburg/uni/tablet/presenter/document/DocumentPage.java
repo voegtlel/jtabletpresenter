@@ -216,6 +216,11 @@ public class DocumentPage implements IEntity, IPageRepaintListener {
 		_document.fireRenderableModifyEnd(renderable, this);
 	}
 
+	/**
+	 * Deserializer
+	 * @param reader
+	 * @throws IOException
+	 */
 	public DocumentPage(final BinaryDeserializer reader)
 			throws IOException {
 		_id = reader.readLong();

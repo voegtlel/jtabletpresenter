@@ -14,6 +14,8 @@ import java.awt.Insets;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -33,6 +35,7 @@ import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 import javax.swing.OverlayLayout;
 import javax.swing.SwingUtilities;
+import javax.swing.TransferHandler;
 
 import de.freiburg.uni.tablet.presenter.actions.IAction;
 import de.freiburg.uni.tablet.presenter.document.DocumentConfig;
@@ -208,8 +211,7 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 			}
 		});
 		
-		final RenderCanvas pageRenderer = new RenderCanvas();
-		_pageRenderer = pageRenderer;
+		_pageRenderer = new RenderCanvas();
 		_pageRenderer.setLockPressure(!_config.getBoolean("editor.variableThickness", false));
 		_pageRenderer.setVoidColor(_config.getColor("editor.voidColor", Color.BLACK));
 		_containerPanel = new JPanel() {
@@ -229,12 +231,12 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 			}
 		};
 		_containerPanel.setLayout(new OverlayLayout(_containerPanel));
-		_containerPanel.add(pageRenderer.getContainerComponent());
+		_containerPanel.add(_pageRenderer.getContainerComponent());
 		getContentPane().add(_containerPanel,
 				BorderLayout.CENTER);
 
 		final PageLayerBufferComposite pageLayers = new PageLayerBufferComposite(
-				pageRenderer);
+				_pageRenderer);
 		_backgroundLayer = pageLayers.addColorBuffer();
 		_backgroundLayer.setColor(_config.getColor("document.background.color", Color.white));
 		if (_config.getBoolean("document.useDefaultRatio", false)) {
@@ -381,6 +383,13 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 				System.out.println("Unknown Button " + destination);
 			}
 		}
+		
+		// Paste action
+		this.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_V, ActionEvent.CTRL_MASK), TransferHandler.getPasteAction().getValue(Action.NAME));
+		this.getRootPane().getActionMap().put(TransferHandler.getPasteAction().getValue(Action.NAME), new ActionWrapper(this.getRootPane(), TransferHandler.getPasteAction()));
+		this.getRootPane().setTransferHandler(new EditorTransferHandler(this));
+		_pageRenderer.setDropTarget(new DropTarget(this, DnDConstants.ACTION_COPY, new EditorTransferHandler(this)));
+		this.getRootPane().setDropTarget(new DropTarget(this, DnDConstants.ACTION_COPY, new EditorTransferHandler(this)));
 	}
 	
 	@Override
@@ -439,6 +448,8 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 			_serverSyncLayer.requireRepaint(renderable, true);
 		}
 		// Else the object was not on a visible layer
+		
+		_pageRenderer.updateTool();
 	}
 
 	protected void onRenderableAdded(final IRenderable renderable,
@@ -454,6 +465,8 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 			// _pageRenderer.requireRepaint();
 		}
 		// Else the object is not on a visible layer
+		
+		_pageRenderer.updateTool();
 	}
 	
 	protected void onPdfPageChanged(final DocumentPage documentPage,
@@ -477,6 +490,8 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 		} else if (_documentEditor.getCurrentPage() != null) {
 			_pdfLayer.setPdfPage(_documentEditor.getCurrentPage().getPdfPage());
 		}
+		
+		_pageRenderer.updateTool();
 	}
 
 	protected void onDocumentChanged(final IClientDocument lastDocument) {

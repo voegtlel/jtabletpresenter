@@ -32,6 +32,8 @@ public class ToolSelectMove extends AbstractTool implements CollisionListener {
 	
 	private boolean _isDragging = false;
 	
+	private boolean _isModifying = false;
+	
 	private float _dragStartX = 0f;
 	private float _dragStartY = 0f;
 	private float _dragEndX = 0f;
@@ -56,7 +58,6 @@ public class ToolSelectMove extends AbstractTool implements CollisionListener {
 	
 	@Override
 	public void render(final IPageBackRenderer renderer) {
-		// TODO: What happens if we undo? The old objects will still be drawn :-(
 		if (_editor.getDocumentEditor().getCurrentPage() != _selectPage) {
 			return;
 		}
@@ -157,14 +158,19 @@ public class ToolSelectMove extends AbstractTool implements CollisionListener {
 		_editor.getPageEditor().suspendRepaint();
 		
 		if (_isDragging) {
+			_isModifying = true;
 			LinkedElementList<IRenderable> newSelection = new LinkedElementList<IRenderable>();
 			float offsetX = _dragEndX - _dragStartX;
 			float offsetY = _dragEndY - _dragStartY;
+			_dragEndX = _dragStartX;
+			_dragEndY = _dragStartY;
+			_isDragging = false;
 			_editor.getDocumentEditor().getHistory().beginActionGroup();
 			for (IRenderable renderable : _selectedObjects) {
 				IRenderable newRenderable = renderable.cloneRenderable(_selectPage, offsetX, offsetY);
 				newSelection.addLast(newRenderable);
 				_selectPage.replaceRenderable(renderable, newRenderable);
+				fireToolFinish(newRenderable);
 			}
 			_editor.getDocumentEditor().getHistory().endActionGroup();
 			_selectedObjects = newSelection;
@@ -172,6 +178,7 @@ public class ToolSelectMove extends AbstractTool implements CollisionListener {
 			_selectEndX += offsetX;
 			_selectStartY += offsetY;
 			_selectEndY += offsetY;
+			_isModifying = false;
 		}
 		
 		if (_selectedObjects.isEmpty()) {
@@ -179,6 +186,18 @@ public class ToolSelectMove extends AbstractTool implements CollisionListener {
 		}
 		
 		_editor.getPageEditor().resumeRepaint();
+	}
+	
+	@Override
+	public void updateTool() {
+		if (!_isModifying && _selectPage != null) {
+			// Reset selection/dragging
+			_selectedObjects.clear();
+			_isDragging = false;
+			_started = false;
+			_selectPage = null;
+			_editor.getFrontRenderer().requireRepaint();
+		}
 	}
 
 	@Override

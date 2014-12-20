@@ -3,37 +3,17 @@ package de.freiburg.uni.tablet.presenter.geometry;
 import java.io.IOException;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
-import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
-import de.freiburg.uni.tablet.presenter.data.IBinarySerializableId;
+import de.freiburg.uni.tablet.presenter.document.AbstractPageEntity;
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
 
-public abstract class AbstractRenderable implements IBinarySerializableId,
-		IRenderable {
-	private final long _id;
-	protected final DocumentPage _parent;
-
+public abstract class AbstractRenderable extends AbstractPageEntity implements IRenderable {
 	/**
 	 * Creates the renderable
 	 */
 	protected AbstractRenderable(final DocumentPage parent) {
-		_parent = parent;
-		_id = parent.getParent().nextId();
+		super(parent);
 	}
 
-	/**
-	 * Returns the id of the renderable object.
-	 * 
-	 * @return id
-	 */
-	@Override
-	public long getId() {
-		return _id;
-	}
-
-	@Override
-	public DocumentPage getParent() {
-		return _parent;
-	}
 
 	/**
 	 * Creates the renderable from an input stream
@@ -42,17 +22,9 @@ public abstract class AbstractRenderable implements IBinarySerializableId,
 	 */
 	protected AbstractRenderable(final BinaryDeserializer reader)
 			throws IOException {
-		_id = reader.readLong();
-		_parent = reader.readObjectTable();
-		_parent.getParent().deserializeId(_id);
+		super(reader);
 	}
 
-	@Override
-	public void serialize(final BinarySerializer writer) throws IOException {
-		writer.writeLong(_id);
-		writer.writeObjectTable(_parent);
-	}
-	
 	@Override
 	public String toString() {
 		return String.format("Renderable %s (%X)", this.getClass().getSimpleName(), System.identityHashCode(this));

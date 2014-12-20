@@ -8,17 +8,14 @@ import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.intarsys.pdf.pd.PDPage;
 
-public class PdfPageSerializable implements IEntity {
-	private final long _id;
-	private final DocumentPage _parent;
+public class PdfPageSerializable extends AbstractPageEntity {
 	private final PdfSerializable _basePdf;
 	private final PDPage _page;
 	private final Page _page2;
 
 	public PdfPageSerializable(final DocumentPage parent, final PdfSerializable basePdf, final PDPage page, final Page page2) {
+		super(parent);
 		_page2 = page2;
-		_id = parent.getParent().nextId();
-		_parent = parent;
 		_basePdf = basePdf;
 		_page = page;
 	}
@@ -44,9 +41,7 @@ public class PdfPageSerializable implements IEntity {
 	}
 	
 	public PdfPageSerializable(final BinaryDeserializer reader) throws IOException {
-		_id = reader.readLong();
-		_parent = reader.readObjectTable();
-		_parent.getParent().deserializeId(_id);
+		super(reader);
 		_basePdf = reader.readObjectTable();
 		final int pageIndex = reader.readInt();
 		_page = _basePdf.getDocument().getPageTree().getPageAt(pageIndex);
@@ -55,21 +50,10 @@ public class PdfPageSerializable implements IEntity {
 
 	@Override
 	public void serialize(final BinarySerializer writer) throws IOException {
-		writer.writeLong(_id);
-		writer.writeObjectTable(_parent);
+		super.serialize(writer);
 		writer.writeObjectTable(_basePdf);
 		System.out.println("Serialize pdf index " + _page.getNodeIndex());
 		writer.writeInt(_page.getNodeIndex());
-	}
-
-	@Override
-	public long getId() {
-		return _id;
-	}
-
-	@Override
-	public DocumentPage getParent() {
-		return _parent;
 	}
 	
 	/**

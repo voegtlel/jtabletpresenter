@@ -9,6 +9,7 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.JOptionPane;
 
+import de.freiburg.uni.tablet.presenter.document.BitmapImageData;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 import de.freiburg.uni.tablet.presenter.geometry.BitmapImage;
 import de.freiburg.uni.tablet.presenter.geometry.DataPoint;
@@ -37,12 +38,12 @@ public class ToolImage extends AbstractTool {
 
 	@Override
 	synchronized public void begin() {
-		final BitmapImage currentImage = _editor.getDocumentEditor().getCurrentImage();
+		final BitmapImageData currentImage = _editor.getDocumentEditor().getCurrentImage();
 		if (currentImage == null) {
 			JOptionPane.showMessageDialog(_editor.getPageEditor().getContainerComponent(),
 					"No image selected for image tool");
 		} else {
-			_image = currentImage.cloneRenderable(_editor.getDocumentEditor().getCurrentPage());
+			_image = new BitmapImage(_editor.getDocumentEditor().getCurrentPage(), currentImage, 0, 0, 0, 0);
 		}
 		_editor.getFrontRenderer().setRepaintListener(this);
 	}
@@ -53,6 +54,7 @@ public class ToolImage extends AbstractTool {
 			if (_startData == null) {
 				_image.setLocation(data.getX(), data.getY());
 				_startData = data;
+				fireToolStart();
 			} else {
 				final float x1 = Math.min(data.getX(), _startData.getX());
 				final float y1 = Math.min(data.getY(), _startData.getY());
@@ -75,6 +77,7 @@ public class ToolImage extends AbstractTool {
 		if (result != null && (((result.getMaxX() - result.getMinX()) > 0)
 				|| ((result.getMaxY() - result.getMinY()) > 0))) {
 			_editor.getDocumentEditor().getCurrentPage().addRenderable(result);
+			fireToolFinish(result);
 		}
 		
 		_editor.getFrontRenderer().setRepaintListener(null);

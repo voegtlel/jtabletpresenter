@@ -15,17 +15,14 @@ import de.intarsys.pdf.parser.COSLoadException;
 import de.intarsys.pdf.pd.PDDocument;
 import de.intarsys.tools.locator.ByteArrayLocator;
 
-public class PdfSerializable implements IEntity {
-	private final long _id;
-	private final IDocument _parent;
+public class PdfSerializable extends AbstractEntity {
 	private boolean _documentLoaded = false;
 	private PDDocument _document = null;
 	private PdfDocument _document2 = null;
 	private final byte[] _data;
 	
 	public PdfSerializable(final IDocument parent, final File srcFile) throws IOException {
-		_id = parent.nextId();
-		_parent = parent;
+		super(parent);
 		_data = FileHelper.readFile(srcFile);
 	}
 	
@@ -35,8 +32,7 @@ public class PdfSerializable implements IEntity {
 	 * @param document
 	 */
 	private PdfSerializable(final IDocument parent, final PDDocument document, final PdfDocument document2, final byte[] data) {
-		_id = parent.nextId();
-		_parent = parent;
+		super(parent);
 		_document = document;
 		_document2 = document2;
 		_documentLoaded = (document != null);
@@ -92,9 +88,7 @@ public class PdfSerializable implements IEntity {
 	}
 	
 	public PdfSerializable(final BinaryDeserializer reader) throws IOException {
-		_id = reader.readLong();
-		_parent = reader.readObjectTable();
-		_parent.deserializeId(_id);
+		super(reader);
 		final boolean pdfAvailable = reader.readBoolean();
 		if (pdfAvailable) {
 			_data = reader.readByteArray();
@@ -105,8 +99,7 @@ public class PdfSerializable implements IEntity {
 
 	@Override
 	public void serialize(final BinarySerializer writer) throws IOException {
-		writer.writeLong(_id);
-		writer.writeObjectTable(_parent);
+		super.serialize(writer);
 		
 		if (_data != null) {
 			writer.writeBoolean(true);
@@ -116,15 +109,6 @@ public class PdfSerializable implements IEntity {
 		}
 	}
 
-	@Override
-	public long getId() {
-		return _id;
-	}
-
-	@Override
-	public IDocument getParent() {
-		return _parent;
-	}
 	
 	/**
 	 * Clones this object

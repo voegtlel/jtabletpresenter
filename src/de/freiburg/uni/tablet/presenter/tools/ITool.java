@@ -32,7 +32,7 @@ public interface ITool {
 	 * Called, when drawing ends
 	 */
 	void end();
-
+	
 	/**
 	 * Called, when the mouse is active for this tool
 	 */
@@ -52,4 +52,9 @@ public interface ITool {
 	 * Called after the document was modified and the tool may update its state
 	 */
 	void updateTool();
+	
+	/**
+	 * Adds a listener
+	 */
+	void addToolListener(IToolListener listener);
 }

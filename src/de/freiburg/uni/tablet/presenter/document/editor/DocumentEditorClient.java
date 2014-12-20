@@ -1,5 +1,6 @@
 package de.freiburg.uni.tablet.presenter.document.editor;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
@@ -7,6 +8,7 @@ import java.util.List;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
+import de.freiburg.uni.tablet.presenter.document.BitmapImageData;
 import de.freiburg.uni.tablet.presenter.document.DocumentHistory;
 import de.freiburg.uni.tablet.presenter.document.DocumentListener;
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
@@ -15,13 +17,12 @@ import de.freiburg.uni.tablet.presenter.document.document.DocumentClientServer;
 import de.freiburg.uni.tablet.presenter.document.document.IClientDocument;
 import de.freiburg.uni.tablet.presenter.document.document.IDocument;
 import de.freiburg.uni.tablet.presenter.document.document.IEditableDocument;
-import de.freiburg.uni.tablet.presenter.geometry.BitmapImage;
 import de.freiburg.uni.tablet.presenter.page.IPen;
 
 public class DocumentEditorClient implements IDocumentEditorClient {
 	private IPen _currentPen = null;
 	private File _currentImageFile = null;
-	private BitmapImage _currentImage = null;
+	private BitmapImageData _currentImage = null;
 
 	private DocumentClientServer _document = null;
 	private final DocumentHistory _history;
@@ -154,15 +155,25 @@ public class DocumentEditorClient implements IDocumentEditorClient {
 	}
 	
 	@Override
-	public BitmapImage getCurrentImage() {
+	public BitmapImageData getCurrentImage() {
 		return _currentImage;
 	}
 	
 	@Override
 	public void setCurrentImageFile(final File imageFile) throws IOException {
+		// Try load
+		BitmapImageData newImage = new BitmapImageData(_document.getDocument(), imageFile);
+		// Then set
 		fireChanging();
+		_currentImage = newImage;
 		_currentImageFile = imageFile;
-		_currentImage = new BitmapImage(_currentPage, imageFile, 0, 0, 0, 0);
+	}
+	
+	@Override
+	public void setCurrentImage(final BufferedImage image) {
+		fireChanging();
+		_currentImageFile = null;
+		_currentImage = new BitmapImageData(_document.getDocument(), image);
 	}
 	
 	@Override

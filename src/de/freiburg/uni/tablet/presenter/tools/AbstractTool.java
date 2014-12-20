@@ -4,15 +4,19 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
 
 import de.freiburg.uni.tablet.presenter.editor.IPageRepaintListener;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 import de.freiburg.uni.tablet.presenter.geometry.DataPoint;
+import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 
 public abstract class AbstractTool implements ITool, IPageRepaintListener {
 	private boolean _isActive = false;
 	private Cursor _cursor = null;
 	protected final IToolPageEditor _editor;
+	private List<IToolListener> _listeners = new ArrayList<IToolListener>();
 
 	public AbstractTool(final IToolPageEditor editor) {
 		_editor = editor;
@@ -62,5 +66,22 @@ public abstract class AbstractTool implements ITool, IPageRepaintListener {
 	
 	@Override
 	public void updateTool() {
+	}
+	
+	@Override
+	public void addToolListener(final IToolListener listener) {
+		_listeners.add(listener);
+	}
+	
+	protected void fireToolFinish(final IRenderable createdRenderable) {
+		for (IToolListener l : _listeners) {
+			l.onFinish(createdRenderable);
+		}
+	}
+	
+	protected void fireToolStart() {
+		for (IToolListener l : _listeners) {
+			l.onStart();
+		}
 	}
 }

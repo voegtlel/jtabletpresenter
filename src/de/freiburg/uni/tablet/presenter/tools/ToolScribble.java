@@ -45,6 +45,7 @@ public class ToolScribble extends AbstractTool {
 		_scribble = new Scribble(_editor.getDocumentEditor().getCurrentPage(), _editor.getDocumentEditor().getCurrentPen());
 		_editor.getFrontRenderer().setRepaintListener(this);
 		_isFirstPoint = true;
+		fireToolStart();
 	}
 	
 	@Override
@@ -84,6 +85,7 @@ public class ToolScribble extends AbstractTool {
 		_editor.getPageEditor().suspendRepaint();
 		if (result != null) {
 			_editor.getDocumentEditor().getCurrentPage().addRenderable(result);
+			fireToolFinish(result);
 		}
 		
 		_editor.getFrontRenderer().setRepaintListener(null);

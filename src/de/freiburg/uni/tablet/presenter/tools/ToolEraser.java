@@ -52,6 +52,8 @@ public class ToolEraser extends AbstractTool implements CollisionListener {
 		_replacedObjects.clear();
 		
 		_editor.getFrontRenderer().setRepaintListener(this);
+		
+		fireToolStart();
 	}
 
 	@Override
@@ -97,6 +99,7 @@ public class ToolEraser extends AbstractTool implements CollisionListener {
 		for (IRenderable renderable : _replacedObjects.values()) {
 			if (!renderable.eraseEnd(_eraseInfo)) {
 				_erasePage.removeRenderable(renderable);
+				fireToolFinish(renderable);
 			}
 		}
 		

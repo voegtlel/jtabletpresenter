@@ -4,7 +4,7 @@
     <property name="debuglevel" value="source,lines,vars"/>
     <property name="target" value="1.7"/>
     <property name="source" value="1.7"/>
-	<property name="version" value="1.13"/>
+	<property name="version" value="1.14"/>
     <path id="jtabletpresenter.classpath">
         <pathelement location="bin"/>
         <pathelement location="lib/jpen-2.jar"/>
@@ -28,8 +28,7 @@
 		</tstamp>
 		
 		<propertyfile file="src/de/freiburg/uni/tablet/presenter/jtabletpresenter.properties"
-			comment="This file is generated - DO NOT EDIT"
-			>
+			comment="This file is generated - DO NOT EDIT">
 			<entry key="Version" value="${version}" />
 			<entry key="BuildTime" value="${builtat}" />
 		</propertyfile>

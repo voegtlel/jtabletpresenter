@@ -27,10 +27,7 @@ import de.intarsys.tools.randomaccess.RandomAccessByteArray;
  * @author Lukas
  *
  */
-public class TextFont implements IEntity {
-	private final long _id;
-	private final IDocument _parent;
-
+public class TextFont extends AbstractEntity {
 	/**
 	 * The internal font
 	 */
@@ -50,9 +47,8 @@ public class TextFont implements IEntity {
 	 * @param size
 	 */
 	public TextFont(final IDocument parent, final String name, final float size) {
-		_id = parent.nextId();
-		_parent = parent;
-
+		super(parent);
+		
 		_font = PDFontType1.createNew(PDFontType1.FONT_Helvetica);
 		_font.setEncoding(WinAnsiEncoding.UNIQUE);
 
@@ -71,9 +67,7 @@ public class TextFont implements IEntity {
 	 * @throws IOException
 	 */
 	public TextFont(final BinaryDeserializer reader) throws IOException {
-		_id = reader.readLong();
-		_parent = reader.readObjectTable();
-		_parent.deserializeId(_id);
+		super(reader);
 		final boolean fontAvailable = reader.readBoolean();
 		if (fontAvailable) {
 			final byte[] data = reader.readByteArray();
@@ -95,9 +89,8 @@ public class TextFont implements IEntity {
 
 	@Override
 	public void serialize(final BinarySerializer writer) throws IOException {
-		writer.writeLong(_id);
-		writer.writeObjectTable(_parent);
-
+		super.serialize(writer);
+		
 		if (_font != null) {
 			writer.writeBoolean(true);
 			RandomAccessByteArray dataBuffer = new RandomAccessByteArray(null);
@@ -111,16 +104,6 @@ public class TextFont implements IEntity {
 		writer.writeFloat(_size);
 	}
 
-	@Override
-	public long getId() {
-		return _id;
-	}
-
-	@Override
-	public IDocument getParent() {
-		return _parent;
-	}
-	
 	/**
 	 * Encodes the given text to bytes used by the internal font engine
 	 * @param text
@@ -228,7 +211,7 @@ public class TextFont implements IEntity {
 	
 	@Override
 	public String toString() {
-		return "TextFont {id: " + _id + ", font: " + _font + ", size: " + _size + "}";
+		return "TextFont {id: " + getId() + ", font: " + _font + ", size: " + _size + "}";
 	}
 
 	/**

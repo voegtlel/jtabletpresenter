@@ -209,6 +209,7 @@ public class ToolText extends AbstractTool implements CollisionListener {
 			_currentText.bake();
 			if (_currentText.getTextLines().length > 0 && (_currentText.getTextLines().length != 1 || !_currentText.getTextLines()[0].isEmpty())) {
 				_editor.getDocumentEditor().getCurrentPage().addRenderable(_currentText);
+				fireToolFinish(_currentText);
 			}
 			_editor.getFrontRenderer().requireRepaint();
 			_currentText = null;
@@ -226,6 +227,7 @@ public class ToolText extends AbstractTool implements CollisionListener {
 		_startData = null;
 		_lastData = null;
 		_selectPage = _editor.getDocumentEditor().getCurrentPage();
+		fireToolStart();
 	}
 
 	@Override
