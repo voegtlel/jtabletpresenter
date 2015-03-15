@@ -1,0 +1,1 @@
+java -jar JTabletPresenter.jar config.ini
