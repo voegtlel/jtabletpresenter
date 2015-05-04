@@ -15,7 +15,8 @@ The tool has capabilities to upload live annotations to a server, which students
  * Quick-Tool-Panel (large buttons for usage with digital pen)
  * Open and draw on PDFs
  * Serialize as PDF
- * Shortcuts
+ * (global) Shortcuts
+ * Screenshots, adding images
  * (experimental) Live stream to server
 
 
