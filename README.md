@@ -140,7 +140,7 @@ The config.ini file has a simple format:
 
 ### Global Shortcuts
 These define system-wide shortcuts being registered for the running application. Actions are the same as for application shortcuts.
-`globalShortcut.*`: Where `*` is an action from the application shortcuts.
+`shortcut.<action>.global.*`: Where `<action>` is an action from the application shortcuts.
 
 ## Network streaming
 The idea behind this is to allow a lecturer to draw on the screen and allow students to add notes on their private file. To allow this, the data on the lecturers screen is streamed to a server (write-only), that distributes the current state to its clients (read-only). It is possible at any time to connect to the server.
