@@ -63,7 +63,7 @@ The default config file is designed for presentation using digital pens.
 
 The config.ini file has a simple format:
 - Comments start with # (Hash)
-- Key-Value pair consists of: \w`*`([a-zA-Z.])\w`*`=\w`*`(.`*`)\w`*` where \1 is the key and \2 is the value.
+- Key-Value pair consists of: `\w*([a-zA-Z.])\w*=\w*(.*)\w*` where \1 is the key and \2 is the value.
 
 ## Configuration Variables
 
