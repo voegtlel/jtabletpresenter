@@ -50,13 +50,15 @@ The default config file is designed for presentation using digital pens.
  * No networking
  * Intentional shortcuts:
      - open/save (Ctrl+O/S)
-     - next page (N, Space, Page Down, Right, Down)
-     - previous page (P, Page Up, Left, Up)
+     - next page (N, Space, Page Up, Right, Down)
+     - previous page (P, Page Down, Left, Up)
      - undo/redo (ctrl+Z/Y)
      - toggle fullscreen + toolbar (F1, Escape)
      - toggle toolbar (F2)
      - show color square (C)
      - use scribble/eraser/line/image tool as primary (1/2/3/4)
+     - take screenshot of an area and use image tool once (ctrl print <global shortcut>)
+     - take screenshot and use image tool once (ctrl shift print <global shortcut>)
 
 
 # Configuration
