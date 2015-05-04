@@ -16,7 +16,8 @@
         <pathelement location="lib/jai_core.jar"/>
         <pathelement location="lib/jai_imageio.jar"/>
         <pathelement location="lib/jbig2.jar"/>
-        <pathelement location="lib/jna.jar"/>
+    	<pathelement location="lib/jkeymaster-1.1.jar"/>
+        <pathelement location="lib/jna-3.5.1.jar"/>
         <pathelement location="lib/jPodFonts.jar"/>
         <pathelement location="lib/jmupdf.jar"/>
         <pathelement location="lib/jPod.jar"/>
@@ -71,7 +72,7 @@
         <jar destfile="packed/JTabletPresenter.jar">
             <manifest>
                 <attribute name="Main-Class" value="de.freiburg.uni.tablet.presenter.ClientApp"/>
-                <attribute name="Class-Path" value=". JTabletPresenter_lib/jpen-2.jar JTabletPresenter_lib/iscwt.jar JTabletPresenter_lib/isfreetype.jar JTabletPresenter_lib/isnativec.jar JTabletPresenter_lib/isrt.jar JTabletPresenter_lib/jai_codec.jar JTabletPresenter_lib/jai_core.jar JTabletPresenter_lib/jai_imageio.jar JTabletPresenter_lib/jbig2.jar JTabletPresenter_lib/jna.jar JTabletPresenter_lib/jPodFonts.jar JTabletPresenter_lib/jmupdf.jar JTabletPresenter_lib/jPod.jar JTabletPresenter_lib/jPodRenderer.jar"/>
+                <attribute name="Class-Path" value=". JTabletPresenter_lib/jpen-2.jar JTabletPresenter_lib/iscwt.jar JTabletPresenter_lib/isfreetype.jar JTabletPresenter_lib/isnativec.jar JTabletPresenter_lib/isrt.jar JTabletPresenter_lib/jai_codec.jar JTabletPresenter_lib/jai_core.jar JTabletPresenter_lib/jai_imageio.jar JTabletPresenter_lib/jbig2.jar JTabletPresenter_lib/jkeymaster-1.1.jar JTabletPresenter_lib/jna-3.5.1.jar JTabletPresenter_lib/jPodFonts.jar JTabletPresenter_lib/jmupdf.jar JTabletPresenter_lib/jPod.jar JTabletPresenter_lib/jPodRenderer.jar"/>
             </manifest>
             <fileset dir="bin"/>
         </jar>
@@ -87,7 +88,8 @@
         <copy file="lib/jai_core.jar" todir="packed/JTabletPresenter_lib"/>
         <copy file="lib/jai_imageio.jar" todir="packed/JTabletPresenter_lib"/>
         <copy file="lib/jbig2.jar" todir="packed/JTabletPresenter_lib"/>
-        <copy file="lib/jna.jar" todir="packed/JTabletPresenter_lib"/>
+        <copy file="lib/jkeymaster-1.1.jar" todir="packed/JTabletPresenter_lib"/>
+		<copy file="lib/jna-3.5.1.jar" todir="packed/JTabletPresenter_lib"/>
         <copy file="lib/jPodFonts.jar" todir="packed/JTabletPresenter_lib"/>
         <copy file="lib/jmupdf.jar" todir="packed/JTabletPresenter_lib"/>
         <copy file="lib/jPod.jar" todir="packed/JTabletPresenter_lib"/>
