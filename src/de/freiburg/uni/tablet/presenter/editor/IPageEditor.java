@@ -21,6 +21,15 @@ public interface IPageEditor {
 	 *            new normal tool
 	 */
 	void setNormalTool(ITool normalTool);
+	
+	/**
+	 * Sets the normal tool for only one operation
+	 * (then it is reverted to the previous tool)
+	 * 
+	 * @param normalTool
+	 *            new normal tool
+	 */
+	void setNormalToolOnce(ITool normalTool);
 
 	/**
 	 * Gets the inverted tool

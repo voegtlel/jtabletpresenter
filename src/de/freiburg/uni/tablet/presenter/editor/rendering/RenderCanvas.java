@@ -20,8 +20,10 @@ import jpen.owner.multiAwt.AwtPenToolkit;
 import de.freiburg.uni.tablet.presenter.editor.pageeditor.IPageLayerBuffer;
 import de.freiburg.uni.tablet.presenter.editor.pageeditor.IPageRenderer;
 import de.freiburg.uni.tablet.presenter.editor.pageeditor.PagePenDispatcher;
+import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 import de.freiburg.uni.tablet.presenter.page.IPen;
 import de.freiburg.uni.tablet.presenter.tools.ITool;
+import de.freiburg.uni.tablet.presenter.tools.IToolListener;
 
 public class RenderCanvas extends Canvas implements IPageRenderer {
 	private static final long serialVersionUID = 1L;
@@ -280,6 +282,27 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 	@Override
 	public void setNormalTool(final ITool normalTool) {
 		_pagePenDispatcher.setNormalTool(normalTool);
+	}
+	
+	@Override
+	public void setNormalToolOnce(final ITool onceNormalTool) {
+		final ITool currentTool = getNormalTool();
+		onceNormalTool.addToolListener(new IToolListener() {
+			@Override
+			public void onStart() {
+			}
+			
+			@Override
+			public void onFinish(final IRenderable createdRenderable) {
+				SwingUtilities.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						setNormalTool(currentTool);
+					}
+				});
+			}
+		});
+		setNormalTool(onceNormalTool);
 	}
 
 	@Override

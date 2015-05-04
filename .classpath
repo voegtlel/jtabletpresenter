@@ -21,10 +21,11 @@
 	<classpathentry kind="lib" path="lib/jai_core.jar"/>
 	<classpathentry kind="lib" path="lib/jai_imageio.jar"/>
 	<classpathentry kind="lib" path="lib/jbig2.jar"/>
-	<classpathentry kind="lib" path="lib/jna.jar"/>
 	<classpathentry kind="lib" path="lib/jPodFonts.jar"/>
 	<classpathentry kind="lib" path="lib/jmupdf.jar"/>
 	<classpathentry kind="lib" path="lib/jPod.jar"/>
 	<classpathentry kind="lib" path="lib/jPodRenderer.jar"/>
+	<classpathentry kind="lib" path="lib/jkeymaster-1.1.jar"/>
+	<classpathentry kind="lib" path="lib/jna-3.5.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

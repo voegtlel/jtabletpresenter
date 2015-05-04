@@ -91,6 +91,14 @@ public class JPageToolMenuFrame<T> extends JDialog {
 		_actions.add(buttonAction);
 	}
 	
+	/**
+	 * Adds a subitem as dummy item (not clickable, but configable)
+	 * @param buttonAction
+	 */
+	public void addItemDummy(final AbstractButtonAction buttonAction) {
+		_actions.add(buttonAction);
+	}
+	
 	private void onActionPerformed(final JButton button, final IButtonAction action) {
 		if (_activeComponent == null) {
 			_activeComponent = button;

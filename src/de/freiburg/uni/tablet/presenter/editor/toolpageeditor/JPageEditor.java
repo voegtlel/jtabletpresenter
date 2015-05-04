@@ -37,6 +37,10 @@ import javax.swing.OverlayLayout;
 import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 
+import com.tulskiy.keymaster.common.HotKey;
+import com.tulskiy.keymaster.common.HotKeyListener;
+import com.tulskiy.keymaster.common.Provider;
+
 import de.freiburg.uni.tablet.presenter.actions.IAction;
 import de.freiburg.uni.tablet.presenter.document.DocumentConfig;
 import de.freiburg.uni.tablet.presenter.document.DocumentConfig.KeyValue;
@@ -110,6 +114,8 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 	private JPanel _containerPanel;
 	
 	private IAction _lastSavedAction = null;
+	
+	private Provider _globalHotkeyProvider = null;
 
 	/**
 	 * Create the panel.
@@ -282,6 +288,11 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 		_pageRenderer.setInvertedTool(null);
 		_pageRenderer.stop();
 		System.out.println("Dispose");
+		if (_globalHotkeyProvider != null) {
+			_globalHotkeyProvider.reset();
+			_globalHotkeyProvider.stop();
+			_globalHotkeyProvider = null;
+		}
 		this.dispose();
 		System.gc();
 	}
@@ -352,7 +363,11 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 		for (KeyValue item : shortcuts) {
 			final String actionName = item.key.substring(9);
 			int lastIndex = actionName.lastIndexOf('.');
-			final String destination = actionName.substring(0, lastIndex);
+			String destination = actionName.substring(0, lastIndex);
+			final boolean isGlobal = destination.endsWith("global");
+			if (isGlobal) {
+				destination = destination.substring(0, destination.length() - 7);
+			}
 			final String actionKeys = item.value.toString();
 			IButtonAction button = null;
 			for (IButtonAction b : _buttonActions) {
@@ -366,19 +381,39 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 			if (button != null) {
 				final IButtonAction refButton = button;
 				final KeyStroke ks = KeyStroke.getKeyStroke(actionKeys);
-				final Action action = new AbstractAction(actionName) {
-					private static final long serialVersionUID = 1L;
-
-					@Override
-					public void actionPerformed(final ActionEvent e) {
-						System.out.println("Shortcut " + ks + " activated for " + actionName);
-						final Point loc = MouseInfo.getPointerInfo().getLocation();
-						refButton.perform(loc);
+				if (ks == null) {
+					System.err.println("Invalid shortcut: " + actionKeys + ", shortcut not registered");
+					continue;
+				}
+				if (isGlobal) {
+					if (_globalHotkeyProvider == null) {
+						_globalHotkeyProvider = Provider.getCurrentProvider(true);
 					}
-				};
-				this.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(ks, actionName);
-				this.getRootPane().getActionMap().put(actionName, action);
-				System.out.println("Shortcut " + ks + " registered for " + actionName);
+					HotKeyListener listener = new HotKeyListener() {
+						@Override
+						public void onHotKey(final HotKey hotkey) {
+							System.out.println("Global shortcut " + ks + " activated for " + actionName);
+							final Point loc = MouseInfo.getPointerInfo().getLocation();
+							refButton.perform(loc);
+						}
+					};
+					_globalHotkeyProvider.register(ks, listener);
+					System.out.println("Global shortcut " + ks + " registered for " + actionName);
+				} else {
+					final Action action = new AbstractAction(actionName) {
+						private static final long serialVersionUID = 1L;
+
+						@Override
+						public void actionPerformed(final ActionEvent e) {
+							System.out.println("Shortcut " + ks + " activated for " + actionName);
+							final Point loc = MouseInfo.getPointerInfo().getLocation();
+							refButton.perform(loc);
+						}
+					};
+					this.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(ks, actionName);
+					this.getRootPane().getActionMap().put(actionName, action);
+					System.out.println("Shortcut " + ks + " registered for " + actionName);
+				}
 			} else {
 				System.out.println("Unknown Button " + destination);
 			}

@@ -21,7 +21,6 @@ public class ButtonToolItemImage extends ButtonToolItem {
 			final AbstractButtonSelectTool selectTool, final String name, final String text,
 			final String imageResource, final ITool tool) {
 		super(editor, selectTool, name, text, imageResource, tool);
-		// TODO Auto-generated constructor stub
 	}
 	
 	@Override

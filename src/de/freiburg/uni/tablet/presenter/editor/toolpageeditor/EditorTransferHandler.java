@@ -16,13 +16,9 @@ import java.io.IOException;
 import java.util.List;
 
 import javax.swing.JComponent;
-import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
-import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
-import de.freiburg.uni.tablet.presenter.tools.ITool;
-import de.freiburg.uni.tablet.presenter.tools.IToolListener;
 import de.freiburg.uni.tablet.presenter.tools.ToolImage;
 
 /**
@@ -36,27 +32,6 @@ public class EditorTransferHandler extends TransferHandler implements DropTarget
 	
 	public EditorTransferHandler(final IToolPageEditor editor) {
 		_editor = editor;
-	}
-	
-	private void setImageToolOnce() {
-		ToolImage tool = new ToolImage(_editor);
-		final ITool currentTool = _editor.getPageEditor().getNormalTool();
-		tool.addToolListener(new IToolListener() {
-			@Override
-			public void onStart() {
-			}
-			
-			@Override
-			public void onFinish(final IRenderable createdRenderable) {
-				SwingUtilities.invokeLater(new Runnable() {
-					@Override
-					public void run() {
-						_editor.getPageEditor().setNormalTool(currentTool);
-					}
-				});
-			}
-		});
-		_editor.getPageEditor().setNormalTool(tool);
 	}
 	
 	private void acceptImage(final Transferable t) throws UnsupportedFlavorException, IOException {
@@ -126,11 +101,11 @@ public class EditorTransferHandler extends TransferHandler implements DropTarget
 		try {
 			if (hasImageFlavor(support.getDataFlavors())) {
 				acceptImage(support.getTransferable());
-				setImageToolOnce();
+				_editor.getPageEditor().setNormalToolOnce(new ToolImage(_editor));
 				return true;
 			} else if (hasFileFlavor(support.getDataFlavors())) {
 				acceptFile(support.getTransferable());
-				setImageToolOnce();
+				_editor.getPageEditor().setNormalToolOnce(new ToolImage(_editor));
 				return true;
 			}
 		} catch (UnsupportedFlavorException | IOException e) {
@@ -168,13 +143,13 @@ public class EditorTransferHandler extends TransferHandler implements DropTarget
 				dtde.acceptDrop(DnDConstants.ACTION_COPY);
 				acceptImage(dtde.getTransferable());
 				dtde.dropComplete(true);
-				setImageToolOnce();
+				_editor.getPageEditor().setNormalToolOnce(new ToolImage(_editor));
 				return;
 			} else if (hasFileFlavor(dtde.getCurrentDataFlavors())) {
 				dtde.acceptDrop(DnDConstants.ACTION_COPY);
 				acceptFile(dtde.getTransferable());
 				dtde.dropComplete(true);
-				setImageToolOnce();
+				_editor.getPageEditor().setNormalToolOnce(new ToolImage(_editor));
 				return;
 			}
 			dtde.rejectDrop();
