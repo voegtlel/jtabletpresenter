@@ -1,6 +1,6 @@
 # JTabletPresenter
 (If you are not interested, skip to [Installation])
-JTabletPresenter was developed by Lukas Vögtle for a lecture on university, where the lecturer was unhappy with the quality of existing commercial products as presentation tools. Its aim is to make a simple way for the lecturer to write on a "whiteboard" using the digital pen and export the result as pdf to provide it to the students.
+JTabletPresenter was developed by Lukas VÃ¶gtle for a lecture on university, where the lecturer was unhappy with the quality of existing commercial products as presentation tools. Its aim is to make a simple way for the lecturer to write on a "whiteboard" using the digital pen and export the result as pdf to provide it to the students.
 
 Later on, support for rendering PDFs and storing the annotations was added.
 In addition an experimental feature for live streaming modifications was successfully tested in a lecture.
@@ -20,7 +20,8 @@ The tool has capabilities to upload live annotations to a server, which students
 
 
 # Installation
-Simply unpack the archive and run the `JTabletPresenter.jar` file.
+1. [Download the latest release](https://github.com/voegtlel/jtabletpresenter/releases)
+2. Simply unpack the archive and run the `JTabletPresenter.jar` file.
 
 ## Hints
 ### Windows
