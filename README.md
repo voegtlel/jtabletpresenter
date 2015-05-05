@@ -1,6 +1,6 @@
 # JTabletPresenter
 (If you are not interested, skip to [Installation])
-JTabletPresenter was developed by Lukas Vögtle for a lecture on university, where the lecturer was unhappy with the quality of existing commercial products as presentation tools. Its aim is to make a simple way for the lecturer to write on a "whiteboard" using the digital pen and export the result as pdf to provide it to the students.
+JTabletPresenter was developed by Lukas VÃ¶gtle for a lecture on university, where the lecturer was unhappy with the quality of existing commercial products as presentation tools. Its aim is to make a simple way for the lecturer to write on a "whiteboard" using the digital pen and export the result as pdf to provide it to the students.
 
 Later on, support for rendering PDFs and storing the annotations was added.
 In addition an experimental feature for live streaming modifications was successfully tested in a lecture.
@@ -15,12 +15,14 @@ The tool has capabilities to upload live annotations to a server, which students
  * Quick-Tool-Panel (large buttons for usage with digital pen)
  * Open and draw on PDFs
  * Serialize as PDF
- * Shortcuts
+ * (global) Shortcuts
+ * Screenshots, adding images
  * (experimental) Live stream to server
 
 
 # Installation
-Simply unpack the archive and run the `JTabletPresenter.jar` file.
+1. [Download the latest release](https://github.com/voegtlel/jtabletpresenter/releases)
+2. Simply unpack the archive and run the `JTabletPresenter.jar` file.
 
 ## Hints
 ### Windows
@@ -48,20 +50,22 @@ The default config file is designed for presentation using digital pens.
  * No networking
  * Intentional shortcuts:
      - open/save (Ctrl+O/S)
-     - next page (N, Space, Page Down, Right, Down)
-     - previous page (P, Page Up, Left, Up)
+     - next page (N, Space, Page Up, Right, Down)
+     - previous page (P, Page Down, Left, Up)
      - undo/redo (ctrl+Z/Y)
      - toggle fullscreen + toolbar (F1, Escape)
      - toggle toolbar (F2)
      - show color square (C)
      - use scribble/eraser/line/image tool as primary (1/2/3/4)
+     - take screenshot of an area and use image tool once (ctrl print <global shortcut>)
+     - take screenshot and use image tool once (ctrl shift print <global shortcut>)
 
 
 # Configuration
 
 The config.ini file has a simple format:
 - Comments start with # (Hash)
-- Key-Value pair consists of: \w`*`([a-zA-Z.])\w`*`=\w`*`(.`*`)\w`*` where \1 is the key and \2 is the value.
+- Key-Value pair consists of: `\w*([a-zA-Z.])\w*=\w*(.*)\w*` where \1 is the key and \2 is the value.
 
 ## Configuration Variables
 
@@ -125,6 +129,9 @@ The config.ini file has a simple format:
  * `shortcut.tools.document.new.*`: New Document (clear all)
  * `shortcut.tools.document.clearPdf.*`: Clear the background PDF
  * `shortcut.tools.document.openPdf.*`: Open a PDF for the background
+ * `shortcut.tools.screenshotArea.*`: Take a screenshot of an area of the screen
+ * `shortcut.tools.screenshotFull.*`: Take a screenshot of a selectable screen
+ * `shortcut.tools.screenshotDirect.*`: Take a screenshot of the screen under the cursor
  * `shortcut.next.*`: Next page
  * `shortcut.previous.*`: Previous page
  * `shortcut.undo.*`: Undo
@@ -132,6 +139,18 @@ The config.ini file has a simple format:
  * `shortcut.toggleFullscreen.*`: Toggle fullscreen
  * `shortcut.color.*`: Show color square
 
+
+### Global Shortcuts
+These define system-wide shortcuts being registered for the running application. Actions are the same as for application shortcuts.
+`shortcut.<action>.global.*`: Where `<action>` is an action from the application shortcuts.
+
+### Toolbar
+The (dynamic) toolbar is separate from the fixed toolbar. This toolbar automatically shows when hovering over it and hides when leaving it. The buttons present in the toolbar can be configured by:
+
+ * `toolbar.orientation` (enum, NONE): One of LEFT, RIGHT, TOP, BOTTOM (Default NONE; disables the toolbar)
+ * `toolbar.compactSize` (integer, 15): Size when the toolbar is not hovered
+ * `toolbar.compactOpacity` (float, 0.25): Opacity when the toolbar is not hovered
+ * `toolbar.*` (string): Creates a toolbar action button. Value is one of the actions from the shortcuts.
 
 ## Network streaming
 The idea behind this is to allow a lecturer to draw on the screen and allow students to add notes on their private file. To allow this, the data on the lecturers screen is streamed to a server (write-only), that distributes the current state to its clients (read-only). It is possible at any time to connect to the server.
