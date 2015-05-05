@@ -64,7 +64,7 @@ public class CaptureWrapper extends JDialog {
 				ownerWindow.setVisible(false);
 				// Annoying, but needed to skip transition effects of hiding the window in some OS
 				try {
-					Thread.sleep(100);
+					Thread.sleep(200);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}

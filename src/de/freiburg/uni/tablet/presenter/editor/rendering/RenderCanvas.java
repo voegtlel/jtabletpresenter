@@ -58,6 +58,8 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 		super();
 		setBackground(Color.BLACK);
 		
+		setPreferredSize(new Dimension(65535, 65535));
+		
 		_renderThread = new Thread(new Runnable() {
 			@Override
 			public void run() {

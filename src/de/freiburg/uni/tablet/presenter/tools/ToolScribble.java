@@ -61,10 +61,13 @@ public class ToolScribble extends AbstractTool {
 			if (_dragLines) {
 				if (_isFirstPoint) {
 					_isFirstPoint = false;
-					_scribble.addPoint(data);
-					_scribble.addPoint(data.clone());
+					// Pressure must be fixed, because it is a dragging operation
+					DataPoint fixedData = new DataPoint(data.getX(), data.getY(), data.getXOrig(), data.getYOrig(), 0.5f, data.getTimestamp());
+					_scribble.addPoint(fixedData);
+					_scribble.addPoint(fixedData.clone());
 				} else {
-					_scribble.updateLastPoint(data);
+					DataPoint fixedData = new DataPoint(data.getX(), data.getY(), data.getXOrig(), data.getYOrig(), 0.5f, data.getTimestamp());
+					_scribble.updateLastPoint(fixedData);
 				}
 			} else {
 				if (data.getPressure() >= _drawThreshold) {

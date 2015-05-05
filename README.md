@@ -144,6 +144,14 @@ The config.ini file has a simple format:
 These define system-wide shortcuts being registered for the running application. Actions are the same as for application shortcuts.
 `shortcut.<action>.global.*`: Where `<action>` is an action from the application shortcuts.
 
+### Toolbar
+The (dynamic) toolbar is separate from the fixed toolbar. This toolbar automatically shows when hovering over it and hides when leaving it. The buttons present in the toolbar can be configured by:
+
+ * `toolbar.orientation` (enum, NONE): One of LEFT, RIGHT, TOP, BOTTOM (Default NONE; disables the toolbar)
+ * `toolbar.compactSize` (integer, 15): Size when the toolbar is not hovered
+ * `toolbar.compactOpacity` (float, 0.25): Opacity when the toolbar is not hovered
+ * `toolbar.*` (string): Creates a toolbar action button. Value is one of the actions from the shortcuts.
+
 ## Network streaming
 The idea behind this is to allow a lecturer to draw on the screen and allow students to add notes on their private file. To allow this, the data on the lecturers screen is streamed to a server (write-only), that distributes the current state to its clients (read-only). It is possible at any time to connect to the server.
 

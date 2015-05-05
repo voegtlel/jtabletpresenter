@@ -127,24 +127,6 @@ public class JPageToolMenuFrame<T> extends JDialog {
 	}
 
 	/**
-	 * Creates a JPageToolFrame and shows it modal.
-	 * 
-	 * @param container
-	 *            container for the dialog
-	 */
-	public static <T> JPageToolMenuFrame<T> createIconBox(
-			final Component container, final int buttonWidth,
-			final int buttonHeight, final int componentsX, final int componentsY) {
-		final JPageToolMenuFrame<T> frame = new JPageToolMenuFrame<T>();
-		final Rectangle rect = new Rectangle(container.getLocationOnScreen());
-		rect.x += container.getWidth();
-		rect.width = buttonWidth * componentsX;
-		rect.height = buttonHeight * componentsY;
-		frame.setBounds(rect);
-		return frame;
-	}
-
-	/**
 	 * Moves the component to the position and makes it visible.
 	 * 
 	 * @param location

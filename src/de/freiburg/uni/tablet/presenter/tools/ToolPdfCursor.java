@@ -261,14 +261,16 @@ public class ToolPdfCursor extends AbstractTool {
 		boolean hoveringNew = false;
 		PDPage page = pdfPage.getPage();
 		List<PDAnnotation> annotations = page.getAnnotations();
-		for (PDAnnotation annot : annotations) {
-			CDSRectangle mediaBox = page.getMediaBox();
-			// origin is bottom left
-			float x = data.getX() * mediaBox.getWidth() - mediaBox.getLowerLeftX();
-			float y = mediaBox.getUpperRightY() - data.getY() * mediaBox.getHeight();
-			hoveringNew = hoveringNew || annot.getRectangle().contains(x, y);
-			if (hoveringNew) {
-				break;
+		if (annotations != null) {
+			for (PDAnnotation annot : annotations) {
+				CDSRectangle mediaBox = page.getMediaBox();
+				// origin is bottom left
+				float x = data.getX() * mediaBox.getWidth() - mediaBox.getLowerLeftX();
+				float y = mediaBox.getUpperRightY() - data.getY() * mediaBox.getHeight();
+				hoveringNew = hoveringNew || annot.getRectangle().contains(x, y);
+				if (hoveringNew) {
+					break;
+				}
 			}
 		}
 		if (hoveringNew != _hovering) {
@@ -297,13 +299,15 @@ public class ToolPdfCursor extends AbstractTool {
 		_document = document;
 		_activeEventProcessor = this;
 		List<PDAnnotation> annotations = page.getAnnotations();
-		for (PDAnnotation annot : annotations) {
-			CDSRectangle mediaBox = page.getMediaBox();
-			// origin is bottom left
-			float x = data.getX() * mediaBox.getWidth() - mediaBox.getLowerLeftX();
-			float y = mediaBox.getUpperRightY() - data.getY() * mediaBox.getHeight();
-			if (annot.getRectangle().contains(x, y)) {
-				ActionTools.annotationTriggerMouseDown(annot);
+		if (annotations != null) {
+			for (PDAnnotation annot : annotations) {
+				CDSRectangle mediaBox = page.getMediaBox();
+				// origin is bottom left
+				float x = data.getX() * mediaBox.getWidth() - mediaBox.getLowerLeftX();
+				float y = mediaBox.getUpperRightY() - data.getY() * mediaBox.getHeight();
+				if (annot.getRectangle().contains(x, y)) {
+					ActionTools.annotationTriggerMouseDown(annot);
+				}
 			}
 		}
 		_document = null;
@@ -324,12 +328,14 @@ public class ToolPdfCursor extends AbstractTool {
 		_document = document;
 		_activeEventProcessor = this;
 		List<PDAnnotation> annotations = page.getAnnotations();
-		for (PDAnnotation annot : annotations) {
-			final CDSRectangle mediaBox = page.getMediaBox();
-			final float x = _lastDataPoint.getX() * mediaBox.getWidth() - mediaBox.getLowerLeftX();
-			final float y = mediaBox.getUpperRightY() - _lastDataPoint.getY() * mediaBox.getHeight();
-			if (annot.getRectangle().contains(x, y)) {
-				ActionTools.annotationTriggerMouseUp(annot);
+		if (annotations != null) {
+			for (PDAnnotation annot : annotations) {
+				final CDSRectangle mediaBox = page.getMediaBox();
+				final float x = _lastDataPoint.getX() * mediaBox.getWidth() - mediaBox.getLowerLeftX();
+				final float y = mediaBox.getUpperRightY() - _lastDataPoint.getY() * mediaBox.getHeight();
+				if (annot.getRectangle().contains(x, y)) {
+					ActionTools.annotationTriggerMouseUp(annot);
+				}
 			}
 		}
 		_document = null;
