@@ -41,6 +41,8 @@ public class JPageToolBarFloat extends JDialog {
 	private int _orientation;
 	private Component _boundComponent;
 	private float _compactOpacity;
+	
+	private boolean _opacitySupported = true;
 
 	/**
 	 * Create the frame.
@@ -78,7 +80,12 @@ public class JPageToolBarFloat extends JDialog {
 			}
 		});
 		setBounds(0, 0, 0, 0);
-		setOpacity(_compactOpacity);
+		try {
+			setOpacity(_compactOpacity);
+		} catch (UnsupportedOperationException e) {
+			e.printStackTrace();
+			_opacitySupported = false;
+		}
 		
 		Toolkit.getDefaultToolkit().addAWTEventListener(new AWTEventListener() {
 	        @Override
@@ -147,13 +154,17 @@ public class JPageToolBarFloat extends JDialog {
 	protected void onMouseEntered() {
 		_currentSize = _fullSize;
 		updateBounds();
-		setOpacity(1.0f);
+		if (_opacitySupported) {
+			setOpacity(1.0f);
+		}
 	}
 	
 	protected void onMouseExited() {
 		_currentSize = _compactSize;
 		updateBounds();
-		setOpacity(_compactOpacity);
+		if (_opacitySupported) {
+			setOpacity(_compactOpacity);
+		}
 	}
 
 	public void setActions(final IButtonAction[] toolbarActions) {
