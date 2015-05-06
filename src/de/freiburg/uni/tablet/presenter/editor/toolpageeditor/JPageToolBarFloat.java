@@ -116,14 +116,15 @@ public class JPageToolBarFloat extends JDialog {
 		if (_boundComponent.isShowing()) {
 			Point location = _boundComponent.getLocationOnScreen();
 			if (_orientation == ORIENTATION_LEFT || _orientation == ORIENTATION_TOP) {
-				JPageToolBarFloat.this.setLocation(location);
+				setLocation(location);
 			} else if (_orientation == ORIENTATION_BOTTOM) {
 				location.move(0, _boundComponent.getHeight() - _currentSize);
-				JPageToolBarFloat.this.setLocation(location);
+				setLocation(location);
 			} else if (_orientation == ORIENTATION_RIGHT) {
 				location.move(_boundComponent.getWidth() - _currentSize, 0);
-				JPageToolBarFloat.this.setLocation(location);
+				setLocation(location);
 			}
+			System.out.println("Update location to " + getLocation());
 		}
 	}
 	
@@ -132,22 +133,16 @@ public class JPageToolBarFloat extends JDialog {
 			Dimension size = _boundComponent.getSize();
 			Point location = _boundComponent.getLocationOnScreen();
 			
-			if (_orientation == ORIENTATION_LEFT || _orientation == ORIENTATION_TOP) {
-				JPageToolBarFloat.this.setLocation(location);
-				if (_orientation == ORIENTATION_LEFT) {
-					JPageToolBarFloat.this.setSize(_currentSize, size.height);
-				} else {
-					JPageToolBarFloat.this.setSize(size.width, _currentSize);
-				}
+			if (_orientation == ORIENTATION_LEFT) {
+				setBounds(location.x, location.y, _currentSize, size.height);
+			} else if (_orientation == ORIENTATION_TOP) {
+				setBounds(location.x, location.y, size.width, _currentSize);
 			} else if (_orientation == ORIENTATION_BOTTOM) {
-				location.move(0, size.height - _currentSize);
-				JPageToolBarFloat.this.setLocation(location);
-				JPageToolBarFloat.this.setSize(size.width, _currentSize);
+				setBounds(location.x, location.y + size.height - _currentSize, size.width, _currentSize);
 			} else if (_orientation == ORIENTATION_RIGHT) {
-				location.move(size.width - _currentSize, 0);
-				JPageToolBarFloat.this.setLocation(location);
-				JPageToolBarFloat.this.setSize(_currentSize, size.height);
+				setBounds(location.x + size.width - _currentSize, location.y, _currentSize, size.height);
 			}
+			System.out.println("Update bounds to " + getBounds());
 		}
 	}
 	
