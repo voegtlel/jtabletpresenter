@@ -106,51 +106,52 @@ The config.ini file has a simple format:
  * `file.dialog.location` (string, empty): If the location is saved (see *  * `file.dialog.saveLocation`), then this stores the last location.
 
 ### Shortcuts
-`shortcut.*`: Configuration for shortcuts, Actions:
+`shortcut.<action>.*`: Configures the shortcuts for an action (see below). Multiple shortcuts can be defined for the same action by adding a different name for `*` (same names overwrite previous definitions).
 
- * `shortcut.tools.new.*`: New Document
- * `shortcut.tools.open.*`: Open file dialog
- * `shortcut.tools.save.*`: Save file dialog
- * `shortcut.tools.toggleToolbar.*`: Toggle the toolbar
- * `shortcut.tools.primary.scribble.*`: Select scribble tool as primary tool
- * `shortcut.tools.primary.eraser.*`: Select eraser tool as primary tool
- * `shortcut.tools.primary.deleter.*`: Select deleter tool as primary tool
- * `shortcut.tools.primary.image.*`: Select image tool as primary tool
- * `shortcut.tools.primary.selectMove.*`: Select selectMove tool as primary tool
- * `shortcut.tools.secondary.scribble.*`: Select scribble tool as primary tool
- * `shortcut.tools.secondary.eraser.*`: Select eraser tool as primary tool
- * `shortcut.tools.secondary.deleter.*`: Select deleter tool as primary tool
- * `shortcut.tools.secondary.image.*`: Select image tool as primary tool
- * `shortcut.tools.secondary.selectMove.*`: Select selectMove tool as primary tool
- * `shortcut.tools.page.new.*`: Create new page
- * `shortcut.tools.page.clone.*`: Clone current page
- * `shortcut.tools.page.delete.*`: Delete current page
- * `shortcut.tools.page.clear.*`: Clear current page
- * `shortcut.tools.document.new.*`: New Document (clear all)
- * `shortcut.tools.document.clearPdf.*`: Clear the background PDF
- * `shortcut.tools.document.openPdf.*`: Open a PDF for the background
- * `shortcut.tools.screenshotArea.*`: Take a screenshot of an area of the screen
- * `shortcut.tools.screenshotFull.*`: Take a screenshot of a selectable screen
- * `shortcut.tools.screenshotDirect.*`: Take a screenshot of the screen under the cursor
- * `shortcut.next.*`: Next page
- * `shortcut.previous.*`: Previous page
- * `shortcut.undo.*`: Undo
- * `shortcut.redo.*`: Redo
- * `shortcut.toggleFullscreen.*`: Toggle fullscreen
- * `shortcut.color.*`: Show color square
+`shortcut.<action>.global.*`: Defines the shortcut as a global shortcut.
 
-
-### Global Shortcuts
-These define system-wide shortcuts being registered for the running application. Actions are the same as for application shortcuts.
-`shortcut.<action>.global.*`: Where `<action>` is an action from the application shortcuts.
+Possible key strokes are defined in [KeyStroke#getKeyStroke(java.lang.String)](http://docs.oracle.com/javase/7/docs/api/javax/swing/KeyStroke.html#getKeyStroke(java.lang.String)).
 
 ### Toolbar
 The (dynamic) toolbar is separate from the fixed toolbar. This toolbar automatically shows when hovering over it and hides when leaving it. The buttons present in the toolbar can be configured by:
 
- * `toolbar.orientation` (enum, NONE): One of LEFT, RIGHT, TOP, BOTTOM (Default NONE; disables the toolbar)
+ * `toolbar.orientation` (enum, NONE): One of LEFT, RIGHT, TOP, BOTTOM, NONE (disables the toolbar)
  * `toolbar.compactSize` (integer, 15): Size when the toolbar is not hovered
  * `toolbar.compactOpacity` (float, 0.25): Opacity when the toolbar is not hovered
- * `toolbar.*` (string): Creates a toolbar action button. Value is one of the actions from the shortcuts.
+ * `toolbar.*` (action): Creates a toolbar action button. Value is one of the actions (see below). This also adds a "`space`" and "`fill`" value to modify spacing.
+
+### Actions
+ * `tools.new`: New Document
+ * `tools.open`: Open file dialog
+ * `tools.save`: Save file dialog
+ * `tools.toggleToolbar`: Toggle the toolbar
+ * `tools.primary.scribble`: Select scribble tool as primary tool
+ * `tools.primary.eraser`: Select eraser tool as primary tool
+ * `tools.primary.deleter`: Select deleter tool as primary tool
+ * `tools.primary.image`: Select image tool as primary tool
+ * `tools.primary.selectMove`: Select selectMove tool as primary tool
+ * `tools.secondary.scribble`: Select scribble tool as primary tool
+ * `tools.secondary.eraser`: Select eraser tool as primary tool
+ * `tools.secondary.deleter`: Select deleter tool as primary tool
+ * `tools.secondary.image`: Select image tool as primary tool
+ * `tools.secondary.selectMove`: Select selectMove tool as primary tool
+ * `tools.page.new`: Create new page
+ * `tools.page.clone`: Clone current page
+ * `tools.page.delete`: Delete current page
+ * `tools.page.clear`: Clear current page
+ * `tools.document.new`: New Document (clear all)
+ * `tools.document.clearPdf`: Clear the background PDF
+ * `tools.document.openPdf`: Open a PDF for the background
+ * `tools.screenshotAreaHide`: Take a screenshot of an area of the screen with hiding the window
+ * `tools.screenshotArea`: Take a screenshot of an area of the screen
+ * `tools.screenshotFull`: Take a screenshot of a selectable screen
+ * `tools.screenshotDirect`: Take a screenshot of the screen under the cursor
+ * `next`: Next page
+ * `previous`: Previous page
+ * `undo`: Undo
+ * `redo`: Redo
+ * `toggleFullscreen`: Toggle fullscreen
+ * `color`: Show color square
 
 ## Network streaming
 The idea behind this is to allow a lecturer to draw on the screen and allow students to add notes on their private file. To allow this, the data on the lecturers screen is streamed to a server (write-only), that distributes the current state to its clients (read-only). It is possible at any time to connect to the server.
