@@ -94,6 +94,15 @@
         <copy file="lib/jmupdf.jar" todir="packed/JTabletPresenter_lib"/>
         <copy file="lib/jPod.jar" todir="packed/JTabletPresenter_lib"/>
         <copy file="lib/jPodRenderer.jar" todir="packed/JTabletPresenter_lib"/>
+		<copy file="jmupdf32.dll" todir="packed"/>
+		<copy file="jmupdf64.dll" todir="packed"/>
+		<copy file="jpen-2-3.dll" todir="packed"/>
+		<copy file="jpen-2-3-64.dll" todir="packed"/>
+		<copy file="libjmupdf32.so" todir="packed"/>
+		<copy file="libjmupdf64.so" todir="packed"/>
+		<copy file="libjpen-2-4.so" todir="packed"/>
+		<copy file="libjpen-2-4-x86_64.so" todir="packed"/>
+		<copy file="libjpen-2-3.jnilib" todir="packed"/>
 		<copy file="README.md" todir="packed/"/>
     </target>
 	<target depends="create_run_jar" name="create_packed_zip">
