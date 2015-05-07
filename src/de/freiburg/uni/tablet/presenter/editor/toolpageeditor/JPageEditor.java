@@ -57,6 +57,11 @@ import de.freiburg.uni.tablet.presenter.editor.pageeditor.PageLayerBufferColor;
 import de.freiburg.uni.tablet.presenter.editor.pageeditor.PageLayerBufferComposite;
 import de.freiburg.uni.tablet.presenter.editor.pageeditor.PageLayerBufferFront;
 import de.freiburg.uni.tablet.presenter.editor.rendering.RenderCanvas;
+import de.freiburg.uni.tablet.presenter.editor.rendering.toolbar.IToolbarItem;
+import de.freiburg.uni.tablet.presenter.editor.rendering.toolbar.ToolbarAction;
+import de.freiburg.uni.tablet.presenter.editor.rendering.toolbar.ToolbarFill;
+import de.freiburg.uni.tablet.presenter.editor.rendering.toolbar.ToolbarRenderer;
+import de.freiburg.uni.tablet.presenter.editor.rendering.toolbar.ToolbarSpace;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonColor;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonNext;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonPrevious;
@@ -65,7 +70,6 @@ import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonSpin
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonToggleFullscreen;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonTools;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonUndo;
-import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.ButtonWrapper;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.FileHelper;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
@@ -84,7 +88,6 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 	private static final long serialVersionUID = 1L;
 
 	private RenderCanvas _pageRenderer;
-	private JPageToolBarFloat _toolBar;
 	private JPageToolBar _panelTools;
 
 	private int _lastExtendedState;
@@ -240,13 +243,6 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 		getContentPane().add(_containerPanel,
 				BorderLayout.CENTER);
 		
-		String toolbarOrientation = _config.getString("toolbar.orientation", "NONE");
-		int orientation = JPageToolBarFloat.getOrientation(toolbarOrientation);
-		if (orientation != JPageToolBarFloat.ORIENTATION_NONE) {
-			_toolBar = new JPageToolBarFloat(this, _pageRenderer.getContainerComponent(), orientation, _config.getInt("toolbar.compactSize", 15), _config.getFloat("toolbar.compactOpacity", 0.25f));
-			_toolBar.setVisible(true);
-		}
-
 		final PageLayerBufferComposite pageLayers = new PageLayerBufferComposite(
 				_pageRenderer);
 		_backgroundLayer = pageLayers.addColorBuffer();
@@ -271,9 +267,7 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 		_panelTools.setToolButtonsVertical(_buttonActions);
 		
 		registerShortcuts();
-		if (_toolBar != null) {
-			buildToolbar();
-		}
+		buildToolbar();
 	}
 	
 	@Override
@@ -318,32 +312,44 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 	}
 	
 	private void buildToolbar() {
+		String toolbarOrientation = _config.getString("toolbar.orientation", "NONE");
+		int orientation = ToolbarRenderer.getOrientation(toolbarOrientation);
+		if (orientation == ToolbarRenderer.ORIENTATION_NONE) {
+			return;
+		}
+		
 		final List<KeyValue> toolbarEntries = _config.getAll("toolbar.");
-		final List<IButtonAction> actions = new ArrayList<>(toolbarEntries.size());
+		final List<IToolbarItem> actions = new ArrayList<>(toolbarEntries.size());
 		for (KeyValue item : toolbarEntries) {
 			final String actionId = item.key.substring(8);
 			if (actionId.equals("orientation") || actionId.equals("compactSize") || actionId.equals("compactOpacity")) {
 				continue;
 			}
 			final String actionName = item.value.toString();
-			IButtonAction button = null;
-			for (IButtonAction b : _buttonActions) {
-				if (b != null) {
-					button = b.getButton(actionName);
-					if (button != null) {
-						break;
+			if (actionName.equals("space")) {
+				actions.add(new ToolbarSpace());
+			} else if (actionName.equals("fill")) {
+				actions.add(new ToolbarFill());
+			} else {
+				IButtonAction button = null;
+				for (IButtonAction b : _buttonActions) {
+					if (b != null) {
+						button = b.getButton(actionName);
+						if (button != null) {
+							break;
+						}
 					}
 				}
-			}
-			if (button != null) {
-				System.out.println("Adding toolbar action " + actionId + " for " + actionName);
-				actions.add(new ButtonWrapper(this, button));
-			} else {
-				System.out.println("Unknown action " + actionName);
+				if (button != null) {
+					System.out.println("Adding toolbar action " + actionId + " for " + actionName);
+					actions.add(new ToolbarAction(button.getText(), button.getImageResource(), button));
+				} else {
+					System.out.println("Unknown action " + actionName);
+				}
 			}
 		}
-		IButtonAction[] toolbarActions = actions.toArray(new IButtonAction[actions.size()]);
-		_toolBar.setActions(toolbarActions);
+		IToolbarItem[] toolbarItems = actions.toArray(new IToolbarItem[actions.size()]);
+		_pageRenderer.setToolbar(toolbarItems, orientation, _config.getInt("toolbar.compactSize", 15), _config.getFloat("toolbar.compactOpacity", 0.25f));
 	}
 	
 	private void registerShortcuts() {

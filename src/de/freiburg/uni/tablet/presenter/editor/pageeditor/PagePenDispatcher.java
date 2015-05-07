@@ -35,6 +35,8 @@ public class PagePenDispatcher implements PenListener {
 	private long _frameReduction = 20;
 	private boolean _lockPressure = false;
 	private float _minPressure = 0;
+	
+	private IPagePenFilter _filter = null;
 
 	public PagePenDispatcher() {
 	}
@@ -105,6 +107,9 @@ public class PagePenDispatcher implements PenListener {
 				// Use the new tool
 				_activePenKind = _penKind;
 				_activePenButton = e.button.getType();
+				if (_filter != null && !_filter.onDown(e.pen.getLevelValue(Type.X), e.pen.getLevelValue(Type.Y), e.pen.getLevelValue(Type.PRESSURE), _penKind)) {
+					return;
+				}
 				_activeTool = inverted ? _invertedTool : _normalTool;
 				if (_activeTool != null) {
 					// Update hover
@@ -137,6 +142,8 @@ public class PagePenDispatcher implements PenListener {
 						}
 					}
 					_activeTool = null;
+				} else if (_filter != null && !_filter.onUp(e.pen.getLevelValue(Type.X), e.pen.getLevelValue(Type.Y), e.pen.getLevelValue(Type.PRESSURE), _penKind)) {
+					return;
 				}
 			}
 		}
@@ -159,6 +166,8 @@ public class PagePenDispatcher implements PenListener {
 			if (_activeTool != null) {
 				_activeTool.draw(dp);
 				_lastData = dp;
+			} else if (_filter != null && !_filter.onMove(e.pen.getLevelValue(Type.X), e.pen.getLevelValue(Type.Y), e.pen.getLevelValue(Type.PRESSURE), _penKind)) {
+				return;
 			}
 			_invertedTool.drawAlways(dp);
 			_normalTool.drawAlways(dp);
@@ -303,5 +312,13 @@ public class PagePenDispatcher implements PenListener {
 	 */
 	public void setLockPressure(final boolean lockPressure) {
 		_lockPressure  = lockPressure;
+	}
+	
+	/**
+	 * Sets a filter, which can filter events
+	 * @param filter
+	 */
+	public void setFilter(final IPagePenFilter filter) {
+		_filter = filter;
 	}
 }

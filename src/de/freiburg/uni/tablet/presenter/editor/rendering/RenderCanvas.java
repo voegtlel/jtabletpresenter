@@ -3,6 +3,7 @@ package de.freiburg.uni.tablet.presenter.editor.rendering;
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -20,6 +21,8 @@ import jpen.owner.multiAwt.AwtPenToolkit;
 import de.freiburg.uni.tablet.presenter.editor.pageeditor.IPageLayerBuffer;
 import de.freiburg.uni.tablet.presenter.editor.pageeditor.IPageRenderer;
 import de.freiburg.uni.tablet.presenter.editor.pageeditor.PagePenDispatcher;
+import de.freiburg.uni.tablet.presenter.editor.rendering.toolbar.IToolbarItem;
+import de.freiburg.uni.tablet.presenter.editor.rendering.toolbar.ToolbarRenderer;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 import de.freiburg.uni.tablet.presenter.page.IPen;
 import de.freiburg.uni.tablet.presenter.tools.ITool;
@@ -53,6 +56,11 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 	 * Dispatcher
 	 */
 	private final PagePenDispatcher _pagePenDispatcher;
+
+	private ToolbarRenderer _toolbarRenderer;
+
+	private Cursor _toolCursor;
+	private boolean _hasTemporaryCursor = false;
 	
 	public RenderCanvas() {
 		super();
@@ -134,7 +142,7 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 	}
 	
 	/**
-	 * 
+	 * Internal thread for repainting.
 	 * @throws InterruptedException
 	 */
 	private void repaintThread() throws InterruptedException {
@@ -180,11 +188,23 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 				if (_renderBuffer != null) {
 					_renderBuffer.resize(_lastRenderWidth, _lastRenderHeight, _lastRenderOffsetX, _lastRenderOffsetY);
 				}
+				if (_toolbarRenderer != null) {
+					_toolbarRenderer.updateBounds(width, height);
+				}
 			}
 			
 			if (this.isVisible()) {
 				final BufferStrategy strategy = this.getBufferStrategy();
 				final Graphics2D graphics = (Graphics2D) strategy.getDrawGraphics();
+				
+				// Clear unused area
+				if (_lastRenderOffsetX != 0 || _lastRenderOffsetY != 0 || width - _lastRenderWidth != 0 || height - _lastRenderHeight != 0) {
+					graphics.setPaint(Color.BLACK);
+					graphics.fillRect(0, 0, width, _lastRenderOffsetY);
+					graphics.fillRect(0, 0, _lastRenderOffsetX, height);
+					graphics.fillRect(_lastRenderOffsetX + _lastRenderWidth, 0, width, height);
+					graphics.fillRect(0, _lastRenderOffsetY + _lastRenderHeight, width, height);
+				}
 				
 				if (_renderBuffer != null) {
 					try {
@@ -196,12 +216,21 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 				}
 				
 				if (graphics != null) {
+					if (_toolbarRenderer != null) {
+						_toolbarRenderer.paint(graphics);
+					}
 					graphics.dispose();
 				}
 				strategy.show();
 				Toolkit.getDefaultToolkit().sync();
 			}
 		}
+	}
+	
+	public void setToolbar(final IToolbarItem[] actions, final int orientation, final int compactSize, final float compactOpacity) {
+		_toolbarRenderer = new ToolbarRenderer(this, orientation, compactSize, compactOpacity, getFont());
+		_toolbarRenderer.setActions(actions);
+		_pagePenDispatcher.setFilter(_toolbarRenderer);
 	}
 	
 	@Override
@@ -272,6 +301,10 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 		return this;
 	}
 	
+	/**
+	 * Locks the pressure (disable pen pressure detection)
+	 * @param lockPressure
+	 */
 	public void setLockPressure(final boolean lockPressure) {
 		_pagePenDispatcher.setLockPressure(lockPressure);
 	}
@@ -326,6 +359,26 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 	public void updateTool() {
 		_pagePenDispatcher.getNormalTool().updateTool();
 		_pagePenDispatcher.getInvertedTool().updateTool();
+	}
+	
+	@Override
+	public void setTemporaryCursor(final Cursor cursor) {
+		setCursor(cursor);
+		_hasTemporaryCursor = true;
+	}
+	
+	@Override
+	public void resetTemporaryCursor() {
+		setCursor(_toolCursor);
+		_hasTemporaryCursor = false;
+	}
+	
+	@Override
+	public void setToolCursor(final Cursor cursor) {
+		if (!_hasTemporaryCursor) {
+			setCursor(cursor);
+		}
+		_toolCursor = cursor;
 	}
 
 	@Override

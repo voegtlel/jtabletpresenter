@@ -39,7 +39,7 @@ public abstract class AbstractTool implements ITool, IPageRepaintListener {
 	protected void updateCursor() {
 		_cursor = generateCursor();
 		if (_isActive) {
-			_editor.getPageEditor().setCursor(_cursor);
+			_editor.getPageEditor().setToolCursor(_cursor);
 		}
 	}
 
@@ -55,7 +55,7 @@ public abstract class AbstractTool implements ITool, IPageRepaintListener {
 		if (_cursor == null) {
 			updateCursor();
 		}
-		_editor.getPageEditor().setCursor(_cursor);
+		_editor.getPageEditor().setToolCursor(_cursor);
 		_isActive = true;
 	}
 

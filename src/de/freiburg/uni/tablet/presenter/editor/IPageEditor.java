@@ -52,7 +52,19 @@ public interface IPageEditor {
 	 * @param cursor
 	 *            new cursor
 	 */
-	void setCursor(Cursor cursor);
+	void setToolCursor(Cursor cursor);
+	
+	/**
+	 * Sets a temporary cursor, that overrides the tool cursor.
+	 * @param cursor
+	 */
+	void setTemporaryCursor(Cursor cursor);
+	
+	/**
+	 * Resets the temporary cursor and activates the tool cursor.
+	 * @param cursor
+	 */
+	void resetTemporaryCursor();
 
 	/**
 	 * Gets the gui-container.
