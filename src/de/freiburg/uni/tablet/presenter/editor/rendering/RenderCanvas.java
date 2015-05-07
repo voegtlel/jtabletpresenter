@@ -156,6 +156,9 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 				_requiresRepaint = false;
 			}
 			if (_running) {
+				if (!isDisplayable()) {
+					Thread.sleep(100);
+				}
 				// Perform actual repaint
 				paint(null);
 			}
@@ -221,8 +224,13 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 					}
 					graphics.dispose();
 				}
-				strategy.show();
-				Toolkit.getDefaultToolkit().sync();
+				try {
+					strategy.show();
+					Toolkit.getDefaultToolkit().sync();
+				} catch (IllegalStateException e) {
+					e.printStackTrace();
+					_requiresRepaint = true;
+				}
 			}
 		}
 	}
