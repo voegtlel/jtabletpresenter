@@ -1,7 +1,6 @@
 package de.freiburg.uni.tablet.presenter.editor.pageeditor;
 
-import java.awt.Dimension;
-import java.awt.Point;
+import java.awt.geom.Point2D;
 
 import jpen.PButton;
 import jpen.PButtonEvent;
@@ -29,8 +28,8 @@ public class PagePenDispatcher implements PenListener {
 
 	private DataPoint _lastData = null;
 
-	private Dimension _drawSize = new Dimension();
-	private Point _drawOffset = new Point();
+	private Point2D.Float _drawSize = new Point2D.Float();
+	private Point2D.Float _drawOffset = new Point2D.Float();
 
 	private long _frameReduction = 20;
 	private boolean _lockPressure = false;
@@ -49,8 +48,8 @@ public class PagePenDispatcher implements PenListener {
 	 * @return
 	 */
 	private DataPoint getDataPoint(final Pen pen, final long timestamp) {
-		return new DataPoint((pen.getLevelValue(Type.X) - _drawOffset.x) / _drawSize.width,
-				(pen.getLevelValue(Type.Y) - _drawOffset.y) / _drawSize.height,
+		return new DataPoint((pen.getLevelValue(Type.X) - _drawOffset.x) / _drawSize.x,
+				(pen.getLevelValue(Type.Y) - _drawOffset.y) / _drawSize.y,
 				pen.getLevelValue(Type.X) - _drawOffset.x, pen.getLevelValue(Type.Y) - _drawOffset.y,
 				_lockPressure?0.5f:Math.max(_minPressure, pen.getLevelValue(Type.PRESSURE)), timestamp);
 	}
@@ -270,17 +269,11 @@ public class PagePenDispatcher implements PenListener {
 		_invertedTool = invertedTool;
 	}
 
-	public Dimension getDrawSize() {
-		return _drawSize;
-	}
-	
-	public Point getDrawOffset() {
-		return _drawOffset;
-	}
-
-	public void setDrawSize(final Dimension drawSize, final Point drawOffset) {
-		_drawSize = drawSize;
-		_drawOffset = drawOffset;
+	public void setTransform(final float drawSizeX, final float drawSizeY, final float drawOffsetX, final float drawOffsetY) {
+		_drawSize.x = drawSizeX;
+		_drawSize.y = drawSizeY;
+		_drawOffset.x = drawOffsetX;
+		_drawOffset.y = drawOffsetY;
 	}
 
 	public long getFrameReduction() {

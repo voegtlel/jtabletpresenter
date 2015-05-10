@@ -2,7 +2,7 @@ package de.freiburg.uni.tablet.presenter.document;
 
 import java.io.IOException;
 
-import com.jmupdf.page.Page;
+import com.jmupdf.interfaces.Page;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
@@ -21,7 +21,7 @@ public class PdfPageSerializable extends AbstractPageEntity {
 	}
 	
 	public PdfPageSerializable(final DocumentPage parent, final PdfSerializable basePdf, final int pageIndex) throws IOException {
-		this(parent, basePdf, basePdf.getDocument().getPageTree().getPageAt(pageIndex), basePdf.getDocument2().getPage(pageIndex + 1));
+		this(parent, basePdf, basePdf.getDocument().getPageTree().getPageAt(pageIndex), basePdf.tryGetPage(pageIndex + 1));
 	}
 	
 	protected PdfPageSerializable(final DocumentPage parent, final PdfPageSerializable base) {
@@ -45,7 +45,7 @@ public class PdfPageSerializable extends AbstractPageEntity {
 		_basePdf = reader.readObjectTable();
 		final int pageIndex = reader.readInt();
 		_page = _basePdf.getDocument().getPageTree().getPageAt(pageIndex);
-		_page2 = _basePdf.getDocument2().getPage(pageIndex + 1);
+		_page2 = _basePdf.tryGetPage(pageIndex + 1);
 	}
 
 	@Override

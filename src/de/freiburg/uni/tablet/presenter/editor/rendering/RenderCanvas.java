@@ -7,13 +7,11 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
-import java.awt.image.ImageObserver;
 
 import javax.swing.SwingUtilities;
 
@@ -21,6 +19,7 @@ import jpen.owner.multiAwt.AwtPenToolkit;
 import de.freiburg.uni.tablet.presenter.editor.pageeditor.IPageLayerBuffer;
 import de.freiburg.uni.tablet.presenter.editor.pageeditor.IPageRenderer;
 import de.freiburg.uni.tablet.presenter.editor.pageeditor.PagePenDispatcher;
+import de.freiburg.uni.tablet.presenter.editor.pageeditor.RenderMetric;
 import de.freiburg.uni.tablet.presenter.editor.rendering.toolbar.IToolbarItem;
 import de.freiburg.uni.tablet.presenter.editor.rendering.toolbar.ToolbarRenderer;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
@@ -44,13 +43,7 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 	
 	private Thread _renderThread;
 	
-	private int _lastRenderOffsetX = 0;
-	private int _lastRenderOffsetY = 0;
-	private int _lastRenderWidth = 0;
-	private int _lastRenderHeight = 0;
-	
-	private int _lastWidth = 0;
-	private int _lastHeight = 0;
+	private RenderMetric _renderMetric = new RenderMetric();
 	
 	/**
 	 * Dispatcher
@@ -169,30 +162,14 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 	@Override
 	public void paint(final Graphics g) {
 		synchronized (_paintSync) {
-			int width = this.getWidth();
-			int height = this.getHeight();
-			if ((width != _lastWidth) || (height != _lastHeight)) {
-				_lastWidth = width;
-				_lastHeight = height;
-				final Float desiredRatio = _renderBuffer.getDesiredRatio();
-				if (desiredRatio == null) {
-					_lastRenderWidth = width;
-					_lastRenderHeight = height;
-					_lastRenderOffsetX = 0;
-					_lastRenderOffsetY = 0;
-				} else {
-					System.out.println("Resize desired ratio: " + desiredRatio);
-					_lastRenderWidth = Math.min((int)(height * desiredRatio), width);
-					_lastRenderHeight = Math.min((int)(width / desiredRatio), height);
-					_lastRenderOffsetX = (_lastWidth - _lastRenderWidth) / 2;
-					_lastRenderOffsetY = (_lastHeight - _lastRenderHeight) / 2;
-				}
-				_pagePenDispatcher.setDrawSize(new Dimension(_lastRenderWidth, _lastRenderHeight), new Point(_lastRenderOffsetX, _lastRenderOffsetY));
+			if (_renderMetric.update(this.getWidth(), this.getHeight(), _renderBuffer.getDesiredRatio())) {
+				_pagePenDispatcher.setTransform(_renderMetric.surfaceVirtualWidth, _renderMetric.surfaceVirtualHeight, _renderMetric.surfaceVirtualOffsetX, _renderMetric.surfaceVirtualOffsetY);
+				
 				if (_renderBuffer != null) {
-					_renderBuffer.resize(_lastRenderWidth, _lastRenderHeight, _lastRenderOffsetX, _lastRenderOffsetY);
+					_renderBuffer.resize(_renderMetric);
 				}
 				if (_toolbarRenderer != null) {
-					_toolbarRenderer.updateBounds(width, height);
+					_toolbarRenderer.updateBounds(_renderMetric.screenWidth, _renderMetric.screenHeight);
 				}
 			}
 			
@@ -201,17 +178,21 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 				final Graphics2D graphics = (Graphics2D) strategy.getDrawGraphics();
 				
 				// Clear unused area
-				if (_lastRenderOffsetX != 0 || _lastRenderOffsetY != 0 || width - _lastRenderWidth != 0 || height - _lastRenderHeight != 0) {
+				if (_renderMetric.surfaceDrawOffsetX != 0 || _renderMetric.surfaceDrawOffsetY != 0 || _renderMetric.screenWidth - _renderMetric.surfaceWidth != 0 || _renderMetric.screenHeight - _renderMetric.surfaceHeight != 0) {
 					graphics.setPaint(Color.BLACK);
-					graphics.fillRect(0, 0, width, _lastRenderOffsetY);
-					graphics.fillRect(0, 0, _lastRenderOffsetX, height);
-					graphics.fillRect(_lastRenderOffsetX + _lastRenderWidth, 0, width, height);
-					graphics.fillRect(0, _lastRenderOffsetY + _lastRenderHeight, width, height);
+					// Top
+					graphics.fillRect(0, 0, _renderMetric.screenWidth, _renderMetric.surfaceDrawOffsetY);
+					// Left (- Top)
+					graphics.fillRect(0, _renderMetric.surfaceDrawOffsetY, _renderMetric.surfaceDrawOffsetX, _renderMetric.screenHeight - _renderMetric.surfaceDrawOffsetY);
+					// Right (- Top)
+					graphics.fillRect(_renderMetric.surfaceDrawOffsetX + _renderMetric.surfaceWidth, _renderMetric.surfaceDrawOffsetY, _renderMetric.screenWidth - _renderMetric.surfaceDrawOffsetX - _renderMetric.surfaceWidth, _renderMetric.screenHeight - _renderMetric.surfaceDrawOffsetY);
+					// Bottom (- Left - Right)
+					graphics.fillRect(_renderMetric.surfaceDrawOffsetX, _renderMetric.surfaceDrawOffsetY + _renderMetric.surfaceHeight, _renderMetric.surfaceWidth, _renderMetric.screenHeight - _renderMetric.surfaceDrawOffsetY - _renderMetric.surfaceHeight);
 				}
 				
 				if (_renderBuffer != null) {
 					try {
-						_renderBuffer.drawBuffer(graphics, this);
+						_renderBuffer.drawBuffer(graphics, _renderMetric);
 					} catch(Exception e) {
 						e.printStackTrace();
 						requireRepaint();
@@ -246,7 +227,7 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 		synchronized (_paintSync) {
 			_renderBuffer = pageLayer;
 			if (_renderBuffer != null) {
-				_renderBuffer.resize(_lastRenderWidth, _lastRenderHeight, _lastRenderOffsetX, _lastRenderOffsetY);
+				_renderBuffer.resize(_renderMetric);
 			}
 		}
 		requireRepaint();
@@ -297,11 +278,6 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 	@Override
 	public boolean isWorking() {
 		return isVisible();
-	}
-	
-	@Override
-	public ImageObserver getObserver() {
-		return this;
 	}
 	
 	@Override

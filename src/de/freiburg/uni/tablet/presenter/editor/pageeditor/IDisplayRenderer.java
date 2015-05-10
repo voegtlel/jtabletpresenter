@@ -1,7 +1,6 @@
 package de.freiburg.uni.tablet.presenter.editor.pageeditor;
 
 import java.awt.image.BufferedImage;
-import java.awt.image.ImageObserver;
 
 public interface IDisplayRenderer {
 	/**
@@ -32,10 +31,4 @@ public interface IDisplayRenderer {
 	 * Resume repainting
 	 */
 	void resumeRepaint();
-
-	/**
-	 * Gets an image observer
-	 * @return
-	 */
-	public ImageObserver getObserver();
 }

@@ -5,6 +5,8 @@ import java.io.IOException;
 
 import com.jmupdf.exceptions.DocException;
 import com.jmupdf.exceptions.DocSecurityException;
+import com.jmupdf.exceptions.PageException;
+import com.jmupdf.interfaces.Page;
 import com.jmupdf.pdf.PdfDocument;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
@@ -74,6 +76,20 @@ public class PdfSerializable extends AbstractEntity {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	/**
+	 * Tries to load the page
+	 * @param index
+	 * @return
+	 */
+	public Page tryGetPage(final int index) {
+		try {
+			return getDocument2().getPage(index);
+		} catch (PageException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
 	/**

@@ -7,7 +7,6 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Transparency;
 import java.awt.geom.AffineTransform;
-import java.awt.image.ImageObserver;
 
 import de.freiburg.uni.tablet.presenter.document.PdfPageSerializable;
 import de.intarsys.cwt.awt.environment.CwtAwtGraphicsContext;
@@ -18,25 +17,21 @@ import de.intarsys.pdf.pd.PDPage;
 import de.intarsys.pdf.platform.cwt.rendering.CSPlatformRenderer;
 
 public class PageLayerBufferPdf implements IPageLayerBufferPdf {
+	private static final AffineTransform IDENTITY_TRANSFORM = new AffineTransform();
+	
 	protected Image _imageBuffer = null;
 
 	protected int _sizeX = 1;
 	protected int _sizeY = 1;
-	protected int _offsetX;
-	protected int _offsetY;
 	
-	protected float _renderFactorX = 1;
-	protected float _renderFactorY = 1;
-
 	private PdfPageSerializable _pdfPage;
 	private IDisplayRenderer _displayRenderer;
-
+	
 	private Graphics2D _graphics;
 	
 	private Object _repaintSync = new Object();
 	
 	private boolean _requireRepaint = true;
-	private boolean _requireResize = true;
 
 	private boolean _ratioEnabled = false;
 	
@@ -49,16 +44,7 @@ public class PageLayerBufferPdf implements IPageLayerBufferPdf {
 	}
 	
 	@Override
-	public void resize(final int width, final int height, final int offsetX, final int offsetY) {
-		synchronized (_repaintSync) {
-			_requireResize = (_sizeX != width || _sizeY != height);
-			_sizeX = width;
-			_sizeY = height;
-			_offsetX = offsetX;
-			_offsetY = offsetY;
-			_renderFactorX = width;
-			_renderFactorY = height;
-		}
+	public void resize(final RenderMetric renderMetric) {
 	}
 	
 	/**
@@ -75,26 +61,15 @@ public class PageLayerBufferPdf implements IPageLayerBufferPdf {
 	}
 	
 	@Override
-	public void drawBuffer(final Graphics2D g, final ImageObserver obs) {
+	public void drawBuffer(final Graphics2D g, final RenderMetric renderMetric) {
 		boolean requiresResize;
-		int width;
-		int height;
-		int offsetX;
-		int offsetY;
-		float factorX;
-		float factorY;
 		boolean requiresRepaint;
 		PDPage page;
 		synchronized (_repaintSync) {
-			requiresResize = _requireResize;
-			width = _sizeX;
-			height = _sizeY;
-			offsetX = _offsetX;
-			offsetY = _offsetY;
-			factorX = _renderFactorX;
-			factorY = _renderFactorY;
+			requiresResize = (_sizeX != renderMetric.surfaceWidth || _sizeY != renderMetric.surfaceHeight);
+			_sizeX = renderMetric.surfaceWidth;
+			_sizeY = renderMetric.surfaceHeight;
 			requiresRepaint = _requireRepaint;
-			_requireResize = false;
 			_requireRepaint = false;
 			page = ((_pdfPage == null)?null:_pdfPage.getPage());
 		}
@@ -102,13 +77,13 @@ public class PageLayerBufferPdf implements IPageLayerBufferPdf {
 			destroyBuffer();
 		} else {
 			if (_imageBuffer == null || requiresResize) {
-				createImage(width, height);
+				createImage(renderMetric.surfaceWidth, renderMetric.surfaceHeight);
 				requiresRepaint = true;
 			}
 			if (requiresRepaint) {
-				renderPdf(page, width, height, factorX, factorY);
+				renderPdf(page, renderMetric);
 			}
-			g.drawImage(_imageBuffer, offsetX, offsetY, obs);
+			g.drawImage(_imageBuffer, renderMetric.surfaceDrawOffsetX, renderMetric.surfaceDrawOffsetY, null);
 		}
 	}
 	
@@ -145,18 +120,16 @@ public class PageLayerBufferPdf implements IPageLayerBufferPdf {
 	/**
 	 * Renders the active pdf page
 	 */
-	private void renderPdf(final PDPage page, final int width, final int height, final float renderFactorX, final float renderFactorY) {
+	private void renderPdf(final PDPage page, final RenderMetric renderMetric) {
 		final Composite defaultComp = _graphics.getComposite();
-		final AffineTransform defaultTransform = new AffineTransform();
-		_graphics.setTransform(defaultTransform);
+		_graphics.setTransform(IDENTITY_TRANSFORM);
 		_graphics.setComposite(AlphaComposite.Clear);
 		_graphics.setColor(new Color(0, 0, 0, 0));
-		_graphics.fillRect(0, 0, width, height);
+		_graphics.fillRect(0, 0, renderMetric.surfaceWidth, renderMetric.surfaceHeight);
 		_graphics.setComposite(defaultComp);
 		if (page != null) {
-			final AffineTransform transform = new AffineTransform();
-			transform.translate(0, renderFactorY);
-			transform.scale(renderFactorX/page.getMediaBox().getWidth(), -renderFactorY/page.getMediaBox().getHeight());
+			final AffineTransform transform = AffineTransform.getTranslateInstance(0, renderMetric.innerOffsetY);
+			transform.scale(renderMetric.innerOffsetX/page.getMediaBox().getWidth(), -renderMetric.innerOffsetY/page.getMediaBox().getHeight());
 			_graphics.setTransform(transform);
 			System.out.println("Init Render Pdf");
 			try {

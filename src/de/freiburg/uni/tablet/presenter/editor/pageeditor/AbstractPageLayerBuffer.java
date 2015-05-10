@@ -12,7 +12,6 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.awt.image.ImageObserver;
 
 import de.freiburg.uni.tablet.presenter.document.TextFont;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
@@ -20,6 +19,7 @@ import de.freiburg.uni.tablet.presenter.list.LinkedElement;
 import de.freiburg.uni.tablet.presenter.list.LinkedElementList;
 import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
 import de.freiburg.uni.tablet.presenter.page.IPen;
+import de.freiburg.uni.tablet.presenter.page.SolidPen;
 import de.intarsys.cwt.awt.environment.CwtAwtGraphicsContext;
 import de.intarsys.pdf.cos.COSName;
 import de.intarsys.pdf.platform.cwt.rendering.CSPlatformDevice;
@@ -47,8 +47,6 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer, IPage
 
 	private int _newWidth = 1;
 	private int _newHeight = 1;
-	private int _newOffsetX = 0;
-	private int _newOffsetY = 0;
 	private int _requireRepaint = REPAINT_ALL;
 	
 	private LinkedElementList<IRenderable> _repaintAddObjects = null;
@@ -60,18 +58,13 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer, IPage
 	
 	private boolean _isEmpty = true;
 
-	protected int _renderWidth = 1;
-	protected int _renderHeight = 1;
-	protected int _renderOffsetX = 1;
-	protected int _renderOffsetY = 1;
-
-	protected float _renderFactorX = 1;
-	protected float _renderFactorY = 1;
 	protected final IDisplayRenderer _displayRenderer;
 
 	private final Ellipse2D.Float _ellipseRenderer = new Ellipse2D.Float();
 	private final Line2D.Float _lineRenderer = new Line2D.Float();
-
+	
+	private RenderMetric _currentRenderMetric = new RenderMetric();
+	
 	public AbstractPageLayerBuffer(final IDisplayRenderer displayRenderer) {
 		_displayRenderer = displayRenderer;
 	}
@@ -137,20 +130,18 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer, IPage
 	protected abstract void paint(IRenderable renderable);
 
 	@Override
-	public void resize(final int width, final int height, final int offsetX, final int offsetY) {
+	public void resize(final RenderMetric renderMetric) {
 		synchronized (_repaintSync) {
-			if ((_newWidth != width || _newHeight != height) && _requireRepaint < REPAINT_RESIZE) {
+			if ((_newWidth != renderMetric.surfaceWidth || _newHeight != renderMetric.surfaceHeight) && _requireRepaint < REPAINT_RESIZE) {
 				_requireRepaint = REPAINT_RESIZE;
 			}
-			_newWidth = width;
-			_newHeight = height;
-			_newOffsetX = offsetX;
-			_newOffsetY = offsetY;
+			_newWidth = renderMetric.surfaceWidth;
+			_newHeight = renderMetric.surfaceHeight;
 		}
 	}
 
 	@Override
-	public void drawBuffer(final Graphics2D g, final ImageObserver obs) {
+	public void drawBuffer(final Graphics2D g, final RenderMetric renderMetric) {
 		int requireRepaint;
 		LinkedElementList<IRenderable> repaintAddObjects;
 		float repaintMinX;
@@ -159,12 +150,7 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer, IPage
 		float repaintMaxY;
 		float repaintRadius;
 		synchronized (_repaintSync) {
-			_renderWidth = _newWidth;
-			_renderHeight = _newHeight;
-			_renderOffsetX = _newOffsetX;
-			_renderOffsetY = _newOffsetY;
-			_renderFactorX = _renderWidth;
-			_renderFactorY = _renderHeight;
+			_currentRenderMetric.copyFrom(renderMetric);
 			requireRepaint = _requireRepaint;
 			_requireRepaint = REPAINT_NONE;
 			
@@ -186,22 +172,22 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer, IPage
 				_graphics.dispose();
 			}
 
-			final int imgWidth = Math.max(_renderWidth, 1);
-			final int imgHeight = Math.max(_renderHeight, 1);
+			final int imgWidth = Math.max(_currentRenderMetric.surfaceWidth, 1);
+			final int imgHeight = Math.max(_currentRenderMetric.surfaceHeight, 1);
 			_imageBuffer = _displayRenderer.createImageBuffer(imgWidth, imgHeight,
 					Transparency.TRANSLUCENT);
 			_graphics = (Graphics2D) _imageBuffer.getGraphics();
 			setRenderingHints(_graphics);
 			_graphics.setBackground(new Color(0, true));
 			_isEmpty = true;
-			System.out.println("Resized: " + _renderWidth + "x" + _renderHeight);
+			System.out.println("Resized: " + _currentRenderMetric.surfaceWidth + "x" + _currentRenderMetric.surfaceHeight);
 		}
 		if (requireRepaint > REPAINT_NONE) {
 			if (requireRepaint <= REPAINT_CLEAR_RECT) {
-				repaintMinX = repaintMinX * _renderFactorX - repaintRadius - 1;
-				repaintMinY = repaintMinY * _renderFactorY - repaintRadius - 1;
-				repaintMaxX = repaintMaxX * _renderFactorX + repaintRadius + 2;
-				repaintMaxY = repaintMaxY * _renderFactorY + repaintRadius + 2;
+				repaintMinX = repaintMinX * _currentRenderMetric.innerFactorX + _currentRenderMetric.innerOffsetX - repaintRadius - 1;
+				repaintMinY = repaintMinY * _currentRenderMetric.innerFactorY + _currentRenderMetric.innerOffsetY - repaintRadius - 1;
+				repaintMaxX = repaintMaxX * _currentRenderMetric.innerFactorX + _currentRenderMetric.innerOffsetX + repaintRadius + 2;
+				repaintMaxY = repaintMaxY * _currentRenderMetric.innerFactorY + _currentRenderMetric.innerOffsetY + repaintRadius + 2;
 				/*System.out.println("repaint clip: " + repaintMinX + ", " + repaintMinY + "; " + repaintMaxX + ", " + repaintMaxY);
 				_graphics.setClip(null);
 				_graphics.setColor(Color.red);
@@ -222,7 +208,7 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer, IPage
 			}
 		}
 		if (!_isEmpty) {
-			g.drawImage(_imageBuffer, _renderOffsetX, _renderOffsetY, obs);
+			g.drawImage(_imageBuffer, _currentRenderMetric.surfaceDrawOffsetX, _currentRenderMetric.surfaceDrawOffsetY, null);
 		}
 	}
 	
@@ -231,7 +217,7 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer, IPage
 	 */
 	public void clear() {
 		if (_graphics != null) {
-			_graphics.clearRect(0, 0, _renderWidth, _renderHeight);
+			_graphics.clearRect(0, 0, _currentRenderMetric.surfaceWidth, _currentRenderMetric.surfaceHeight);
 			_isEmpty = true;
 		}
 	}
@@ -240,14 +226,15 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer, IPage
 	public void draw(final IPen pen, final float x1,
 			final float y1, final float x2, final float y2) {
 		if (_graphics != null) {
-			_lineRenderer.x1 = x1 * _renderFactorX;
-			_lineRenderer.y1 = y1 * _renderFactorY;
-			_lineRenderer.x2 = x2 * _renderFactorX;
-			_lineRenderer.y2 = y2 * _renderFactorY;
+			_lineRenderer.x1 = x1 * _currentRenderMetric.innerFactorX + _currentRenderMetric.innerOffsetX;
+			_lineRenderer.y1 = y1 * _currentRenderMetric.innerFactorY + _currentRenderMetric.innerOffsetY;
+			_lineRenderer.x2 = x2 * _currentRenderMetric.innerFactorX + _currentRenderMetric.innerOffsetX;
+			_lineRenderer.y2 = y2 * _currentRenderMetric.innerFactorY + _currentRenderMetric.innerOffsetY;
 			if (pen == null) {
+				_graphics.setStroke(new SolidPen().getStroke(SolidPen.DEFAULT_PRESSURE * _currentRenderMetric.innerScale));
 				_graphics.setPaint(Color.black);
 			} else {
-				_graphics.setStroke(pen.getStroke());
+				_graphics.setStroke(pen.getStroke(SolidPen.DEFAULT_PRESSURE * _currentRenderMetric.innerScale));
 				_graphics.setPaint(pen.getColor());
 			}
 			_graphics.draw(_lineRenderer);
@@ -274,11 +261,11 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer, IPage
 	public void drawPath(final float x1, final float y1, final float x2, final float y2,
 			final float pressure) {
 		if (_graphics != null) {
-			_lineRenderer.x1 = x1 * _renderFactorX;
-			_lineRenderer.y1 = y1 * _renderFactorY;
-			_lineRenderer.x2 = x2 * _renderFactorX;
-			_lineRenderer.y2 = y2 * _renderFactorY;
-			_graphics.setStroke(_pathPen.getStroke(pressure));
+			_lineRenderer.x1 = x1 * _currentRenderMetric.innerFactorX + _currentRenderMetric.innerOffsetX;
+			_lineRenderer.y1 = y1 * _currentRenderMetric.innerFactorY + _currentRenderMetric.innerOffsetY;
+			_lineRenderer.x2 = x2 * _currentRenderMetric.innerFactorX + _currentRenderMetric.innerOffsetX;
+			_lineRenderer.y2 = y2 * _currentRenderMetric.innerFactorY + _currentRenderMetric.innerOffsetY;
+			_graphics.setStroke(_pathPen.getStroke(pressure * _currentRenderMetric.innerScale));
 			_graphics.draw(_lineRenderer);
 			_isEmpty = false;
 		}
@@ -297,7 +284,10 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer, IPage
 			float yMin = Math.min(y1, y2);
 			float w = Math.abs(x2 - x1);
 			float h = Math.abs(y2 - y1);
-			_graphics.draw(new Rectangle2D.Float(xMin * _renderFactorX, yMin * _renderFactorY, w * _renderFactorX, h *_renderFactorY));
+			_graphics.draw(new Rectangle2D.Float(xMin * _currentRenderMetric.innerFactorX + _currentRenderMetric.innerOffsetX,
+					yMin * _currentRenderMetric.innerFactorY + _currentRenderMetric.innerOffsetY,
+					w * _currentRenderMetric.innerFactorX,
+					h * _currentRenderMetric.innerFactorY));
 			_isEmpty = false;
 		}
 	}
@@ -314,8 +304,8 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer, IPage
 			final float y) {
 		if (_graphics != null) {
 			float thickness = pen.getThickness(IPen.DEFAULT_PRESSURE);
-			_ellipseRenderer.x = x * _renderFactorX - thickness / 2.0f;
-			_ellipseRenderer.y = y * _renderFactorY - thickness / 2.0f;
+			_ellipseRenderer.x = x * _currentRenderMetric.innerFactorX + _currentRenderMetric.innerOffsetX - thickness / 2.0f * _currentRenderMetric.innerScale;
+			_ellipseRenderer.y = y * _currentRenderMetric.innerFactorY + _currentRenderMetric.innerOffsetY - thickness / 2.0f * _currentRenderMetric.innerScale;
 			_ellipseRenderer.width = thickness;
 			_ellipseRenderer.height = thickness;
 			_graphics.setPaint(pen.getColor());
@@ -335,9 +325,10 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer, IPage
 		if (_graphics != null) {
 			_graphics.setPaint(pen.getColor());
 			_graphics.setStroke(pen.getStroke());
+			AffineTransform t = AffineTransform.getTranslateInstance(_currentRenderMetric.innerOffsetX, _currentRenderMetric.innerOffsetY);
+			t.scale(_currentRenderMetric.innerFactorX, _currentRenderMetric.innerFactorY);
 			final Shape transformedPath = path
-					.createTransformedShape(AffineTransform.getScaleInstance(
-							_renderFactorX, _renderFactorY));
+					.createTransformedShape(t);
 			_graphics.draw(transformedPath);
 			_isEmpty = false;
 		}
@@ -355,10 +346,11 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer, IPage
 	@Override
 	public void draw(final BufferedImage image, final float x, final float y, final float width, final float height) {
 		if (_graphics != null) {
-			final AffineTransform t = AffineTransform.getScaleInstance(_renderFactorX, _renderFactorY);
+			AffineTransform t = AffineTransform.getTranslateInstance(_currentRenderMetric.innerOffsetX, _currentRenderMetric.innerOffsetY);
+			t.scale(_currentRenderMetric.innerFactorX, _currentRenderMetric.innerFactorY);
 			t.translate(x, y);
-			t.scale(width/image.getWidth(_displayRenderer.getObserver()), height/image.getHeight(_displayRenderer.getObserver()));
-			_graphics.drawImage(image, t, _displayRenderer.getObserver());
+			t.scale(width/image.getWidth(null), height/image.getHeight(null));
+			_graphics.drawImage(image, t, null);
 			_isEmpty = false;
 		}
 	}
@@ -371,7 +363,8 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer, IPage
 			final CSPlatformDevice csPlatformDevice = new CSPlatformDevice(ctx);
 			csPlatformDevice.open(dummyRenderer);
 			csPlatformDevice.saveState();
-			AffineTransform t = AffineTransform.getScaleInstance(_renderFactorX, _renderFactorY);
+			AffineTransform t = AffineTransform.getTranslateInstance(_currentRenderMetric.innerOffsetX, _currentRenderMetric.innerOffsetY);
+			t.scale(_currentRenderMetric.innerFactorX, _currentRenderMetric.innerFactorY);
 			t.translate(x, y);
 			t.scale(1, -1);
 			ctx.setTransform(t);
@@ -393,7 +386,7 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer, IPage
 	
 	@Override
 	public void setOffset(final float x, final float y) {
-		_graphics.setTransform(AffineTransform.getTranslateInstance(-x * _renderFactorX, -y * _renderFactorY));
+		_graphics.setTransform(AffineTransform.getTranslateInstance(-x * _currentRenderMetric.innerFactorX, -y * _currentRenderMetric.innerFactorY));
 	}
 	
 	public void setDesiredRatio(final Float desiredRatio) {
