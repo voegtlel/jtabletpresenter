@@ -28,7 +28,7 @@ public class DocumentPage implements IEntity, IPageRepaintListener {
 
 	private final LinkedElementList<IRenderable> _renderablesList = new LinkedElementList<IRenderable>();
 	
-	private PdfPageSerializable _pdfPage = null;
+	private IEntity _backgroundEntity = null;
 	
 	/**
 	 * Creates a new document page for a document. The page will not be added to the document.
@@ -141,21 +141,21 @@ public class DocumentPage implements IEntity, IPageRepaintListener {
 	}
 	
 	/**
-	 * Sets the index for a referenced pdf page
+	 * Sets the background entity
 	 * @param pdfPageIndex
 	 */
-	public void setPdfPage(final PdfPageSerializable page) {
-		final PdfPageSerializable lastPdfPage = _pdfPage;
-		_pdfPage = page;
-		_document.firePdfPageChanged(this, lastPdfPage);
+	public void setBackgroundEntity(final IEntity backgroundEntity) {
+		final IEntity lastBackgroundEntity = _backgroundEntity;
+		_backgroundEntity = backgroundEntity;
+		_document.fireBackgroundEntityChanged(this, lastBackgroundEntity);
 	}
 	
 	/**
-	 * Gets the index for a referenced pdf page
+	 * Gets the background entity
 	 * @return
 	 */
-	public PdfPageSerializable getPdfPage() {
-		return _pdfPage;
+	public IEntity getBackgroundEntity() {
+		return _backgroundEntity;
 	}
 	
 	/**
@@ -227,7 +227,7 @@ public class DocumentPage implements IEntity, IPageRepaintListener {
 		reader.putObjectTable(this.getId(), this);
 		_document = reader.readObjectTable();
 		_document.deserializeId(_id);
-		_pdfPage = reader.readObjectTable();
+		_backgroundEntity = reader.readObjectTable();
 		final int count = reader.readInt();
 		for (int i = 0; i < count; i++) {
 			final IRenderable renderable = reader.readObjectTable();
@@ -270,7 +270,7 @@ public class DocumentPage implements IEntity, IPageRepaintListener {
 	public void serialize(final BinarySerializer writer) throws IOException {
 		writer.writeLong(_id);
 		writer.writeObjectTable(_document);
-		writer.writeObjectTable(_pdfPage);
+		writer.writeObjectTable(_backgroundEntity);
 		writer.writeInt(_renderablesList.getCount());
 		for (LinkedElement<IRenderable> r = _renderablesList.getFirst(); r != null; r = r
 				.getNext()) {

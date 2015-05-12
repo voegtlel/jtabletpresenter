@@ -13,7 +13,6 @@ import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.document.DocumentListener;
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
 import de.freiburg.uni.tablet.presenter.document.IEntity;
-import de.freiburg.uni.tablet.presenter.document.PdfPageSerializable;
 import de.freiburg.uni.tablet.presenter.document.PdfSerializable;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 
@@ -37,9 +36,9 @@ public class DocumentClientServer implements IEditableDocument {
 		}
 		
 		@Override
-		public void pdfPageChanged(final DocumentPage documentPage,
-				final PdfPageSerializable lastPdfPage) {
-			onDocumentPdfPageChanged(documentPage, lastPdfPage);
+		public void backgroundEntityChanged(final DocumentPage documentPage,
+				final IEntity lastBackgroundEntity) {
+			onDocumentBackgroundEntityChanged(documentPage, lastBackgroundEntity);
 		}
 		
 		@Override
@@ -98,9 +97,9 @@ public class DocumentClientServer implements IEditableDocument {
 		}
 		
 		@Override
-		public void pdfPageChanged(final DocumentPage documentPage,
-				final PdfPageSerializable lastPdfPage) {
-			onDocumentPdfPageChanged(documentPage, lastPdfPage);
+		public void backgroundEntityChanged(final DocumentPage documentPage,
+				final IEntity lastBackgroundEntity) {
+			onDocumentBackgroundEntityChanged(documentPage, lastBackgroundEntity);
 		}
 		
 		@Override
@@ -169,9 +168,9 @@ public class DocumentClientServer implements IEditableDocument {
 		firePageInserted(document, prevPage, page);
 	}
 
-	protected void onDocumentPdfPageChanged(final DocumentPage documentPage,
-			final PdfPageSerializable lastPdfPage) {
-		firePdfPageChanged(documentPage, lastPdfPage);
+	protected void onDocumentBackgroundEntityChanged(final DocumentPage documentPage,
+			final IEntity lastBackgroundEntity) {
+		fireBackgroundEntityChanged(documentPage, lastBackgroundEntity);
 	}
 
 	protected void onDocumentRenderableAdded(final IRenderable renderableAfter,
@@ -430,10 +429,10 @@ public class DocumentClientServer implements IEditableDocument {
 		}
 	}
 	
-	protected void firePdfPageChanged(final DocumentPage documentPage,
-			final PdfPageSerializable lastPdfPage) {
+	protected void fireBackgroundEntityChanged(final DocumentPage documentPage,
+			final IEntity lastBackgroundEntity) {
 		for (final DocumentListener listener : _listeners) {
-			listener.pdfPageChanged(documentPage, lastPdfPage);
+			listener.backgroundEntityChanged(documentPage, lastBackgroundEntity);
 		}
 	}
 

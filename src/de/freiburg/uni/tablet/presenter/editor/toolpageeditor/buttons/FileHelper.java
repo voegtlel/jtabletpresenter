@@ -137,7 +137,7 @@ public class FileHelper {
 			for (int i = 0; i < count; i++) {
 				final DocumentPage page = document.getPageByIndex(i);
 				final DocumentPage basePage = ((baseDocument != null)?baseDocument.getPageByIndex(i):null);
-				pdfRenderer.nextPage((basePage != null)?basePage.getPdfPage():page.getPdfPage());
+				pdfRenderer.nextPage((basePage != null)?basePage.getBackgroundEntity():page.getBackgroundEntity());
 				if (basePage != null) {
 					basePage.render(pdfRenderer);
 				}

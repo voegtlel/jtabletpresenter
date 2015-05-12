@@ -57,12 +57,12 @@ public interface DocumentListener {
 	void renderableRemoving(IRenderable renderableAfter, IRenderable renderable, DocumentPage page);
 	
 	/**
-	 * Called, when a pdf page assignment was changed
+	 * Called, when a background entity page assignment was changed
 	 * @param documentPage
-	 * @param lastPdfPage
+	 * @param lastBackgroundEntity
 	 */
-	void pdfPageChanged(DocumentPage documentPage,
-			PdfPageSerializable lastPdfPage);
+	void backgroundEntityChanged(DocumentPage documentPage,
+			IEntity lastBackgroundEntity);
 
 	/**
 	 * Called, when a renderable was modified

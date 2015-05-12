@@ -51,6 +51,8 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 	private final PagePenDispatcher _pagePenDispatcher;
 
 	private ToolbarRenderer _toolbarRenderer;
+	
+	private ITool _temporaryOriginalTool;
 
 	private Cursor _toolCursor;
 	private boolean _hasTemporaryCursor = false;
@@ -216,6 +218,7 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 		}
 	}
 	
+	@Override
 	public RenderMetric getRenderMetric() {
 		return _renderMetric;
 	}
@@ -333,7 +336,9 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 	
 	@Override
 	public void setNormalToolOnce(final ITool onceNormalTool) {
-		final ITool currentTool = getNormalTool();
+		if (_temporaryOriginalTool == null) {
+			_temporaryOriginalTool = getNormalTool();
+		}
 		onceNormalTool.addToolListener(new IToolListener() {
 			@Override
 			public void onStart() {
@@ -345,7 +350,7 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 				SwingUtilities.invokeLater(new Runnable() {
 					@Override
 					public void run() {
-						setNormalTool(currentTool);
+						setNormalTool(_temporaryOriginalTool);
 						onceNormalTool.removeToolListener(thisRef);
 					}
 				});

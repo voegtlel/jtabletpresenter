@@ -9,6 +9,8 @@ import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
 public class ToolZoomPan extends AbstractTool {
 	private float _dragStartX = 0f;
 	private float _dragStartY = 0f;
+	private float _dragLastX = 0f;
+	private float _dragLastY = 0f;
 	private boolean _hasStart = false;
 	private boolean _zoom;
 	
@@ -29,6 +31,7 @@ public class ToolZoomPan extends AbstractTool {
 	@Override
 	public void begin() {
 		_hasStart = false;
+		fireToolStart();
 	}
 
 	@Override
@@ -36,37 +39,43 @@ public class ToolZoomPan extends AbstractTool {
 		if (!_hasStart) {
 			_dragStartX = data.getXOrig();
 			_dragStartY = data.getYOrig();
+			_dragLastX = _dragStartX;
+			_dragLastY = _dragStartY;
 			_hasStart = true;
 		}
 		
-		float relX = data.getXOrig() - _dragStartX;
-		float relY = data.getYOrig() - _dragStartY;
+		float relX = data.getXOrig() - _dragLastX;
+		float relY = data.getYOrig() - _dragLastY;
 		if (_zoom) {
 			relX /= _editor.getPageEditor().getRenderMetric().innerFactorX;
 			float relZoom = (float)Math.exp(relX * 0.1f);
-			System.out.println("RelZoom: " + relZoom);
-			_editor.getPageEditor().zoom(relZoom);
+			_editor.getPageEditor().zoomAt(relZoom, _dragStartX, _dragStartY);
 		} else {
 			relX /= _editor.getPageEditor().getRenderMetric().innerFactorX;
 			relY /= _editor.getPageEditor().getRenderMetric().innerFactorY;
-			_editor.getPageEditor().pan(relX, relY);
+			_editor.getPageEditor().pan(-relX, -relY);
 		}
 		
-		_dragStartX = data.getXOrig();
-		_dragStartY = data.getYOrig();
+		_dragLastX = data.getXOrig();
+		_dragLastY = data.getYOrig();
 	}
 	
 	@Override
 	public void end() {
 		_hasStart = false;
+		fireToolFinish(null);
 	}
 	
 	@Override
-	public void updateTool() {
+	protected Cursor generateCursor() {
+		if (_zoom) {
+			return Cursor.getPredefinedCursor(Cursor.E_RESIZE_CURSOR);
+		} else {
+			return Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR);
+		}
 	}
 
-	@Override
-	protected Cursor generateCursor() {
-		return null;
+	public boolean isZoom() {
+		return _zoom;
 	}
 }

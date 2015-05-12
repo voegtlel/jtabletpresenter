@@ -1,19 +1,19 @@
 package de.freiburg.uni.tablet.presenter.editor.pageeditor;
 
-import de.freiburg.uni.tablet.presenter.document.PdfPageSerializable;
+import de.freiburg.uni.tablet.presenter.document.IEntity;
 
 /**
  * Interface for pdf layer buffer
  * @author Luke
  *
  */
-public interface IPageLayerBufferPdf extends IPageLayerBuffer {
+public interface IPageLayerBufferBackground extends IPageLayerBuffer {
 
 	/**
 	 * Sets the document
 	 * @param document
 	 */
-	void setPdfPage(PdfPageSerializable pdfPage);
+	void setBackgroundEntity(IEntity backgroundEntity);
 
 	/**
 	 * Enable or disable automatic page ratio (used for getDesiredRatio())

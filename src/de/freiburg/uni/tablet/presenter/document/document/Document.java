@@ -14,7 +14,6 @@ import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.document.DocumentListener;
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
 import de.freiburg.uni.tablet.presenter.document.IEntity;
-import de.freiburg.uni.tablet.presenter.document.PdfPageSerializable;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 import de.freiburg.uni.tablet.presenter.list.LinkedElement;
 import de.freiburg.uni.tablet.presenter.list.LinkedElementList;
@@ -217,10 +216,10 @@ public class Document implements IDocumentNotify {
 	}
 	
 	@Override
-	public void firePdfPageChanged(final DocumentPage documentPage,
-			final PdfPageSerializable lastPdfPage) {
+	public void fireBackgroundEntityChanged(final DocumentPage documentPage,
+			final IEntity lastBackgroundEntity) {
 		for (final DocumentListener listener : _listeners) {
-			listener.pdfPageChanged(documentPage, lastPdfPage);
+			listener.backgroundEntityChanged(documentPage, lastBackgroundEntity);
 		}
 	}
 

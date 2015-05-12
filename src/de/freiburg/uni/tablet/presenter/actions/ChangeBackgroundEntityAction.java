@@ -9,37 +9,37 @@ import java.io.IOException;
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
-import de.freiburg.uni.tablet.presenter.document.PdfPageSerializable;
+import de.freiburg.uni.tablet.presenter.document.IEntity;
 import de.freiburg.uni.tablet.presenter.document.editor.IDocumentEditor;
 
 /**
  * @author lukas
  * 
  */
-public class ChangePdfPageAction implements IAction {
+public class ChangeBackgroundEntityAction implements IAction {
 	private final DocumentPage _page;
-	private final PdfPageSerializable _pdfPage;
-	private final PdfPageSerializable _lastPdfPage;
+	private final IEntity _backgroundEntity;
+	private final IEntity _lastBackgroundEntity;
 
 	/**
 	 * 
 	 */
-	public ChangePdfPageAction(final DocumentPage page,
-			final PdfPageSerializable pdfPage, final PdfPageSerializable lastPdfPage) {
+	public ChangeBackgroundEntityAction(final DocumentPage page,
+			final IEntity backgroundEntity, final IEntity lastBackgroundEntity) {
 		_page = page;
-		_pdfPage = pdfPage;
-		_lastPdfPage = lastPdfPage;
+		_backgroundEntity = backgroundEntity;
+		_lastBackgroundEntity = lastBackgroundEntity;
 	}
 
 	/**
 	 * @throws IOException
 	 * 
 	 */
-	public ChangePdfPageAction(final BinaryDeserializer reader)
+	public ChangeBackgroundEntityAction(final BinaryDeserializer reader)
 			throws IOException {
 		_page = reader.readObjectTable();
-		_pdfPage = reader.readObjectTable();
-		_lastPdfPage = reader.readObjectTable();
+		_backgroundEntity = reader.readObjectTable();
+		_lastBackgroundEntity = reader.readObjectTable();
 	}
 
 	@Override
@@ -49,23 +49,23 @@ public class ChangePdfPageAction implements IAction {
 
 	@Override
 	public IAction getUndoAction() {
-		return new ChangePdfPageAction(_page, _lastPdfPage, _pdfPage);
+		return new ChangeBackgroundEntityAction(_page, _lastBackgroundEntity, _backgroundEntity);
 	}
 
 	@Override
 	public void perform(final IDocumentEditor editor) {
-		_page.setPdfPage(_pdfPage);
+		_page.setBackgroundEntity(_backgroundEntity);
 	}
 
 	@Override
 	public void serialize(final BinarySerializer writer) throws IOException {
 		writer.writeObjectTable(_page);
-		writer.writeObjectTable(_pdfPage);
-		writer.writeObjectTable(_lastPdfPage);
+		writer.writeObjectTable(_backgroundEntity);
+		writer.writeObjectTable(_lastBackgroundEntity);
 	}
 
 	@Override
 	public String toString() {
-		return String.format("ChangePdfPage: (Last: %s) to %s in %s", _lastPdfPage, _pdfPage, _page);
+		return String.format("ChangePdfPage: (Last: %s) to %s in %s", _lastBackgroundEntity, _backgroundEntity, _page);
 	}
 }

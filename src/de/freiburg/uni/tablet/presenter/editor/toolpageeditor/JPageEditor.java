@@ -42,7 +42,7 @@ import de.freiburg.uni.tablet.presenter.document.DocumentConfig;
 import de.freiburg.uni.tablet.presenter.document.DocumentConfig.KeyValue;
 import de.freiburg.uni.tablet.presenter.document.DocumentListener;
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
-import de.freiburg.uni.tablet.presenter.document.PdfPageSerializable;
+import de.freiburg.uni.tablet.presenter.document.IEntity;
 import de.freiburg.uni.tablet.presenter.document.document.DocumentAdapter;
 import de.freiburg.uni.tablet.presenter.document.document.IClientDocument;
 import de.freiburg.uni.tablet.presenter.document.document.IDocument;
@@ -51,7 +51,7 @@ import de.freiburg.uni.tablet.presenter.document.editor.DocumentEditorClient;
 import de.freiburg.uni.tablet.presenter.document.editor.IDocumentEditorClient;
 import de.freiburg.uni.tablet.presenter.editor.IPageEditor;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
-import de.freiburg.uni.tablet.presenter.editor.pageeditor.IPageLayerBufferPdf;
+import de.freiburg.uni.tablet.presenter.editor.pageeditor.IPageLayerBufferBackground;
 import de.freiburg.uni.tablet.presenter.editor.pageeditor.PageLayerBufferBack;
 import de.freiburg.uni.tablet.presenter.editor.pageeditor.PageLayerBufferColor;
 import de.freiburg.uni.tablet.presenter.editor.pageeditor.PageLayerBufferComposite;
@@ -103,8 +103,8 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 
 	private IButtonAction[] _buttonActions = new IButtonAction[] {};
 
-	private PageLayerBufferColor _backgroundLayer;
-	private IPageLayerBufferPdf _pdfLayer;
+	private PageLayerBufferColor _backgroundColorLayer;
+	private IPageLayerBufferBackground _backgroundDataLayer;
 
 	private DocumentConfig _config;
 	
@@ -143,9 +143,9 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 			}
 			
 			@Override
-			public void pdfPageChanged(final DocumentPage documentPage,
-					final PdfPageSerializable lastPdfPage) {
-				onPdfPageChanged(documentPage, lastPdfPage);
+			public void backgroundEntityChanged(final DocumentPage documentPage,
+					final IEntity lastBackgroundEntity) {
+				onPdfPageChanged(documentPage, lastBackgroundEntity);
 			}
 			
 			@Override
@@ -245,13 +245,13 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 		
 		final PageLayerBufferComposite pageLayers = new PageLayerBufferComposite(
 				_pageRenderer);
-		_backgroundLayer = pageLayers.addColorBuffer();
-		_backgroundLayer.setColor(_config.getColor("document.background.color", Color.white));
+		_backgroundColorLayer = pageLayers.addColorBuffer();
+		_backgroundColorLayer.setColor(_config.getColor("document.background.color", Color.white));
 		if (_config.getBoolean("document.useDefaultRatio", false)) {
-			_backgroundLayer.setDesiredRatio(_config.getFloat("document.defaultRatio", 4.0f/3.0f));
+			_backgroundColorLayer.setDesiredRatio(_config.getFloat("document.defaultRatio", 4.0f/3.0f));
 		}
-		_pdfLayer = pageLayers.addPdfBuffer(_config.getInt("pdf.renderer", PageLayerBufferComposite.PDF_LIBRARY_TYPE_JPOD));
-		_pdfLayer.setRatioEnabled(_config.getBoolean("pdf.useRatio", false));
+		_backgroundDataLayer = pageLayers.addBackgroundBuffer(_config.getInt("pdf.renderer", PageLayerBufferComposite.PDF_LIBRARY_TYPE_JPOD));
+		_backgroundDataLayer.setRatioEnabled(_config.getBoolean("pdf.useRatio", false));
 		_serverSyncLayer = pageLayers.addBackBuffer();
 		_clientOnlyLayer = pageLayers.addBackBuffer();
 		_frontLayer = pageLayers.addFrontBuffer();
@@ -499,9 +499,9 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 	}
 	
 	protected void onPdfPageChanged(final DocumentPage documentPage,
-			final PdfPageSerializable lastPdfPage) {
+			final IEntity lastBackgroundEntity) {
 		if ((documentPage == _documentEditor.getCurrentPage()) || (documentPage == _documentEditor.getCurrentBackPage())) {
-			_pdfLayer.setPdfPage(documentPage.getPdfPage());
+			_backgroundDataLayer.setBackgroundEntity(documentPage.getBackgroundEntity());
 		}
 	}
 	
@@ -514,12 +514,13 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 		_clientOnlyLayer.setRepaintListener(_documentEditor.getCurrentPage());
 		_serverSyncLayer.setRepaintListener(_documentEditor.getCurrentBackPage());
 		// Next PDF Page
-		if (_documentEditor.getCurrentBackPage() != null) {
-			_pdfLayer.setPdfPage(_documentEditor.getCurrentBackPage().getPdfPage());
-		} else if (_documentEditor.getCurrentPage() != null) {
-			_pdfLayer.setPdfPage(_documentEditor.getCurrentPage().getPdfPage());
+		DocumentPage documentPage = _documentEditor.getCurrentBackPage();
+		if (documentPage == null) {
+			documentPage = _documentEditor.getCurrentPage();
 		}
-		
+		if (documentPage != null) {
+			_backgroundDataLayer.setBackgroundEntity(documentPage.getBackgroundEntity());
+		}
 		_pageRenderer.updateTool();
 	}
 

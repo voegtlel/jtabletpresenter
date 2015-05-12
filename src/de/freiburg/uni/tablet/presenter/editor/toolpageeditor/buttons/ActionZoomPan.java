@@ -30,14 +30,14 @@ public class ActionZoomPan extends AbstractButtonAction {
 		switch (_mode) {
 		case MODE_ZOOM:
 			System.out.println("Zoom");
-			if (!(_editor.getPageEditor().getNormalTool() instanceof ToolZoomPan)) {
+			if (!(_editor.getPageEditor().getNormalTool() instanceof ToolZoomPan) || !((ToolZoomPan)_editor.getPageEditor().getNormalTool()).isZoom()) {
 				_editor.getPageEditor().setNormalToolOnce(new ToolZoomPan(_editor, true));
 			}
 			break;
 			
 		case MODE_PAN:
 			System.out.println("Pan");
-			if (!(_editor.getPageEditor().getNormalTool() instanceof ToolZoomPan)) {
+			if (!(_editor.getPageEditor().getNormalTool() instanceof ToolZoomPan) || ((ToolZoomPan)_editor.getPageEditor().getNormalTool()).isZoom()) {
 				_editor.getPageEditor().setNormalToolOnce(new ToolZoomPan(_editor, false));
 			}
 			break;

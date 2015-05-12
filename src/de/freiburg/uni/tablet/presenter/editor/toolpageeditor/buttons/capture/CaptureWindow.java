@@ -100,7 +100,7 @@ public class CaptureWindow extends JWindow {
 			}
 		} else if (e.getID() == MouseEvent.MOUSE_RELEASED) {
 			if (e.getButton() == MouseEvent.BUTTON1) {
-				if (_needRectangle && _isSelecting) {
+				if (_needRectangle && _isSelecting && _captureRectangle.width > 0 && _captureRectangle.height > 0) {
 					_isSelecting = false;
 					repaint();
 					BufferedImage screenshot = new BufferedImage(_captureRectangle.width, _captureRectangle.height, BufferedImage.TYPE_INT_ARGB);

@@ -13,6 +13,8 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.freiburg.uni.tablet.presenter.document.BitmapImageData;
+import de.freiburg.uni.tablet.presenter.document.IEntity;
 import de.freiburg.uni.tablet.presenter.document.PdfPageSerializable;
 import de.freiburg.uni.tablet.presenter.document.TextFont;
 import de.freiburg.uni.tablet.presenter.editor.IPageRepaintListener;
@@ -53,6 +55,7 @@ public class PdfRenderer implements IPageBackRenderer {
 	
 	private File _file;
 	private CDSRectangle _pageSize;
+	private CDSRectangle _pageSizeOrig;
 	private boolean _showPageNumber;
 	
 	private boolean _wasEmptyPage = true;
@@ -68,6 +71,7 @@ public class PdfRenderer implements IPageBackRenderer {
 		System.out.println("create pdf");
 		_pdf = PDDocument.createNew();
 		_pageSize = new CDSRectangle(0f, 0f, screenSizeX, screenSizeY);
+		_pageSizeOrig = _pageSize;
 		_file = file;
 		if (_showPageNumber) {
 			_font = PDFontType1.createNew(PDFontType1.FONT_Helvetica);
@@ -133,23 +137,34 @@ public class PdfRenderer implements IPageBackRenderer {
 		}
 	}
 	
-	public void nextPage(final PdfPageSerializable page) throws Exception {
+	public void nextPage(final IEntity pageBackgroundEntity) throws Exception {
 		if (_creator != null && _wasEmptyPage && _ignoreEmptyPage && _form == null) {
 			return;
 		}
 		endPage();
-		if (page != null) {
-			final PDPage sourcePage = page.getPage();
-			System.out.println("copy page");
-			_page = (PDPage) PDPage.META.createFromCos(sourcePage.cosGetObject().copyDeep(_baseCopiedMap));
-			_pdf.addPageNode(_page);
+		_pageSize = null;
+		if (pageBackgroundEntity != null) {
+			if (pageBackgroundEntity instanceof PdfPageSerializable) {
+				final PDPage sourcePage = ((PdfPageSerializable)pageBackgroundEntity).getPage();
+				System.out.println("copy page");
+				_page = (PDPage) PDPage.META.createFromCos(sourcePage.cosGetObject().copyDeep(_baseCopiedMap));
+				_pdf.addPageNode(_page);
+			} else if (pageBackgroundEntity instanceof BitmapImageData) {
+				BufferedImage image = ((BitmapImageData) pageBackgroundEntity).getImage();
+				_pageSize = new CDSRectangle(0, 0, image.getWidth(), image.getHeight());
+				_page = null;
+			} else {
+				throw new IllegalArgumentException("Invalid entity");
+			}
 		} else {
 			_page = null;
 		}
 		if (_page == null) {
 			System.out.println("new page");
 			_form = null;
-			_pageSize = _pageSize.copy();
+			if (_pageSize == null) {
+				_pageSize = _pageSizeOrig.copy();
+			}
 			_page = (PDPage) PDPage.META.createNew();
 			_page.setCropBox(_pageSize);
 			_page.setMediaBox(_pageSize);
@@ -158,6 +173,7 @@ public class PdfRenderer implements IPageBackRenderer {
 			_creator = CSCreator.createNew(_page);
 		} else {
 			_pageSize = _page.getMediaBox().copy();
+			_pageSizeOrig = _pageSize;
 			_form = (PDForm) PDForm.META.createNew();
 			_form.setBoundingBox(_pageSize);
 			System.out.println("creator from form");
@@ -167,6 +183,10 @@ public class PdfRenderer implements IPageBackRenderer {
 		_creator.setLineJoin(1);
 		_renderFactorX = _pageSize.getWidth();
 		_renderFactorY = _pageSize.getHeight();
+		if (pageBackgroundEntity instanceof BitmapImageData) {
+			BufferedImage image = ((BitmapImageData) pageBackgroundEntity).getImage();
+			draw(image, 0, 0, 1, 1);
+		}
 	}
 	
 	@Override
@@ -259,7 +279,7 @@ public class PdfRenderer implements IPageBackRenderer {
 	@Override
 	public void draw(final BufferedImage image, final float x, final float y, final float width, final float height) {
 		try {
-			final BufferedImage rgbImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
+			final BufferedImage rgbImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
 			final Graphics g = rgbImage.getGraphics();
 			g.drawImage(image, 0, 0, image.getWidth(), image.getHeight(), 0, 0, image.getWidth(), image.getHeight(), null);
 			g.dispose();

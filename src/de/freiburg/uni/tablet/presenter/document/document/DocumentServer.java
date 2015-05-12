@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
+import de.freiburg.uni.tablet.presenter.document.IEntity;
 import de.freiburg.uni.tablet.presenter.document.PdfPageSerializable;
 import de.freiburg.uni.tablet.presenter.document.PdfSerializable;
 import de.freiburg.uni.tablet.presenter.list.LinkedElement;
@@ -40,12 +41,12 @@ public class DocumentServer extends Document implements IEditableDocument {
 				LinkedElement<DocumentPage> docPage = _pages.getFirst();
 				while (pdfPage != null) {
 					// Set indices
-					docPage.getData().setPdfPage(new PdfPageSerializable(docPage.getData(), document, pdfPage, document.tryGetPage(pdfPage.getNodeIndex() + 1)));
+					docPage.getData().setBackgroundEntity(new PdfPageSerializable(docPage.getData(), document, pdfPage, document.tryGetPage(pdfPage.getNodeIndex() + 1)));
 					pdfPage = pdfPage.getNextPage();
 					docPage = docPage.getNext();
 				}
 				while (docPage != null) {
-					docPage.getData().setPdfPage(null);
+					docPage.getData().setBackgroundEntity(null);
 					docPage = docPage.getNext();
 				}
 			} else if (pdfMode == PDF_MODE_KEEP_INDEX) {
@@ -54,8 +55,9 @@ public class DocumentServer extends Document implements IEditableDocument {
 				LinkedElement<DocumentPage> docPage = _pages.getFirst();
 				int lastPdfIndex = 0;
 				while (docPage.getNext() != null) {
-					if (docPage.getData().getPdfPage().getPage().getNodeIndex() > lastPdfIndex) {
-						lastPdfIndex = docPage.getData().getPdfPage().getPage().getNodeIndex();
+					IEntity current = docPage.getData().getBackgroundEntity();
+					if (current != null && current instanceof PdfPageSerializable && ((PdfPageSerializable)current).getPage().getNodeIndex() > lastPdfIndex) {
+						lastPdfIndex = ((PdfPageSerializable)current).getPage().getNodeIndex();
 					}
 					docPage = docPage.getNext();
 				}
@@ -63,7 +65,7 @@ public class DocumentServer extends Document implements IEditableDocument {
 					PDPage pdfPage = pageTree.getPageAt(lastPdfIndex);
 					while (pdfPage != null) {
 						final DocumentPage newPage = this.addPage();
-						newPage.setPdfPage(new PdfPageSerializable(newPage, document, pdfPage, document.tryGetPage(lastPdfIndex + 1)));
+						newPage.setBackgroundEntity(new PdfPageSerializable(newPage, document, pdfPage, document.tryGetPage(lastPdfIndex + 1)));
 						pdfPage = pdfPage.getNextPage();
 					}
 				}
@@ -72,13 +74,13 @@ public class DocumentServer extends Document implements IEditableDocument {
 				// Iterate through doc pages and find highest
 				LinkedElement<DocumentPage> docPage = _pages.getFirst();
 				while (docPage != null) {
-					docPage.getData().setPdfPage(null);
+					docPage.getData().setBackgroundEntity(null);
 					docPage = docPage.getNext();
 				}
 				PDPage pdfPage = pageTree.getFirstPage();
 				while (pdfPage != null) {
 					final DocumentPage newPage = this.addPage();
-					newPage.setPdfPage(new PdfPageSerializable(newPage, document, pdfPage, document.tryGetPage(pdfPage.getNodeIndex() + 1)));
+					newPage.setBackgroundEntity(new PdfPageSerializable(newPage, document, pdfPage, document.tryGetPage(pdfPage.getNodeIndex() + 1)));
 					pdfPage = pdfPage.getNextPage();
 				}
 			} else if (pdfMode == PDF_MODE_CLEAR) {
@@ -88,12 +90,12 @@ public class DocumentServer extends Document implements IEditableDocument {
 				final DocumentPage firstPage = this.getPageByIndex(0);
 				PDPage pdfPage = pageTree.getFirstPage();
 				if (pdfPage != null) {
-					firstPage.setPdfPage(new PdfPageSerializable(firstPage, document, pdfPage, document.tryGetPage(pdfPage.getNodeIndex() + 1)));
+					firstPage.setBackgroundEntity(new PdfPageSerializable(firstPage, document, pdfPage, document.tryGetPage(pdfPage.getNodeIndex() + 1)));
 					pdfPage = pdfPage.getNextPage();
 				}
 				while (pdfPage != null) {
 					final DocumentPage newPage = this.addPage();
-					newPage.setPdfPage(new PdfPageSerializable(newPage, document, pdfPage, document.tryGetPage(pdfPage.getNodeIndex() + 1)));
+					newPage.setBackgroundEntity(new PdfPageSerializable(newPage, document, pdfPage, document.tryGetPage(pdfPage.getNodeIndex() + 1)));
 					pdfPage = pdfPage.getNextPage();
 				}
 			}
@@ -105,7 +107,7 @@ public class DocumentServer extends Document implements IEditableDocument {
 				// Iterate through pdf pages and clear pdf index
 				LinkedElement<DocumentPage> docPage = _pages.getFirst();
 				while (docPage != null) {
-					docPage.getData().setPdfPage(null);
+					docPage.getData().setBackgroundEntity(null);
 					docPage = docPage.getNext();
 				}
 			} else {

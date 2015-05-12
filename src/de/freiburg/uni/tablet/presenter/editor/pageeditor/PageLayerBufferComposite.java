@@ -49,6 +49,12 @@ public class PageLayerBufferComposite implements IPageLayerBuffer {
 		_pageLayerBuffers.add(result);
 		return result;
 	}
+	
+	public IPageLayerBufferBackground addBackgroundBuffer(final int pdfLibraryType) {
+		final IPageLayerBufferBackground result = new PageLayerBufferBackground(_displayRenderer, pdfLibraryType);
+		_pageLayerBuffers.add(result);
+		return result;
+	}
 
 	public PageLayerBufferComposite addComposite() {
 		final PageLayerBufferComposite result = new PageLayerBufferComposite(

@@ -10,8 +10,8 @@ import java.util.List;
 import de.freiburg.uni.tablet.presenter.actions.ActionGroup;
 import de.freiburg.uni.tablet.presenter.actions.AddPageAction;
 import de.freiburg.uni.tablet.presenter.actions.AddRenderableAction;
+import de.freiburg.uni.tablet.presenter.actions.ChangeBackgroundEntityAction;
 import de.freiburg.uni.tablet.presenter.actions.ChangePageIndexAction;
-import de.freiburg.uni.tablet.presenter.actions.ChangePdfPageAction;
 import de.freiburg.uni.tablet.presenter.actions.IAction;
 import de.freiburg.uni.tablet.presenter.actions.RemovePageAction;
 import de.freiburg.uni.tablet.presenter.actions.RemoveRenderableAction;
@@ -77,10 +77,10 @@ public class DocumentHistory {
 			}
 			
 			@Override
-			public void pdfPageChanged(final DocumentPage documentPage,
-					final PdfPageSerializable lastPdfPage) {
+			public void backgroundEntityChanged(final DocumentPage documentPage,
+					final IEntity lastBackgroundEntity) {
 				if (!_isPerforming) {
-					addAction(new ChangePdfPageAction(documentPage, documentPage.getPdfPage(), lastPdfPage));
+					addAction(new ChangeBackgroundEntityAction(documentPage, documentPage.getBackgroundEntity(), lastBackgroundEntity));
 				}
 			}
 			

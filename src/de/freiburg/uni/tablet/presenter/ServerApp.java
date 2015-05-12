@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 import de.freiburg.uni.tablet.presenter.document.DocumentConfig;
 import de.freiburg.uni.tablet.presenter.document.DocumentListener;
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
-import de.freiburg.uni.tablet.presenter.document.PdfPageSerializable;
+import de.freiburg.uni.tablet.presenter.document.IEntity;
 import de.freiburg.uni.tablet.presenter.document.document.DocumentAdapter;
 import de.freiburg.uni.tablet.presenter.document.document.DocumentServer;
 import de.freiburg.uni.tablet.presenter.document.document.IClientDocument;
@@ -109,8 +109,8 @@ public class ServerApp {
 			}
 
 			@Override
-			public void pdfPageChanged(final DocumentPage documentPage,
-					final PdfPageSerializable lastPdfPage) {
+			public void backgroundEntityChanged(final DocumentPage documentPage,
+					final IEntity lastBackgroundEntity) {
 				_autosaveLastChange = System.currentTimeMillis();
 			}
 

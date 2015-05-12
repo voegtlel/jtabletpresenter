@@ -1,7 +1,7 @@
 package de.freiburg.uni.tablet.presenter.document.document;
 
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
-import de.freiburg.uni.tablet.presenter.document.PdfPageSerializable;
+import de.freiburg.uni.tablet.presenter.document.IEntity;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 
 public interface IDocumentNotify extends IDocument {
@@ -14,8 +14,8 @@ public interface IDocumentNotify extends IDocument {
 	
 	void fireRenderableRemoving(IRenderable afterRenderable, IRenderable renderable, DocumentPage page);
 
-	void firePdfPageChanged(DocumentPage documentPage,
-			PdfPageSerializable lastPdfPage);
+	void fireBackgroundEntityChanged(DocumentPage documentPage,
+			IEntity backgroundObject);
 
 	void fireRenderableModified(IRenderable renderable, DocumentPage documentPage);
 	

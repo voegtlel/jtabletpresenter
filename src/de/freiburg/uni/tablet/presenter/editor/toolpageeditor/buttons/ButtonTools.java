@@ -30,10 +30,10 @@ public class ButtonTools extends AbstractButtonMenuTool {
 		this._frame.addItem(new ButtonSecondary(editor), true);
 		this._frame.addItem(new ButtonToolPage(editor), true);
 		this._frame.addItem(new ButtonToolDocument(editor), true);
-		this._frame.addItem(new ButtonToolScreenshot(editor, "screenshotAreaHide", "Area Screenshot", true, true, true), true);
-		this._frame.addItemDummy(new ButtonToolScreenshot(editor, "screenshotArea", "Area Screenshot", true, true, false));
-		this._frame.addItemDummy(new ButtonToolScreenshot(editor, "screenshotFull", "Screenshot", true, false, false));
-		this._frame.addItemDummy(new ButtonToolScreenshot(editor, "screenshotDirect", "Screenshot", false, false, false));
+		this._frame.addItem(new ButtonToolScreenshot(editor, "screenshotAreaHide", "Area Screenshot", ButtonToolScreenshot.MODE_SELECT_RECTANGLE, true, false), true);
+		this._frame.addItemDummy(new ButtonToolScreenshot(editor, "screenshotArea", "Area Screenshot", ButtonToolScreenshot.MODE_SELECT_RECTANGLE, false, false));
+		this._frame.addItemDummy(new ButtonToolScreenshot(editor, "screenshotFull", "Screenshot", ButtonToolScreenshot.MODE_SELECT_RECTANGLE, false, true));
+		this._frame.addItemDummy(new ButtonToolScreenshot(editor, "screenshotDirect", "Screenshot", ButtonToolScreenshot.MODE_CURRENT_SCREEN, false, true));
 		
 		this._frame.addItemDummy(new ActionZoomPan(editor, "zoom", ActionZoomPan.MODE_ZOOM));
 		this._frame.addItemDummy(new ActionZoomPan(editor, "pan", ActionZoomPan.MODE_PAN));

@@ -101,11 +101,12 @@ public class RenderMetric {
 	 * @return
 	 */
 	public boolean update(final int screenWidth, final int screenHeight, final Float desiredRatio) {
-		if (this.screenWidth != screenWidth || this.screenHeight != screenHeight || _desiredRatio != desiredRatio) {
+		if (this.screenWidth != screenWidth || this.screenHeight != screenHeight || (_desiredRatio != desiredRatio && (_desiredRatio != null && !_desiredRatio.equals(desiredRatio)))) {
 			_changed = true;
 		}
 		
 		if (_changed) {
+			_changed = false;
 			this.screenWidth = screenWidth;
 			this.screenHeight = screenHeight;
 			_desiredRatio = desiredRatio;
@@ -136,8 +137,9 @@ public class RenderMetric {
 					(surfaceHeight * 0.5f) / innerFactorY - 0.5f);
 			surfaceRelativeOffsetX = (surfaceRelativeOffsetXNormalized + 0.5f) * innerFactorX - surfaceWidth * 0.5f;
 			surfaceRelativeOffsetY = (surfaceRelativeOffsetYNormalized + 0.5f) * innerFactorY - surfaceHeight * 0.5f;
-			surfaceVirtualOffsetX = surfaceRelativeOffsetX + surfaceDrawOffsetX;
-			surfaceVirtualOffsetY = surfaceRelativeOffsetY + surfaceDrawOffsetY;
+			surfaceVirtualOffsetX = -surfaceRelativeOffsetX + surfaceDrawOffsetX;
+			surfaceVirtualOffsetY = -surfaceRelativeOffsetY + surfaceDrawOffsetY;
+			System.out.println("Offs: " + surfaceVirtualOffsetX + ", " + surfaceVirtualOffsetY);
 			innerOffsetX = -surfaceRelativeOffsetX;
 			innerOffsetY = -surfaceRelativeOffsetY;
 			return true;

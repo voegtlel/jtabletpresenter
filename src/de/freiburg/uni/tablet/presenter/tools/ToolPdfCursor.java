@@ -12,6 +12,7 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
+import de.freiburg.uni.tablet.presenter.document.IEntity;
 import de.freiburg.uni.tablet.presenter.document.PdfPageSerializable;
 import de.freiburg.uni.tablet.presenter.document.document.IEditableDocument;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
@@ -163,9 +164,10 @@ public class ToolPdfCursor extends AbstractTool {
 				if (page != null) {
 					IEditableDocument document = _editor.getDocumentEditor().getDocument();
 					for (DocumentPage p : document.getPages()) {
-						if (p.getPdfPage() != null && p.getPdfPage().getPage() != null) {
-							PDPage testPage = p.getPdfPage().getPage();
-							if (testPage.getDoc() == _document && testPage == page) {
+						IEntity backgroundEntity = p.getBackgroundEntity();
+						if (backgroundEntity != null && backgroundEntity instanceof PdfPageSerializable) {
+							PDPage testPage = ((PdfPageSerializable)backgroundEntity).getPage();
+							if (testPage != null && testPage.getDoc() == _document && testPage == page) {
 								final DocumentPage newActivePage = p;
 								success = true;
 								SwingUtilities.invokeLater(new Runnable() {
@@ -245,10 +247,13 @@ public class ToolPdfCursor extends AbstractTool {
 	
 	private PdfPageSerializable getPage() {
 		DocumentPage currentPage = _editor.getDocumentEditor().getCurrentPage();
-		if (currentPage != null && currentPage.getPdfPage() != null) {
-			PdfPageSerializable pdfPage = currentPage.getPdfPage();
-			if (pdfPage.getPage() != null) {
-				return pdfPage;
+		if (currentPage != null) {
+			IEntity backgroundEntity = currentPage.getBackgroundEntity();
+			if (backgroundEntity != null && backgroundEntity instanceof PdfPageSerializable) {
+				PdfPageSerializable pdfPage = (PdfPageSerializable) backgroundEntity;
+				if (pdfPage.getPage() != null) {
+					return pdfPage;
+				}
 			}
 		}
 		return null;
