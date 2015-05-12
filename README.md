@@ -58,7 +58,7 @@ The default config file is designed for presentation using digital pens.
      - show color square (C)
      - use scribble/eraser/line/image tool as primary (1/2/3/4)
      - take screenshot of an area and use image tool once (ctrl print <global shortcut>)
-     - take screenshot and use image tool once (ctrl shift print <global shortcut>)
+     - take screenshot and set it as current page background (ctrl shift print <global shortcut>)
 
 
 # Configuration
@@ -69,6 +69,9 @@ The config.ini file has a simple format:
 
 ## Configuration Variables
 
+Following variables are shown as
+ * `Variable` (variable type, default value if not specified): Description
+
 ### Editor
  * `editor.variableThickness` (boolean, false): If true and a real pen is used, the pressure of the pen is used for drawing.
  * `editor.voidColor` (color, FF000000): Background color for void space (outside of aspect ratio clipping)
@@ -78,6 +81,7 @@ The config.ini file has a simple format:
  * `editor.defaultPen.thickness` (float, 1.0): Thickness of the pen
  * `editor.defaultPen.color` (Color, FF000000): Color of the pen
  * `editor.scribble.drawThreshold` (float, 0.0): The Threshold, at which drawing will start. Can be used to prevent squiggles.
+ * `editor.screenshot.hideDelay` (float, 0.2): Time in sec to wait for taking the screenshot after hiding the window (to skip the hiding animation).
 
 ### Document
  * `document.background.color` (color, FFFFFFFF): Background color for the whole document
@@ -112,6 +116,8 @@ The config.ini file has a simple format:
 
 Possible key strokes are defined in [KeyStroke#getKeyStroke(java.lang.String)](http://docs.oracle.com/javase/7/docs/api/javax/swing/KeyStroke.html#getKeyStroke(java.lang.String)).
 
+Primary purpose is the screenshot tool.
+
 ### Toolbar
 The (dynamic) toolbar is separate from the fixed toolbar. This toolbar automatically shows when hovering over it and hides when leaving it. The buttons present in the toolbar can be configured by:
 
@@ -142,10 +148,10 @@ The (dynamic) toolbar is separate from the fixed toolbar. This toolbar automatic
  * `tools.document.new`: New Document (clear all)
  * `tools.document.clearPdf`: Clear the background PDF
  * `tools.document.openPdf`: Open a PDF for the background
- * `tools.screenshotAreaHide`: Take a screenshot of an area of the screen with hiding the window
- * `tools.screenshotArea`: Take a screenshot of an area of the screen
- * `tools.screenshotFull`: Take a screenshot of a selectable screen
- * `tools.screenshotDirect`: Take a screenshot of the screen under the cursor
+ * `tools.screenshotAreaHide`: Take a screenshot of an area of the screen with hiding the window and use the image tool
+ * `tools.screenshotArea`: Take a screenshot of an area of the screen and use the image tool
+ * `tools.screenshotFull`: Take a screenshot of a selectable screen and set as page background
+ * `tools.screenshotDirect`: Take a screenshot of the screen under the cursor and set as page background
  * `next`: Next page
  * `previous`: Previous page
  * `undo`: Undo
