@@ -73,6 +73,11 @@ public abstract class AbstractTool implements ITool, IPageRepaintListener {
 		_listeners.add(listener);
 	}
 	
+	@Override
+	public void removeToolListener(final IToolListener listener) {
+		_listeners.remove(listener);
+	}
+	
 	protected void fireToolFinish(final IRenderable createdRenderable) {
 		for (IToolListener l : _listeners) {
 			l.onFinish(createdRenderable);

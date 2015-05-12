@@ -34,5 +34,9 @@ public class ButtonTools extends AbstractButtonMenuTool {
 		this._frame.addItemDummy(new ButtonToolScreenshot(editor, "screenshotArea", "Area Screenshot", true, true, false));
 		this._frame.addItemDummy(new ButtonToolScreenshot(editor, "screenshotFull", "Screenshot", true, false, false));
 		this._frame.addItemDummy(new ButtonToolScreenshot(editor, "screenshotDirect", "Screenshot", false, false, false));
+		
+		this._frame.addItemDummy(new ActionZoomPan(editor, "zoom", ActionZoomPan.MODE_ZOOM));
+		this._frame.addItemDummy(new ActionZoomPan(editor, "pan", ActionZoomPan.MODE_PAN));
+		this._frame.addItemDummy(new ActionZoomPan(editor, "resetView", ActionZoomPan.MODE_RESET));
 	}
 }

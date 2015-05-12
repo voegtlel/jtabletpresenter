@@ -3,6 +3,7 @@ package de.freiburg.uni.tablet.presenter.editor.pageeditor;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 
@@ -43,6 +44,7 @@ public class PageLayerBufferPdf2 implements IPageLayerBufferPdf {
 	@Override
 	public void resize(final RenderMetric renderMetric) {
 		synchronized (_repaintSync) {
+			_requireRepaint = true;
 			// Require synched?
 			_additionalRenderWidth = 0;
 			_additionalRenderHeight = 0;
@@ -66,7 +68,7 @@ public class PageLayerBufferPdf2 implements IPageLayerBufferPdf {
 		boolean requiresRepaint;
 		Page page;
 		synchronized (_repaintSync) {
-			requiresRepaint = _requireRepaint || (_width != renderMetric.surfaceWidth || _height != renderMetric.surfaceHeight);
+			requiresRepaint = _requireRepaint;
 			_width = renderMetric.surfaceWidth;
 			_height = renderMetric.surfaceHeight;
 			_requireRepaint = false;
@@ -121,7 +123,13 @@ public class PageLayerBufferPdf2 implements IPageLayerBufferPdf {
 			pagePixels.getOptions().setImageType(ImageType.IMAGE_TYPE_ARGB);
 			float scale = Math.min(renderMetric.surfaceVirtualWidth / page.getWidth(), renderMetric.surfaceVirtualHeight / page.getHeight());
 			pagePixels.getOptions().setZoom(scale);
-			pagePixels.drawPage(null, renderMetric.innerOffsetX / scale, renderMetric.innerOffsetY / scale, (renderMetric.innerOffsetX + renderMetric.innerFactorX) / scale, (renderMetric.innerOffsetY + renderMetric.innerFactorY) / scale);
+			Rectangle2D.Float bounds = new Rectangle2D.Float(
+					renderMetric.surfaceRelativeOffsetX * page.getWidth() / renderMetric.surfaceVirtualWidth,
+					renderMetric.surfaceRelativeOffsetY * page.getHeight() / renderMetric.surfaceVirtualHeight,
+					renderMetric.surfaceWidth * page.getWidth() / renderMetric.surfaceVirtualWidth,
+					renderMetric.surfaceHeight * page.getHeight() / renderMetric.surfaceVirtualHeight);
+			System.out.println("SrcRect: " + bounds + " of " + page.getBoundBox());
+			pagePixels.drawPage(null, bounds.x, bounds.y, bounds.x + bounds.width, bounds.y + bounds.height);
 			/*final ByteBuffer buffer = page.getDocument().getPageByteBuffer(page.getPageNumber(),
 					Math.min((float)_imageBuffer.getWidth() / (float)page.getWidth(), (float)_imageBuffer.getHeight() / (float)page.getHeight()),
 					0, ImageType.IMAGE_TYPE_ARGB, 1.0f, bbox, 0, 0,
@@ -142,7 +150,8 @@ public class PageLayerBufferPdf2 implements IPageLayerBufferPdf {
 			} else {
 				final WritableRaster raster = _imageBuffer.getRaster();
 				System.out.println("drawPage result: " + bbox.getX() + ", " + bbox.getY() + ", " + bbox.getWidth() + ", " + bbox.getHeight());
-		    	raster.setDataElements(bbox.getX(), bbox.getY(), bbox.getWidth(), bbox.getHeight(), pagePixels.getPixels());
+		    	//raster.setDataElements(bbox.getX(), bbox.getY(), bbox.getWidth(), bbox.getHeight(), pagePixels.getPixels());
+				raster.setDataElements(0, 0, bbox.getWidth(), bbox.getHeight(), pagePixels.getPixels());
 			}
 	    }
 	}

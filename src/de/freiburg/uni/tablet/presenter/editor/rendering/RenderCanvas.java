@@ -216,10 +216,38 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 		}
 	}
 	
+	public RenderMetric getRenderMetric() {
+		return _renderMetric;
+	}
+	
 	public void setToolbar(final IToolbarItem[] actions, final int orientation, final int compactSize, final float compactOpacity) {
 		_toolbarRenderer = new ToolbarRenderer(this, orientation, compactSize, compactOpacity, getFont());
 		_toolbarRenderer.setActions(actions);
 		_pagePenDispatcher.setFilter(_toolbarRenderer);
+	}
+	
+	@Override
+	public void zoom(final float factor) {
+		_renderMetric.zoom(factor);
+		requireRepaint();
+	}
+	
+	@Override
+	public void pan(final float x, final float y) {
+		_renderMetric.pan(x, y);
+		requireRepaint();
+	}
+	
+	@Override
+	public void zoomAt(final float factor, final float x, final float y) {
+		_renderMetric.zoomAt(factor, x, y);
+		requireRepaint();
+	}
+	
+	@Override
+	public void resetZoomPan() {
+		_renderMetric.resetView();
+		requireRepaint();
 	}
 	
 	@Override
@@ -313,10 +341,12 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 			
 			@Override
 			public void onFinish(final IRenderable createdRenderable) {
+				final IToolListener thisRef = this;
 				SwingUtilities.invokeLater(new Runnable() {
 					@Override
 					public void run() {
 						setNormalTool(currentTool);
+						onceNormalTool.removeToolListener(thisRef);
 					}
 				});
 			}

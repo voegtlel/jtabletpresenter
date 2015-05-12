@@ -57,6 +57,15 @@ public class RenderMetric {
 	public float surfaceRelativeOffsetY;
 	
 	/**
+	 * Offset inside the surface to transform data.
+	 */
+	public float surfaceRelativeOffsetXNormalized;
+	/**
+	 * Offset inside the surface to transform data.
+	 */
+	public float surfaceRelativeOffsetYNormalized;
+	
+	/**
 	 * Offset of the target rendering surface (after applying ratio).
 	 * Specifies the offset of the left upper corner of the surface in surface inner coordinates.
 	 */
@@ -69,7 +78,7 @@ public class RenderMetric {
 	/**
 	 * Scale inside the surface to transform data.
 	 */
-	public float innerScale = 1.0f;
+	public float surfaceScale = 1.0f;
 	
 	/**
 	 * Defines the factor for scaling in x and y direction for mapping [0, 1] -> inner coordinates.
@@ -101,45 +110,41 @@ public class RenderMetric {
 			this.screenHeight = screenHeight;
 			_desiredRatio = desiredRatio;
 			if (desiredRatio == null) {
-				surfaceVirtualWidth = screenWidth * innerScale;
-				surfaceVirtualHeight = screenHeight * innerScale;
-				surfaceWidth = screenWidth;
-				surfaceHeight = screenHeight;
-				surfaceDrawOffsetX = 0;
-				surfaceDrawOffsetY = 0;
-				surfaceVirtualOffsetX = surfaceRelativeOffsetX;
-				surfaceVirtualOffsetY = surfaceRelativeOffsetY;
+				surfaceVirtualWidth = screenWidth * surfaceScale;
+				surfaceVirtualHeight = screenHeight * surfaceScale;
 			} else {
-				surfaceVirtualWidth = Math.min((int)(screenHeight * desiredRatio), screenWidth) * innerScale;
-				surfaceVirtualHeight = Math.min((int)(screenWidth / desiredRatio), screenHeight) * innerScale;
-				surfaceWidth = Math.min((int)surfaceVirtualWidth, screenWidth);
-				surfaceHeight = Math.min((int)surfaceVirtualHeight, screenHeight);
-				surfaceDrawOffsetX = (screenWidth - surfaceWidth) / 2;
-				surfaceDrawOffsetY = (screenHeight - surfaceHeight) / 2;
-				
-				// TODO - or +?
-				surfaceVirtualOffsetX = surfaceRelativeOffsetX + surfaceDrawOffsetX;
-				surfaceVirtualOffsetY = surfaceRelativeOffsetY + surfaceDrawOffsetY;
+				surfaceVirtualWidth = Math.min((int)(screenHeight * desiredRatio), screenWidth) * surfaceScale;
+				surfaceVirtualHeight = Math.min((int)(screenWidth / desiredRatio), screenHeight) * surfaceScale;
 			}
-			innerOffsetX = -surfaceRelativeOffsetX;
-			innerOffsetY = -surfaceRelativeOffsetY;
 			innerFactorX = surfaceVirtualWidth;
 			innerFactorY = surfaceVirtualHeight;
+			surfaceWidth = Math.min((int)surfaceVirtualWidth, screenWidth);
+			surfaceHeight = Math.min((int)surfaceVirtualHeight, screenHeight);
+			surfaceDrawOffsetX = (screenWidth - surfaceWidth) / 2;
+			surfaceDrawOffsetY = (screenHeight - surfaceHeight) / 2;
+			// Min:
+			// (surfaceRelativeOffsetXNormalized + 0.5f) * innerFactorX - surfaceWidth * 0.5f = 0
+			// surfaceRelativeOffsetXNormalized = (surfaceWidth * 0.5f) / innerFactorX - 0.5f
+			// Max:
+			// (surfaceRelativeOffsetXNormalized + 0.5f) * innerFactorX + surfaceWidth * 0.5f = surfaceVirtualWidth
+			// surfaceRelativeOffsetXNormalized = (surfaceVirtualWidth - surfaceWidth * 0.5f) / innerFactorX - 0.5f
+			surfaceRelativeOffsetXNormalized = Math.max(Math.min(surfaceRelativeOffsetXNormalized,
+					(surfaceVirtualWidth - surfaceWidth * 0.5f) / innerFactorX - 0.5f),
+					(surfaceWidth * 0.5f) / innerFactorX - 0.5f);
+			surfaceRelativeOffsetYNormalized = Math.max(Math.min(surfaceRelativeOffsetYNormalized,
+					(surfaceVirtualHeight - surfaceHeight * 0.5f) / innerFactorY - 0.5f),
+					(surfaceHeight * 0.5f) / innerFactorY - 0.5f);
+			surfaceRelativeOffsetX = (surfaceRelativeOffsetXNormalized + 0.5f) * innerFactorX - surfaceWidth * 0.5f;
+			surfaceRelativeOffsetY = (surfaceRelativeOffsetYNormalized + 0.5f) * innerFactorY - surfaceHeight * 0.5f;
+			surfaceVirtualOffsetX = surfaceRelativeOffsetX + surfaceDrawOffsetX;
+			surfaceVirtualOffsetY = surfaceRelativeOffsetY + surfaceDrawOffsetY;
+			innerOffsetX = -surfaceRelativeOffsetX;
+			innerOffsetY = -surfaceRelativeOffsetY;
 			return true;
 		}
 		return false;
 	}
 	
-	/**
-	 * Updates the inner scale
-	 * @param relativeScale
-	 */
-	public void scale(final float relativeScale) {
-		innerScale *= relativeScale;
-		innerScale = Math.min(innerScale, 1.0f);
-		_changed = true;
-	}
-
 	public void copyFrom(final RenderMetric src) {
 		screenWidth = src.screenWidth;
 		screenHeight = src.screenHeight;
@@ -151,12 +156,44 @@ public class RenderMetric {
 		surfaceDrawOffsetY = src.surfaceDrawOffsetY;
 		surfaceRelativeOffsetX = src.surfaceRelativeOffsetX;
 		surfaceRelativeOffsetY = src.surfaceRelativeOffsetY;
+		surfaceRelativeOffsetXNormalized = src.surfaceRelativeOffsetXNormalized;
+		surfaceRelativeOffsetYNormalized = src.surfaceRelativeOffsetYNormalized;
 		innerOffsetX = src.innerOffsetX;
 		innerOffsetY = src.innerOffsetY;
-		innerScale = src.innerScale;
+		surfaceScale = src.surfaceScale;
 		innerFactorX = src.innerFactorX;
 		innerFactorY = src.innerFactorY;
 		
 		_desiredRatio = src._desiredRatio;
+	}
+
+	/**
+	 * Updates the inner scale
+	 * @param relativeScale
+	 */
+	public void zoom(final float factor) {
+		zoomAt(factor, 0.5f, 0.5f);
+	}
+	
+	public void pan(final float x, final float y) {
+		surfaceRelativeOffsetXNormalized += x;
+		surfaceRelativeOffsetYNormalized += y;
+		_changed = true;
+	}
+
+	public void zoomAt(final float factor, final float x, final float y) {
+		//surfaceRelativeOffsetXNormalized += x * (surfaceScale - surfaceScale * factor);
+		//surfaceRelativeOffsetYNormalized += y * (surfaceScale - surfaceScale * factor);
+		surfaceScale *= factor;
+		surfaceScale = Math.max(surfaceScale, 1.0f);
+		System.out.println("ZoomAt: " + surfaceScale + " @" + surfaceRelativeOffsetXNormalized + "," + surfaceRelativeOffsetYNormalized);
+		_changed = true;
+	}
+
+	public void resetView() {
+		surfaceRelativeOffsetXNormalized = 0;
+		surfaceRelativeOffsetYNormalized = 0;
+		surfaceScale = 1.0f;
+		_changed = true;
 	}
 }

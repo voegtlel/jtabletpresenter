@@ -50,7 +50,7 @@ public class PagePenDispatcher implements PenListener {
 	private DataPoint getDataPoint(final Pen pen, final long timestamp) {
 		return new DataPoint((pen.getLevelValue(Type.X) - _drawOffset.x) / _drawSize.x,
 				(pen.getLevelValue(Type.Y) - _drawOffset.y) / _drawSize.y,
-				pen.getLevelValue(Type.X) - _drawOffset.x, pen.getLevelValue(Type.Y) - _drawOffset.y,
+				pen.getLevelValue(Type.X), pen.getLevelValue(Type.Y),
 				_lockPressure?0.5f:Math.max(_minPressure, pen.getLevelValue(Type.PRESSURE)), timestamp);
 	}
 

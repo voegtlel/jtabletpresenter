@@ -57,4 +57,9 @@ public interface ITool {
 	 * Adds a listener
 	 */
 	void addToolListener(IToolListener listener);
+
+	/**
+	 * Removes a listener
+	 */
+	void removeToolListener(IToolListener listener);
 }

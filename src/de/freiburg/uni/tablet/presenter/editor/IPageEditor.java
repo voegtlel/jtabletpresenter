@@ -4,6 +4,7 @@ import java.awt.Component;
 import java.awt.Cursor;
 
 import de.freiburg.uni.tablet.presenter.editor.pageeditor.IPageLayerBuffer;
+import de.freiburg.uni.tablet.presenter.editor.pageeditor.RenderMetric;
 import de.freiburg.uni.tablet.presenter.tools.ITool;
 
 public interface IPageEditor {
@@ -112,4 +113,36 @@ public interface IPageEditor {
 	 * Resumes repainting
 	 */
 	void resumeRepaint();
+
+	/**
+	 * Zooms the view
+	 * @param factor
+	 * @param x
+	 * @param y
+	 */
+	void zoomAt(float factor, float x, float y);
+	
+	/**
+	 * Pans the view
+	 * @param x
+	 * @param y
+	 */
+	void pan(float x, float y);
+	
+	/**
+	 * Zooms the view
+	 * @param factor
+	 */
+	void zoom(float factor);
+
+	/**
+	 * Resets the view
+	 */
+	void resetZoomPan();
+
+	/**
+	 * Gets the render metric
+	 * @return
+	 */
+	RenderMetric getRenderMetric();
 }

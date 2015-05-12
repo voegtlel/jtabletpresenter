@@ -134,6 +134,8 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer, IPage
 		synchronized (_repaintSync) {
 			if ((_newWidth != renderMetric.surfaceWidth || _newHeight != renderMetric.surfaceHeight) && _requireRepaint < REPAINT_RESIZE) {
 				_requireRepaint = REPAINT_RESIZE;
+			} else if (_requireRepaint < REPAINT_ALL) {
+				_requireRepaint = REPAINT_ALL;
 			}
 			_newWidth = renderMetric.surfaceWidth;
 			_newHeight = renderMetric.surfaceHeight;
@@ -231,10 +233,10 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer, IPage
 			_lineRenderer.x2 = x2 * _currentRenderMetric.innerFactorX + _currentRenderMetric.innerOffsetX;
 			_lineRenderer.y2 = y2 * _currentRenderMetric.innerFactorY + _currentRenderMetric.innerOffsetY;
 			if (pen == null) {
-				_graphics.setStroke(new SolidPen().getStroke(SolidPen.DEFAULT_PRESSURE * _currentRenderMetric.innerScale));
+				_graphics.setStroke(new SolidPen().getStroke(SolidPen.DEFAULT_PRESSURE * _currentRenderMetric.surfaceScale));
 				_graphics.setPaint(Color.black);
 			} else {
-				_graphics.setStroke(pen.getStroke(SolidPen.DEFAULT_PRESSURE * _currentRenderMetric.innerScale));
+				_graphics.setStroke(pen.getStroke(SolidPen.DEFAULT_PRESSURE * _currentRenderMetric.surfaceScale));
 				_graphics.setPaint(pen.getColor());
 			}
 			_graphics.draw(_lineRenderer);
@@ -265,7 +267,7 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer, IPage
 			_lineRenderer.y1 = y1 * _currentRenderMetric.innerFactorY + _currentRenderMetric.innerOffsetY;
 			_lineRenderer.x2 = x2 * _currentRenderMetric.innerFactorX + _currentRenderMetric.innerOffsetX;
 			_lineRenderer.y2 = y2 * _currentRenderMetric.innerFactorY + _currentRenderMetric.innerOffsetY;
-			_graphics.setStroke(_pathPen.getStroke(pressure * _currentRenderMetric.innerScale));
+			_graphics.setStroke(_pathPen.getStroke(pressure * _currentRenderMetric.surfaceScale));
 			_graphics.draw(_lineRenderer);
 			_isEmpty = false;
 		}
@@ -304,8 +306,8 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer, IPage
 			final float y) {
 		if (_graphics != null) {
 			float thickness = pen.getThickness(IPen.DEFAULT_PRESSURE);
-			_ellipseRenderer.x = x * _currentRenderMetric.innerFactorX + _currentRenderMetric.innerOffsetX - thickness / 2.0f * _currentRenderMetric.innerScale;
-			_ellipseRenderer.y = y * _currentRenderMetric.innerFactorY + _currentRenderMetric.innerOffsetY - thickness / 2.0f * _currentRenderMetric.innerScale;
+			_ellipseRenderer.x = x * _currentRenderMetric.innerFactorX + _currentRenderMetric.innerOffsetX - thickness / 2.0f * _currentRenderMetric.surfaceScale;
+			_ellipseRenderer.y = y * _currentRenderMetric.innerFactorY + _currentRenderMetric.innerOffsetY - thickness / 2.0f * _currentRenderMetric.surfaceScale;
 			_ellipseRenderer.width = thickness;
 			_ellipseRenderer.height = thickness;
 			_graphics.setPaint(pen.getColor());
