@@ -54,17 +54,18 @@ public class CaptureWrapper extends JDialog {
 	 * @param selectScreen if true, a tool for selecting the screen to shoot is used
 	 * @param selectRectangle if true, the tool is extended with an area select
 	 * @param owner owner component for modality
+	 * @param hideDelay time in ms to delay for hiding the window
 	 * @return the image or null
 	 * @throws AWTException
 	 */
-	public static BufferedImage captureScreen(final boolean selectScreen, final boolean selectRectangle, final Component owner, final boolean hideOwner) throws AWTException {
+	public static BufferedImage captureScreen(final boolean selectScreen, final boolean selectRectangle, final Component owner, final boolean hideOwner, final int hideDelay) throws AWTException {
 		if (selectScreen) {
 			Window ownerWindow = SwingUtilities.windowForComponent(owner);
 			if (hideOwner) {
 				ownerWindow.setVisible(false);
 				// Annoying, but needed to skip transition effects of hiding the window in some OS
 				try {
-					Thread.sleep(200);
+					Thread.sleep(hideDelay);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}

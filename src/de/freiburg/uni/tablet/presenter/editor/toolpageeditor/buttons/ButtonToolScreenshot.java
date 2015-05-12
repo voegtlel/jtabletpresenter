@@ -44,7 +44,8 @@ public class ButtonToolScreenshot extends AbstractButtonAction {
 	@Override
 	public void performLater(final Component component) {
 		try {
-			BufferedImage imageData = CaptureWrapper.captureScreen(_mode == MODE_SELECT_SCREEN || _mode == MODE_SELECT_RECTANGLE, _mode == MODE_SELECT_RECTANGLE, component, _hideWindow);
+			BufferedImage imageData = CaptureWrapper.captureScreen(_mode == MODE_SELECT_SCREEN || _mode == MODE_SELECT_RECTANGLE,
+					_mode == MODE_SELECT_RECTANGLE, component, _hideWindow, (int)(_editor.getConfig().getFloat("editor.screenshot.hideDelay", 0.2f) * 1000));
 			if (imageData != null) {
 				if (_asBackground) {
 					DocumentPage page = _editor.getDocumentEditor().getCurrentPage();
