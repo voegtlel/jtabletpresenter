@@ -62,10 +62,12 @@ public class PdfRenderer implements IPageBackRenderer {
 	private boolean _ignoreEmptyPage;
 	private float _thicknessFactor;
 	private boolean _ignoreEmptyPageNumber;
+	private boolean _ignorePdfPageNumber;
 	
-	public PdfRenderer(final File file, final float screenSizeX, final float screenSizeY, final boolean ignoreEmptyPage, final boolean ignoreEmptyPageNumber, final boolean showPageNumber, final float thicknessFactor) throws Exception {
+	public PdfRenderer(final File file, final float screenSizeX, final float screenSizeY, final boolean ignoreEmptyPage, final boolean ignoreEmptyPageNumber, final boolean ignorePdfPageNumber, final boolean showPageNumber, final float thicknessFactor) throws Exception {
 		_ignoreEmptyPage = ignoreEmptyPage;
 		_ignoreEmptyPageNumber = ignoreEmptyPageNumber;
+		_ignorePdfPageNumber = ignorePdfPageNumber;
 		_showPageNumber = showPageNumber;
 		_thicknessFactor = thicknessFactor;
 		System.out.println("create pdf");
@@ -89,7 +91,7 @@ public class PdfRenderer implements IPageBackRenderer {
 	private void endPage() {
 		if (_creator != null) {
 			// Finally add page number
-			if (_showPageNumber && (!_wasEmptyPage || !_ignoreEmptyPageNumber)) {
+			if (_showPageNumber && (!_wasEmptyPage || !_ignoreEmptyPageNumber) && (!_ignorePdfPageNumber || _form == null)) {
 				// Draw page number
 				float fontSize = 20;
 				_creator.textSetFont(null, _font, fontSize);

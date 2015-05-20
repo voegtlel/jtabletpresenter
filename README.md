@@ -95,6 +95,7 @@ Following variables are shown as
  * `pdf.ignoreEmptyPages` (boolean, false): If true, empty pages won't be exported to PDF
  * `pdf.showPageNumber` (boolean, true): If true, the page number is printed on the lower right on PDFs
  * `pdf.ignoreEmptyPageNumber` (boolean, true): If true and empty pages are printed (`pdf.ignoreEmptyPages`) these won't have page numbers
+ * `pdf.ignorePdfPageNumber` (boolean, true): If true and pages with PDF content won't have page numbers
  * `pdf.thicknessFactor` (float, 0.2): The factor for line thickness for rendering to PDF
 
 ### General

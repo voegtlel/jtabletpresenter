@@ -129,10 +129,11 @@ public class FileHelper {
 			final boolean pdfIgnoreEmptyPages = config.getBoolean("pdf.ignoreEmptyPages", false);
 			final boolean pdfShowPageNumber = config.getBoolean("pdf.showPageNumber", true);
 			final boolean pdfIgnoreEmptyPageNumber = config.getBoolean("pdf.ignoreEmptyPageNumber", true);
+			final boolean pdfIgnorePdfPageNumber = config.getBoolean("pdf.ignorePdfPageNumber", true);
 			final float pdfThicknessFactor = config.getFloat("pdf.thicknessFactor", 0.2f);
 			final PdfRenderer pdfRenderer = new PdfRenderer(file,
 					pdfDefaultWidth, pdfDefaultHeight,
-					pdfIgnoreEmptyPages, pdfIgnoreEmptyPageNumber, pdfShowPageNumber, pdfThicknessFactor);
+					pdfIgnoreEmptyPages, pdfIgnoreEmptyPageNumber, pdfIgnorePdfPageNumber, pdfShowPageNumber, pdfThicknessFactor);
 			final int count = document.getPageCount();
 			for (int i = 0; i < count; i++) {
 				final DocumentPage page = document.getPageByIndex(i);
