@@ -1,7 +1,9 @@
 package de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons;
 
 import java.awt.Component;
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -15,6 +17,11 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 
+import org.apache.tika.detect.Detector;
+import org.apache.tika.metadata.Metadata;
+import org.apache.tika.mime.MediaType;
+import org.apache.tika.parser.AutoDetectParser;
+
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.document.DocumentConfig;
@@ -25,8 +32,14 @@ import de.freiburg.uni.tablet.presenter.document.document.IEditableDocument;
 import de.freiburg.uni.tablet.presenter.document.editor.IDocumentEditor;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 import de.freiburg.uni.tablet.presenter.editor.pdf.PdfRenderer;
+import de.freiburg.uni.tablet.presenter.tools.ToolImage;
 
 public class FileHelper {
+	public static final int FILE_HEADER_VERSION = 0x00010001;
+	public static final int FILE_HEADER_DOCUMENT = 0x6a747064; //jtpd
+	public static final int FILE_HEADER_PAGE = 0x6a747070; //jtpp
+	public static final int FILE_HEADER_SESSION = 0x6a747073; //jtps
+	
 	private static class PdfModeOption {
 		private final int _key;
 		private final String _text;
@@ -82,12 +95,25 @@ public class FileHelper {
 	public static final FileFilter FILTER_session = new FileFilter() {
 		@Override
 		public String getDescription() {
-			return "Session Data (session.dat)";
+			return "Session Data (session.jps)";
 		}
 
 		@Override
 		public boolean accept(final File f) {
-			return f.getPath().toLowerCase().endsWith("session.dat") || f.isDirectory();
+			return f.getPath().toLowerCase().endsWith("session.jps") || f.isDirectory();
+		}
+	};
+	public static final FileFilter FILTER_image = new FileFilter() {
+		@Override
+		public String getDescription() {
+			return "Image (*.png, *.jpg, *.jpeg, *.gif, *.bmp)";
+		}
+
+		@Override
+		public boolean accept(final File f) {
+			return f.getPath().toLowerCase().endsWith(".png") || f.getPath().toLowerCase().endsWith(".jpg") ||
+					f.getPath().toLowerCase().endsWith(".jpeg") || f.getPath().toLowerCase().endsWith(".gif") ||
+					f.getPath().toLowerCase().endsWith(".bmp") || f.isDirectory();
 		}
 	};
 	
@@ -106,6 +132,8 @@ public class FileHelper {
 		
 		final BinarySerializer writer = new BinarySerializer(
 				fileChannel);
+		writer.writeInt(FILE_HEADER_DOCUMENT);
+		writer.writeInt(FILE_HEADER_VERSION);
 		writer.writeObjectTable(document);
 		writer.flush();
 		fileChannel.close();
@@ -116,7 +144,19 @@ public class FileHelper {
 		
 		final BinarySerializer writer = new BinarySerializer(
 				fileChannel);
+		writer.writeInt(FILE_HEADER_PAGE);
+		writer.writeInt(FILE_HEADER_VERSION);
 		page.serializeDirect(writer);
+		writer.flush();
+		fileChannel.close();
+	}
+	
+	public static void saveSession(final IDocumentEditor editor, final File file) throws IOException {
+		final SeekableByteChannel fileChannel = Files.newByteChannel(file.toPath(), StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
+		final BinarySerializer writer = new BinarySerializer(fileChannel);
+		writer.writeInt(FILE_HEADER_SESSION);
+		writer.writeInt(FILE_HEADER_VERSION);
+		editor.serialize(writer);
 		writer.flush();
 		fileChannel.close();
 	}
@@ -148,14 +188,6 @@ public class FileHelper {
 		} catch (Exception e) {
 			throw new IOException(e);
 		}
-	}
-	
-	public static void saveSession(final IDocumentEditor editor, final File file) throws IOException {
-		final SeekableByteChannel bc = Files.newByteChannel(file.toPath(), StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
-		final BinarySerializer bs = new BinarySerializer(bc);
-		editor.serialize(bs);
-		bs.flush();
-		bc.close();
 	}
 	
 	public static boolean showSaveDialog(final Component component, final IToolPageEditor editor, final FileFilter defaultType) {
@@ -226,6 +258,12 @@ public class FileHelper {
 		final SeekableByteChannel fileChannel = Files.newByteChannel(file.toPath(), StandardOpenOption.READ);
 		
 		final BinaryDeserializer reader = new BinaryDeserializer(fileChannel);
+		if (FILE_HEADER_DOCUMENT != reader.readInt()) {
+			throw new IOException("Invalid header for document");
+		}
+		if (FILE_HEADER_VERSION != reader.readInt()) {
+			throw new IOException("Invalid version for document");
+		}
 		final IEditableDocument document = reader.readObjectTable();
 		fileChannel.close();
 		
@@ -233,7 +271,7 @@ public class FileHelper {
 	}
 	
 	/**
-	 * Opens a document file
+	 * Opens a page file
 	 * 
 	 * @param file
 	 * @param dstPage
@@ -243,23 +281,109 @@ public class FileHelper {
 		final SeekableByteChannel fileChannel = Files.newByteChannel(file.toPath(), StandardOpenOption.READ);
 		
 		final BinaryDeserializer reader = new BinaryDeserializer(fileChannel);
+		if (FILE_HEADER_PAGE != reader.readInt()) {
+			throw new IOException("Invalid header for document");
+		}
+		if (FILE_HEADER_VERSION != reader.readInt()) {
+			throw new IOException("Invalid version for document");
+		}
 		dstPage.deserializeDirect(reader);
 		fileChannel.close();
 	}
 	
 	/**
-	 * Opens a session.dat file
+	 * Opens a session.jps file
 	 * @param file
 	 * @param editor
 	 * @throws IOException
 	 */
 	public static void openSession(final File file, final IDocumentEditor editor) throws IOException {
 		System.out.println("Loading session");
-		SeekableByteChannel bs = Files.newByteChannel(file.toPath(), StandardOpenOption.READ);
-		BinaryDeserializer bd = new BinaryDeserializer(bs);
-		editor.deserialize(bd);
-		bs.close();
+		SeekableByteChannel fileChannel = Files.newByteChannel(file.toPath(), StandardOpenOption.READ);
+		BinaryDeserializer reader = new BinaryDeserializer(fileChannel);
+		if (FILE_HEADER_SESSION != reader.readInt()) {
+			throw new IOException("Invalid header for session");
+		}
+		if (FILE_HEADER_VERSION != reader.readInt()) {
+			throw new IOException("Invalid version for document");
+		}
+		editor.deserialize(reader);
+		fileChannel.close();
 		System.out.println("Session loaded");
+	}
+	
+	/**
+	 * Opens a pdf file
+	 * @param component
+	 * @param editor
+	 * @param pdfFile
+	 * @return true if accepted
+	 * @throws IOException
+	 */
+	public static boolean openPdf(final Component component, final IToolPageEditor editor, final File pdfFile) throws IOException {
+		final PdfModeOption defOpt = new PdfModeOption(IEditableDocument.PDF_MODE_CLEAR, "Clear all");
+		final Object dialogResult = JOptionPane.showInputDialog(component, "Select PDF Mode", "PDF Loading...", JOptionPane.QUESTION_MESSAGE, null, new Object[] {
+				defOpt,
+			new PdfModeOption(IEditableDocument.PDF_MODE_REINDEX, "Reindex Pages"),
+			new PdfModeOption(IEditableDocument.PDF_MODE_KEEP_INDEX, "Keep Page Indices"),
+			new PdfModeOption(IEditableDocument.PDF_MODE_APPEND, "Append Pdf Pages"),
+			defOpt
+		}, defOpt);
+		if (dialogResult != null) {
+			final PdfModeOption res = (PdfModeOption)dialogResult;
+			final PdfSerializable pdf = new PdfSerializable(editor.getDocumentEditor().getFrontDocument(), pdfFile);
+			editor.getDocumentEditor().getFrontDocument().setPdfPages(pdf, res.getKey());
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * Tries to open the given file by its mime type
+	 * @param component
+	 * @param editor
+	 * @param file
+	 * @return
+	 * @throws IOException
+	 */
+	public static boolean openFile(final Component component, final IToolPageEditor editor, final File file) throws IOException {
+		MediaType mediaType;
+		BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));
+		try {
+			AutoDetectParser parser = new AutoDetectParser();
+			Detector detector = parser.getDetector();
+			Metadata md = new Metadata();
+			md.add(Metadata.RESOURCE_NAME_KEY, file.getAbsolutePath());
+			mediaType = detector.detect(bis, md);
+		} finally {
+			bis.close();
+		}
+		
+		if ("application".equals(mediaType.getType())) {
+			if ("jtabletpresenter".equals(mediaType.getSubtype())) {
+				String type = mediaType.getParameters().get("type");
+				System.out.println("jtabletpresenter subtype: " + type);
+				if ("document".equals(type)) {
+					editor.getDocumentEditor().setBackDocument(null);
+					editor.getDocumentEditor().setDocument(openDocument(file));
+					return true;
+				} else if ("page".equals(type)) {
+					DocumentPage currentPage = editor.getDocumentEditor().getCurrentPage();
+					openPage(file, currentPage);
+					return true;
+				} else if ("sessiondat".equals(type)) {
+					openSession(file, editor.getDocumentEditor());
+					return true;
+				}
+			} else if ("pdf".equals(mediaType.getSubtype())) {
+				return openPdf(component, editor, file);
+			}
+		} else if ("image".equals(mediaType.getType())) {
+			editor.getDocumentEditor().setCurrentImageFile(file);
+			editor.getPageEditor().setNormalToolOnce(new ToolImage(editor));
+			return true;
+		}
+		return false;
 	}
 	
 	public static boolean showOpenDialog(final Component component, final IToolPageEditor editor, final FileFilter defaultFilter) {
@@ -268,6 +392,7 @@ public class FileHelper {
 		fileChooser.addChoosableFileFilter(FILTER_presenterPageFile);
 		fileChooser.addChoosableFileFilter(FILTER_pdf);
 		fileChooser.addChoosableFileFilter(FILTER_session);
+		fileChooser.addChoosableFileFilter(FILTER_image);
 		fileChooser.setFileFilter(defaultFilter);
 		final String defaultDir = editor.getConfig().getString("file.dialog.location", "");
 		if (!defaultDir.isEmpty()) {
@@ -284,34 +409,7 @@ public class FileHelper {
 					}
 					editor.getConfig().write(false);
 				}
-				final File f = fileChooser.getSelectedFile();
-				if (f.getPath().toLowerCase().endsWith(".jpd")) {
-					editor.getDocumentEditor().setBackDocument(null);
-					editor.getDocumentEditor().setDocument(openDocument(f));
-					return true;
-				} else if (f.getPath().toLowerCase().endsWith(".jpp")) {
-					DocumentPage currentPage = editor.getDocumentEditor().getCurrentPage();
-					openPage(f, currentPage);
-					return true;
-				} else if (f.getPath().toLowerCase().endsWith(".pdf")) {
-					final PdfModeOption defOpt = new PdfModeOption(IEditableDocument.PDF_MODE_CLEAR, "Clear all");
-					final Object dialogResult = JOptionPane.showInputDialog(component, "Select PDF Mode", "PDF Loading...", JOptionPane.QUESTION_MESSAGE, null, new Object[] {
-							defOpt,
-						new PdfModeOption(IEditableDocument.PDF_MODE_REINDEX, "Reindex Pages"),
-						new PdfModeOption(IEditableDocument.PDF_MODE_KEEP_INDEX, "Keep Page Indices"),
-						new PdfModeOption(IEditableDocument.PDF_MODE_APPEND, "Append Pdf Pages"),
-						defOpt
-					}, defOpt);
-					if (dialogResult != null) {
-						final PdfModeOption res = (PdfModeOption)dialogResult;
-						final PdfSerializable pdf = new PdfSerializable(editor.getDocumentEditor().getFrontDocument(), f);
-						editor.getDocumentEditor().getFrontDocument().setPdfPages(pdf, res.getKey());
-						return true;
-					}
-				} else if (f.getPath().toLowerCase().endsWith("session.dat")) {
-					openSession(f, editor.getDocumentEditor());
-					return true;
-				}
+				openFile(component, editor, fileChooser.getSelectedFile());
 			} catch (final FileNotFoundException e) {
 				JOptionPane.showMessageDialog(component, "Couldn't open file",
 						"Error", JOptionPane.ERROR_MESSAGE);

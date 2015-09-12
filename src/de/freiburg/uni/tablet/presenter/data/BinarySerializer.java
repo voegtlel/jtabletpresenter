@@ -8,6 +8,7 @@ import java.io.EOFException;
 import java.io.Flushable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.channels.WritableByteChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -30,6 +31,9 @@ public class BinarySerializer {
 	 */
 	public BinarySerializer(final WritableByteChannel channel) {
 		_channel = channel;
+		if (_buffer.order() != ByteOrder.BIG_ENDIAN) {
+			_buffer.order(ByteOrder.BIG_ENDIAN);
+		}
 	}
 	
 	public void flush() throws IOException {

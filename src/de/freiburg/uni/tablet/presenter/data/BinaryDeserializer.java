@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -34,6 +35,9 @@ public class BinaryDeserializer {
 	 */
 	public BinaryDeserializer(final ReadableByteChannel channel) {
 		_channel = channel;
+		if (_buffer.order() != ByteOrder.BIG_ENDIAN) {
+			_buffer.order(ByteOrder.BIG_ENDIAN);
+		}
 	}
 	
 	public void read(final ByteBuffer buffer) throws IOException {

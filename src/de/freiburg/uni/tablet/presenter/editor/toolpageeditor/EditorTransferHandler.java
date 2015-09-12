@@ -19,6 +19,7 @@ import javax.swing.JComponent;
 import javax.swing.TransferHandler;
 
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
+import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.FileHelper;
 import de.freiburg.uni.tablet.presenter.tools.ToolImage;
 
 /**
@@ -46,14 +47,15 @@ public class EditorTransferHandler extends TransferHandler implements DropTarget
 			graphics.dispose();
 			_editor.getDocumentEditor().setCurrentImage(bi);
 		}
+		_editor.getPageEditor().setNormalToolOnce(new ToolImage(_editor));
 	}
 	
-	private void acceptFile(final Transferable t) throws UnsupportedFlavorException, IOException {
+	private boolean acceptFile(final Transferable t) throws UnsupportedFlavorException, IOException {
 		@SuppressWarnings("unchecked")
 		List<File> files = (List<File>) t.getTransferData(DataFlavor.javaFileListFlavor);
 		if (files.size() == 1) {
-			System.out.println("Set image to " + files.get(0));
-			_editor.getDocumentEditor().setCurrentImageFile(files.get(0));
+			File file = files.get(0);
+			return FileHelper.openFile(_editor.getMainComponent(), _editor, file);
 		} else {
 			throw new UnsupportedFlavorException(DataFlavor.javaFileListFlavor);
 		}
@@ -101,11 +103,11 @@ public class EditorTransferHandler extends TransferHandler implements DropTarget
 		try {
 			if (hasImageFlavor(support.getDataFlavors())) {
 				acceptImage(support.getTransferable());
-				_editor.getPageEditor().setNormalToolOnce(new ToolImage(_editor));
 				return true;
 			} else if (hasFileFlavor(support.getDataFlavors())) {
-				acceptFile(support.getTransferable());
-				_editor.getPageEditor().setNormalToolOnce(new ToolImage(_editor));
+				if (!acceptFile(support.getTransferable())) {
+					return false;
+				}
 				return true;
 			}
 		} catch (UnsupportedFlavorException | IOException e) {
@@ -143,13 +145,10 @@ public class EditorTransferHandler extends TransferHandler implements DropTarget
 				dtde.acceptDrop(DnDConstants.ACTION_COPY);
 				acceptImage(dtde.getTransferable());
 				dtde.dropComplete(true);
-				_editor.getPageEditor().setNormalToolOnce(new ToolImage(_editor));
 				return;
 			} else if (hasFileFlavor(dtde.getCurrentDataFlavors())) {
 				dtde.acceptDrop(DnDConstants.ACTION_COPY);
-				acceptFile(dtde.getTransferable());
-				dtde.dropComplete(true);
-				_editor.getPageEditor().setNormalToolOnce(new ToolImage(_editor));
+				dtde.dropComplete(acceptFile(dtde.getTransferable()));
 				return;
 			}
 			dtde.rejectDrop();

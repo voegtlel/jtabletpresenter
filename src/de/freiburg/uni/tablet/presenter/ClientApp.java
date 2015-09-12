@@ -177,7 +177,7 @@ public class ClientApp {
 			}
 		} else {
 			if (_pageRenderer.getConfig().getBoolean("autosave.loadStartup", false)) {
-				final File savedSession = new File("session.dat");
+				final File savedSession = new File("session.jps");
 				if (savedSession.exists())  {
 					try {
 						System.out.println("Loading session");
@@ -245,7 +245,7 @@ public class ClientApp {
 			@Override
 			public void windowClosing(final WindowEvent e) {
 				if (_pageRenderer.getConfig().getBoolean("autosave.saveExit", false)) {
-					final File savedSession = new File("session.dat");
+					final File savedSession = new File("session.jps");
 					try {
 						System.out.println("Saving session");
 						FileHelper.saveSession(_pageRenderer.getDocumentEditor(), savedSession);

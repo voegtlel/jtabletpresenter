@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mime-info>
+	<mime-type type="application/jtabletpresenter">
+		<_comment>JTabletPresenter File</_comment>
+		<!-- <sub-class-of type="application/octet-stream" />-->
+		<magic priority="50">
+			<match value="jtp" type="string" offset="0" />
+		</magic>
+	</mime-type>
+	<mime-type type="application/jtabletpresenter; type=document; version=1.1">
+		<_comment>JTabletPresenter Document</_comment>
+		<glob pattern="*.jpd" />
+		<sub-class-of type="application/jtabletpresenter" />
+		<magic priority="70">
+			<match value="d" type="string" offset="3">
+				<match value="0x00010001" type="big32" offset="4" />
+			</match>
+		</magic>
+	</mime-type>
+	<mime-type type="application/jtabletpresenter; type=page; version=1.1">
+		<_comment>JTabletPresenter Page</_comment>
+		<glob pattern="*.jpp" />
+		<sub-class-of type="application/jtabletpresenter" />
+		<magic priority="70">
+			<match value="p" type="string" offset="3">
+				<match value="0x00010001" type="big32" offset="4" />
+			</match>
+		</magic>
+	</mime-type>
+	<mime-type type="application/jtabletpresenter; type=sessiondat; version=1.1">
+		<_comment>JTabletPresenter session.dat</_comment>
+		<glob pattern="*session.jps" />
+		<sub-class-of type="application/jtabletpresenter" />
+		<magic priority="70">
+			<match value="s" type="string" offset="3">
+				<match value="0x00010001" type="big32" offset="4" />
+			</match>
+		</magic>
+	</mime-type>
+</mime-info>
