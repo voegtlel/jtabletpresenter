@@ -82,6 +82,7 @@ Following variables are shown as
  * `editor.defaultPen.color` (Color, FF000000): Color of the pen
  * `editor.scribble.drawThreshold` (float, 0.0): The Threshold, at which drawing will start. Can be used to prevent squiggles.
  * `editor.screenshot.hideDelay` (float, 0.2): Time in sec to wait for taking the screenshot after hiding the window (to skip the hiding animation).
+ * `editor.image.lockRatio` (boolean, false): If true and if the document uses a fixed ratio, the ratio of images is kept fixed when drawing.
 
 ### Document
  * `document.background.color` (color, FFFFFFFF): Background color for the whole document
@@ -95,6 +96,7 @@ Following variables are shown as
  * `pdf.ignoreEmptyPages` (boolean, false): If true, empty pages won't be exported to PDF
  * `pdf.showPageNumber` (boolean, true): If true, the page number is printed on the lower right on PDFs
  * `pdf.ignoreEmptyPageNumber` (boolean, true): If true and empty pages are printed (`pdf.ignoreEmptyPages`) these won't have page numbers
+ * `pdf.ignorePdfPageNumber` (boolean, true): If true and pages with PDF content won't have page numbers
  * `pdf.thicknessFactor` (float, 0.2): The factor for line thickness for rendering to PDF
 
 ### General
