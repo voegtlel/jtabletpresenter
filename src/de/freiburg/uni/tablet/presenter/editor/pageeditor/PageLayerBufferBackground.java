@@ -39,6 +39,8 @@ public class PageLayerBufferBackground implements IPageLayerBufferBackground {
 	
 	@Override
 	public void resize(final RenderMetric renderMetric) {
+		// Always resize PDF layer
+		_pdfLayer.resize(renderMetric);
 	}
 	
 	@Override
