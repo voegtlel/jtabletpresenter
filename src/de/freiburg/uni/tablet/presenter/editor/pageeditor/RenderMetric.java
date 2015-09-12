@@ -168,6 +168,14 @@ public class RenderMetric {
 		
 		_desiredRatio = src._desiredRatio;
 	}
+	
+	/**
+	 * Gets the desired ratio
+	 * @return
+	 */
+	public Float getDesiredRatio() {
+		return _desiredRatio;
+	}
 
 	/**
 	 * Updates the inner scale

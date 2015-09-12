@@ -155,6 +155,10 @@ public class BitmapImage extends AbstractRenderable {
 		return _y;
 	}
 	
+	public float getImageRatio() {
+		return (float)_image.getWidth() / _image.getHeight();
+	}
+	
 	@Override
 	public float getMinX() {
 		return Math.min(_x, _x + _width);

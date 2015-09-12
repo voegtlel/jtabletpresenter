@@ -46,8 +46,9 @@ public class CaptureWindow extends JWindow {
 		setBounds(device.getDefaultConfiguration().getBounds());
 		Robot robot = new Robot(device);
 		Rectangle bounds = device.getDefaultConfiguration().getBounds();
-		_captureRectangle = new Rectangle(bounds.width, bounds.height);
-		_captureImage = robot.createScreenCapture(_captureRectangle);
+		// Fixed: On windows 10, bounds.x and bounds.y are required. This was not so on windows 7/8...
+		_captureRectangle = new Rectangle(bounds.x, bounds.y, bounds.width, bounds.height);
+		_captureImage = robot.createScreenCapture(bounds);
 		enableEvents(AWTEvent.MOUSE_EVENT_MASK | AWTEvent.MOUSE_MOTION_EVENT_MASK | AWTEvent.KEY_EVENT_MASK);
 	}
 	

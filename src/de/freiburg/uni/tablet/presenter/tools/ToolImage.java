@@ -18,6 +18,7 @@ import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
 public class ToolImage extends AbstractTool {
 	private BitmapImage _image = null;
 	private DataPoint _startData = null;
+	private final boolean _lockRatio;
 
 	/**
 	 * Documents
@@ -26,6 +27,7 @@ public class ToolImage extends AbstractTool {
 	 */
 	public ToolImage(final IToolPageEditor editor) {
 		super(editor);
+		_lockRatio = editor.getConfig().getBoolean("editor.image.lockRatio", false);
 		updateCursor();
 	}
 	
@@ -56,13 +58,33 @@ public class ToolImage extends AbstractTool {
 				_startData = data;
 				fireToolStart();
 			} else {
-				final float x1 = Math.min(data.getX(), _startData.getX());
+				// First notify (when the area is still the old area)
+				_editor.getFrontRenderer().requireRepaint(_image, true);
+				float x0 = _startData.getX();
+				float y0 = _startData.getY();
+				float width = data.getX() - x0;
+				float height = data.getY() - y0;
+				Float desiredRatio = _editor.getPageEditor().getRenderMetric().getDesiredRatio();
+				if (_lockRatio && desiredRatio != null) {
+					float imageRatio = _image.getImageRatio();
+					float desH = Math.abs(width * desiredRatio / imageRatio);
+					float desW = Math.abs(height / desiredRatio * imageRatio);
+					if (desH < Math.abs(height)) {
+						height = desH * Math.signum(height);
+					} else {
+						width = desW * Math.signum(width);
+					}
+				}
+				/*final float x1 = Math.min(data.getX(), _startData.getX());
 				final float y1 = Math.min(data.getY(), _startData.getY());
 				final float x2 = Math.max(data.getX(), _startData.getX());
-				final float y2 = Math.max(data.getY(), _startData.getY());
+				final float y2 = Math.max(data.getY(), _startData.getY());*/
+				final float x1 = Math.min(x0, x0 + width);
+				final float y1 = Math.min(y0, y0 + height);
+				final float x2 = Math.max(x0, x0 + width);
+				final float y2 = Math.max(y0, y0 + height);
 				_image.setLocation(x1, y1);
 				_image.setSize(x2-x1, y2-y1);
-				_editor.getFrontRenderer().requireRepaint(_image, true);
 			}
 		}
 	}
