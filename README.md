@@ -83,6 +83,8 @@ Following variables are shown as
  * `editor.scribble.drawThreshold` (float, 0.0): The Threshold, at which drawing will start. Can be used to prevent squiggles.
  * `editor.screenshot.hideDelay` (float, 0.2): Time in sec to wait for taking the screenshot after hiding the window (to skip the hiding animation).
  * `editor.image.lockRatio` (boolean, false): If true and if the document uses a fixed ratio, the ratio of images is kept fixed when drawing.
+ * `editor.stroke.screenAdapt` (boolean, true): If true, then the stroke width will adapt the screen size. Otherwise the stroke width is pixel based.
+ * `editor.stroke.baseThickness` (float, 0.004): Specifies the ratio of the stroke to screen in [0,1] 
 
 ### Document
  * `document.background.color` (color, FFFFFFFF): Background color for the whole document
@@ -102,6 +104,7 @@ Following variables are shown as
 ### General
  * `color.red`, `color.green`, `color.blue`, `color.black` (Color, FFBB0000, FF00BB00, FF0000BB, FF000000): Color values for the color-square selected colors.
  * `fullscreen.autotoggleToolbar` (boolean, true): If true, the toolbar is hidden when changing into fullscreen and shown when switching to windowed mode
+ * `thickness.thin`, `thickness.medium`, `thickness.thick` (float, 1.0, 2.0, 3.0): Default base thicknesses possible to select.
 
 ### Save/Load
  * `autosave.next`, `autosave.previous`, `autosave.spinner` (boolean, true): If true, the current page will be autosaved on next/previous/spinner selected page
@@ -154,6 +157,8 @@ The (dynamic) toolbar is separate from the fixed toolbar. This toolbar automatic
  * `tools.screenshotArea`: Take a screenshot of an area of the screen and use the image tool
  * `tools.screenshotFull`: Take a screenshot of a selectable screen and set as page background
  * `tools.screenshotDirect`: Take a screenshot of the screen under the cursor and set as page background
+ * `tools.blankScreen`: Blanks the screen containing the main window
+ * `tools.blankScreenAll`: Blanks all screens
  * `next`: Next page
  * `previous`: Previous page
  * `undo`: Undo
