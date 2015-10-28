@@ -30,8 +30,9 @@ public class CaptureWrapper extends JDialog {
 		setAutoRequestFocus(true);
 		setModal(true);
 		setModalityType(ModalityType.DOCUMENT_MODAL);
+		boolean isFirst = true;
 		for (GraphicsDevice graphicsDevice : GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices()) {
-			final CaptureWindow frame = new CaptureWindow(graphicsDevice, this, selectRectangle) {
+			final CaptureWindow frame = new CaptureWindow(graphicsDevice, this, selectRectangle, isFirst) {
 				private static final long serialVersionUID = 1L;
 
 				@Override
@@ -41,6 +42,7 @@ public class CaptureWrapper extends JDialog {
 					CaptureWrapper.this.dispose();
 				}
 			};
+			isFirst = false;
 			frame.setVisible(true);
 		}
 	}

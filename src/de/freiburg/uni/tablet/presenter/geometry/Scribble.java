@@ -6,6 +6,7 @@ import java.io.IOException;
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
+import de.freiburg.uni.tablet.presenter.editor.pageeditor.RenderMetric;
 import de.freiburg.uni.tablet.presenter.list.LinkedElement;
 import de.freiburg.uni.tablet.presenter.list.LinkedElementList;
 import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
@@ -124,8 +125,8 @@ public class Scribble extends AbstractRenderable {
 	}
 
 	@Override
-	public float getRadius() {
-		return _pen.getThickness();
+	public float getRadius(final RenderMetric metric) {
+		return _pen.getThickness(metric, IPen.MAX_PRESSURE);
 	}
 	
 	

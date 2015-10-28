@@ -102,7 +102,7 @@ public class ToolScribble extends AbstractTool {
 			return null;
 		}
 		final int diameter = (int) Math.max(_editor.getDocumentEditor()
-				.getCurrentPen().getThickness(IPen.DEFAULT_PRESSURE), 2);
+				.getCurrentPen().getThickness(_editor.getPageEditor().getRenderMetric(), IPen.DEFAULT_PRESSURE), 2);
 		final int extraline = 3;
 		final BufferedImage img = createBitmap(diameter + 2 * extraline + 1,
 				diameter + 2 * extraline + 1);

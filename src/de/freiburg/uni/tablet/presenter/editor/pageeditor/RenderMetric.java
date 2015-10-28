@@ -89,8 +89,29 @@ public class RenderMetric {
 	 */
 	public float innerFactorY = 1.0f;
 	
+	/**
+	 * If null, the ratio is the full screen. Otherwise this is used as the desired ratio
+	 */
 	private Float _desiredRatio;
 	
+	/**
+	 * Base size of a stroke.
+	 */
+	public float strokeSize = 1.0f;
+	
+	/**
+	 * Base size of a stroke before transforming by screen size.
+	 */
+	private float _strokeBaseSize = 0.05f;
+	
+	/**
+	 * If true, then the stroke size is determined by the screen size
+	 */
+	private boolean _strokeByScreen = false;
+	
+	/**
+	 * Specifies if the metric has changed
+	 */
 	private boolean _changed = false;
 	
 	/**
@@ -142,6 +163,11 @@ public class RenderMetric {
 			System.out.println("Offs: " + surfaceVirtualOffsetX + ", " + surfaceVirtualOffsetY);
 			innerOffsetX = -surfaceRelativeOffsetX;
 			innerOffsetY = -surfaceRelativeOffsetY;
+			if (_strokeByScreen) {
+				strokeSize = _strokeBaseSize * ((surfaceVirtualWidth + surfaceVirtualHeight)/2.0f);
+			} else {
+				strokeSize = _strokeBaseSize;
+			}
 			return true;
 		}
 		return false;
@@ -165,6 +191,10 @@ public class RenderMetric {
 		surfaceScale = src.surfaceScale;
 		innerFactorX = src.innerFactorX;
 		innerFactorY = src.innerFactorY;
+		
+		strokeSize = src.strokeSize;
+		_strokeBaseSize = src._strokeBaseSize;
+		_strokeByScreen = src._strokeByScreen;
 		
 		_desiredRatio = src._desiredRatio;
 	}
@@ -204,6 +234,12 @@ public class RenderMetric {
 		surfaceRelativeOffsetXNormalized = 0;
 		surfaceRelativeOffsetYNormalized = 0;
 		surfaceScale = 1.0f;
+		_changed = true;
+	}
+	
+	public void setStroke(final boolean byScreenSize, final float baseSize) {
+		_strokeByScreen = byScreenSize;
+		_strokeBaseSize = baseSize;
 		_changed = true;
 	}
 }

@@ -8,6 +8,7 @@ import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
 import de.freiburg.uni.tablet.presenter.document.TextFont;
+import de.freiburg.uni.tablet.presenter.editor.pageeditor.RenderMetric;
 import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
 
 public class Text extends AbstractRenderable {
@@ -222,7 +223,7 @@ public class Text extends AbstractRenderable {
 	}
 
 	@Override
-	public float getRadius() {
+	public float getRadius(final RenderMetric metric) {
 		return 0;
 	}
 

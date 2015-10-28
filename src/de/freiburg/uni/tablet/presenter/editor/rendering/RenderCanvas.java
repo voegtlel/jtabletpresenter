@@ -223,6 +223,11 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 		return _renderMetric;
 	}
 	
+	public void setStroke(final boolean byScreenSize, final float baseSize) {
+		_renderMetric.setStroke(byScreenSize, baseSize);
+		requireRepaint();
+	}
+	
 	public void setToolbar(final IToolbarItem[] actions, final int orientation, final int compactSize, final float compactOpacity) {
 		_toolbarRenderer = new ToolbarRenderer(this, orientation, compactSize, compactOpacity, getFont());
 		_toolbarRenderer.setActions(actions);

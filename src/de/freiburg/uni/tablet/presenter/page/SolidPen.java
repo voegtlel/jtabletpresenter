@@ -7,9 +7,11 @@ import java.io.IOException;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
+import de.freiburg.uni.tablet.presenter.editor.pageeditor.RenderMetric;
 
 public class SolidPen implements IPen {
-	private final BasicStroke _stroke;
+	private float _strokeWidth;
+	private BasicStroke _stroke;
 	private final Color _paint;
 	private final float _thickness;
 
@@ -19,8 +21,6 @@ public class SolidPen implements IPen {
 
 	public SolidPen(final float thickness, final Color color) {
 		_thickness = thickness;
-		_stroke = new BasicStroke(thickness * DEFAULT_PRESSURE, BasicStroke.CAP_ROUND,
-				BasicStroke.JOIN_ROUND);
 		_paint = color;
 	}
 
@@ -29,8 +29,6 @@ public class SolidPen implements IPen {
 		final int color = reader.readInt();
 		_paint = new Color((color >> 16) & 0xff, (color >> 8) & 0xff, color & 0xff,
 				(color >> 24) & 0xff);
-		_stroke = new BasicStroke(_thickness * DEFAULT_PRESSURE, BasicStroke.CAP_ROUND,
-				BasicStroke.JOIN_ROUND);
 	}
 
 	@Override
@@ -45,18 +43,24 @@ public class SolidPen implements IPen {
 	}
 	
 	@Override
-	public float getThickness(final float pressure) {
-		return _thickness * pressure;
+	public float getThickness(final RenderMetric metric, final float pressure) {
+		return metric.strokeSize * _thickness * pressure;
 	}
 
 	@Override
-	public Stroke getStroke() {
+	public Stroke getStroke(final RenderMetric metric) {
+		float requestedStrokeWidth = getThickness(metric, DEFAULT_PRESSURE);
+		if (_stroke == null || Math.abs(_strokeWidth - requestedStrokeWidth) > 0.1f) {
+			_strokeWidth = requestedStrokeWidth;
+			_stroke = new BasicStroke(_strokeWidth, BasicStroke.CAP_ROUND,
+					BasicStroke.JOIN_ROUND);
+		}
 		return _stroke;
 	}
 	
 	@Override
-	public Stroke getStroke(final float pressure) {
-		return new BasicStroke(_thickness * pressure, BasicStroke.CAP_ROUND,
+	public Stroke getStroke(final RenderMetric metric, final float pressure) {
+		return new BasicStroke(getThickness(metric, pressure), BasicStroke.CAP_ROUND,
 				BasicStroke.JOIN_ROUND);
 	}
 

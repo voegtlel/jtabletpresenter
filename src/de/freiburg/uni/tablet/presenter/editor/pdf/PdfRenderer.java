@@ -18,6 +18,7 @@ import de.freiburg.uni.tablet.presenter.document.IEntity;
 import de.freiburg.uni.tablet.presenter.document.PdfPageSerializable;
 import de.freiburg.uni.tablet.presenter.document.TextFont;
 import de.freiburg.uni.tablet.presenter.editor.IPageRepaintListener;
+import de.freiburg.uni.tablet.presenter.editor.pageeditor.RenderMetric;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
 import de.freiburg.uni.tablet.presenter.page.IPen;
@@ -60,16 +61,16 @@ public class PdfRenderer implements IPageBackRenderer {
 	
 	private boolean _wasEmptyPage = true;
 	private boolean _ignoreEmptyPage;
-	private float _thicknessFactor;
 	private boolean _ignoreEmptyPageNumber;
 	private boolean _ignorePdfPageNumber;
+	
+	private RenderMetric _penRenderMetric = new RenderMetric();
 	
 	public PdfRenderer(final File file, final float screenSizeX, final float screenSizeY, final boolean ignoreEmptyPage, final boolean ignoreEmptyPageNumber, final boolean ignorePdfPageNumber, final boolean showPageNumber, final float thicknessFactor) throws Exception {
 		_ignoreEmptyPage = ignoreEmptyPage;
 		_ignoreEmptyPageNumber = ignoreEmptyPageNumber;
 		_ignorePdfPageNumber = ignorePdfPageNumber;
 		_showPageNumber = showPageNumber;
-		_thicknessFactor = thicknessFactor;
 		System.out.println("create pdf");
 		_pdf = PDDocument.createNew();
 		_pageSize = new CDSRectangle(0f, 0f, screenSizeX, screenSizeY);
@@ -79,6 +80,9 @@ public class PdfRenderer implements IPageBackRenderer {
 			_font = PDFontType1.createNew(PDFontType1.FONT_Helvetica);
 			_font.setEncoding(WinAnsiEncoding.UNIQUE);
 		}
+		
+		_penRenderMetric.setStroke(false, thicknessFactor);
+		_penRenderMetric.update((int)screenSizeX, (int)screenSizeY, null);
 	}
 	
 	public void close() throws IOException {
@@ -194,9 +198,9 @@ public class PdfRenderer implements IPageBackRenderer {
 	@Override
 	public void draw(final IPen pen, final float x,
 			final float y) {
-		float thickness = pen.getThickness(IPen.DEFAULT_PRESSURE);
-		_ellipseRenderer.x = x * _renderFactorX - thickness  * _thicknessFactor / 2.0f;
-		_ellipseRenderer.y = _renderFactorY - y * _renderFactorY - thickness  * _thicknessFactor / 2.0f;
+		float thickness = pen.getThickness(_penRenderMetric, IPen.DEFAULT_PRESSURE);
+		_ellipseRenderer.x = x * _renderFactorX - thickness / 2.0f;
+		_ellipseRenderer.y = _renderFactorY - y * _renderFactorY - thickness / 2.0f;
 		_ellipseRenderer.width = thickness;
 		_ellipseRenderer.height = thickness;
 		try {
@@ -213,7 +217,7 @@ public class PdfRenderer implements IPageBackRenderer {
 	public void draw(final IPen pen, final Path2D path) {
 		try {
 			_creator.setStrokeColorRGB(pen.getColor().getRed()/255f, pen.getColor().getGreen()/255f, pen.getColor().getBlue()/255f);
-			_creator.setLineWidth(pen.getThickness(IPen.DEFAULT_PRESSURE) * _thicknessFactor);
+			_creator.setLineWidth(pen.getThickness(_penRenderMetric, IPen.DEFAULT_PRESSURE));
 			final PathIterator pathIterator = path.getPathIterator(AffineTransform.getScaleInstance(
 					_renderFactorX, _renderFactorY));
 			double[] coords = new double[6];
@@ -246,7 +250,7 @@ public class PdfRenderer implements IPageBackRenderer {
 		_pathPen = pen;
 		_creator.setStrokeColorRGB(pen.getColor().getRed()/255f, pen.getColor().getGreen()/255f, pen.getColor().getBlue()/255f);
 		if (!_captureThickness) {
-			_creator.setLineWidth(pen.getThickness(IPen.DEFAULT_PRESSURE) * _thicknessFactor);
+			_creator.setLineWidth(pen.getThickness(_penRenderMetric, IPen.DEFAULT_PRESSURE));
 		}
 		_isFirstPath = true;
 	}
@@ -263,7 +267,7 @@ public class PdfRenderer implements IPageBackRenderer {
 	public void drawPath(final float x1, final float y1, final float x2, final float y2,
 			final float pressure) {
 		if (_captureThickness) {
-			_creator.setLineWidth(_pathPen.getThickness(pressure) * _thicknessFactor);
+			_creator.setLineWidth(_pathPen.getThickness(_penRenderMetric, pressure));
 		}
 		float x1t = x1 * _renderFactorX;
 		float y1t = _renderFactorY - y1 * _renderFactorY;

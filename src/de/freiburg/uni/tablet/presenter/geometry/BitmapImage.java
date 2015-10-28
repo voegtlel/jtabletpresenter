@@ -14,6 +14,7 @@ import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.document.BitmapImageData;
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
+import de.freiburg.uni.tablet.presenter.editor.pageeditor.RenderMetric;
 import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
 import de.freiburg.uni.tablet.presenter.page.IPen;
 import de.freiburg.uni.tablet.presenter.page.SolidPen;
@@ -180,7 +181,7 @@ public class BitmapImage extends AbstractRenderable {
 	}
 
 	@Override
-	public float getRadius() {
+	public float getRadius(final RenderMetric metric) {
 		return 0;
 	}
 

@@ -9,6 +9,8 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.Window;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
@@ -35,7 +37,7 @@ public class CaptureWindow extends JWindow {
 	 * Create the frame.
 	 * @throws AWTException
 	 */
-	public CaptureWindow(final GraphicsDevice device, final Window owner, final boolean needRectangle) throws AWTException {
+	public CaptureWindow(final GraphicsDevice device, final Window owner, final boolean needRectangle, final boolean requestFocus) throws AWTException {
 		super(owner, device.getDefaultConfiguration());
 		_owner = owner;
 		setFocusable(true);
@@ -50,6 +52,15 @@ public class CaptureWindow extends JWindow {
 		_captureRectangle = new Rectangle(bounds.x, bounds.y, bounds.width, bounds.height);
 		_captureImage = robot.createScreenCapture(bounds);
 		enableEvents(AWTEvent.MOUSE_EVENT_MASK | AWTEvent.MOUSE_MOTION_EVENT_MASK | AWTEvent.KEY_EVENT_MASK);
+		
+		if (requestFocus) {
+			addComponentListener(new ComponentAdapter() {
+				@Override
+				public void componentShown(final ComponentEvent e) {
+					CaptureWindow.this.requestFocus();
+				}
+			});
+		}
 	}
 	
 	@Override

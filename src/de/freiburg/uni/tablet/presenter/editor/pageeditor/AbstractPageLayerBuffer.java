@@ -97,7 +97,7 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer, IPage
 				_repaintMinY = Math.min(_repaintMinY, renderable.getMinY());
 				_repaintMaxX = Math.max(_repaintMaxX, renderable.getMaxX());
 				_repaintMaxY = Math.max(_repaintMaxY, renderable.getMaxY());
-				_repaintRadius = Math.max(_repaintRadius, renderable.getRadius());
+				_repaintRadius = Math.max(_repaintRadius, renderable.getRadius(_currentRenderMetric));
 				if (_requireRepaint <= REPAINT_ADD_PAINT && !clear) {
 					if (_repaintAddObjects == null) {
 						_repaintAddObjects = new LinkedElementList<>();
@@ -233,10 +233,10 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer, IPage
 			_lineRenderer.x2 = x2 * _currentRenderMetric.innerFactorX + _currentRenderMetric.innerOffsetX;
 			_lineRenderer.y2 = y2 * _currentRenderMetric.innerFactorY + _currentRenderMetric.innerOffsetY;
 			if (pen == null) {
-				_graphics.setStroke(new SolidPen().getStroke(SolidPen.DEFAULT_PRESSURE * _currentRenderMetric.surfaceScale));
+				_graphics.setStroke(new SolidPen().getStroke(_currentRenderMetric, SolidPen.DEFAULT_PRESSURE * _currentRenderMetric.surfaceScale));
 				_graphics.setPaint(Color.black);
 			} else {
-				_graphics.setStroke(pen.getStroke(SolidPen.DEFAULT_PRESSURE * _currentRenderMetric.surfaceScale));
+				_graphics.setStroke(pen.getStroke(_currentRenderMetric, SolidPen.DEFAULT_PRESSURE * _currentRenderMetric.surfaceScale));
 				_graphics.setPaint(pen.getColor());
 			}
 			_graphics.draw(_lineRenderer);
@@ -267,7 +267,7 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer, IPage
 			_lineRenderer.y1 = y1 * _currentRenderMetric.innerFactorY + _currentRenderMetric.innerOffsetY;
 			_lineRenderer.x2 = x2 * _currentRenderMetric.innerFactorX + _currentRenderMetric.innerOffsetX;
 			_lineRenderer.y2 = y2 * _currentRenderMetric.innerFactorY + _currentRenderMetric.innerOffsetY;
-			_graphics.setStroke(_pathPen.getStroke(pressure * _currentRenderMetric.surfaceScale));
+			_graphics.setStroke(_pathPen.getStroke(_currentRenderMetric, pressure * _currentRenderMetric.surfaceScale));
 			_graphics.draw(_lineRenderer);
 			_isEmpty = false;
 		}
@@ -305,7 +305,8 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer, IPage
 	public void draw(final IPen pen, final float x,
 			final float y) {
 		if (_graphics != null) {
-			float thickness = pen.getThickness(IPen.DEFAULT_PRESSURE);
+			float thickness = pen.getThickness(_currentRenderMetric, IPen.DEFAULT_PRESSURE);
+			System.out.println("Draw with " + thickness);
 			_ellipseRenderer.x = x * _currentRenderMetric.innerFactorX + _currentRenderMetric.innerOffsetX - thickness / 2.0f * _currentRenderMetric.surfaceScale;
 			_ellipseRenderer.y = y * _currentRenderMetric.innerFactorY + _currentRenderMetric.innerOffsetY - thickness / 2.0f * _currentRenderMetric.surfaceScale;
 			_ellipseRenderer.width = thickness;
@@ -326,7 +327,7 @@ public abstract class AbstractPageLayerBuffer implements IPageLayerBuffer, IPage
 	public void draw(final IPen pen, final Path2D path) {
 		if (_graphics != null) {
 			_graphics.setPaint(pen.getColor());
-			_graphics.setStroke(pen.getStroke());
+			_graphics.setStroke(pen.getStroke(_currentRenderMetric));
 			AffineTransform t = AffineTransform.getTranslateInstance(_currentRenderMetric.innerOffsetX, _currentRenderMetric.innerOffsetY);
 			t.scale(_currentRenderMetric.innerFactorX, _currentRenderMetric.innerFactorY);
 			final Shape transformedPath = path

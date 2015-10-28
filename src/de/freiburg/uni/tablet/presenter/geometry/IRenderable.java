@@ -6,6 +6,7 @@ import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
 import de.freiburg.uni.tablet.presenter.document.IEntity;
+import de.freiburg.uni.tablet.presenter.editor.pageeditor.RenderMetric;
 import de.freiburg.uni.tablet.presenter.page.IPageBackRenderer;
 
 public interface IRenderable extends IEntity {
@@ -108,7 +109,7 @@ public interface IRenderable extends IEntity {
 	 * 
 	 * @return
 	 */
-	float getRadius();
+	float getRadius(RenderMetric metric);
 
 	/**
 	 * Updates the data of the renderable to load data from a reader

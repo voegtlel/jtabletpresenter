@@ -12,6 +12,7 @@ import jpen.PScrollEvent;
 import jpen.Pen;
 import jpen.event.PenListener;
 import de.freiburg.uni.tablet.presenter.geometry.DataPoint;
+import de.freiburg.uni.tablet.presenter.page.IPen;
 import de.freiburg.uni.tablet.presenter.tools.ITool;
 
 public class PagePenDispatcher implements PenListener {
@@ -47,11 +48,11 @@ public class PagePenDispatcher implements PenListener {
 	 * @param timestamp
 	 * @return
 	 */
-	private DataPoint getDataPoint(final Pen pen, final long timestamp) {
+	private DataPoint getDataPoint(final Pen pen, final float pressure, final long timestamp) {
 		return new DataPoint((pen.getLevelValue(Type.X) - _drawOffset.x) / _drawSize.x,
 				(pen.getLevelValue(Type.Y) - _drawOffset.y) / _drawSize.y,
 				pen.getLevelValue(Type.X), pen.getLevelValue(Type.Y),
-				_lockPressure?0.5f:Math.max(_minPressure, pen.getLevelValue(Type.PRESSURE)), timestamp);
+				_lockPressure?0.5f:Math.max(_minPressure, pressure), timestamp);
 	}
 
 	@Override
@@ -61,16 +62,19 @@ public class PagePenDispatcher implements PenListener {
 		// override active tool
 		boolean activate = false;
 		boolean inverted = false;
+		boolean setDefaultPressure = false;
 		// dispatch event
 		switch (_penKind) {
 		case CURSOR:
 			switch (e.button.getType()) {
 			case LEFT:
 				activate = true;
+				setDefaultPressure = true;
 				break;
 			case RIGHT:
 				activate = true;
 				inverted = true;
+				setDefaultPressure = true;
 				break;
 			default:
 			}
@@ -106,7 +110,8 @@ public class PagePenDispatcher implements PenListener {
 				// Use the new tool
 				_activePenKind = _penKind;
 				_activePenButton = e.button.getType();
-				if (_filter != null && !_filter.onDown(e.pen.getLevelValue(Type.X), e.pen.getLevelValue(Type.Y), e.pen.getLevelValue(Type.PRESSURE), _penKind)) {
+				float pressure = (setDefaultPressure?IPen.DEFAULT_PRESSURE:e.pen.getLevelValue(Type.PRESSURE));
+				if (_filter != null && !_filter.onDown(e.pen.getLevelValue(Type.X), e.pen.getLevelValue(Type.Y), pressure, _penKind)) {
 					return;
 				}
 				_activeTool = inverted ? _invertedTool : _normalTool;
@@ -122,7 +127,7 @@ public class PagePenDispatcher implements PenListener {
 						}
 					}
 					// Activate tool
-					final DataPoint dp = getDataPoint(e.pen, e.getTime());
+					final DataPoint dp = getDataPoint(e.pen, pressure, e.getTime());
 					_activeTool.begin();
 					_lastData = null;
 					_activeTool.draw(dp);
@@ -153,7 +158,7 @@ public class PagePenDispatcher implements PenListener {
 		if (!e.isMovement()) {
 			return;
 		}
-		final DataPoint dp = getDataPoint(e.pen, e.getTime());
+		final DataPoint dp = getDataPoint(e.pen, e.pen.getLevelValue(Type.PRESSURE), e.getTime());
 		boolean usePoint = true;
 		if (_lastData != null) {
 			// if it is not the first point, check if we have moved enough
