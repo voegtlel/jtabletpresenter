@@ -8,6 +8,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Frame;
+import java.awt.Image;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -20,10 +21,12 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -269,8 +272,23 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 		
 		registerShortcuts();
 		buildToolbar();
+		setIcons();
 	}
 	
+	private void setIcons() {
+		Image[] icons = new Image[] {
+				new ImageIcon(JPageEditor.class.getResource("/icon/app-8.png")).getImage(),
+				new ImageIcon(JPageEditor.class.getResource("/icon/app-10.png")).getImage(),
+				new ImageIcon(JPageEditor.class.getResource("/icon/app-16.png")).getImage(),
+				new ImageIcon(JPageEditor.class.getResource("/icon/app-20.png")).getImage(),
+				new ImageIcon(JPageEditor.class.getResource("/icon/app-32.png")).getImage(),
+				new ImageIcon(JPageEditor.class.getResource("/icon/app-40.png")).getImage(),
+				new ImageIcon(JPageEditor.class.getResource("/icon/app-48.png")).getImage(),
+				new ImageIcon(JPageEditor.class.getResource("/icon/app-64.png")).getImage()
+		};
+		this.setIconImages(Arrays.asList(icons));
+	}
+
 	@Override
 	public void wasSaved() {
 		_lastSavedAction = _documentEditor.getHistory().getLastAction();
