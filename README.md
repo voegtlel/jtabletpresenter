@@ -102,8 +102,10 @@ Following variables are shown as
  * `pdf.thicknessFactor` (float, 0.2): The factor for line thickness for rendering to PDF
 
 ### General
- * `color.red`, `color.green`, `color.blue`, `color.black` (Color, FFBB0000, FF00BB00, FF0000BB, FF000000): Color values for the color-square selected colors.
+ * `color.nine`, (boolean, true): If true, the color-square shows nine colors, otherwise only four (red, gree, blue, black)
+ * `color.*`, (Color): Color values for the color-square selected colors to tune for presenters (possible colors: red, gree, blue, black, orange, violet, yellow, grey, white).
  * `fullscreen.autotoggleToolbar` (boolean, true): If true, the toolbar is hidden when changing into fullscreen and shown when switching to windowed mode
+ * `fullscreen.autotoggleAutoToolbar` (boolean, true): If true, the auto-toolbar is shown when changing into fullscreen and hidden when switching to windowed mode
  * `thickness.thin`, `thickness.medium`, `thickness.thick` (float, 1.0, 2.0, 3.0): Default base thicknesses possible to select.
 
 ### Save/Load
@@ -135,7 +137,6 @@ The (dynamic) toolbar is separate from the fixed toolbar. This toolbar automatic
  * `tools.new`: New Document
  * `tools.open`: Open file dialog
  * `tools.save`: Save file dialog
- * `tools.toggleToolbar`: Toggle the toolbar
  * `tools.primary.scribble`: Select scribble tool as primary tool
  * `tools.primary.eraser`: Select eraser tool as primary tool
  * `tools.primary.deleter`: Select deleter tool as primary tool
@@ -159,6 +160,8 @@ The (dynamic) toolbar is separate from the fixed toolbar. This toolbar automatic
  * `tools.screenshotDirect`: Take a screenshot of the screen under the cursor and set as page background
  * `tools.blankScreen`: Blanks the screen containing the main window
  * `tools.blankScreenAll`: Blanks all screens
+ * `tools.toggleToolbar`: Toggle the toolbar
+ * `tools.toggleAutoToolbar`: Toggle the auto-toolbar
  * `next`: Next page
  * `previous`: Previous page
  * `undo`: Undo
