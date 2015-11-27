@@ -1,14 +1,18 @@
 package de.freiburg.uni.tablet.presenter.editor.toolpageeditor;
 
+import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 
 /**
  * Class for an automatic fadable toolbar.
@@ -66,6 +70,19 @@ public class JPageToolBar extends JPanel {
 				}
 			}
 		}
+	}
+	
+	@Override
+	protected boolean processKeyBinding(final KeyStroke ks, final KeyEvent e,
+			final int condition, final boolean pressed) {
+		if (e.getSource() != null && e.getSource() instanceof Component) {
+			Component src = (Component) e.getSource();
+			if (SwingUtilities.isDescendingFrom(src, this) && src != this) {
+				System.out.println("event " + e + " ignored");
+				return true;
+			}
+		}
+		return super.processKeyBinding(ks, e, condition, pressed);
 	}
 
 	public void setToolButtonsHorizontal(final IButtonAction[] buttons) {

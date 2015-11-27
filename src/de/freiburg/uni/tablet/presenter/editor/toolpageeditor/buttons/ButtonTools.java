@@ -24,7 +24,6 @@ public class ButtonTools extends AbstractButtonMenuTool {
 		this._frame.addItem(new ButtonDocumentNew(editor), true);
 		this._frame.addItem(new ButtonOpenFrom(editor), true);
 		this._frame.addItem(new ButtonSaveAs(editor), true);
-		this._frame.addItem(new ButtonToggleShowToolbar(editor), true);
 		//this._frame.addItem(new ButtonPreferences(editor), true);
 		this._frame.addItem(new ButtonPrimary(editor), true);
 		this._frame.addItem(new ButtonSecondary(editor), true);
@@ -33,6 +32,8 @@ public class ButtonTools extends AbstractButtonMenuTool {
 		this._frame.addItem(new ButtonThickness(editor), true);
 		this._frame.addItem(new ButtonToolScreenshot(editor, "screenshotAreaHide", "Area Screenshot", ButtonToolScreenshot.MODE_SELECT_RECTANGLE, true, false), true);
 		this._frame.addItem(new ButtonToolBlank(editor, "blankScreen", "Blank", false), true);
+		this._frame.addItemDummy(new ButtonToggleShowToolbar(editor));
+		this._frame.addItemDummy(new ButtonToggleShowAutoToolbar(editor));
 		this._frame.addItemDummy(new ButtonToolScreenshot(editor, "screenshotArea", "Area Screenshot", ButtonToolScreenshot.MODE_SELECT_RECTANGLE, false, false));
 		this._frame.addItemDummy(new ButtonToolScreenshot(editor, "screenshotFull", "Screenshot", ButtonToolScreenshot.MODE_SELECT_RECTANGLE, false, true));
 		this._frame.addItemDummy(new ButtonToolScreenshot(editor, "screenshotDirect", "Screenshot", ButtonToolScreenshot.MODE_CURRENT_SCREEN, false, true));

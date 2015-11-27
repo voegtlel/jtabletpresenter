@@ -330,6 +330,16 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 		System.out.println("onWindowFocus");
 	}
 	
+	@Override
+	public void setAutoToolbarVisible(final boolean visible) {
+		_pageRenderer.setToolbarVisible(visible);
+	}
+	
+	@Override
+	public boolean isAutoToolbarVisible() {
+		return _pageRenderer.isToolbarVisible();
+	}
+	
 	private void buildToolbar() {
 		String toolbarOrientation = _config.getString("toolbar.orientation", "NONE");
 		int orientation = ToolbarRenderer.getOrientation(toolbarOrientation);
@@ -368,7 +378,8 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 			}
 		}
 		IToolbarItem[] toolbarItems = actions.toArray(new IToolbarItem[actions.size()]);
-		_pageRenderer.setToolbar(toolbarItems, orientation, _config.getInt("toolbar.compactSize", 15), _config.getFloat("toolbar.compactOpacity", 0.25f));
+		_pageRenderer.setToolbar(toolbarItems, orientation, _config.getInt("toolbar.compactSize", 15),
+				_config.getFloat("toolbar.compactOpacity", 0.25f), !_config.getBoolean("fullscreen.autotoggleAutoToolbar", true));
 	}
 	
 	private void registerShortcuts() {
@@ -396,6 +407,15 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 				final KeyStroke ks = KeyStroke.getKeyStroke(actionKeys);
 				if (ks == null) {
 					System.err.println("Invalid shortcut: " + actionKeys + ", shortcut not registered");
+					continue;
+				}
+				final boolean suppressOnInput = ((ks.getModifiers() == 0 || ks.getModifiers() == KeyEvent.SHIFT_DOWN_MASK)
+						&& ((ks.getKeyCode() >= KeyEvent.VK_A && ks.getKeyCode() >= KeyEvent.VK_Z)
+								|| (ks.getKeyCode() >= KeyEvent.VK_0 && ks.getKeyCode() >= KeyEvent.VK_9)
+								|| (ks.getKeyCode() == KeyEvent.VK_SPACE || ks.getKeyCode() == KeyEvent.VK_BACK_SPACE)));
+				if (suppressOnInput && isGlobal) {
+					// Uhoh, no modifiers. => may not be global
+					System.err.println("Invalid global shortcut: " + ks + " (not allowed as global), shortcut not registered");
 					continue;
 				}
 				if (isGlobal) {

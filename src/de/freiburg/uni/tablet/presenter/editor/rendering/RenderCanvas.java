@@ -51,6 +51,7 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 	private final PagePenDispatcher _pagePenDispatcher;
 
 	private ToolbarRenderer _toolbarRenderer;
+	private boolean _toolbarVisible;
 	
 	private ITool _temporaryOriginalTool;
 
@@ -202,7 +203,7 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 				}
 				
 				if (graphics != null) {
-					if (_toolbarRenderer != null) {
+					if (_toolbarRenderer != null && _toolbarVisible) {
 						_toolbarRenderer.paint(graphics);
 					}
 					graphics.dispose();
@@ -228,10 +229,19 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 		requireRepaint();
 	}
 	
-	public void setToolbar(final IToolbarItem[] actions, final int orientation, final int compactSize, final float compactOpacity) {
+	public void setToolbar(final IToolbarItem[] actions, final int orientation, final int compactSize, final float compactOpacity, final boolean toolbarVisible) {
 		_toolbarRenderer = new ToolbarRenderer(this, orientation, compactSize, compactOpacity, getFont());
 		_toolbarRenderer.setActions(actions);
 		_pagePenDispatcher.setFilter(_toolbarRenderer);
+		_toolbarVisible = toolbarVisible;
+	}
+	
+	public void setToolbarVisible(final boolean visible) {
+		_toolbarVisible = visible;
+	}
+	
+	public boolean isToolbarVisible() {
+		return _toolbarVisible;
 	}
 	
 	@Override

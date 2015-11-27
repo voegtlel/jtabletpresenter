@@ -31,5 +31,8 @@ public class ButtonToggleFullscreen extends AbstractButtonAction {
 		if (_editor.getConfig().getBoolean("fullscreen.autotoggleToolbar", true)) {
 			_editor.setToolbarVisible(!_editor.isFullscreen());
 		}
+		if (_editor.getConfig().getBoolean("fullscreen.autotoggleAutoToolbar", true)) {
+			_editor.setAutoToolbarVisible(_editor.isFullscreen());
+		}
 	}
 }
