@@ -102,7 +102,8 @@ Following variables are shown as
  * `pdf.thicknessFactor` (float, 0.2): The factor for line thickness for rendering to PDF
 
 ### General
- * `color.red`, `color.green`, `color.blue`, `color.black` (Color, FFBB0000, FF00BB00, FF0000BB, FF000000): Color values for the color-square selected colors.
+ * `color.nine`, (boolean, true): If true, the color-square shows nine colors, otherwise only four (red, gree, blue, black)
+ * `color.*`, (Color): Color values for the color-square selected colors to tune for presenters (possible colors: red, gree, blue, black, orange, violet, yellow, grey, white).
  * `fullscreen.autotoggleToolbar` (boolean, true): If true, the toolbar is hidden when changing into fullscreen and shown when switching to windowed mode
  * `thickness.thin`, `thickness.medium`, `thickness.thick` (float, 1.0, 2.0, 3.0): Default base thicknesses possible to select.
 
