@@ -27,6 +27,6 @@ public class ButtonToggleShowAutoToolbar extends AbstractButtonAction {
 
 	@Override
 	public void performLater(final Component component) {
-		_editor.setAutoToolbarVisible(!_editor.isAutoToolbarVisible());
+		_editor.setAutoToolbarEnabled(!_editor.isAutoToolbarEnabled());
 	}
 }

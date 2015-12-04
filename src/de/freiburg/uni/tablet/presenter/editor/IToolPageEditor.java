@@ -89,13 +89,13 @@ public interface IToolPageEditor {
 	 * Sets if the auto-toolbar should be visible
 	 * @param visible
 	 */
-	void setAutoToolbarVisible(boolean visible);
+	void setAutoToolbarEnabled(boolean visible);
 	
 	/**
 	 * Gets if the auto-toolbar is visible
 	 * @return
 	 */
-	boolean isAutoToolbarVisible();
+	boolean isAutoToolbarEnabled();
 	
 	/**
 	 * Gets if the editor is connected to a networking page

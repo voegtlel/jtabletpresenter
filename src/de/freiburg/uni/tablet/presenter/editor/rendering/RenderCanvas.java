@@ -51,7 +51,6 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 	private final PagePenDispatcher _pagePenDispatcher;
 
 	private ToolbarRenderer _toolbarRenderer;
-	private boolean _toolbarVisible;
 	
 	private ITool _temporaryOriginalTool;
 
@@ -203,7 +202,7 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 				}
 				
 				if (graphics != null) {
-					if (_toolbarRenderer != null && _toolbarVisible) {
+					if (_toolbarRenderer != null) {
 						_toolbarRenderer.paint(graphics);
 					}
 					graphics.dispose();
@@ -229,19 +228,18 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 		requireRepaint();
 	}
 	
-	public void setToolbar(final IToolbarItem[] actions, final int orientation, final int compactSize, final float compactOpacity, final boolean toolbarVisible) {
-		_toolbarRenderer = new ToolbarRenderer(this, orientation, compactSize, compactOpacity, getFont());
+	public void setToolbar(final IToolbarItem[] actions, final int orientation, final int compactSize, final float compactOpacity, final boolean toolbarEnabled) {
+		_toolbarRenderer = new ToolbarRenderer(this, orientation, compactSize, compactOpacity, getFont(), toolbarEnabled);
 		_toolbarRenderer.setActions(actions);
 		_pagePenDispatcher.setFilter(_toolbarRenderer);
-		_toolbarVisible = toolbarVisible;
 	}
 	
-	public void setToolbarVisible(final boolean visible) {
-		_toolbarVisible = visible;
+	public void setToolbarEnabled(final boolean enabled) {
+		_toolbarRenderer.setEnabled(enabled);
 	}
 	
-	public boolean isToolbarVisible() {
-		return _toolbarVisible;
+	public boolean isToolbarEnabled() {
+		return _toolbarRenderer.isEnabled();
 	}
 	
 	@Override

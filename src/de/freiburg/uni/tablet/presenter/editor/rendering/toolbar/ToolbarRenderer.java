@@ -47,6 +47,7 @@ public class ToolbarRenderer implements IPagePenFilter {
 	
 	private IPageRenderer _renderer;
 	private IToolbarItem[] _actions;
+	private boolean _enabled;
 	
 	private Rectangle _bounds = new Rectangle();
 	private Rectangle _compactBounds = new Rectangle();
@@ -69,11 +70,12 @@ public class ToolbarRenderer implements IPagePenFilter {
 	/**
 	 * Create the frame.
 	 */
-	public ToolbarRenderer(final IPageRenderer renderer, final int orientation, final int compactSize, final float compactOpacity, final Font font) {
+	public ToolbarRenderer(final IPageRenderer renderer, final int orientation, final int compactSize, final float compactOpacity, final Font font, final boolean toolbarEnabled) {
 		_renderer = renderer;
 		_orientation = orientation;
 		_compactSize = compactSize;
 		_font = font;
+		_enabled = toolbarEnabled;
 		
 		_alphaInactive = AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, compactOpacity);
 	}
@@ -162,6 +164,9 @@ public class ToolbarRenderer implements IPagePenFilter {
 	}
 	
 	public void paint(final Graphics2D graphics) {
+		if (!_enabled) {
+			return;
+		}
 		final Rectangle currentBounds = (_hoverState?_bounds:_compactBounds);
 		graphics.setClip(currentBounds.x, currentBounds.y, currentBounds.width, currentBounds.height);
 		Composite compositeOrig = graphics.getComposite();
@@ -238,8 +243,19 @@ public class ToolbarRenderer implements IPagePenFilter {
 		return _bounds;
 	}
 	
+	public void setEnabled(final boolean enabled) {
+		_enabled = enabled;
+	}
+	
+	public boolean isEnabled() {
+		return _enabled;
+	}
+	
 	@Override
 	public boolean onDown(final float x, final float y, final float pressure, final Type penKind) {
+		if (!_enabled) {
+			return true;
+		}
 		_downAction = _hoverAction;
 		if (_downAction != null) {
 			_renderer.requireRepaint();
@@ -253,6 +269,9 @@ public class ToolbarRenderer implements IPagePenFilter {
 
 	@Override
 	public boolean onUp(final float x, final float y, final float pressure, final Type penKind) {
+		if (!_enabled) {
+			return true;
+		}
 		if (_downAction == _hoverAction && _downAction != null) {
 			Point location = _renderer.getContainerComponent().getLocationOnScreen();
 			if (_orientation == ORIENTATION_LEFT) {
@@ -280,6 +299,9 @@ public class ToolbarRenderer implements IPagePenFilter {
 
 	@Override
 	public boolean onMove(final float x, final float y, final float pressure, final Type penKind) {
+		if (!_enabled) {
+			return true;
+		}
 		Rectangle currentBounds = (_hoverState?_bounds:_compactBounds);
 		boolean lastHoverState = _hoverState;
 		_hoverState = (x >= currentBounds.x && y >= currentBounds.y && x < currentBounds.getMaxX() && y < currentBounds.getMaxY());

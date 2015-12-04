@@ -331,13 +331,13 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 	}
 	
 	@Override
-	public void setAutoToolbarVisible(final boolean visible) {
-		_pageRenderer.setToolbarVisible(visible);
+	public void setAutoToolbarEnabled(final boolean enabled) {
+		_pageRenderer.setToolbarEnabled(enabled);
 	}
 	
 	@Override
-	public boolean isAutoToolbarVisible() {
-		return _pageRenderer.isToolbarVisible();
+	public boolean isAutoToolbarEnabled() {
+		return _pageRenderer.isToolbarEnabled();
 	}
 	
 	private void buildToolbar() {
