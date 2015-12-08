@@ -1,10 +1,12 @@
 package de.freiburg.uni.tablet.presenter.updater;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -156,17 +158,42 @@ public class ClientUpdater {
 		
 		listener.onStartUpdater();
 		
-		String[] updaterArgs = new String[5+args.length];
-		updaterArgs[0] = targetFile.getAbsolutePath();
-		updaterArgs[1] = new File(".").getAbsolutePath();
-		updaterArgs[2] = mainClassName;
-		updaterArgs[3] = System.getProperty("java.class.path");
-		updaterArgs[4] = updaterFile.getAbsolutePath();
-		for (int i = 0; i < args.length; i++) {
-			updaterArgs[5+i] = args[i];
-		}
+		String[] updArgs = new String[9];
+		updArgs[0] = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
+		updArgs[1] = "-cp";
+		updArgs[2] = updaterFile.getAbsolutePath();
+		updArgs[3] = Updater.class.getName();
+		updArgs[4] = targetFile.getAbsolutePath();
+		updArgs[5] = new File(".").getAbsolutePath();
+		updArgs[6] = mainClassName;
+		updArgs[7] = System.getProperty("java.class.path");
+		updArgs[8] = updaterFile.getAbsolutePath();
+		ProcessBuilder pb = new ProcessBuilder(updArgs);
+		Process process = pb.start();
 		
-		UpdaterHelper.runJvm(Updater.class.getName(), updaterFile.getAbsolutePath(), updaterArgs);
-		System.exit(0);
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		if (process.isAlive()) {
+			System.exit(0);
+		} else {
+			StringBuilder output = new StringBuilder();
+			BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+			String line;
+			while ((line = reader.readLine()) != null) {
+				output.append(line);
+				output.append("\n");
+			}
+			reader.close();
+			reader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+			while ((line = reader.readLine()) != null) {
+				output.append(line);
+				output.append("\n");
+			}
+			reader.close();
+			throw new IOException("Can't start updater:" + output.toString());
+		}
 	}
 }

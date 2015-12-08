@@ -4,7 +4,7 @@
     <property name="debuglevel" value="source,lines,vars"/>
     <property name="target" value="1.7"/>
     <property name="source" value="1.7"/>
-	<property name="version" value="1.25"/>
+	<property name="version" value="1.26"/>
     <path id="jtabletpresenter.classpath">
         <pathelement location="bin"/>
         <pathelement location="lib/jpen-2.jar"/>
@@ -72,7 +72,7 @@
         </java>
     </target>
 	<target depends="build" name="create_updater_jar">
-        <jar destfile="packed/Updater.jar" basedir="bin" includes="de/freiburg/uni/tablet/presenter/Updater.class" />
+        <jar destfile="packed/Updater.jar" basedir="bin" includes="de/freiburg/uni/tablet/presenter/Updater*.class" />
     </target>
 	<target depends="build,create_updater_jar" name="create_run_jar">
         <jar destfile="packed/JTabletPresenter.jar">
