@@ -35,21 +35,6 @@ public class PageLayerBufferComposite implements IPageLayerBuffer {
 		return result;
 	}
 	
-	public IPageLayerBufferPdf addPdfBuffer(final int libraryType) {
-		final IPageLayerBufferPdf result;
-		if (libraryType == PDF_LIBRARY_TYPE_JPOD) {
-			result = new PageLayerBufferPdf(
-					_displayRenderer);
-		} else if (libraryType == PDF_LIBRARY_TYPE_MUPDF) {
-			result = new PageLayerBufferPdf2(
-					_displayRenderer);
-		} else {
-			throw new IllegalArgumentException("libraryType for pdf layer invalid");
-		}
-		_pageLayerBuffers.add(result);
-		return result;
-	}
-	
 	public IPageLayerBufferBackground addBackgroundBuffer(final int pdfLibraryType) {
 		final IPageLayerBufferBackground result = new PageLayerBufferBackground(_displayRenderer, pdfLibraryType);
 		_pageLayerBuffers.add(result);

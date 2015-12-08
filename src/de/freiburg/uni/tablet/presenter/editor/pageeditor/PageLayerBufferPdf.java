@@ -8,6 +8,7 @@ import java.awt.Image;
 import java.awt.Transparency;
 import java.awt.geom.AffineTransform;
 
+import de.freiburg.uni.tablet.presenter.document.IEntity;
 import de.freiburg.uni.tablet.presenter.document.PdfPageSerializable;
 import de.intarsys.cwt.awt.environment.CwtAwtGraphicsContext;
 import de.intarsys.cwt.environment.IGraphicsContext;
@@ -16,7 +17,7 @@ import de.intarsys.pdf.content.CSContent;
 import de.intarsys.pdf.pd.PDPage;
 import de.intarsys.pdf.platform.cwt.rendering.CSPlatformRenderer;
 
-public class PageLayerBufferPdf implements IPageLayerBufferPdf {
+public class PageLayerBufferPdf implements IPageLayerBufferBackground {
 	private static final AffineTransform IDENTITY_TRANSFORM = new AffineTransform();
 	
 	protected Image _imageBuffer = null;
@@ -52,11 +53,15 @@ public class PageLayerBufferPdf implements IPageLayerBufferPdf {
 	 * @param document
 	 */
 	@Override
-	public void setPdfPage(final PdfPageSerializable pdfPage) {
-		synchronized (_repaintSync) {
-			_pdfPage = pdfPage;
-			_requireRepaint = true;
-			_displayRenderer.requireRepaint();
+	public void setBackgroundEntity(final IEntity backgroundEntity) {
+		if (backgroundEntity instanceof PdfPageSerializable) {
+			synchronized (_repaintSync) {
+				if (backgroundEntity != _pdfPage) {
+					_pdfPage = (PdfPageSerializable) backgroundEntity;
+					_requireRepaint = true;
+					_displayRenderer.requireRepaint();
+				}
+			}
 		}
 	}
 	
@@ -128,8 +133,8 @@ public class PageLayerBufferPdf implements IPageLayerBufferPdf {
 		_graphics.fillRect(0, 0, renderMetric.surfaceWidth, renderMetric.surfaceHeight);
 		_graphics.setComposite(defaultComp);
 		if (page != null) {
-			final AffineTransform transform = AffineTransform.getTranslateInstance(0, renderMetric.innerOffsetY);
-			transform.scale(renderMetric.innerOffsetX/page.getMediaBox().getWidth(), -renderMetric.innerOffsetY/page.getMediaBox().getHeight());
+			final AffineTransform transform = AffineTransform.getTranslateInstance(0, renderMetric.surfaceHeight);
+			transform.scale(renderMetric.surfaceWidth/page.getMediaBox().getWidth(), -renderMetric.surfaceHeight/page.getMediaBox().getHeight());
 			_graphics.setTransform(transform);
 			System.out.println("Init Render Pdf");
 			try {

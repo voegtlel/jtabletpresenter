@@ -3,7 +3,7 @@ package de.freiburg.uni.tablet.presenter.editor.pageeditor;
 import de.freiburg.uni.tablet.presenter.document.IEntity;
 
 /**
- * Interface for pdf layer buffer
+ * Interface for background layer buffer
  * @author Luke
  *
  */

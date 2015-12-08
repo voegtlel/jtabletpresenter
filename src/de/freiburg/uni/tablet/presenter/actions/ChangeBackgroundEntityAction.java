@@ -66,6 +66,6 @@ public class ChangeBackgroundEntityAction implements IAction {
 
 	@Override
 	public String toString() {
-		return String.format("ChangePdfPage: (Last: %s) to %s in %s", _lastBackgroundEntity, _backgroundEntity, _page);
+		return String.format("ChangeBackgroundEntity: (Last: %s) to %s in %s", _lastBackgroundEntity, _backgroundEntity, _page);
 	}
 }

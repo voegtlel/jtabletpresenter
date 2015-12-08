@@ -5,11 +5,7 @@ import java.io.IOException;
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
 import de.freiburg.uni.tablet.presenter.document.IEntity;
-import de.freiburg.uni.tablet.presenter.document.PdfPageSerializable;
-import de.freiburg.uni.tablet.presenter.document.PdfSerializable;
 import de.freiburg.uni.tablet.presenter.list.LinkedElement;
-import de.intarsys.pdf.pd.PDPage;
-import de.intarsys.pdf.pd.PDPageTree;
 
 public class DocumentServer extends Document implements IEditableDocument {
 	/**
@@ -30,80 +26,63 @@ public class DocumentServer extends Document implements IEditableDocument {
 	}
 	
 	@Override
-	public void setPdfPages(final PdfSerializable document, final int pdfMode) {
+	public void setBackPages(final IBackDocument document, final int pdfMode) {
 		if (document != null) {
-			if (pdfMode == PDF_MODE_REINDEX) {
-				final PDPageTree pageTree = document.getDocument().getPageTree();
+			if (pdfMode == DOCUMENT_MODE_REINDEX) {
 				// Ensure the pages exist (enough space)
-				getPageByIndex(pageTree.getCount() - 1, true);
+				getPageByIndex(document.getPageCount() - 1, true);
 				// Iterate through pdf pages
-				PDPage pdfPage = pageTree.getFirstPage();
 				LinkedElement<DocumentPage> docPage = _pages.getFirst();
-				while (pdfPage != null) {
+				for (IBackDocumentPage page : document.getPages()) {
 					// Set indices
-					docPage.getData().setBackgroundEntity(new PdfPageSerializable(docPage.getData(), document, pdfPage, document.tryGetPage(pdfPage.getNodeIndex() + 1)));
-					pdfPage = pdfPage.getNextPage();
+					docPage.getData().setBackgroundEntity(page.createEntity(docPage.getData()));
 					docPage = docPage.getNext();
 				}
 				while (docPage != null) {
 					docPage.getData().setBackgroundEntity(null);
 					docPage = docPage.getNext();
 				}
-			} else if (pdfMode == PDF_MODE_KEEP_INDEX) {
-				final PDPageTree pageTree = document.getDocument().getPageTree();
+			} else if (pdfMode == DOCUMENT_MODE_KEEP_INDEX) {
 				// Iterate through doc pages and find highest
 				LinkedElement<DocumentPage> docPage = _pages.getFirst();
 				int lastPdfIndex = 0;
 				while (docPage.getNext() != null) {
 					IEntity current = docPage.getData().getBackgroundEntity();
-					if (current != null && current instanceof PdfPageSerializable && ((PdfPageSerializable)current).getPage().getNodeIndex() > lastPdfIndex) {
-						lastPdfIndex = ((PdfPageSerializable)current).getPage().getNodeIndex();
+					if (current != null && current instanceof IBackDocumentPageEntity && ((IBackDocumentPageEntity)current).getPageIndex() > lastPdfIndex) {
+						lastPdfIndex = ((IBackDocumentPageEntity)current).getPageIndex();
 					}
 					docPage = docPage.getNext();
 				}
-				if (lastPdfIndex < pageTree.getCount() - 1) {
-					PDPage pdfPage = pageTree.getPageAt(lastPdfIndex);
-					while (pdfPage != null) {
+				if (lastPdfIndex < document.getPageCount() - 1) {
+					for (IBackDocumentPage locPage : document.getPagesAt(lastPdfIndex)) {
 						final DocumentPage newPage = this.addPage();
-						newPage.setBackgroundEntity(new PdfPageSerializable(newPage, document, pdfPage, document.tryGetPage(lastPdfIndex + 1)));
-						pdfPage = pdfPage.getNextPage();
+						newPage.setBackgroundEntity(locPage.createEntity(newPage));
 					}
 				}
-			} else if (pdfMode == PDF_MODE_APPEND) {
-				final PDPageTree pageTree = document.getDocument().getPageTree();
+			} else if (pdfMode == DOCUMENT_MODE_APPEND) {
 				// Iterate through doc pages and find highest
 				LinkedElement<DocumentPage> docPage = _pages.getFirst();
 				while (docPage != null) {
 					docPage.getData().setBackgroundEntity(null);
 					docPage = docPage.getNext();
 				}
-				PDPage pdfPage = pageTree.getFirstPage();
-				while (pdfPage != null) {
+				for (IBackDocumentPage locPage : document.getPages()) {
 					final DocumentPage newPage = this.addPage();
-					newPage.setBackgroundEntity(new PdfPageSerializable(newPage, document, pdfPage, document.tryGetPage(pdfPage.getNodeIndex() + 1)));
-					pdfPage = pdfPage.getNextPage();
+					newPage.setBackgroundEntity(locPage.createEntity(newPage));
 				}
-			} else if (pdfMode == PDF_MODE_CLEAR) {
-				final PDPageTree pageTree = document.getDocument().getPageTree();
+			} else if (pdfMode == DOCUMENT_MODE_CLEAR) {
 				// Clear and create new
 				clear();
-				final DocumentPage firstPage = this.getPageByIndex(0);
-				PDPage pdfPage = pageTree.getFirstPage();
-				if (pdfPage != null) {
-					firstPage.setBackgroundEntity(new PdfPageSerializable(firstPage, document, pdfPage, document.tryGetPage(pdfPage.getNodeIndex() + 1)));
-					pdfPage = pdfPage.getNextPage();
-				}
-				while (pdfPage != null) {
-					final DocumentPage newPage = this.addPage();
-					newPage.setBackgroundEntity(new PdfPageSerializable(newPage, document, pdfPage, document.tryGetPage(pdfPage.getNodeIndex() + 1)));
-					pdfPage = pdfPage.getNextPage();
+				for (IBackDocumentPage locPage : document.getPages()) {
+					DocumentPage page = this.getPageByIndex(locPage.getPageIndex(), true);
+					page.setBackgroundEntity(locPage.createEntity(page));
 				}
 			}
 		} else {
-			if (pdfMode == PDF_MODE_CLEAR) {
+			if (pdfMode == DOCUMENT_MODE_CLEAR) {
 				// Clear and reset whole document
 				clear();
-			} else if (pdfMode == PDF_MODE_REINDEX) {
+			} else if (pdfMode == DOCUMENT_MODE_REINDEX) {
 				// Iterate through pdf pages and clear pdf index
 				LinkedElement<DocumentPage> docPage = _pages.getFirst();
 				while (docPage != null) {

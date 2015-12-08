@@ -12,9 +12,10 @@ import com.jmupdf.interfaces.Page;
 import com.jmupdf.interfaces.PagePixels;
 import com.jmupdf.page.PageRect;
 
+import de.freiburg.uni.tablet.presenter.document.IEntity;
 import de.freiburg.uni.tablet.presenter.document.PdfPageSerializable;
 
-public class PageLayerBufferPdf2 implements IPageLayerBufferPdf {
+public class PageLayerBufferPdf2 implements IPageLayerBufferBackground {
 	protected int _width = 1;
 	protected int _height = 1;
 	
@@ -55,11 +56,15 @@ public class PageLayerBufferPdf2 implements IPageLayerBufferPdf {
 	 * @see de.freiburg.uni.tablet.presenter.editor.pageeditor.IPageLayerBufferPdf#setPdfPage(de.freiburg.uni.tablet.presenter.document.PdfPageSerializable)
 	 */
 	@Override
-	public void setPdfPage(final PdfPageSerializable pdfPage) {
-		synchronized (_repaintSync) {
-			_pdfPage = pdfPage;
-			_requireRepaint = true;
-			_displayRenderer.requireRepaint();
+	public void setBackgroundEntity(final IEntity backgroundEntity) {
+		if (backgroundEntity instanceof PdfPageSerializable) {
+			synchronized (_repaintSync) {
+				if (backgroundEntity != _pdfPage) {
+					_pdfPage = (PdfPageSerializable) backgroundEntity;
+					_requireRepaint = true;
+					_displayRenderer.requireRepaint();
+				}
+			}
 		}
 	}
 	

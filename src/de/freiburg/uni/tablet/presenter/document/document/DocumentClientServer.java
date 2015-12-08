@@ -13,7 +13,6 @@ import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.document.DocumentListener;
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
 import de.freiburg.uni.tablet.presenter.document.IEntity;
-import de.freiburg.uni.tablet.presenter.document.PdfSerializable;
 import de.freiburg.uni.tablet.presenter.geometry.IRenderable;
 
 public class DocumentClientServer implements IEditableDocument {
@@ -524,11 +523,11 @@ public class DocumentClientServer implements IEditableDocument {
 	}
 
 	@Override
-	public void setPdfPages(final PdfSerializable document, final int pdfMode) {
+	public void setBackPages(final IBackDocument document, final int documentMode) {
 		if (_backDocument != null) {
-			throw new IllegalStateException("Can't set pdf on server sync document");
+			throw new IllegalStateException("Can't set background document on server sync document");
 		}
-		_document.setPdfPages(document, pdfMode);
+		_document.setBackPages(document, documentMode);
 	}
 
 	@Override

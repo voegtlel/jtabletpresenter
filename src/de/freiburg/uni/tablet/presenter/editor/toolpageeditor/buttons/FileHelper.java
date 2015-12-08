@@ -27,6 +27,7 @@ import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
 import de.freiburg.uni.tablet.presenter.document.DocumentConfig;
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
 import de.freiburg.uni.tablet.presenter.document.PdfSerializable;
+import de.freiburg.uni.tablet.presenter.document.PptxSerializable;
 import de.freiburg.uni.tablet.presenter.document.document.IDocument;
 import de.freiburg.uni.tablet.presenter.document.document.IEditableDocument;
 import de.freiburg.uni.tablet.presenter.document.editor.IDocumentEditor;
@@ -40,11 +41,11 @@ public class FileHelper {
 	public static final int FILE_HEADER_PAGE = 0x6a747070; //jtpp
 	public static final int FILE_HEADER_SESSION = 0x6a747073; //jtps
 	
-	private static class PdfModeOption {
+	private static class DocumentModeOption {
 		private final int _key;
 		private final String _text;
 
-		public PdfModeOption(final int key, final String text) {
+		public DocumentModeOption(final int key, final String text) {
 			_key = key;
 			_text = text;
 		}
@@ -92,6 +93,17 @@ public class FileHelper {
 			return f.getPath().toLowerCase().endsWith(".pdf") || f.isDirectory();
 		}
 	};
+	public static final FileFilter FILTER_pptx = new FileFilter() {
+		@Override
+		public String getDescription() {
+			return "PPTX (*.pptx)";
+		}
+
+		@Override
+		public boolean accept(final File f) {
+			return f.getPath().toLowerCase().endsWith(".pptx") || f.isDirectory();
+		}
+	};
 	public static final FileFilter FILTER_session = new FileFilter() {
 		@Override
 		public String getDescription() {
@@ -120,6 +132,8 @@ public class FileHelper {
 	public static FileFilter stringToFilter(final String str) {
 		if ("pdf".equalsIgnoreCase(str)) {
 			return FILTER_pdf;
+		} else if ("pptx".equalsIgnoreCase(str)) {
+			return FILTER_pptx;
 		} else if ("jpp".equalsIgnoreCase(str)) {
 			return FILTER_presenterPageFile;
 		} else {
@@ -313,6 +327,26 @@ public class FileHelper {
 	}
 	
 	/**
+	 * Shows a prompt for the document mode. Returns -1 on cancel.
+	 * @param component
+	 * @return
+	 */
+	public static int getDocumentMode(final Component component) {
+		final DocumentModeOption defOpt = new DocumentModeOption(IEditableDocument.DOCUMENT_MODE_CLEAR, "Clear all");
+		final Object dialogResult = JOptionPane.showInputDialog(component, "Select PDF Mode", "PDF Loading...", JOptionPane.QUESTION_MESSAGE, null, new Object[] {
+				defOpt,
+			new DocumentModeOption(IEditableDocument.DOCUMENT_MODE_REINDEX, "Reindex Pages"),
+			new DocumentModeOption(IEditableDocument.DOCUMENT_MODE_KEEP_INDEX, "Keep Page Indices"),
+			new DocumentModeOption(IEditableDocument.DOCUMENT_MODE_APPEND, "Append Pdf Pages"),
+			defOpt
+		}, defOpt);
+		if (dialogResult == null) {
+			return -1;
+		}
+		return ((DocumentModeOption)dialogResult).getKey();
+	}
+	
+	/**
 	 * Opens a pdf file
 	 * @param component
 	 * @param editor
@@ -321,18 +355,28 @@ public class FileHelper {
 	 * @throws IOException
 	 */
 	public static boolean openPdf(final Component component, final IToolPageEditor editor, final File pdfFile) throws IOException {
-		final PdfModeOption defOpt = new PdfModeOption(IEditableDocument.PDF_MODE_CLEAR, "Clear all");
-		final Object dialogResult = JOptionPane.showInputDialog(component, "Select PDF Mode", "PDF Loading...", JOptionPane.QUESTION_MESSAGE, null, new Object[] {
-				defOpt,
-			new PdfModeOption(IEditableDocument.PDF_MODE_REINDEX, "Reindex Pages"),
-			new PdfModeOption(IEditableDocument.PDF_MODE_KEEP_INDEX, "Keep Page Indices"),
-			new PdfModeOption(IEditableDocument.PDF_MODE_APPEND, "Append Pdf Pages"),
-			defOpt
-		}, defOpt);
-		if (dialogResult != null) {
-			final PdfModeOption res = (PdfModeOption)dialogResult;
+		int documentMode = getDocumentMode(component);
+		if (documentMode != -1) {
 			final PdfSerializable pdf = new PdfSerializable(editor.getDocumentEditor().getFrontDocument(), pdfFile);
-			editor.getDocumentEditor().getFrontDocument().setPdfPages(pdf, res.getKey());
+			editor.getDocumentEditor().getFrontDocument().setBackPages(pdf, documentMode);
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * Opens a pptx file
+	 * @param component
+	 * @param editor
+	 * @param pptxFile
+	 * @return true if accepted
+	 * @throws IOException
+	 */
+	public static boolean openPptx(final Component component, final IToolPageEditor editor, final File pptxFile) throws IOException {
+		int documentMode = getDocumentMode(component);
+		if (documentMode != -1) {
+			final PptxSerializable pdf = new PptxSerializable(editor.getDocumentEditor().getFrontDocument(), pptxFile);
+			editor.getDocumentEditor().getFrontDocument().setBackPages(pdf, documentMode);
 			return true;
 		}
 		return false;
@@ -377,6 +421,8 @@ public class FileHelper {
 				}
 			} else if ("pdf".equals(mediaType.getSubtype())) {
 				return openPdf(component, editor, file);
+			} else if ("vnd.openxmlformats-officedocument.presentationml.presentation".equals(mediaType.getSubtype())) {
+				return openPptx(component, editor, file);
 			}
 		} else if ("image".equals(mediaType.getType())) {
 			editor.getDocumentEditor().setCurrentImageFile(file);
@@ -391,6 +437,7 @@ public class FileHelper {
 		fileChooser.addChoosableFileFilter(FILTER_presenterDocumentFile);
 		fileChooser.addChoosableFileFilter(FILTER_presenterPageFile);
 		fileChooser.addChoosableFileFilter(FILTER_pdf);
+		fileChooser.addChoosableFileFilter(FILTER_pptx);
 		fileChooser.addChoosableFileFilter(FILTER_session);
 		fileChooser.addChoosableFileFilter(FILTER_image);
 		fileChooser.setFileFilter(defaultFilter);

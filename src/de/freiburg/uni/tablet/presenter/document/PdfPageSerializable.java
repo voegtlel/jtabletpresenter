@@ -6,9 +6,10 @@ import com.jmupdf.interfaces.Page;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
+import de.freiburg.uni.tablet.presenter.document.document.IBackDocumentPageEntity;
 import de.intarsys.pdf.pd.PDPage;
 
-public class PdfPageSerializable extends AbstractPageEntity {
+public class PdfPageSerializable extends AbstractPageEntity implements IBackDocumentPageEntity {
 	private final PdfSerializable _basePdf;
 	private final PDPage _page;
 	private final Page _page2;
@@ -63,5 +64,10 @@ public class PdfPageSerializable extends AbstractPageEntity {
 	 */
 	public PdfPageSerializable clone(final DocumentPage newDocument) {
 		return new PdfPageSerializable(newDocument, this);
+	}
+	
+	@Override
+	public int getPageIndex() {
+		return _page.getNodeIndex();
 	}
 }

@@ -23,6 +23,14 @@
         <pathelement location="lib/jPod.jar"/>
         <pathelement location="lib/jPodRenderer.jar"/>
 		<pathelement location="lib/tika-core-1.3.jar"/>
+    	<pathelement location="lib/commons-codec-1.9.jar"/>
+    	<pathelement location="lib/commons-logging-1.1.3.jar"/>
+		<pathelement location="lib/log4j-1.2.17.jar"/>
+		<pathelement location="lib/poi-3.13-20150929.jar"/>
+		<pathelement location="lib/poi-ooxml-3.13-20150929.jar"/>
+		<pathelement location="lib/poi-ooxml-schemas-3.13-20150929.jar"/>
+		<pathelement location="lib/poi-scratchpad-3.13-20150929.jar"/>
+		<pathelement location="lib/xmlbeans-2.6.0.jar"/>
     </path>
 	<target name="buildinfo">
 		<tstamp>
@@ -74,7 +82,7 @@
         <jar destfile="packed/JTabletPresenter.jar">
             <manifest>
                 <attribute name="Main-Class" value="de.freiburg.uni.tablet.presenter.ClientApp"/>
-                <attribute name="Class-Path" value=". JTabletPresenter_lib/jpen-2.jar JTabletPresenter_lib/iscwt.jar JTabletPresenter_lib/isfreetype.jar JTabletPresenter_lib/isnativec.jar JTabletPresenter_lib/isrt.jar JTabletPresenter_lib/jai_codec.jar JTabletPresenter_lib/jai_core.jar JTabletPresenter_lib/jai_imageio.jar JTabletPresenter_lib/jbig2.jar JTabletPresenter_lib/jkeymaster-1.1.jar JTabletPresenter_lib/jna-3.5.1.jar JTabletPresenter_lib/jPodFonts.jar JTabletPresenter_lib/jmupdf.jar JTabletPresenter_lib/jPod.jar JTabletPresenter_lib/jPodRenderer.jar JTabletPresenter_lib/tika-core-1.3.jar"/>
+                <attribute name="Class-Path" value=". JTabletPresenter_lib/jpen-2.jar JTabletPresenter_lib/iscwt.jar JTabletPresenter_lib/isfreetype.jar JTabletPresenter_lib/isnativec.jar JTabletPresenter_lib/isrt.jar JTabletPresenter_lib/jai_codec.jar JTabletPresenter_lib/jai_core.jar JTabletPresenter_lib/jai_imageio.jar JTabletPresenter_lib/jbig2.jar JTabletPresenter_lib/jkeymaster-1.1.jar JTabletPresenter_lib/jna-3.5.1.jar JTabletPresenter_lib/jPodFonts.jar JTabletPresenter_lib/jmupdf.jar JTabletPresenter_lib/jPod.jar JTabletPresenter_lib/jPodRenderer.jar JTabletPresenter_lib/tika-core-1.3.jar JTabletPresenter_lib/commons-codec-1.9.jar JTabletPresenter_lib/commons-logging-1.1.3.jar JTabletPresenter_lib/log4j-1.2.17.jar JTabletPresenter_lib/poi-3.13-20150929.jar JTabletPresenter_lib/poi-ooxml-3.13-20150929.jar JTabletPresenter_lib/poi-ooxml-schemas-3.13-20150929.jar JTabletPresenter_lib/poi-scratchpad-3.13-20150929.jar JTabletPresenter_lib/xmlbeans-2.6.0.jar"/>
             </manifest>
             <fileset dir="bin"/>
         </jar>
@@ -97,6 +105,14 @@
         <copy file="lib/jPod.jar" todir="packed/JTabletPresenter_lib"/>
         <copy file="lib/jPodRenderer.jar" todir="packed/JTabletPresenter_lib"/>
 		<copy file="lib/tika-core-1.3.jar" todir="packed/JTabletPresenter_lib"/>
+		<copy file="lib/commons-codec-1.9.jar" todir="packed/JTabletPresenter_lib"/>
+		<copy file="lib/commons-logging-1.1.3.jar" todir="packed/JTabletPresenter_lib"/>
+		<copy file="lib/log4j-1.2.17.jar" todir="packed/JTabletPresenter_lib"/>
+		<copy file="lib/poi-3.13-20150929.jar" todir="packed/JTabletPresenter_lib"/>
+		<copy file="lib/poi-ooxml-3.13-20150929.jar" todir="packed/JTabletPresenter_lib"/>
+		<copy file="lib/poi-ooxml-schemas-3.13-20150929.jar" todir="packed/JTabletPresenter_lib"/>
+		<copy file="lib/poi-scratchpad-3.13-20150929.jar" todir="packed/JTabletPresenter_lib"/>
+		<copy file="lib/xmlbeans-2.6.0.jar" todir="packed/JTabletPresenter_lib"/>
 		<copy file="lib/COPYING.LESSER.txt" todir="packed/JTabletPresenter_lib"/>
 		<copy file="lib/COPYING.txt" todir="packed/JTabletPresenter_lib"/>
 		<copy file="jmupdf32.dll" todir="packed"/>

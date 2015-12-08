@@ -28,6 +28,6 @@ public class ButtonDocumentClearPdf extends AbstractButtonAction {
 
 	@Override
 	public void performLater(final Component component) {
-		_editor.getDocumentEditor().getFrontDocument().setPdfPages(null, IEditableDocument.PDF_MODE_CLEAR);
+		_editor.getDocumentEditor().getFrontDocument().setBackPages(null, IEditableDocument.DOCUMENT_MODE_CLEAR);
 	}
 }

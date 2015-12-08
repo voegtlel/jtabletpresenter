@@ -2,6 +2,8 @@ package de.freiburg.uni.tablet.presenter.document;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 import com.jmupdf.exceptions.DocException;
 import com.jmupdf.exceptions.DocSecurityException;
@@ -11,13 +13,17 @@ import com.jmupdf.pdf.PdfDocument;
 
 import de.freiburg.uni.tablet.presenter.data.BinaryDeserializer;
 import de.freiburg.uni.tablet.presenter.data.BinarySerializer;
+import de.freiburg.uni.tablet.presenter.document.document.IBackDocument;
+import de.freiburg.uni.tablet.presenter.document.document.IBackDocumentPage;
+import de.freiburg.uni.tablet.presenter.document.document.IBackDocumentPageEntity;
 import de.freiburg.uni.tablet.presenter.document.document.IDocument;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.FileHelper;
 import de.intarsys.pdf.parser.COSLoadException;
 import de.intarsys.pdf.pd.PDDocument;
+import de.intarsys.pdf.pd.PDPage;
 import de.intarsys.tools.locator.ByteArrayLocator;
 
-public class PdfSerializable extends AbstractEntity {
+public class PdfSerializable extends AbstractEntity implements IBackDocument {
 	private boolean _documentLoaded = false;
 	private PDDocument _document = null;
 	private PdfDocument _document2 = null;
@@ -46,9 +52,7 @@ public class PdfSerializable extends AbstractEntity {
 	 * @return
 	 */
 	public PDDocument getDocument() {
-		if (!_documentLoaded) {
-			loadDocument();
-		}
+		loadDocument();
 		return _document;
 	}
 	
@@ -84,10 +88,13 @@ public class PdfSerializable extends AbstractEntity {
 	 * @return
 	 */
 	public Page tryGetPage(final int index) {
-		try {
-			return getDocument2().getPage(index);
-		} catch (PageException e) {
-			e.printStackTrace();
+		loadDocument();
+		if (_document2 != null) {
+			try {
+				return _document2.getPage(index);
+			} catch (PageException e) {
+				e.printStackTrace();
+			}
 		}
 		return null;
 	}
@@ -97,9 +104,7 @@ public class PdfSerializable extends AbstractEntity {
 	 * @return
 	 */
 	public PdfDocument getDocument2() {
-		if (!_documentLoaded) {
-			loadDocument();
-		}
+		loadDocument();
 		return _document2;
 	}
 	
@@ -133,5 +138,72 @@ public class PdfSerializable extends AbstractEntity {
 	 */
 	public PdfSerializable clone(final IDocument newDocument) {
 		return new PdfSerializable(newDocument, _document, _document2, _data);
+	}
+	
+	@Override
+	public Iterable<IBackDocumentPage> getPagesAt(final int pageIndex) {
+		loadDocument();
+		if (_document == null) {
+			return new ArrayList<>();
+		}
+		return new Iterable<IBackDocumentPage>() {
+			@Override
+			public Iterator<IBackDocumentPage> iterator() {
+				return new Iterator<IBackDocumentPage>() {
+					PDPage page = null;
+					
+					@Override
+					public IBackDocumentPage next() {
+						if (page == null) {
+							page = _document.getPageTree().getPageAt(pageIndex);
+						} else {
+							page = page.getNextPage();
+						}
+						return new LocalDocumentPage(page);
+					}
+					
+					@Override
+					public boolean hasNext() {
+						return (page == null && _document.getPageTree().getCount() > pageIndex) || (page != null && page.getNextPage() != null);
+					}
+				};
+			}
+		};
+	}
+
+	@Override
+	public Iterable<IBackDocumentPage> getPages() {
+		return getPagesAt(0);
+	}
+	
+	/**
+	 * Internal class for a page
+	 *
+	 */
+	private class LocalDocumentPage implements IBackDocumentPage {
+		PDPage _page;
+		
+		public LocalDocumentPage(final PDPage page) {
+			_page = page;
+		}
+		
+		@Override
+		public IBackDocumentPageEntity createEntity(final DocumentPage parent) {
+			return new PdfPageSerializable(parent, PdfSerializable.this, _page, tryGetPage(_page.getNodeIndex() + 1));
+		}
+
+		@Override
+		public int getPageIndex() {
+			return _page.getNodeIndex();
+		}
+	}
+
+	@Override
+	public int getPageCount() {
+		loadDocument();
+		if (_document == null) {
+			return 0;
+		}
+		return _document.getPageTree().getCount();
 	}
 }

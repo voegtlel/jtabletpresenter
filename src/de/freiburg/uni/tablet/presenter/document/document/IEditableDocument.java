@@ -1,32 +1,31 @@
 package de.freiburg.uni.tablet.presenter.document.document;
 
 import de.freiburg.uni.tablet.presenter.document.DocumentPage;
-import de.freiburg.uni.tablet.presenter.document.PdfSerializable;
 
 
 public interface IEditableDocument extends IClientDocument {
 	/**
-	 * Reset indices and use first page as first pdf page
+	 * Reset indices and use first page as first document page
 	 */
-	int PDF_MODE_REINDEX = 0;
+	int DOCUMENT_MODE_REINDEX = 0;
 	/**
 	 * Keep current indices and append if needed
 	 */
-	int PDF_MODE_KEEP_INDEX = 1;
+	int DOCUMENT_MODE_KEEP_INDEX = 1;
 	/**
-	 * Append the loaded pdf to the end of the document
+	 * Append the loaded document to the end of the document
 	 */
-	int PDF_MODE_APPEND = 2;
+	int DOCUMENT_MODE_APPEND = 2;
 	/**
 	 * Clear all pages and reindex
 	 */
-	int PDF_MODE_CLEAR = 3;
+	int DOCUMENT_MODE_CLEAR = 3;
 
 	/**
-	 * Sets the background pdf
+	 * Sets the background document
 	 * @param document
 	 */
-	void setPdfPages(PdfSerializable document, int pdfMode);
+	void setBackPages(IBackDocument document, int documentMode);
 
 	/**
 	 * Gets a page by its index or null

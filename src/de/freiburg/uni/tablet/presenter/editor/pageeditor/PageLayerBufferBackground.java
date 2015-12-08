@@ -6,7 +6,7 @@ import java.awt.image.BufferedImage;
 import de.freiburg.uni.tablet.presenter.document.BitmapImageData;
 import de.freiburg.uni.tablet.presenter.document.IEntity;
 import de.freiburg.uni.tablet.presenter.document.PdfPageSerializable;
-import de.intarsys.pdf.cds.CDSRectangle;
+import de.freiburg.uni.tablet.presenter.document.PptxSlideSerializable;
 
 public class PageLayerBufferBackground implements IPageLayerBufferBackground {
 	private final IDisplayRenderer _displayRenderer;
@@ -15,7 +15,8 @@ public class PageLayerBufferBackground implements IPageLayerBufferBackground {
 
 	private boolean _ratioEnabled = false;
 
-	private final IPageLayerBufferPdf _pdfLayer;
+	private final IPageLayerBufferBackground _pdfLayer;
+	private final IPageLayerBufferBackground _pptxLayer;
 
 	private IEntity _backgroundEntity;
 	
@@ -25,6 +26,8 @@ public class PageLayerBufferBackground implements IPageLayerBufferBackground {
 	 */
 	public PageLayerBufferBackground(final IDisplayRenderer displayRenderer, final int pdfLibraryType) {
 		_displayRenderer = displayRenderer;
+		
+		_pptxLayer = new PageLayerBufferPptx(_displayRenderer);
 		
 		if (pdfLibraryType == PageLayerBufferComposite.PDF_LIBRARY_TYPE_JPOD) {
 			_pdfLayer = new PageLayerBufferPdf(
@@ -41,6 +44,7 @@ public class PageLayerBufferBackground implements IPageLayerBufferBackground {
 	public void resize(final RenderMetric renderMetric) {
 		// Always resize PDF layer
 		_pdfLayer.resize(renderMetric);
+		_pptxLayer.resize(renderMetric);
 	}
 	
 	@Override
@@ -48,11 +52,16 @@ public class PageLayerBufferBackground implements IPageLayerBufferBackground {
 		synchronized (_repaintSync) {
 			_backgroundEntity = backgroundEntity;
 			if (backgroundEntity instanceof PdfPageSerializable) {
-				_pdfLayer.setPdfPage((PdfPageSerializable) backgroundEntity);
+				_pdfLayer.setBackgroundEntity(backgroundEntity);
 			} else {
-				_pdfLayer.setPdfPage(null);
-				_displayRenderer.requireRepaint();
+				_pdfLayer.setBackgroundEntity(null);
 			}
+			if (backgroundEntity instanceof PptxSlideSerializable) {
+				_pptxLayer.setBackgroundEntity(backgroundEntity);
+			} else {
+				_pptxLayer.setBackgroundEntity(null);
+			}
+			_displayRenderer.requireRepaint();
 		}
 	}
 	
@@ -67,6 +76,8 @@ public class PageLayerBufferBackground implements IPageLayerBufferBackground {
 			return;
 		} else if (backgroundEntity instanceof PdfPageSerializable) {
 			_pdfLayer.drawBuffer(g, renderMetric);
+		} else if (backgroundEntity instanceof PptxSlideSerializable) {
+			_pptxLayer.drawBuffer(g, renderMetric);
 		} else if (backgroundEntity instanceof BitmapImageData) {
 			g.drawImage(((BitmapImageData) backgroundEntity).getImage(), renderMetric.surfaceDrawOffsetX, renderMetric.surfaceDrawOffsetY, renderMetric.surfaceWidth, renderMetric.surfaceHeight, null);
 		}
@@ -75,6 +86,8 @@ public class PageLayerBufferBackground implements IPageLayerBufferBackground {
 	@Override
 	public void setRatioEnabled(final boolean enabled) {
 		_ratioEnabled = enabled;
+		_pdfLayer.setRatioEnabled(enabled);
+		_pptxLayer.setRatioEnabled(enabled);
 	}
 	
 	@Override
@@ -87,8 +100,9 @@ public class PageLayerBufferBackground implements IPageLayerBufferBackground {
 		synchronized (_repaintSync) {
 			if (_ratioEnabled && _backgroundEntity != null) {
 				if (_backgroundEntity instanceof PdfPageSerializable) {
-					final CDSRectangle r = ((PdfPageSerializable)_backgroundEntity).getPage().getMediaBox();
-					return r.getWidth() / r.getHeight();
+					return _pdfLayer.getDesiredRatio();
+				} else if (_backgroundEntity instanceof PptxSlideSerializable) {
+					return _pptxLayer.getDesiredRatio();
 				} else if (_backgroundEntity instanceof BitmapImageData) {
 					BufferedImage image = ((BitmapImageData) _backgroundEntity).getImage();
 					return (float)image.getWidth() / image.getHeight();
