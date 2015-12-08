@@ -188,31 +188,35 @@ public class Updater extends JDialog {
 					int splitFirst = entry.getName().indexOf('/', 1);
 					if (splitFirst != -1) {
 						String subName = entry.getName().substring(splitFirst+1);
-						File file = new File(_targetDirectory, subName);
-						if (entry.isDirectory()) {
-							log("Extracting " + subName + " (Directory)");
-							file.mkdirs();
-							if (!file.exists() || !file.isDirectory()) {
-								throw new IOException("Can't create directory " + file);
-							}
+						if (subName.endsWith(".ini")) {
+							log("Ignoring config update " + subName);
 						} else {
-							log("Extracting " + subName + " (" + entry.getSize() + "B)");
-							if (file.exists()) {
-								log("Overwriting file " + file);
-							}
-							InputStream zis = zf.getInputStream(entry);
-							FileOutputStream bos = new FileOutputStream(file);
-							try {
-								byte[] buffer = new byte[1024];
-								while (true) {
-									int read = zis.read(buffer);
-									if (read < 0) {
-										break;
-									}
-									bos.write(buffer, 0, read);
+							File file = new File(_targetDirectory, subName);
+							if (entry.isDirectory()) {
+								log("Extracting " + subName + " (Directory)");
+								file.mkdirs();
+								if (!file.exists() || !file.isDirectory()) {
+									throw new IOException("Can't create directory " + file);
 								}
-							} finally {
-								bos.close();
+							} else {
+								log("Extracting " + subName + " (" + entry.getSize() + "B)");
+								if (file.exists()) {
+									log("Overwriting file " + file);
+								}
+								InputStream zis = zf.getInputStream(entry);
+								FileOutputStream bos = new FileOutputStream(file);
+								try {
+									byte[] buffer = new byte[1024];
+									while (true) {
+										int read = zis.read(buffer);
+										if (read < 0) {
+											break;
+										}
+										bos.write(buffer, 0, read);
+									}
+								} finally {
+									bos.close();
+								}
 							}
 						}
 					}
