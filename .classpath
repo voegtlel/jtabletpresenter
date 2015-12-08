@@ -28,5 +28,6 @@
 	<classpathentry kind="lib" path="lib/jkeymaster-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/jna-3.5.1.jar"/>
 	<classpathentry kind="lib" path="lib/tika-core-1.3.jar"/>
+	<classpathentry kind="lib" path="lib/minimal-json-0.9.4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

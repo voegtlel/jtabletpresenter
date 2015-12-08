@@ -22,6 +22,9 @@ import de.freiburg.uni.tablet.presenter.document.document.DocumentServer;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.JPageEditor;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.FileHelper;
 import de.freiburg.uni.tablet.presenter.page.SolidPen;
+import de.freiburg.uni.tablet.presenter.updater.ClientUpdater;
+import de.freiburg.uni.tablet.presenter.updater.UpdateAdapter;
+import de.freiburg.uni.tablet.presenter.updater.UpdateDialog;
 import de.freiburg.uni.tablet.presenter.xsocket.ClientListener;
 import de.freiburg.uni.tablet.presenter.xsocket.DownClient;
 import de.freiburg.uni.tablet.presenter.xsocket.UpClient;
@@ -78,7 +81,7 @@ public class ClientApp {
 				@Override
 				public void run() {
 					try {
-						new ClientApp(config);
+						new ClientApp(config, args);
 					} catch (final Exception e) {
 						e.printStackTrace();
 					}
@@ -91,7 +94,7 @@ public class ClientApp {
 	 * Create the application.
 	 * @param args
 	 */
-	public ClientApp(final DocumentConfig config) {
+	public ClientApp(final DocumentConfig config, final String[] allArgs) {
 		NativeLibrary.addSearchPath("freetype", ".");
 		
 		try {
@@ -108,13 +111,13 @@ public class ClientApp {
 		
 		_pageRenderer = new JPageEditor(config);
 		
-		initialize();
+		initialize(allArgs);
 	}
 
 	/**
 	 * Initialize the contents of the frame.
 	 */
-	private void initialize() {
+	private void initialize(final String[] allArgs) {
 		_pageRenderer.setTitle("JTabletPresenter v" + VersionString);
 		_pageRenderer.setSize(800, 600);
 		_pageRenderer.setLocationByPlatform(true);
@@ -281,5 +284,44 @@ public class ClientApp {
 				}
 			});
 		}
+		if (_pageRenderer.getConfig().getBoolean("updater.checkUpdates", true)) {
+			Thread updater = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						System.out.println("Checking for updates");
+						ClientUpdater.checkForUpdate(new UpdateAdapter() {
+							@Override
+							public void onVersionInfo(final String fromVersion, final String toVersion) {
+								System.out.println("Newest release: " + toVersion + " (current: " + fromVersion + ")");
+								if (!fromVersion.equals(toVersion)) {
+									SwingUtilities.invokeLater(new Runnable() {
+										@Override
+										public void run() {
+											if (_pageRenderer.isVisible()) {
+												if (JOptionPane.showConfirmDialog(_pageRenderer, "Update found:\nThis Version: " + fromVersion + "\nNew Version: " + toVersion + "\nPerform Update?", "Updater", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+													UpdateDialog updateDialog = new UpdateDialog(_pageRenderer, ClientApp.class.getName(), allArgs);
+													updateDialog.setVisible(true);
+												}
+											}
+										}
+									});
+								}
+							}
+						});
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			});
+			updater.start();
+		}
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				
+			}
+		});
 	}
 }

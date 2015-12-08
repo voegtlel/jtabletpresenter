@@ -47,7 +47,8 @@ The default config file is designed for presentation using digital pens.
  * Uses JMuPdf renderer (has better support)
  * Autosaving for each page and on exit
  * Default saving/loading as PDF (unfortunately the internal format is not desired by most users though it would be much more practicable :( )
- * No networking
+ * Network Streaming
+ * Auto-Updater
  * Intentional shortcuts:
      - open/save (Ctrl+O/S)
      - next page (N, Space, Page Up, Right, Down)
@@ -107,6 +108,7 @@ Following variables are shown as
  * `fullscreen.autotoggleToolbar` (boolean, true): If true, the toolbar is hidden when changing into fullscreen and shown when switching to windowed mode
  * `fullscreen.autotoggleAutoToolbar` (boolean, true): If true, the auto-toolbar is shown when changing into fullscreen and hidden when switching to windowed mode
  * `thickness.thin`, `thickness.medium`, `thickness.thick` (float, 1.0, 2.0, 3.0): Default base thicknesses possible to select.
+ * `updater.checkUpdates` (boolean, true): If true, the updater will check for a new version on startup.
 
 ### Save/Load
  * `autosave.next`, `autosave.previous`, `autosave.spinner` (boolean, true): If true, the current page will be autosaved on next/previous/spinner selected page
