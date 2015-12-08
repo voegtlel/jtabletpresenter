@@ -17,6 +17,7 @@ The tool has capabilities to upload live annotations to a server, which students
  * Serialize as PDF
  * (global) Shortcuts
  * Screenshots, adding images
+ * Auto-updater
  * (experimental) Live stream to server
 
 
@@ -47,7 +48,7 @@ The default config file is designed for presentation using digital pens.
  * Uses JMuPdf renderer (has better support)
  * Autosaving for each page and on exit
  * Default saving/loading as PDF (unfortunately the internal format is not desired by most users though it would be much more practicable :( )
- * Network Streaming
+ * Network streaming disabled
  * Auto-Updater
  * Intentional shortcuts:
      - open/save (Ctrl+O/S)
