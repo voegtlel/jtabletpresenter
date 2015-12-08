@@ -304,9 +304,9 @@ public class Updater extends JDialog {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			String inputFile = args[0];
-			String outputFolder = args[1];
-			String selfFile = args[2];
+			File inputFile = new File(args[0]);
+			File outputFolder = new File(args[1]);
+			File selfFile = new File(args[2]);
 			//String classPath = args[3];
 			//String mainClassName = args[4];
 			File jarFile = new File(outputFolder, "JTabletPresenter.jar");
@@ -314,12 +314,12 @@ public class Updater extends JDialog {
 			for (int i = 0; i < mainClassArgs.length; i++) {
 				mainClassArgs[i] = args[i + 5];
 			}
-			File self = new File(selfFile);
-			self.deleteOnExit();
+			selfFile.deleteOnExit();
+			inputFile.deleteOnExit();
 			SwingUtilities.invokeLater(new Runnable() {
 				@Override
 				public void run() {
-					Updater updater = new Updater(new File(inputFile), new File(outputFolder), jarFile, mainClassArgs);
+					Updater updater = new Updater(inputFile, outputFolder, jarFile, mainClassArgs);
 					updater.setVisible(true);
 				}
 			});
