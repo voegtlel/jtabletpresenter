@@ -35,8 +35,9 @@
 			<entry key="Version" value="${version}" />
 			<entry key="BuildTime" value="${builtat}" />
 		</propertyfile>
+		
 	</target>
-    <target name="init">
+    <target name="init" depends="buildinfo">
         <mkdir dir="bin"/>
         <copy includeemptydirs="false" todir="bin">
             <fileset dir="src">
