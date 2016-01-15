@@ -21,8 +21,8 @@ public class ButtonSecondary extends AbstractButtonSelectTool {
 	/**
 	 * Creates the action with an editor.
 	 */
-	public ButtonSecondary(final IToolPageEditor editor) {
-		super("secondary", editor, "Secondary", "/buttons/edit-erase.png");
+	public ButtonSecondary(final IToolPageEditor editor, int baseSize) {
+		super("secondary", editor, "Secondary", "/buttons/edit-erase", baseSize);
 		setSelectedTool(_toolEraser);
 	}
 

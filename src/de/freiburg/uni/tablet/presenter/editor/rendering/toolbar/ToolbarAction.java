@@ -12,18 +12,12 @@ public class ToolbarAction implements IToolbarItem {
 	private ImageIcon _imageIcon;
 	private IButtonAction _action;
 
-	public ToolbarAction(final String name, final String imageResource, final IButtonAction action) {
+	public ToolbarAction(final String name, final IButtonAction action, final int desiredSize) {
 		_name = name;
-		_imageIcon = new ImageIcon(JPageEditor.class.getResource(imageResource));
+		_imageIcon = new ImageIcon(action.getImageResource(desiredSize, desiredSize));
 		_action = action;
 	}
-	
-	public ToolbarAction(final String name, final ImageIcon imageIcon, final IButtonAction action) {
-		_name = name;
-		_imageIcon = imageIcon;
-		_action = action;
-	}
-	
+
 	public String getName() {
 		return _name;
 	}

@@ -35,7 +35,7 @@ public class ButtonToolScreenshot extends AbstractButtonAction {
 	 * Creates the action with an editor.
 	 */
 	public ButtonToolScreenshot(final IToolPageEditor editor, final String name, final String title, final int mode, final boolean hideWindow, final boolean asBackground) {
-		super(name, editor, title, "/buttons/tool-screenshot.png");
+		super(name, editor, title, "/buttons/tool-screenshot");
 		_mode = mode;
 		_hideWindow = hideWindow;
 		_asBackground = asBackground;

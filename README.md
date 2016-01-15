@@ -131,8 +131,9 @@ Primary purpose is the screenshot tool.
 ### Toolbar
 The (dynamic) toolbar is separate from the fixed toolbar. This toolbar automatically shows when hovering over it and hides when leaving it. The buttons present in the toolbar can be configured by:
 
+ * `toolbar.buttonSize` (int, 32): Size of the buttons. This affects all buttons and all texts.
  * `toolbar.orientation` (enum, NONE): One of LEFT, RIGHT, TOP, BOTTOM, NONE (disables the toolbar)
- * `toolbar.compactSize` (integer, 15): Size when the toolbar is not hovered
+ * `toolbar.compactScale` (float, 0.5): Relative size when the toolbar is not hovered
  * `toolbar.compactOpacity` (float, 0.25): Opacity when the toolbar is not hovered
  * `toolbar.*` (action): Creates a toolbar action button. Value is one of the actions (see below). This also adds a "`space`" and "`fill`" value to modify spacing.
 

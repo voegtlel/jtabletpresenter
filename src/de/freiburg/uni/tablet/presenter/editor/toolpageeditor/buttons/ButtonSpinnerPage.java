@@ -4,8 +4,7 @@
  */
 package de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons;
 
-import java.awt.Component;
-import java.awt.Dimension;
+import java.awt.*;
 
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
@@ -32,13 +31,14 @@ public class ButtonSpinnerPage extends AbstractButtonAction {
 	/**
 	 * Creates the action with an editor.
 	 */
-	public ButtonSpinnerPage(final IToolPageEditor editor) {
+	public ButtonSpinnerPage(final IToolPageEditor editor, int baseSize) {
 		super("pageNumber", editor, null, null);
 		_spinner = new JSpinner();
-		_spinner.setMinimumSize(new Dimension(JPageToolButton.WIDTH_NORMAL, 0));
-		_spinner.setMaximumSize(new Dimension(JPageToolButton.WIDTH_NORMAL,
+		_spinner.setFont(new Font("Dialog", Font.PLAIN, (int)(baseSize * JPageToolButton.SIZE_FONT)));
+		_spinner.setMinimumSize(new Dimension((int)(baseSize * JPageToolButton.WIDTH_NORMAL), 0));
+		_spinner.setMaximumSize(new Dimension((int)(baseSize * JPageToolButton.WIDTH_NORMAL),
 				Integer.MAX_VALUE));
-		_spinner.setPreferredSize(new Dimension(JPageToolButton.WIDTH_NORMAL,
+		_spinner.setPreferredSize(new Dimension((int)(baseSize * JPageToolButton.WIDTH_NORMAL),
 				_spinner.getPreferredSize().height));
 		_spinner.setModel(new SpinnerNumberModel(1, 1, Integer.MAX_VALUE, 1));
 		_spinner.getModel().addChangeListener(new ChangeListener() {

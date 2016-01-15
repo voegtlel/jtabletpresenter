@@ -20,9 +20,11 @@ import javax.swing.SwingUtilities;
  *
  */
 public class JPageToolBar extends JPanel {
+	public static final float SPACING = 0.1f;
+	public static final float EMPTY_SPACING = 0.75f;
 	private static final long serialVersionUID = 1L;
 
-	public void setToolButtonsVertical(final IButtonAction[] buttons) {
+	public void setToolButtonsVertical(final IButtonAction[] buttons, int baseSize) {
 		// Build layout
 		final GridBagLayout gbl_panelTools = new GridBagLayout();
 		gbl_panelTools.columnWidths = new int[] { 0 };
@@ -33,7 +35,7 @@ public class JPageToolBar extends JPanel {
 		for (int i = 0; i < buttons.length; i++) {
 			gbl_panelTools.rowWeights[i] = 0.0;
 			if (buttons[i] == null) {
-				gbl_panelTools.rowHeights[i] = 10;
+				gbl_panelTools.rowHeights[i] = (int)(baseSize * EMPTY_SPACING);
 			} else {
 				gbl_panelTools.rowHeights[i] = 0;
 			}
@@ -47,7 +49,7 @@ public class JPageToolBar extends JPanel {
 		for (int i = 0; i < buttons.length; i++) {
 			if (buttons[i] != null) {
 				final GridBagConstraints gbc_control = new GridBagConstraints();
-				gbc_control.insets = new Insets(0, 0, 5, 0);
+				gbc_control.insets = new Insets(0, 0, (int)(baseSize * SPACING), 0);
 				gbc_control.fill = GridBagConstraints.BOTH;
 				gbc_control.gridx = 0;
 				gbc_control.gridy = i;
@@ -57,7 +59,8 @@ public class JPageToolBar extends JPanel {
 					final IButtonAction action = buttons[i];
 					final JButton button = new JPageToolButton(
 							buttons[i].getText(),
-							buttons[i].getImageResource(), false);
+							buttons[i].getImageResource(baseSize, baseSize),
+							baseSize, false);
 					button.addActionListener(new ActionListener() {
 						@Override
 						public void actionPerformed(final ActionEvent e) {
@@ -85,7 +88,7 @@ public class JPageToolBar extends JPanel {
 		return super.processKeyBinding(ks, e, condition, pressed);
 	}
 
-	public void setToolButtonsHorizontal(final IButtonAction[] buttons) {
+	public void setToolButtonsHorizontal(final IButtonAction[] buttons, int baseSize) {
 		// Build layout
 		final GridBagLayout gbl_panelTools = new GridBagLayout();
 		gbl_panelTools.rowHeights = new int[] { 0 };
@@ -96,7 +99,7 @@ public class JPageToolBar extends JPanel {
 		for (int i = 0; i < buttons.length; i++) {
 			gbl_panelTools.columnWeights[i] = 0.0;
 			if (buttons[i] == null) {
-				gbl_panelTools.columnWidths[i] = 10;
+				gbl_panelTools.columnWidths[i] = (int)(baseSize * EMPTY_SPACING);
 			} else {
 				gbl_panelTools.columnWidths[i] = 0;
 			}
@@ -110,7 +113,7 @@ public class JPageToolBar extends JPanel {
 		for (int i = 0; i < buttons.length; i++) {
 			if (buttons[i] != null) {
 				final GridBagConstraints gbc_control = new GridBagConstraints();
-				gbc_control.insets = new Insets(0, 0, 0, 5);
+				gbc_control.insets = new Insets(0, 0, 0, (int)(baseSize * SPACING));
 				gbc_control.fill = GridBagConstraints.BOTH;
 				gbc_control.gridx = i;
 				gbc_control.gridy = 0;
@@ -120,7 +123,8 @@ public class JPageToolBar extends JPanel {
 					final IButtonAction action = buttons[i];
 					final JButton button = new JPageToolButton(
 							buttons[i].getText(),
-							buttons[i].getImageResource(), false);
+							buttons[i].getImageResource(baseSize, baseSize),
+							baseSize, false);
 					button.addActionListener(new ActionListener() {
 						@Override
 						public void actionPerformed(final ActionEvent e) {

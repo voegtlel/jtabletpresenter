@@ -22,7 +22,7 @@ public class ButtonUndo extends AbstractButtonAction {
 	 * Creates the action with an editor.
 	 */
 	public ButtonUndo(final IToolPageEditor editor) {
-		super("undo", editor, "Undo", "/buttons/edit-undo.png");
+		super("undo", editor, "Undo", "/buttons/edit-undo");
 	}
 
 	@Override

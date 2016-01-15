@@ -1,7 +1,6 @@
 package de.freiburg.uni.tablet.presenter;
 
-import java.awt.Color;
-import java.awt.EventQueue;
+import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -11,8 +10,7 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 
 import com.jmupdf.JmuPdf;
 import com.sun.jna.NativeLibrary;
@@ -20,6 +18,7 @@ import com.sun.jna.NativeLibrary;
 import de.freiburg.uni.tablet.presenter.document.DocumentConfig;
 import de.freiburg.uni.tablet.presenter.document.document.DocumentServer;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.JPageEditor;
+import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.JPageToolButton;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons.FileHelper;
 import de.freiburg.uni.tablet.presenter.page.SolidPen;
 import de.freiburg.uni.tablet.presenter.updater.ClientUpdater;
@@ -76,6 +75,14 @@ public class ClientApp {
 			}
 		} else {
 			System.setProperty("sun.awt.noerasebackground", "true");
+
+			try {
+				UIManager.getLookAndFeelDefaults()
+						.put("defaultFont", new Font("Dialog", Font.PLAIN,
+								(int) (JPageToolButton.SIZE_FONT * config.getInt("toolbar.buttonSize", 32))));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 			
 			EventQueue.invokeLater(new Runnable() {
 				@Override

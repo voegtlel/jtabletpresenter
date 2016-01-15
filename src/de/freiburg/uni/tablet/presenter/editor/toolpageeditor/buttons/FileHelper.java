@@ -388,6 +388,7 @@ public class FileHelper {
 	
 	public static boolean showOpenDialog(final Component component, final IToolPageEditor editor, final FileFilter defaultFilter) {
 		final JFileChooser fileChooser = new JFileChooser();
+		fileChooser.setFont(component.getFont());
 		fileChooser.addChoosableFileFilter(FILTER_presenterDocumentFile);
 		fileChooser.addChoosableFileFilter(FILTER_presenterPageFile);
 		fileChooser.addChoosableFileFilter(FILTER_pdf);

@@ -4,9 +4,9 @@
     <property name="debuglevel" value="source,lines,vars"/>
     <property name="target" value="1.7"/>
     <property name="source" value="1.7"/>
-	<property name="version" value="1.26.2"/>
+	<property name="version" value="1.27.0"/>
     <path id="jtabletpresenter.classpath">
-        <pathelement location="bin"/>
+        <pathelement location="bin/build"/>
         <pathelement location="lib/jpen-2.jar"/>
         <pathelement location="lib/iscwt.jar"/>
         <pathelement location="lib/isfreetype.jar"/>
@@ -24,6 +24,7 @@
         <pathelement location="lib/jPodRenderer.jar"/>
     	<pathelement location="lib/minimal-json-0.9.4.jar"/>
 		<pathelement location="lib/tika-core-1.3.jar"/>
+        <pathelement location="lib/svgSalamander.jar"/>
     </path>
 	<target name="buildinfo">
 		<tstamp>
@@ -38,14 +39,14 @@
 		
 	</target>
     <target name="init" depends="buildinfo">
-        <mkdir dir="bin"/>
-        <copy includeemptydirs="false" todir="bin">
+        <mkdir dir="bin/build"/>
+        <copy includeemptydirs="false" todir="bin/build">
             <fileset dir="src">
                 <exclude name="**/*.launch"/>
                 <exclude name="**/*.java"/>
             </fileset>
         </copy>
-        <copy includeemptydirs="false" todir="bin">
+        <copy includeemptydirs="false" todir="bin/build">
             <fileset dir="res">
                 <exclude name="**/*.launch"/>
                 <exclude name="**/*.java"/>
@@ -54,14 +55,14 @@
         </copy>
     </target>
     <target name="clean">
-        <delete dir="bin"/>
+        <delete dir="bin/build"/>
     	<delete dir="packed/JTabletPresenter_lib"/>
         <delete file="packed/JTabletPresenter.jar"/>
     </target>
     <target depends="clean" name="cleanall"/>
     <target depends="init,buildinfo" name="build">
         <echo message="${ant.project.name}: ${ant.file}"/>
-        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" includeantruntime="false" source="${source}" target="${target}">
+        <javac debug="true" debuglevel="${debuglevel}" destdir="bin/build" includeantruntime="false" source="${source}" target="${target}">
             <src path="src"/>
             <src path="res"/>
             <classpath refid="jtabletpresenter.classpath"/>
@@ -73,15 +74,15 @@
         </java>
     </target>
 	<target depends="build" name="create_updater_jar">
-        <jar destfile="packed/Updater.jar" basedir="bin" includes="de/freiburg/uni/tablet/presenter/Updater*.class" />
+        <jar destfile="packed/Updater.jar" basedir="bin/build" includes="de/freiburg/uni/tablet/presenter/Updater*.class" />
     </target>
 	<target depends="build,create_updater_jar" name="create_run_jar">
         <jar destfile="packed/JTabletPresenter.jar">
             <manifest>
                 <attribute name="Main-Class" value="de.freiburg.uni.tablet.presenter.ClientApp"/>
-                <attribute name="Class-Path" value=". JTabletPresenter_lib/jpen-2.jar JTabletPresenter_lib/iscwt.jar JTabletPresenter_lib/isfreetype.jar JTabletPresenter_lib/isnativec.jar JTabletPresenter_lib/isrt.jar JTabletPresenter_lib/jai_codec.jar JTabletPresenter_lib/jai_core.jar JTabletPresenter_lib/jai_imageio.jar JTabletPresenter_lib/jbig2.jar JTabletPresenter_lib/jkeymaster-1.1.jar JTabletPresenter_lib/jna-3.5.1.jar JTabletPresenter_lib/jPodFonts.jar JTabletPresenter_lib/jmupdf.jar JTabletPresenter_lib/jPod.jar JTabletPresenter_lib/jPodRenderer.jar JTabletPresenter_lib/tika-core-1.3.jar JTabletPresenter_lib/minimal-json-0.9.4.jar"/>
+                <attribute name="Class-Path" value=". JTabletPresenter_lib/jpen-2.jar JTabletPresenter_lib/iscwt.jar JTabletPresenter_lib/isfreetype.jar JTabletPresenter_lib/isnativec.jar JTabletPresenter_lib/isrt.jar JTabletPresenter_lib/jai_codec.jar JTabletPresenter_lib/jai_core.jar JTabletPresenter_lib/jai_imageio.jar JTabletPresenter_lib/jbig2.jar JTabletPresenter_lib/jkeymaster-1.1.jar JTabletPresenter_lib/jna-3.5.1.jar JTabletPresenter_lib/jPodFonts.jar JTabletPresenter_lib/jmupdf.jar JTabletPresenter_lib/jPod.jar JTabletPresenter_lib/jPodRenderer.jar JTabletPresenter_lib/tika-core-1.3.jar JTabletPresenter_lib/minimal-json-0.9.4.jar JTabletPresenter_lib/svgSalamander.jar"/>
             </manifest>
-            <fileset dir="bin"/>
+            <fileset dir="bin/build"/>
         </jar>
         <delete dir="packed/JTabletPresenter_lib"/>
         <mkdir dir="packed/JTabletPresenter_lib"/>
@@ -103,7 +104,8 @@
         <copy file="lib/jPodRenderer.jar" todir="packed/JTabletPresenter_lib"/>
 		<copy file="lib/tika-core-1.3.jar" todir="packed/JTabletPresenter_lib"/>
 		<copy file="lib/minimal-json-0.9.4.jar" todir="packed/JTabletPresenter_lib"/>
-		<copy file="lib/COPYING.LESSER.txt" todir="packed/JTabletPresenter_lib"/>
+        <copy file="lib/svgSalamander.jar" todir="packed/JTabletPresenter_lib"/>
+        <copy file="lib/COPYING.LESSER.txt" todir="packed/JTabletPresenter_lib"/>
 		<copy file="lib/COPYING.txt" todir="packed/JTabletPresenter_lib"/>
 		<copy file="jmupdf32.dll" todir="packed"/>
 		<copy file="jmupdf64.dll" todir="packed"/>

@@ -22,7 +22,7 @@ public class ButtonDocumentOpenPdf extends AbstractButtonAction {
 	 * Creates the action with an editor.
 	 */
 	public ButtonDocumentOpenPdf(final IToolPageEditor editor) {
-		super("openPdf", editor, "Open PDF", "/buttons/document-open-pdf.png");
+		super("openPdf", editor, "Open PDF", "/buttons/document-open-pdf");
 	}
 
 	@Override

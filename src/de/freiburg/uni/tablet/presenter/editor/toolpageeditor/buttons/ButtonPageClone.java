@@ -25,7 +25,7 @@ public class ButtonPageClone extends AbstractButtonAction {
 	 * Creates the action with an editor.
 	 */
 	public ButtonPageClone(final IToolPageEditor editor) {
-		super("clone", editor, "Clone", "/buttons/page-clone.png");
+		super("clone", editor, "Clone", "/buttons/page-clone");
 	}
 
 	@Override

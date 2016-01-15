@@ -4,8 +4,7 @@
  */
 package de.freiburg.uni.tablet.presenter.editor.toolpageeditor;
 
-import java.awt.Component;
-import java.awt.Point;
+import java.awt.*;
 
 /**
  * @author lukas
@@ -26,10 +25,17 @@ public interface IButtonAction {
 
 	/**
 	 * Path to the image resource.
-	 * 
+	 *
 	 * @return
 	 */
 	String getImageResource();
+
+	/**
+	 * The loaded image resource.
+	 * 
+	 * @return
+	 */
+	Image getImageResource(int width, int height);
 
 	/**
 	 * If null, a button will be created and perform will be used as action. If

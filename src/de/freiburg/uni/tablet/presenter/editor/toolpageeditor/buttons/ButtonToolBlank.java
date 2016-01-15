@@ -23,7 +23,7 @@ public class ButtonToolBlank extends AbstractButtonAction {
 	 * Creates the action with an editor.
 	 */
 	public ButtonToolBlank(final IToolPageEditor editor, final String name, final String title, final boolean allScreens) {
-		super(name, editor, title, "/buttons/tool-blank.png");
+		super(name, editor, title, "/buttons/tool-blank");
 		_allScreens = allScreens;
 	}
 

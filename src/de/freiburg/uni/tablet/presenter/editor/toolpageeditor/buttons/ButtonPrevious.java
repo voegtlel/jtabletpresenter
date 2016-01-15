@@ -23,7 +23,7 @@ public class ButtonPrevious extends AbstractButtonAction {
 	 * Creates the action with an editor.
 	 */
 	public ButtonPrevious(final IToolPageEditor editor) {
-		super("previous", editor, "Prev", "/buttons/go-previous.png");
+		super("previous", editor, "Prev", "/buttons/go-previous");
 	}
 
 	@Override

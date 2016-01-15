@@ -19,19 +19,19 @@ public class ButtonTools extends AbstractButtonMenuTool {
 	/**
 	 * Creates the action with an editor.
 	 */
-	public ButtonTools(final IToolPageEditor editor) {
-		super("tools", editor, "Tools", "/buttons/document-properties.png", 10);
-		this._frame.addItem(new ButtonDocumentNew(editor), true);
-		this._frame.addItem(new ButtonOpenFrom(editor), true);
-		this._frame.addItem(new ButtonSaveAs(editor), true);
-		//this._frame.addItem(new ButtonPreferences(editor), true);
-		this._frame.addItem(new ButtonPrimary(editor), true);
-		this._frame.addItem(new ButtonSecondary(editor), true);
-		this._frame.addItem(new ButtonToolPage(editor), true);
-		this._frame.addItem(new ButtonToolDocument(editor), true);
-		this._frame.addItem(new ButtonThickness(editor), true);
-		this._frame.addItem(new ButtonToolScreenshot(editor, "screenshotAreaHide", "Area Screenshot", ButtonToolScreenshot.MODE_SELECT_RECTANGLE, true, false), true);
-		this._frame.addItem(new ButtonToolBlank(editor, "blankScreen", "Blank", false), true);
+	public ButtonTools(final IToolPageEditor editor, final int baseSize) {
+		super("tools", editor, "Tools", "/buttons/document-properties", baseSize, 10);
+		this._frame.addItem(new ButtonDocumentNew(editor), baseSize, true);
+		this._frame.addItem(new ButtonOpenFrom(editor), baseSize, true);
+		this._frame.addItem(new ButtonSaveAs(editor), baseSize, true);
+		//this._frame.addItem(new ButtonPreferences(editor), baseSize, true);
+		this._frame.addItem(new ButtonPrimary(editor, baseSize), baseSize, true);
+		this._frame.addItem(new ButtonSecondary(editor, baseSize), baseSize, true);
+		this._frame.addItem(new ButtonToolPage(editor, baseSize), baseSize, true);
+		this._frame.addItem(new ButtonToolDocument(editor, baseSize), baseSize, true);
+		this._frame.addItem(new ButtonThickness(editor, baseSize), baseSize, true);
+		this._frame.addItem(new ButtonToolScreenshot(editor, "screenshotAreaHide", "Area Screenshot", ButtonToolScreenshot.MODE_SELECT_RECTANGLE, true, false), baseSize, true);
+		this._frame.addItem(new ButtonToolBlank(editor, "blankScreen", "Blank", false), baseSize, true);
 		this._frame.addItemDummy(new ButtonToggleShowToolbar(editor));
 		this._frame.addItemDummy(new ButtonToggleShowAutoToolbar(editor));
 		this._frame.addItemDummy(new ButtonToolScreenshot(editor, "screenshotArea", "Area Screenshot", ButtonToolScreenshot.MODE_SELECT_RECTANGLE, false, false));

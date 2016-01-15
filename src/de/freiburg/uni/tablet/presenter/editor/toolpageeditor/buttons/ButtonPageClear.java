@@ -23,7 +23,7 @@ public class ButtonPageClear extends AbstractButtonAction {
 	 * Creates the action with an editor.
 	 */
 	public ButtonPageClear(final IToolPageEditor editor) {
-		super("clear", editor, "Clear", "/buttons/page-clear.png");
+		super("clear", editor, "Clear", "/buttons/page-clear");
 	}
 
 	@Override

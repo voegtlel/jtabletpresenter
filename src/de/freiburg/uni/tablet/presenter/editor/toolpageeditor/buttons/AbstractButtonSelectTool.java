@@ -45,8 +45,8 @@ public abstract class AbstractButtonSelectTool extends AbstractButtonMenuTool {
 	 * @param imageResource
 	 */
 	public AbstractButtonSelectTool(final String name, final IToolPageEditor editor,
-			final String text, final String imageResource) {
-		super(name, editor, text, imageResource, 8);
+			final String text, final String imageResource, int baseSize) {
+		super(name, editor, text, imageResource, baseSize, 8);
 		_toolScribble = new ToolScribble(_editor, false);
 		_toolLine = new ToolScribble(_editor, true);
 		_toolEraser = new ToolEraser(_editor, false);
@@ -55,14 +55,14 @@ public abstract class AbstractButtonSelectTool extends AbstractButtonMenuTool {
 		_toolText = new ToolText(_editor);
 		_toolSelectMove = new ToolSelectMove(_editor, true);
 		_toolPdfCursor = new ToolPdfCursor(_editor);
-		this._frame.addItem(new ButtonToolItem(editor, this, "scribble", "Pen", "/buttons/edit-scribble.png", _toolScribble), true);
-		this._frame.addItem(new ButtonToolItem(editor, this, "line", "Line", "/buttons/edit-line.png", _toolLine), true);
-		this._frame.addItem(new ButtonToolItem(editor, this, "eraser", "Eraser", "/buttons/edit-erase.png", _toolEraser), true);
-		this._frame.addItem(new ButtonToolItem(editor, this, "deleter", "Deleter", "/buttons/edit-delete.png", _toolDeleter), true);
-		this._frame.addItem(new ButtonToolItem(editor, this, "image", "Image", "/buttons/edit-image.png", _toolImage), true);
-		this._frame.addItem(new ButtonToolItem(editor, this, "text", "Text", "/buttons/edit-text.png", _toolText), true);
-		this._frame.addItem(new ButtonToolItem(editor, this, "selectMove", "Drag", "/buttons/edit-drag.png", _toolSelectMove), true);
-		this._frame.addItem(new ButtonToolItem(editor, this, "pdfCursor", "Pdf Cursor", "/buttons/edit-pdf-cursor.png", _toolPdfCursor), true);
+		this._frame.addItem(new ButtonToolItem(editor, this, "scribble", "Pen", "/buttons/edit-scribble", _toolScribble), baseSize, true);
+		this._frame.addItem(new ButtonToolItem(editor, this, "line", "Line", "/buttons/edit-line", _toolLine), baseSize, true);
+		this._frame.addItem(new ButtonToolItem(editor, this, "eraser", "Eraser", "/buttons/edit-erase", _toolEraser), baseSize, true);
+		this._frame.addItem(new ButtonToolItem(editor, this, "deleter", "Deleter", "/buttons/edit-delete", _toolDeleter), baseSize, true);
+		this._frame.addItem(new ButtonToolItem(editor, this, "image", "Image", "/buttons/edit-image", _toolImage), baseSize, true);
+		this._frame.addItem(new ButtonToolItem(editor, this, "text", "Text", "/buttons/edit-text", _toolText), baseSize, true);
+		this._frame.addItem(new ButtonToolItem(editor, this, "selectMove", "Drag", "/buttons/edit-drag", _toolSelectMove), baseSize, true);
+		this._frame.addItem(new ButtonToolItem(editor, this, "pdfCursor", "Pdf Cursor", "/buttons/edit-pdf-cursor", _toolPdfCursor), baseSize, true);
 	}
 	
 	public ITool getTool(final String name) {

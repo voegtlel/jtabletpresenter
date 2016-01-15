@@ -23,7 +23,7 @@ public class ButtonPageNew extends AbstractButtonAction {
 	 * Creates the action with an editor.
 	 */
 	public ButtonPageNew(final IToolPageEditor editor) {
-		super("new", editor, "New", "/buttons/page-new.png");
+		super("new", editor, "New", "/buttons/page-new");
 	}
 
 	@Override

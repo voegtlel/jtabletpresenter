@@ -4,15 +4,21 @@
  */
 package de.freiburg.uni.tablet.presenter.editor.toolpageeditor.buttons;
 
-import java.awt.Component;
-import java.awt.Point;
+import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.image.BufferedImage;
+import java.net.URI;
 
 import javax.swing.AbstractAction;
 import javax.swing.SwingUtilities;
 
+import com.kitfox.svg.SVGCache;
+import com.kitfox.svg.SVGDiagram;
+import com.kitfox.svg.SVGUniverse;
+import com.kitfox.svg.app.beans.SVGIcon;
 import de.freiburg.uni.tablet.presenter.editor.IToolPageEditor;
 import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.IButtonAction;
+import de.freiburg.uni.tablet.presenter.editor.toolpageeditor.JPageEditor;
 
 /**
  * @author lukas
@@ -29,6 +35,7 @@ public abstract class AbstractButtonAction extends AbstractAction implements IBu
 	protected final IToolPageEditor _editor;
 	private final String _text;
 	private final String _imageResource;
+	private BufferedImage _lastImage;
 	
 	private long _lastTimestamp = 0;
 
@@ -55,6 +62,22 @@ public abstract class AbstractButtonAction extends AbstractAction implements IBu
 	@Override
 	public String getImageResource() {
 		return _imageResource;
+	}
+
+	@Override
+	public Image getImageResource(int width, int height) {
+		if (_lastImage == null || _lastImage.getWidth() != width || _lastImage.getHeight() != height) {
+			_lastImage = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
+			URI svgUri = SVGCache.getSVGUniverse().loadSVG(JPageEditor.class.getResource(_imageResource + ".svg"));
+			SVGIcon icon = new SVGIcon();
+			icon.setSvgURI(svgUri);
+			Graphics2D iconGraphics = _lastImage.createGraphics();
+			icon.setPreferredSize(new Dimension(width, height));
+			icon.setAntiAlias(true);
+			icon.setScaleToFit(true);
+			icon.paintIcon(null, iconGraphics, 0, 0);
+		}
+		return _lastImage;
 	}
 
 	@Override

@@ -23,7 +23,7 @@ public class ButtonPageDelete extends AbstractButtonAction {
 	 * Creates the action with an editor.
 	 */
 	public ButtonPageDelete(final IToolPageEditor editor) {
-		super("delete", editor, "Delete", "/buttons/page-delete.png");
+		super("delete", editor, "Delete", "/buttons/page-delete");
 	}
 
 	@Override

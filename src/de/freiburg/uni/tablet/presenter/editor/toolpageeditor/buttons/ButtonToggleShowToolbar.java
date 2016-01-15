@@ -22,7 +22,7 @@ public class ButtonToggleShowToolbar extends AbstractButtonAction {
 	 * Creates the action with an editor.
 	 */
 	public ButtonToggleShowToolbar(final IToolPageEditor editor) {
-		super("toggleToolbar", editor, "Toolbar", "/buttons/toggle-toolbar.png");
+		super("toggleToolbar", editor, "Toolbar", "/buttons/toggle-toolbar");
 	}
 
 	@Override

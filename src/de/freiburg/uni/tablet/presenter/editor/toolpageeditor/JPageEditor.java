@@ -4,21 +4,10 @@
  */
 package de.freiburg.uni.tablet.presenter.editor.toolpageeditor;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Frame;
-import java.awt.Image;
-import java.awt.MouseInfo;
-import java.awt.Point;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowFocusListener;
+import java.awt.event.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -123,7 +112,6 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 
 	/**
 	 * Create the panel.
-	 * @param configFilename
 	 */
 	public JPageEditor(final DocumentConfig config) {
 		_documentListener = new DocumentAdapter() {
@@ -220,8 +208,12 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 				onWindowFocus();
 			}
 		});
-		
+
+		int baseSize = _config.getInt("toolbar.buttonSize", 32);
+		setFont(new Font("Dialog", Font.PLAIN, (int)(baseSize * JPageToolButton.SIZE_FONT)));
+
 		_pageRenderer = new RenderCanvas();
+		_pageRenderer.setFont(getFont());
 		_pageRenderer.setLockPressure(!_config.getBoolean("editor.variableThickness", false));
 		_pageRenderer.setStroke(_config.getBoolean("editor.stroke.screenAdapt", true), _config.getFloat("editor.stroke.baseThickness", 0.004f));
 		_pageRenderer.setVoidColor(_config.getColor("editor.voidColor", Color.BLACK));
@@ -263,12 +255,12 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 
 		_panelTools = new JPageToolBar();
 		getContentPane().add(_panelTools, BorderLayout.WEST);
-		_buttonActions = new IButtonAction[] { new ButtonTools(this), null,
+		_buttonActions = new IButtonAction[] { new ButtonTools(this, baseSize), null,
 				new ButtonNext(this), new ButtonPrevious(this),
-				new ButtonSpinnerPage(this), null, new ButtonUndo(this),
-				new ButtonRedo(this), null, new ButtonColor(this), null,
+				new ButtonSpinnerPage(this, baseSize), null, new ButtonUndo(this),
+				new ButtonRedo(this), null, new ButtonColor(this, baseSize), null,
 				new ButtonToggleFullscreen(this) };
-		_panelTools.setToolButtonsVertical(_buttonActions);
+		_panelTools.setToolButtonsVertical(_buttonActions, baseSize);
 		
 		registerShortcuts();
 		buildToolbar();
@@ -346,12 +338,15 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 		if (orientation == ToolbarRenderer.ORIENTATION_NONE) {
 			return;
 		}
+
+		int buttonSize = _config.getInt("toolbar.buttonSize", 32);
 		
 		final List<KeyValue> toolbarEntries = _config.getAll("toolbar.");
 		final List<IToolbarItem> actions = new ArrayList<>(toolbarEntries.size());
 		for (KeyValue item : toolbarEntries) {
 			final String actionId = item.key.substring(8);
-			if (actionId.equals("orientation") || actionId.equals("compactSize") || actionId.equals("compactOpacity")) {
+			if (actionId.equals("orientation") || actionId.equals("compactScale") ||
+					actionId.equals("compactSize") || actionId.equals("compactOpacity")) {
 				continue;
 			}
 			final String actionName = item.value.toString();
@@ -371,14 +366,14 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 				}
 				if (button != null) {
 					System.out.println("Adding toolbar action " + actionId + " for " + actionName);
-					actions.add(new ToolbarAction(button.getText(), button.getImageResource(), button));
+					actions.add(new ToolbarAction(button.getText(), button, buttonSize));
 				} else {
 					System.out.println("Unknown action " + actionName);
 				}
 			}
 		}
 		IToolbarItem[] toolbarItems = actions.toArray(new IToolbarItem[actions.size()]);
-		_pageRenderer.setToolbar(toolbarItems, orientation, _config.getInt("toolbar.compactSize", 15),
+		_pageRenderer.setToolbar(toolbarItems, orientation, buttonSize, _config.getFloat("toolbar.compactScale", 0.5f), getFont(),
 				_config.getFloat("toolbar.compactOpacity", 0.25f), !_config.getBoolean("fullscreen.autotoggleAutoToolbar", true));
 	}
 	
@@ -453,8 +448,10 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 		}
 		
 		// Paste action
-		this.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_V, ActionEvent.CTRL_MASK), TransferHandler.getPasteAction().getValue(Action.NAME));
-		this.getRootPane().getActionMap().put(TransferHandler.getPasteAction().getValue(Action.NAME), new ActionWrapper(this.getRootPane(), TransferHandler.getPasteAction()));
+		this.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_V,
+				InputEvent.CTRL_MASK), TransferHandler.getPasteAction().getValue(Action.NAME));
+		this.getRootPane().getActionMap().put(TransferHandler.getPasteAction().getValue(Action.NAME),
+				new ActionWrapper(this.getRootPane(), TransferHandler.getPasteAction()));
 		this.getRootPane().setTransferHandler(new EditorTransferHandler(this));
 		_pageRenderer.setDropTarget(new DropTarget(this, DnDConstants.ACTION_COPY, new EditorTransferHandler(this)));
 		this.getRootPane().setDropTarget(new DropTarget(this, DnDConstants.ACTION_COPY, new EditorTransferHandler(this)));

@@ -4,10 +4,7 @@
  */
 package de.freiburg.uni.tablet.presenter.editor.toolpageeditor;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Insets;
+import java.awt.*;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -21,23 +18,29 @@ public class JPageToolButton extends JButton {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	
-	public static final int WIDTH_NORMAL = 50;
-	public static final int WIDTH_WIDE = 75;
-	public static final int HEIGHT_NORMAL = 50;
+
+	public static final float WIDTH_NORMAL = 1.1f;
+	public static final float WIDTH_WIDE = WIDTH_NORMAL * 1.5f;
+
+	public static final float HEIGHT_NORMAL = 1.4f;
+	public static final float HEIGHT_NOTEXT = 1.1f;
+	public static final float SIZE_FONT = 0.3f;
+	public static final float SPACING = 0.1f;
 
 	/**
 	 * 
 	 */
-	public JPageToolButton(final int width, final int height) {
+	public JPageToolButton(final int baseSize, final boolean wideMode, final String text) {
 		super();
 
-		final Dimension dim = new Dimension(width, height);
+		final Dimension dim = new Dimension((int)(baseSize * (wideMode?WIDTH_WIDE:WIDTH_NORMAL)),
+				(int)(baseSize * (text==null?HEIGHT_NOTEXT:HEIGHT_NORMAL)));
 
 		setBackground(Color.WHITE);
 		setForeground(Color.BLACK);
 		setBorder(new CompoundBorder(new LineBorder(new Color(0, 0, 0)),
-				new EmptyBorder(5, 5, 5, 5)));
+				new EmptyBorder((int)(SPACING * baseSize), (int)(SPACING * baseSize),
+						(int)(SPACING * baseSize), (int)(SPACING * baseSize))));
 		setVerticalTextPosition(SwingConstants.BOTTOM);
 		setPreferredSize(dim);
 		setMinimumSize(dim);
@@ -46,23 +49,19 @@ public class JPageToolButton extends JButton {
 		setIconTextGap(0);
 		setHorizontalTextPosition(SwingConstants.CENTER);
 		setFocusable(false);
-		setFont(new Font("Dialog", Font.PLAIN, 12));
+		setFont(new Font("Dialog", Font.PLAIN, (int)(baseSize * SIZE_FONT)));
+		if (text != null) {
+			setText(text);
+		}
 	}
 
-	public JPageToolButton(final String text, final String imageResource,
-			final boolean wideMode) {
-		this((wideMode ? WIDTH_WIDE : WIDTH_NORMAL), HEIGHT_NORMAL);
+	public JPageToolButton(final String text, final Image image,
+			final int baseSize, final boolean wideMode) {
+		this(baseSize, wideMode, text);
 
-		setIcon(new ImageIcon(JPageEditor.class.getResource(imageResource)));
-		setText(text);
+		setIcon(new ImageIcon(image));
 	}
 
-	public JPageToolButton(final String imageResource, final boolean wideMode) {
-		this((wideMode ? WIDTH_WIDE : WIDTH_NORMAL), HEIGHT_NORMAL);
-
-		setIcon(new ImageIcon(JPageEditor.class.getResource(imageResource)));
-	}
-	
 	@Override
 	public void setEnabled(boolean enabled) {
 		super.setEnabled(enabled);

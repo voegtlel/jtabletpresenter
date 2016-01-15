@@ -1,13 +1,6 @@
 package de.freiburg.uni.tablet.presenter.editor.rendering;
 
-import java.awt.Canvas;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.image.BufferStrategy;
@@ -228,8 +221,8 @@ public class RenderCanvas extends Canvas implements IPageRenderer {
 		requireRepaint();
 	}
 	
-	public void setToolbar(final IToolbarItem[] actions, final int orientation, final int compactSize, final float compactOpacity, final boolean toolbarEnabled) {
-		_toolbarRenderer = new ToolbarRenderer(this, orientation, compactSize, compactOpacity, getFont(), toolbarEnabled);
+	public void setToolbar(final IToolbarItem[] actions, final int orientation, final int baseSize, final float compactScale, final Font font, final float compactOpacity, final boolean toolbarEnabled) {
+		_toolbarRenderer = new ToolbarRenderer(this, orientation, baseSize, compactScale, compactOpacity, font, toolbarEnabled);
 		_toolbarRenderer.setActions(actions);
 		_pagePenDispatcher.setFilter(_toolbarRenderer);
 	}

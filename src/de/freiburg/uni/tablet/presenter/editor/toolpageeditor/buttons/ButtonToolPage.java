@@ -19,11 +19,11 @@ public class ButtonToolPage extends AbstractButtonMenuTool {
 	/**
 	 * Creates the action with an editor.
 	 */
-	public ButtonToolPage(final IToolPageEditor editor) {
-		super("page", editor, "Page", "/buttons/tool-page.png", 4);
-		this._frame.addItem(new ButtonPageNew(editor), true);
-		this._frame.addItem(new ButtonPageClone(editor), true);
-		this._frame.addItem(new ButtonPageDelete(editor), true);
-		this._frame.addItem(new ButtonPageClear(editor), true);
+	public ButtonToolPage(final IToolPageEditor editor, final int baseSize) {
+		super("page", editor, "Page", "/buttons/tool-page", baseSize, 4);
+		this._frame.addItem(new ButtonPageNew(editor), baseSize, true);
+		this._frame.addItem(new ButtonPageClone(editor), baseSize, true);
+		this._frame.addItem(new ButtonPageDelete(editor), baseSize, true);
+		this._frame.addItem(new ButtonPageClear(editor), baseSize, true);
 	}
 }

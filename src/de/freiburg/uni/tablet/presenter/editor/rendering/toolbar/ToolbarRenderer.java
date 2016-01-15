@@ -21,6 +21,10 @@ public class ToolbarRenderer implements IPagePenFilter {
 	public static final int ORIENTATION_RIGHT = 0x02;
 	public static final int ORIENTATION_TOP = 0x03;
 	public static final int ORIENTATION_BOTTOM = 0x04;
+
+	public static final float EMPTY_SPACING = 0.5f;
+	public static final float SPACING = 0.05f;
+	public static final float PADDING = 0.1f;
 	
 	private static final HashMap<String, Integer> ORIENTATION_MAP = new HashMap<>();
 	
@@ -52,11 +56,12 @@ public class ToolbarRenderer implements IPagePenFilter {
 	private Rectangle _bounds = new Rectangle();
 	private Rectangle _compactBounds = new Rectangle();
 	
-	private int _compactSize;
+	private int _compactScale;
 	private int _fullSize;
 	private int _orientation;
-	private int _actionSpace = 10;
-	private int _actionPadding = 5;
+	private int _actionEmptySpace;
+	private int _actionSpacing;
+	private int _actionPadding;
 	private AlphaComposite _alphaInactive;
 	private Font _font;
 	private Color _background = new Color(0xd0ffffff, true);
@@ -70,10 +75,13 @@ public class ToolbarRenderer implements IPagePenFilter {
 	/**
 	 * Create the frame.
 	 */
-	public ToolbarRenderer(final IPageRenderer renderer, final int orientation, final int compactSize, final float compactOpacity, final Font font, final boolean toolbarEnabled) {
+	public ToolbarRenderer(final IPageRenderer renderer, final int orientation, final int baseSize, final float compactScale, final float compactOpacity, final Font font, final boolean toolbarEnabled) {
 		_renderer = renderer;
 		_orientation = orientation;
-		_compactSize = compactSize;
+		_actionEmptySpace = (int)(baseSize * EMPTY_SPACING);
+		_actionSpacing = (int)(baseSize * SPACING);
+		_actionPadding = (int)(baseSize * PADDING);
+		_compactScale = (int)(compactScale * baseSize);
 		_font = font;
 		_enabled = toolbarEnabled;
 		
@@ -103,17 +111,20 @@ public class ToolbarRenderer implements IPagePenFilter {
 		
 		int pos = 0;
 		boolean vertical = (_orientation == ORIENTATION_LEFT || _orientation == ORIENTATION_RIGHT);
+		boolean lastWasAction = false;
 		for (int i = 0; i < _actions.length; i++) {
 			if (_actions[i].getType() == ToolbarItemType.Space) {
-				pos += _actionSpace;
+				pos += _actionEmptySpace;
 				if (vertical) {
-					l.iterateSpace(_actions[i], _bounds.x, _bounds.y + pos, _bounds.width, _actionSpace);
+					l.iterateSpace(_actions[i], _bounds.x, _bounds.y + pos, _bounds.width, _actionEmptySpace);
 				} else {
-					l.iterateSpace(_actions[i], _bounds.x + pos, _bounds.y, _actionSpace, _bounds.height);
+					l.iterateSpace(_actions[i], _bounds.x + pos, _bounds.y, _actionEmptySpace, _bounds.height);
 				}
+				lastWasAction = false;
 			} else if (_actions[i].getType() == ToolbarItemType.Fill) {
 				int requiredSpace = 0;
 				int dividers = 1;
+				boolean lastCalcWasAction = false;
 				for (int j = i + 1; j < _actions.length; j++) {
 					if (_actions[j].getType() == ToolbarItemType.Action) {
 						if (vertical) {
@@ -122,24 +133,34 @@ public class ToolbarRenderer implements IPagePenFilter {
 							requiredSpace += ((ToolbarAction)_actions[j]).getIcon().getIconWidth();
 						}
 						requiredSpace += _actionPadding * 2;
+						if (lastCalcWasAction) {
+							requiredSpace += _actionSpacing;
+						}
+						lastCalcWasAction = true;
 					} else if (_actions[j].getType() == ToolbarItemType.Space) {
-						requiredSpace += _actionSpace;
+						requiredSpace += _actionEmptySpace;
+						lastCalcWasAction = false;
 					} else if (_actions[j].getType() == ToolbarItemType.Fill) {
 						dividers++;
+						lastCalcWasAction = false;
 					}
 				}
 				if (vertical) {
 					int width = _bounds.width;
-					int height = Math.max(Math.max(_bounds.height - pos - requiredSpace, 0) / dividers, _actionSpace);
+					int height = Math.max(Math.max(_bounds.height - pos - requiredSpace, 0) / dividers, _actionEmptySpace);
 					l.iterateFill(_actions[i], _bounds.x, _bounds.y + pos, width, height);
 					pos += height;
 				} else {
-					int width = Math.max(Math.max(_bounds.width - pos - requiredSpace, 0) / dividers, _actionSpace);
+					int width = Math.max(Math.max(_bounds.width - pos - requiredSpace, 0) / dividers, _actionEmptySpace);
 					int height = _bounds.height;
 					l.iterateFill(_actions[i], _bounds.x + pos, _bounds.y, width, height);
 					pos += width;
 				}
+				lastWasAction = false;
 			} else if (_actions[i].getType() == ToolbarItemType.Action) {
+				if (lastWasAction) {
+					pos += _actionSpacing;
+				}
 				ToolbarAction action = (ToolbarAction) _actions[i];
 				int x;
 				int y;
@@ -159,6 +180,8 @@ public class ToolbarRenderer implements IPagePenFilter {
 				} else {
 					pos += buttonWidth;
 				}
+				pos += _actionSpacing;
+				lastWasAction = true;
 			}
 		}
 	}
@@ -180,10 +203,10 @@ public class ToolbarRenderer implements IPagePenFilter {
 		} else {
 			graphics.setComposite(_alphaInactive);
 			if (_orientation == ORIENTATION_LEFT) {
-				offsetX = _compactSize - _fullSize;
+				offsetX = _compactScale - _fullSize;
 				offsetY = 0;
 			} else if (_orientation == ORIENTATION_TOP) {
-				offsetY = _compactSize - _fullSize;
+				offsetY = _compactScale - _fullSize;
 				offsetX = 0;
 			} else {
 				offsetX = 0;
@@ -226,16 +249,16 @@ public class ToolbarRenderer implements IPagePenFilter {
 	public void updateBounds(final int width, final int height) {
 		if (_orientation == ORIENTATION_LEFT) {
 			_bounds.setBounds(0, 0, _fullSize, height);
-			_compactBounds.setBounds(0, 0, _compactSize, height);
+			_compactBounds.setBounds(0, 0, _compactScale, height);
 		} else if (_orientation == ORIENTATION_TOP) {
 			_bounds.setBounds(0, 0, width, _fullSize);
-			_compactBounds.setBounds(0, 0, width, _compactSize);
+			_compactBounds.setBounds(0, 0, width, _compactScale);
 		} else if (_orientation == ORIENTATION_BOTTOM) {
 			_bounds.setBounds(0,  height - _fullSize, width, _fullSize);
-			_compactBounds.setBounds(0,  height - _compactSize, width, _compactSize);
+			_compactBounds.setBounds(0,  height - _compactScale, width, _compactScale);
 		} else if (_orientation == ORIENTATION_RIGHT) {
 			_bounds.setBounds(width - _fullSize, 0, _fullSize, height);
-			_compactBounds.setBounds(width - _compactSize, 0, _compactSize, height);
+			_compactBounds.setBounds(width - _compactScale, 0, _compactScale, height);
 		}
 	}
 	

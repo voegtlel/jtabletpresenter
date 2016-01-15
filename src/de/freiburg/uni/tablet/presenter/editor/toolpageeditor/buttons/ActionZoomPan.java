@@ -21,7 +21,7 @@ public class ActionZoomPan extends AbstractButtonAction {
 	 * Creates the action with an editor.
 	 */
 	public ActionZoomPan(final IToolPageEditor editor, final String name, final int mode) {
-		super(name, editor, "Zoom/Pan", "/buttons/action-zoom.png");
+		super(name, editor, "Zoom/Pan", "/buttons/action-zoom");
 		_mode = mode;
 	}
 

@@ -22,7 +22,7 @@ public class ButtonToggleFullscreen extends AbstractButtonAction {
 	 * Creates the action with an editor.
 	 */
 	public ButtonToggleFullscreen(final IToolPageEditor editor) {
-		super("toggleFullscreen", editor, "Full", "/buttons/view-fullscreen.png");
+		super("toggleFullscreen", editor, "Full", "/buttons/view-fullscreen");
 	}
 
 	@Override

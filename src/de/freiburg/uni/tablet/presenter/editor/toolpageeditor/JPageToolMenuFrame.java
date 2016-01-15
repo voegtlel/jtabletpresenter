@@ -70,20 +70,19 @@ public class JPageToolMenuFrame<T> extends JDialog {
 	
 	/**
 	 * Adds a subitem
-	 * @param buttonAction
 	 */
-	public void addItem(final AbstractButtonAction buttonAction, final boolean wideMode) {
+	public void addItem(final AbstractButtonAction buttonAction, final int baseSize, final boolean wideMode) {
 		if (buttonAction.getControl() != null) {
 			getContentPane().add(buttonAction.getControl());
 		} else {
-			final IButtonAction action = buttonAction;
 			final JButton button = new JPageToolButton(
 					buttonAction.getText(),
-					buttonAction.getImageResource(), wideMode);
+					buttonAction.getImageResource(baseSize, baseSize),
+					baseSize, wideMode);
 			button.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(final ActionEvent e) {
-					JPageToolMenuFrame.this.onActionPerformed(button, action);
+					JPageToolMenuFrame.this.onActionPerformed(button, buttonAction);
 				}
 			});
 			getContentPane().add(button);
@@ -93,7 +92,6 @@ public class JPageToolMenuFrame<T> extends JDialog {
 	
 	/**
 	 * Adds a subitem as dummy item (not clickable, but configable)
-	 * @param buttonAction
 	 */
 	public void addItemDummy(final AbstractButtonAction buttonAction) {
 		_actions.add(buttonAction);

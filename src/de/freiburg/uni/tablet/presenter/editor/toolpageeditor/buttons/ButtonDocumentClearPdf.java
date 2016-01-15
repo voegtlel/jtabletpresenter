@@ -23,7 +23,7 @@ public class ButtonDocumentClearPdf extends AbstractButtonAction {
 	 * Creates the action with an editor.
 	 */
 	public ButtonDocumentClearPdf(final IToolPageEditor editor) {
-		super("clearPdf", editor, "Clear PDF", "/buttons/document-clear-pdf.png");
+		super("clearPdf", editor, "Clear PDF", "/buttons/document-clear-pdf");
 	}
 
 	@Override

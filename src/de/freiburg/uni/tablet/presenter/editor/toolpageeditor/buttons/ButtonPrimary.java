@@ -20,8 +20,8 @@ public class ButtonPrimary extends AbstractButtonSelectTool {
 	/**
 	 * Creates the action with an editor.
 	 */
-	public ButtonPrimary(final IToolPageEditor editor) {
-		super("primary", editor, "Primary", "/buttons/edit-scribble.png");
+	public ButtonPrimary(final IToolPageEditor editor, int baseSize) {
+		super("primary", editor, "Primary", "/buttons/edit-scribble", baseSize);
 		setSelectedTool(_toolScribble);
 	}
 
