@@ -261,6 +261,69 @@ public class JPageEditor extends JFrame implements IToolPageEditor {
 				new ButtonRedo(this), null, new ButtonColor(this, baseSize), null,
 				new ButtonToggleFullscreen(this) };
 		_panelTools.setToolButtonsVertical(_buttonActions, baseSize);
+
+		final boolean useCtrlWheelZoom = !_config.getBoolean("editor.disableCtrlWheelZoom", false);
+		final boolean useMiddlePan = !_config.getBoolean("editor.disableMiddlePan", false);
+		if (useCtrlWheelZoom || useMiddlePan) {
+			MouseAdapter mouseAdapter = new MouseAdapter() {
+				private boolean _hasStart = false;
+				private int _dragStartX = 0;
+				private int _dragStartY = 0;
+				private int _dragLastX = 0;
+				private int _dragLastY = 0;
+
+				@Override
+				public void mouseWheelMoved(MouseWheelEvent e) {
+					if ((e.getModifiersEx() & MouseEvent.CTRL_DOWN_MASK) != 0) {
+						float relZoom = (float) Math.exp(-e.getWheelRotation() * 0.1f);
+						float x = (e.getX() - getPageEditor().getRenderMetric().surfaceVirtualOffsetX) / getPageEditor().getRenderMetric().surfaceVirtualWidth;
+						float y = (e.getY() - getPageEditor().getRenderMetric().surfaceVirtualOffsetY) / getPageEditor().getRenderMetric().surfaceVirtualHeight;
+						getPageEditor().zoomAt(relZoom, x, y);
+					}
+					//System.out.println("MouseWheelListener.mouseWheelMoved(" + e.getWheelRotation() + ")");
+				}
+
+				@Override
+				public void mousePressed(MouseEvent e) {
+					if (e.getButton() == MouseEvent.BUTTON2) {
+						_dragStartX = e.getX();
+						_dragStartY = e.getY();
+						_dragLastX = _dragStartX;
+						_dragLastY = _dragStartY;
+						_hasStart = true;
+					}
+				}
+
+				@Override
+				public void mouseDragged(MouseEvent e) {
+					if (_hasStart) {
+						float relX = e.getX() - _dragLastX;
+						float relY = e.getY() - _dragLastY;
+						relX /= getPageEditor().getRenderMetric().surfaceVirtualWidth;
+						relY /= getPageEditor().getRenderMetric().surfaceVirtualHeight;
+						getPageEditor().pan(-relX, -relY);
+
+						_dragLastX = e.getX();
+						_dragLastY = e.getY();
+					}
+				}
+
+				@Override
+				public void mouseReleased(MouseEvent e) {
+					if (e.getButton() == MouseEvent.BUTTON2) {
+						_hasStart = false;
+					}
+				}
+			};
+
+			if (useCtrlWheelZoom) {
+				_pageRenderer.addMouseWheelListener(mouseAdapter);
+			}
+			if (useMiddlePan) {
+				_pageRenderer.addMouseMotionListener(mouseAdapter);
+				_pageRenderer.addMouseListener(mouseAdapter);
+			}
+		}
 		
 		registerShortcuts();
 		buildToolbar();

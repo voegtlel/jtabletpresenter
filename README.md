@@ -86,7 +86,9 @@ Following variables are shown as
  * `editor.screenshot.hideDelay` (float, 0.2): Time in sec to wait for taking the screenshot after hiding the window (to skip the hiding animation).
  * `editor.image.lockRatio` (boolean, false): If true and if the document uses a fixed ratio, the ratio of images is kept fixed when drawing.
  * `editor.stroke.screenAdapt` (boolean, true): If true, then the stroke width will adapt the screen size. Otherwise the stroke width is pixel based.
- * `editor.stroke.baseThickness` (float, 0.004): Specifies the ratio of the stroke to screen in [0,1] 
+ * `editor.stroke.baseThickness` (float, 0.004): Specifies the ratio of the stroke to screen in [0,1]
+ * `editor.disableCtrlWheelZoom` (boolean, false): Disable zooming by pressing ctrl+wheel up/down
+ * `editor.disableMiddlePan` (boolean, false): Disable panning by pressing middle mouse button 
 
 ### Document
  * `document.background.color` (color, FFFFFFFF): Background color for the whole document

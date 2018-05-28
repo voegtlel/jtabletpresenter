@@ -218,15 +218,19 @@ public class RenderMetric {
 	public void pan(final float x, final float y) {
 		surfaceRelativeOffsetXNormalized += x;
 		surfaceRelativeOffsetYNormalized += y;
+		//System.out.println("Pan @" + surfaceRelativeOffsetXNormalized + "," + surfaceRelativeOffsetYNormalized);
 		_changed = true;
 	}
 
 	public void zoomAt(final float factor, final float x, final float y) {
-		//surfaceRelativeOffsetXNormalized += x * (surfaceScale - surfaceScale * factor);
-		//surfaceRelativeOffsetYNormalized += y * (surfaceScale - surfaceScale * factor);
+		// This is only an approximation. The exact thing seems deferred.
+		float offsetX = (x - (0.5f + surfaceRelativeOffsetXNormalized));
+		float offsetY = (y - (0.5f + surfaceRelativeOffsetYNormalized));
+		surfaceRelativeOffsetXNormalized -= offsetX * (1.0f - factor);
+		surfaceRelativeOffsetYNormalized -= offsetY * (1.0f - factor);
 		surfaceScale *= factor;
 		surfaceScale = Math.max(surfaceScale, 1.0f);
-		System.out.println("ZoomAt: " + surfaceScale + " @" + surfaceRelativeOffsetXNormalized + "," + surfaceRelativeOffsetYNormalized);
+		//System.out.println("ZoomAt: " + surfaceScale + " @" + surfaceRelativeOffsetXNormalized * innerFactorX + "," + surfaceRelativeOffsetYNormalized * innerFactorY);
 		_changed = true;
 	}
 
